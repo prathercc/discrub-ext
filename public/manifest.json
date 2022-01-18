@@ -1,0 +1,34 @@
+{
+  "short_name": "Discrub-Ext",
+  "name": "Discrub - Extension",
+  "version": "1.0.1",
+  "manifest_version": 2,
+  "permissions": ["storage", "tabs", "activeTab", "http://*/*", "https://*/*"],
+  "optional_permissions": ["<all_urls>"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["./static/js/content.js"]
+    }
+  ],
+  "web_accessible_resources": ["*.html"],
+  "browser_action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "logo.png",
+      "32": "logo.png",
+      "48": "logo.png",
+      "128": "logo.png"
+    }
+  },
+  "icons": {
+    "16": "logo.png",
+    "32": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
+  }
+  // "content_security_policy": "script-src 'self' 'sha256-fdAfMKZtCTRPKMRznGwonJHC++vCCrQS7XFnVrzSXAE=' 'sha256-YD8w9VLrdvqI5/tFVmpT+1337ly+e/JvPrkRxYZo/w4='; object-src 'self';"
+}
