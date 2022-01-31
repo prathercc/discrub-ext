@@ -1,75 +1,83 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
+import { textPrimary, textSecondary } from "../../../styleConstants";
 
-function DiscordTextField({
-  value,
-  onChange,
-  disabled = false,
-  label,
-  sx,
-  select = false,
-  ...props
-}) {
-  return (
-    <TextField
-      InputProps={{
-        disableUnderline: true,
-        startAdornment: <InputAdornment position="start"></InputAdornment>,
-      }}
-      sx={{
-        "& .MuiInputLabel-root": {
-          color: "rgb(210, 213, 247)",
-          fontWeight: "bold",
-          "&.Mui-focused": {
-            color: "rgb(210, 213, 247)",
+const DiscordTextField = forwardRef(
+  (
+    {
+      value,
+      onChange,
+      disabled = false,
+      label,
+      sx,
+      select = false,
+      tooltipText = null,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <TextField
+        ref={ref}
+        InputProps={{
+          disableUnderline: true,
+          startAdornment: <InputAdornment position="start"></InputAdornment>,
+        }}
+        sx={{
+          "& .MuiInputLabel-root": {
+            color: textSecondary,
             fontWeight: "bold",
-          },
-          "&.Mui-disabled": {
-            color: "rgb(210, 213, 247)",
-            fontWeight: "bold",
-          },
-        },
-        "& .MuiFilledInput-input": {
-          "&.MuiInputBase-input": {
+            "&.Mui-focused": {
+              color: textSecondary,
+              fontWeight: "bold",
+            },
             "&.Mui-disabled": {
-              "-webkit-text-fill-color": "rgb(210, 213, 247) !important",
+              color: textSecondary,
+              fontWeight: "bold",
             },
           },
-        },
-        "& .MuiFilledInput-root": {
-          color: "rgb(210, 213, 247)",
-          backgroundColor: "transparent",
-          border: "1px solid rgb(88, 101, 242)",
-          overflow: "hidden",
-          borderRadius: 2,
-          "&.Mui-focused": {
-            color: "rgb(210, 213, 247)",
-            backgroundColor: "transparent",
-            borderColor: "rgb(88, 101, 242)",
+          "& .MuiFilledInput-input": {
+            "&.MuiInputBase-input": {
+              "&.Mui-disabled": {
+                "-webkit-text-fill-color": `${textSecondary} !important`,
+              },
+            },
           },
-          "&:hover": {
+          "& .MuiFilledInput-root": {
+            color: textSecondary,
             backgroundColor: "transparent",
+            border: `1px solid ${textPrimary}`,
+            overflow: "hidden",
+            borderRadius: 2,
+            "&.Mui-focused": {
+              color: textSecondary,
+              backgroundColor: "transparent",
+              borderColor: textPrimary,
+            },
+            "&:hover": {
+              backgroundColor: "transparent",
+            },
+            "&.Mui-disabled": {
+              backgroundColor: "transparent",
+            },
           },
-          "&.Mui-disabled": {
-            backgroundColor: "transparent",
-          },
-        },
-        ...sx,
-      }}
-      label={label}
-      variant="filled"
-      size="small"
-      fullWidth
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      select={select}
-      {...props}
-    >
-      {props.children}
-    </TextField>
-  );
-}
+          ...sx,
+        }}
+        label={label}
+        variant="filled"
+        size="small"
+        fullWidth
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        select={select}
+        {...props}
+      >
+        {props.children}
+      </TextField>
+    );
+  }
+);
 
 export default DiscordTextField;

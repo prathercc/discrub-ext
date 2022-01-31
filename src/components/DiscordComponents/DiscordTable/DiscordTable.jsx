@@ -22,10 +22,15 @@ import DiscordTextField from "../DiscordTextField/DiscordTextField";
 import Grid from "@mui/material/Grid";
 import DiscordDateTimePicker from "../DiscordDateTimePicker/DiscordDateTimePicker";
 import DiscordCheckBox from "../DiscordCheckBox/DiscordCheckBox";
-import DiscordDeleteModal from "../DiscordModal/DiscordDeleteModal";
-import DiscordEditModal from "../DiscordModal/DiscordEditModal";
+import DeleteModal from "../../Modals/DeleteModal";
+import EditModal from "../../Modals/EditModal";
+import AttachmentModal from "../../Modals/AttachmentModal";
 import AttachmentIcon from "@mui/icons-material/Attachment";
-import DiscordAttachmentModal from "../DiscordModal/DiscordAttachmentModal";
+import {
+  textSecondary,
+  textPrimary,
+  discordSecondary,
+} from "../../../styleConstants";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -61,7 +66,7 @@ function EnhancedTableHead(props) {
     <TableHead>
       <TableRow>
         <TableCell
-          sx={{ borderBottom: "1px solid rgb(88, 101, 242)" }}
+          sx={{ borderBottom: `1px solid ${textPrimary}` }}
           padding="checkbox"
         >
           <DiscordCheckBox
@@ -73,8 +78,7 @@ function EnhancedTableHead(props) {
         {columns.map((column) => (
           <TableCell
             sx={{
-              color: "rgb(210, 213, 247)",
-              borderBottom: "1px solid rgb(88, 101, 242)",
+              borderBottom: `1px solid ${textPrimary}`,
             }}
             key={column.id}
             align={column.numeric ? "right" : "left"}
@@ -85,6 +89,21 @@ function EnhancedTableHead(props) {
               active={orderBy === column.id}
               direction={orderBy === column.id ? order : "asc"}
               onClick={createSortHandler(column.id)}
+              sx={{
+                color: textSecondary,
+                "&:hover": {
+                  color: textSecondary,
+                },
+                "&.Mui-active": {
+                  color: textSecondary,
+                  "&:hover": {
+                    color: textSecondary,
+                  },
+                  ".MuiTableSortLabel-icon": {
+                    color: textSecondary,
+                  },
+                },
+              }}
             >
               {column.label}
               {orderBy === column.id ? (
@@ -96,7 +115,7 @@ function EnhancedTableHead(props) {
           </TableCell>
         ))}
         <TableCell
-          sx={{ borderBottom: "1px solid rgb(88, 101, 242)" }}
+          sx={{ borderBottom: `1px solid ${textPrimary}` }}
           padding="checkbox"
         />
       </TableRow>
@@ -130,7 +149,7 @@ const EnhancedTableToolbar = (props) => {
     >
       {numSelected > 0 ? (
         <Typography
-          sx={{ flex: "1 1 100%", color: "rgb(210, 213, 247)" }}
+          sx={{ flex: "1 1 100%", color: textSecondary }}
           color="inherit"
           variant="subtitle1"
           component="div"
@@ -149,7 +168,7 @@ const EnhancedTableToolbar = (props) => {
         <Grid item xs={12}>
           <Tooltip title="Filter list">
             <IconButton onClick={() => setFilterOpen(!filterOpen)}>
-              <FilterListIcon sx={{ color: "rgb(210, 213, 247)" }} />
+              <FilterListIcon sx={{ color: textSecondary }} />
             </IconButton>
           </Tooltip>
         </Grid>
@@ -164,12 +183,12 @@ const EnhancedTableToolbar = (props) => {
         <>
           <Tooltip title="Delete">
             <IconButton onClick={() => setDeleteModalOpen(true)}>
-              <DeleteIcon sx={{ color: "rgb(210, 213, 247)" }} />
+              <DeleteIcon sx={{ color: textSecondary }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Edit">
             <IconButton onClick={() => setEditModalOpen(true)}>
-              <EditIcon sx={{ color: "rgb(210, 213, 247)" }} />
+              <EditIcon sx={{ color: textSecondary }} />
             </IconButton>
           </Tooltip>
         </>
@@ -356,25 +375,63 @@ export default function DiscordTable({
 
   return (
     <Box sx={{ width: "100%" }}>
-      <DiscordDeleteModal
+      <DeleteModal
         open={deleteModalOpen}
-        handleClose={() => setDeleteModalOpen(false)}
-      />
-      <DiscordEditModal
-        open={editModalOpen}
-        handleClose={() => setEditModalOpen(false)}
-      />
-      <DiscordAttachmentModal
-        open={attachmentModalOpen}
-        handleClose={async (e) => {
-          console.log("Here is what comes back from closing the dialog - ", e);
-          setAttachmentModalOpen(false);
-          setSelectedAttachmentRow(null);
+        handleClose={async (deletedRows) => {
+          setDeleteModalOpen(false);
           let updatedArr = [];
           await rows.forEach((x) => {
-            if (x.id === e.id) updatedArr.push(e);
+            if (!deletedRows.includes(x.id)) updatedArr.push(x);
+          });
+          setRefactoredData(updatedArr);
+        }}
+        rows={rows}
+        selected={selected}
+        userData={userData}
+      />
+      <EditModal
+        checkModalOpen={() => {
+          return editModalOpen;
+        }}
+        userData={userData}
+        open={editModalOpen}
+        handleClose={async (editedRows) => {
+          setEditModalOpen(false);
+          let updatedArr = [];
+          await rows.forEach((x) => {
+            let filteredRows = editedRows.filter((y) => y.id === x.id);
+            if (filteredRows.length > 0) updatedArr.push(filteredRows[0]);
             else updatedArr.push(x);
           });
+          setRefactoredData(updatedArr);
+        }}
+        selected={selected}
+        rows={rows}
+      />
+      <AttachmentModal
+        open={attachmentModalOpen}
+        handleClose={async (e) => {
+          let updatedSelected = await selected.filter(
+            (x) => x !== selectedAttachmentRow.id
+          );
+          setSelected(updatedSelected);
+          setAttachmentModalOpen(false);
+          let updatedArr = [];
+          await rows.forEach((x) => {
+            //Entire message was deleted
+            if (e === null) {
+              if (x.id !== selectedAttachmentRow.id) {
+                updatedArr.push(x);
+              }
+            }
+            //Attachment(s) trimmed out
+            else {
+              if (x.id === e.id) {
+                updatedArr.push({ ...e, username: e.author.username });
+              } else updatedArr.push(x);
+            }
+          });
+          setSelectedAttachmentRow(null);
           setRefactoredData(updatedArr);
         }}
         row={selectedAttachmentRow}
@@ -384,9 +441,9 @@ export default function DiscordTable({
         sx={{
           width: "100%",
           mb: 2,
-          backgroundColor: "#2f3136",
+          backgroundColor: discordSecondary,
           borderRadius: "6px",
-          color: "rgb(88, 101, 242)",
+          color: textPrimary,
         }}
       >
         <EnhancedTableToolbar
@@ -437,7 +494,7 @@ export default function DiscordTable({
                     >
                       <TableCell
                         padding="checkbox"
-                        sx={{ borderBottom: "1px solid rgb(88, 101, 242)" }}
+                        sx={{ borderBottom: `1px solid ${textPrimary}` }}
                       >
                         <DiscordCheckBox
                           disabled={userData.username !== row["username"]}
@@ -452,12 +509,13 @@ export default function DiscordTable({
                         return (
                           <TableCell
                             sx={{
-                              color: "rgb(210, 213, 247)",
-                              borderBottom: "1px solid rgb(88, 101, 242)",
+                              color: textSecondary,
+                              borderBottom: `1px solid ${textPrimary}`,
                               whiteSpace: "normal",
                               wordBreak:
                                 column === "content" ? "break-word" : "normal",
                               cursor: "default",
+                              userSelect: "none",
                             }}
                             align="left"
                           >
@@ -471,27 +529,28 @@ export default function DiscordTable({
                       })}
                       <TableCell
                         padding="checkbox"
-                        sx={{ borderBottom: "1px solid rgb(88, 101, 242)" }}
+                        sx={{ borderBottom: `1px solid ${textPrimary}` }}
                       >
                         <Tooltip title="Attachments">
                           <IconButton
                             sx={{
                               display:
-                                row.attachments.length === 0 ||
-                                userData.username !== row.username
+                                row.attachments.length === 0
                                   ? "none"
                                   : "initial",
                             }}
-                            disabled={row.attachments.length === 0}
+                            disabled={
+                              row.attachments.length === 0 ||
+                              userData.username !== row.username
+                            }
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedAttachmentRow(row);
                               setAttachmentModalOpen(true);
                             }}
+                            color="primary"
                           >
-                            <AttachmentIcon
-                              sx={{ color: "rgb(210, 213, 247)" }}
-                            />
+                            <AttachmentIcon sx={{ color: textSecondary }} />
                           </IconButton>
                         </Tooltip>
                       </TableCell>
@@ -511,7 +570,7 @@ export default function DiscordTable({
           </Table>
         </TableContainer>
         <TablePagination
-          sx={{ color: "rgb(210, 213, 247)" }}
+          sx={{ color: textSecondary }}
           rowsPerPageOptions={[5, 10, 25, 50, 100, 1000, 10000]}
           component="div"
           count={rows.length}

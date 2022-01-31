@@ -4,6 +4,7 @@ import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateTimePicker from "@mui/lab/DateTimePicker";
 import InputAdornment from "@mui/material/InputAdornment";
+import { textSecondary, textPrimary } from "../../../styleConstants";
 
 const DiscordDateTimePicker = ({ label, onChange }) => {
   const [value, setValue] = React.useState(null);
@@ -14,27 +15,27 @@ const DiscordDateTimePicker = ({ label, onChange }) => {
           <TextField
             sx={{
               "& .MuiInputLabel-root": {
-                color: "rgb(210, 213, 247)",
+                color: textSecondary,
                 fontWeight: "bold",
                 "&.Mui-focused": {
-                  color: "rgb(210, 213, 247)",
+                  color: textSecondary,
                   fontWeight: "bold",
                 },
                 "&.Mui-disabled": {
-                  color: "rgb(210, 213, 247)",
+                  color: textSecondary,
                   fontWeight: "bold",
                 },
               },
               "& .MuiFilledInput-root": {
-                color: "rgb(210, 213, 247)",
+                color: textSecondary,
                 backgroundColor: "transparent",
-                border: "1px solid rgb(88, 101, 242)",
+                border: `1px solid ${textPrimary}`,
                 overflow: "hidden",
                 borderRadius: 2,
                 "&.Mui-focused": {
-                  color: "rgb(210, 213, 247)",
+                  color: textSecondary,
                   backgroundColor: "transparent",
-                  borderColor: "rgb(88, 101, 242)",
+                  borderColor: textPrimary,
                 },
                 "&:hover": {
                   backgroundColor: "transparent",

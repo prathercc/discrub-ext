@@ -6,6 +6,7 @@ import DiscordTextField from "../DiscordComponents/DiscordTextField/DiscordTextF
 import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
 import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
+import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 
 function DirectMessages({ userData }) {
   const [directMessages, setDirectMessages] = useState(null);
@@ -68,37 +69,40 @@ function DirectMessages({ userData }) {
         overflow: "auto",
       }}
     >
-      {userData && directMessages && (
-        <>
-          <DiscordTypography variant="h5">
-            Your Direct Messages
-          </DiscordTypography>
-          <DiscordTypography variant="caption">
-            Messages between other Discord users and yourself.
-          </DiscordTypography>
-          <DiscordTextField
-            disabled={fetchingData}
-            value={selectedDirectMessage}
-            onChange={(e) => setSelectedDirectMessage(e.target.value)}
-            sx={{ my: "5px" }}
-            select
-            label="Direct Messages"
-          >
-            {directMessages.map((directMessage) => {
-              return (
-                <MenuItem key={directMessage.id} value={directMessage.id}>
-                  {directMessage.recipients.length === 1
-                    ? directMessage.recipients[0].username
-                    : directMessage.name
-                    ? `Group Chat - ${directMessage.name}`
-                    : `Unnamed Group Chat - ${directMessage.id}`}
-                </MenuItem>
-              );
-            })}
-          </DiscordTextField>
-        </>
-      )}
-      {(!userData || !directMessages || fetchingData) && <DiscordSpinner />}
+      <DiscordPaper>
+        {userData && directMessages && (
+          <>
+            <DiscordTypography variant="h5">
+              Your Direct Messages
+            </DiscordTypography>
+            <DiscordTypography variant="caption">
+              Messages between other Discord users and yourself.
+            </DiscordTypography>
+            <DiscordTextField
+              disabled={fetchingData}
+              value={selectedDirectMessage}
+              onChange={(e) => setSelectedDirectMessage(e.target.value)}
+              sx={{ my: "5px" }}
+              select
+              label="Direct Messages"
+            >
+              {directMessages.map((directMessage) => {
+                return (
+                  <MenuItem key={directMessage.id} value={directMessage.id}>
+                    {directMessage.recipients.length === 1
+                      ? directMessage.recipients[0].username
+                      : directMessage.name
+                      ? `Group Chat - ${directMessage.name}`
+                      : `Unnamed Group Chat - ${directMessage.id}`}
+                  </MenuItem>
+                );
+              })}
+            </DiscordTextField>
+          </>
+        )}
+
+        {(!userData || !directMessages || fetchingData) && <DiscordSpinner />}
+      </DiscordPaper>
       {messageData && !fetchingData && (
         <DMTable rows={messageData} userData={userData} />
       )}

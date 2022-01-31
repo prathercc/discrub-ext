@@ -1,3 +1,5 @@
+import { CampaignRounded } from "@mui/icons-material";
+
 const discordUsersUrl = "https://discordapp.com/api/users";
 const discordGuildsUrl = "https://discordapp.com/api/guilds";
 const discordChannelsUrl = "https://discordapp.com/api/channels";
@@ -45,12 +47,7 @@ export const fetchChannels = (authorization, guildId) => {
   }).then((resp) => resp.json());
 };
 
-export const editMessage = (
-  authorization,
-  messageId,
-  updateObj,
-  channelId
-) => {
+export const editMessage = (authorization, messageId, updateObj, channelId) => {
   return fetch(`${discordChannelsUrl}/${channelId}/messages/${messageId}`, {
     method: "PATCH",
     headers: {
@@ -69,7 +66,10 @@ export const deleteMessage = (authorization, messageId, channelId) => {
       authorization: authorization,
       "user-agent": userAgent,
     },
-  }).then((resp) => resp.json());
+  }).then((resp) => {
+    if (resp.status === 429) return resp.json();
+    else return resp;
+  });
 };
 //For some reason if the last message was attachment only (no message), the table will not render!
 export const fetchMessageData = (authorization, lastId, channelId) => {

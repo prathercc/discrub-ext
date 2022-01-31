@@ -11,6 +11,13 @@ import Identity from "../Identity/Identity";
 import { fetchUserData } from "../../discordService";
 import Box from "@mui/material/Box";
 import About from "../About/About";
+import {
+  discordPrimary,
+  discordSecondary,
+  fontFamily,
+  textSecondary,
+} from "../../styleConstants";
+import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
 
 function InjectedDialog() {
   const [menuIndex, setMenuIndex] = useState(0);
@@ -30,16 +37,17 @@ function InjectedDialog() {
   return (
     <Box
       sx={{
-        backgroundColor: "#202225",
+        backgroundColor: discordPrimary,
         height: "700px",
         width: "775px",
-        color: "#fff",
-        font: 'Ginto,"Helvetica Neue",Helvetica,Arial,sans-serif',
+        color: textSecondary,
+        fontFamily: fontFamily,
         padding: 0,
         margin: 0,
-        border: "1px solid rgb(142, 146, 151, 0.4)",
+        border: `1px solid ${textSecondary.slice(0,18) + "0.2)"}`,
         wordWrap: "break-word",
         overflow: "hidden",
+        borderRadius: "1px",
       }}
     >
       <MenuBar menuIndex={menuIndex} setMenuIndex={setMenuIndex} />
@@ -60,7 +68,7 @@ const CloseWindowButton = () => {
         <IconButton
           sx={{
             "&:hover": { color: "rgb(166, 2, 2)" },
-            color: "#8e9297",
+            color: textSecondary,
           }}
           onClick={() => sendChromeMessage("CLOSE_INJECTED_DIALOG")}
           color="primary"
@@ -80,22 +88,22 @@ const DevelopmentMessages = () => {
           position: "fixed",
           bottom: "0px",
           left: "5px",
-          opacity: 0.1,
+          opacity: 0.5,
           pointerEvents: "none",
         }}
       >
-        <Typography>Discrub</Typography>
+        <DiscordTypography>Discrub</DiscordTypography>
       </Box>
       <Box
         sx={{
           position: "fixed",
           bottom: "0px",
           right: "5px",
-          opacity: 0.1,
+          opacity: 0.5,
           pointerEvents: "none",
         }}
       >
-        <Typography>Version 1.0.1</Typography>
+        <DiscordTypography>Version 1.0.1</DiscordTypography>
       </Box>
     </>
   );

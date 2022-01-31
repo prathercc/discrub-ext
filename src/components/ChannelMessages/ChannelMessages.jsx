@@ -11,6 +11,7 @@ import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTyp
 import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
+import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 
 function ChannelMessages({ userData }) {
   const [guilds, setGuilds] = useState(null);
@@ -106,50 +107,52 @@ function ChannelMessages({ userData }) {
     >
       {userData && guilds && (
         <>
-          <DiscordTypography variant="h5">
-            Your Channel Messages
-          </DiscordTypography>
-          <DiscordTypography variant="caption">
-            Messages between other Discord users and yourself, within Guilds.
-          </DiscordTypography>
-          <DiscordTextField
-            disabled={fetchingData}
-            value={selectedGuild}
-            onChange={(e) => setSelectedGuild(e.target.value)}
-            sx={{ my: "5px" }}
-            select
-            label="Guilds"
-          >
-            {guilds.map((guild) => {
-              return (
-                <MenuItem key={guild.id} value={guild.id}>
-                  {guild.name}
-                </MenuItem>
-              );
-            })}
-          </DiscordTextField>
-          <DiscordTextField
-            disabled={selectedGuild === null || fetchingData}
-            value={selectedChannel}
-            onChange={(e) => setSelectedChannel(e.target.value)}
-            sx={{ my: "5px" }}
-            select
-            label="Channels"
-          >
-            {channels &&
-              channels.map((channel) => {
+          <DiscordPaper>
+            <DiscordTypography variant="h5">
+              Your Channel Messages
+            </DiscordTypography>
+            <DiscordTypography variant="caption">
+              Messages between other Discord users and yourself, within Guilds.
+            </DiscordTypography>
+            <DiscordTextField
+              disabled={fetchingData}
+              value={selectedGuild}
+              onChange={(e) => setSelectedGuild(e.target.value)}
+              sx={{ my: "5px" }}
+              select
+              label="Guilds"
+            >
+              {guilds.map((guild) => {
                 return (
-                  <MenuItem key={channel.id} value={channel.id}>
-                    {channel.name}
+                  <MenuItem key={guild.id} value={guild.id}>
+                    {guild.name}
                   </MenuItem>
                 );
               })}
-          </DiscordTextField>
+            </DiscordTextField>
+            <DiscordTextField
+              disabled={selectedGuild === null || fetchingData}
+              value={selectedChannel}
+              onChange={(e) => setSelectedChannel(e.target.value)}
+              sx={{ my: "5px" }}
+              select
+              label="Channels"
+            >
+              {channels &&
+                channels.map((channel) => {
+                  return (
+                    <MenuItem key={channel.id} value={channel.id}>
+                      {channel.name}
+                    </MenuItem>
+                  );
+                })}
+            </DiscordTextField>
+          </DiscordPaper>
           {messageData && messageData.length > 0 && !fetchingData && (
             <ChannelMsgTable rows={messageData} userData={userData} />
           )}
           {messageData && messageData.length === 0 && !fetchingData && (
-            <>
+            <DiscordPaper>
               <Box container sx={boxSx}>
                 <DiscordTypography>No Messages to Display</DiscordTypography>
               </Box>
@@ -158,11 +161,15 @@ function ChannelMessages({ userData }) {
                   <SentimentDissatisfiedIcon />
                 </DiscordTypography>
               </Box>
-            </>
+            </DiscordPaper>
           )}
         </>
       )}
-      {(!userData || !guilds || fetchingData) && <DiscordSpinner />}
+      {(!userData || !guilds || fetchingData) && (
+        <DiscordPaper>
+          <DiscordSpinner />
+        </DiscordPaper>
+      )}
     </Box>
   );
 }

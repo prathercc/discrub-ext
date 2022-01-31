@@ -1,6 +1,11 @@
 /*global chrome*/
 import * as React from "react";
 import Button from "@mui/material/Button";
+import {
+  textSecondary,
+  textPrimary,
+  discordPrimary,
+} from "../../../styleConstants";
 
 function DiscordButton({ icon, label, onClick, neutral = false, ...props }) {
   return (
@@ -8,17 +13,13 @@ function DiscordButton({ icon, label, onClick, neutral = false, ...props }) {
       {...props}
       sx={{
         "&:hover": {
-          backgroundColor: neutral
-            ? "rgb(210, 213, 247)"
-            : "rgb(88, 101, 242, 0.7)",
+          backgroundColor: neutral ? textSecondary : textPrimary,
         },
-        backgroundColor: neutral
-          ? "rgb(210, 213, 247)"
-          : "rgb(88, 101, 242, 0.7)",
+        backgroundColor: neutral ? textSecondary : textPrimary,
         textTransform: "none",
         fontFamily: 'Whitney,"Helvetica Neue",Helvetica,Arial,sans-serif',
         fontWeight: 500,
-        color: neutral ? "#202225" : "rgb(210, 213, 247)",
+        color: neutral ? discordPrimary : textSecondary,
         ...props.sx,
       }}
       style={{ width: "90px", height: "30px" }}

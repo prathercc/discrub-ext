@@ -1,5 +1,5 @@
 /*global chrome*/
-import * as React from "react";
+import React from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
@@ -8,21 +8,27 @@ import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
 import Tooltip from "@mui/material/Tooltip";
 import { makeStyles } from "@mui/styles";
+import {
+  discordSecondary,
+  textPrimary,
+  textSecondary,
+  fontFamily,
+} from "../../styleConstants";
 
 const useStyles = makeStyles({
   tabs: {
     "& .MuiTabs-indicator": {
-      backgroundColor: "#5865f2",
+      backgroundColor: textPrimary,
     },
     "& .MuiTab-root": {
-      color: "#8e9297",
-      fontFamily: 'Ginto,"Helvetica Neue",Helvetica,Arial,sans-serif',
+      color: textSecondary,
+      fontFamily: fontFamily,
     },
     "& .MuiTab-root.Mui-selected": {
-      color: "#FFF",
+      color: textSecondary,
     },
     "& .MuiTabs-flexContainer": {
-      backgroundColor: "#2f3136",
+      backgroundColor: discordSecondary,
     },
   },
 });

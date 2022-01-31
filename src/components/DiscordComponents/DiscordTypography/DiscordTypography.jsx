@@ -1,9 +1,13 @@
 import React from "react";
 import { Typography } from "@mui/material";
+import { textSecondary } from "../../../styleConstants";
 
 function DiscordTypography(props) {
   return (
-    <Typography sx={{ color: "rgb(210, 213, 247)", ...props.sx }} {...props}>
+    <Typography
+      {...props}
+      sx={{ color: textSecondary, userSelect: "none", ...props.sx }}
+    >
       {props.children}
     </Typography>
   );
