@@ -1,6 +1,7 @@
 import React from "react";
 import DialogActions from "@mui/material/DialogActions";
 import { textSecondary, discordPrimary } from "../../../styleConstants";
+
 const DiscordDialogActions = (props) => {
   return (
     <DialogActions

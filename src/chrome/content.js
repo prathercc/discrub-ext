@@ -14,7 +14,7 @@ chrome.runtime.onMessage.addListener(function (
         const button = document.querySelector('[aria-label="Inbox"]');
         const iframe = document.createElement("iframe");
         iframe.id = "injected_iframe_button";
-        iframe.src = chrome.extension.getURL("injected_button.html");
+        iframe.src = chrome.runtime.getURL("injected_button.html");
         iframe.scrolling = "no";
         iframe.width = 90;
         iframe.height = 30;
@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener(function (
         modal.style.backgroundColor = "transparent";
         const iframe = document.createElement("iframe");
         iframe.id = "injected_dialog_iframe";
-        iframe.src = chrome.extension.getURL("injected_dialog.html");
+        iframe.src = chrome.runtime.getURL("injected_dialog.html");
         iframe.height = "702px";
         iframe.width = "777px";
         modal.appendChild(iframe);

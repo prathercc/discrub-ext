@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
 import styled, { keyframes } from "styled-components";
 import GitHubButton from "react-github-btn";
+import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
+import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
+import { Tooltip } from "@mui/material";
 
-function About({ userData }) {
+function About() {
   return (
     <Box
       sx={{
@@ -15,143 +18,147 @@ function About({ userData }) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        flexDirection: "column",
       }}
     >
-      <Box>
-        <CusImg src="logo.png" />
-      </Box>
-      <AboutMessages />
+      <CustomGrid my={2} container>
+        <CustomGrid item xs={12}>
+          <CusImg src="discrub2.png" />
+        </CustomGrid>
+      </CustomGrid>
+
+      <DiscordPaper sx={{ width: "85%" }}>
+        <CustomGrid spacing={2} container>
+          <CustomGrid item xs={4}>
+            <GitHubButton
+              href="https://github.com/sponsors/prathercc"
+              data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
+              data-icon="octicon-heart"
+              data-size="large"
+              aria-label="Sponsor @prathercc on GitHub"
+            >
+              Sponsor
+            </GitHubButton>
+          </CustomGrid>
+          <CustomGrid item xs={4}>
+            <GitHubButton
+              href="https://github.com/prathercc"
+              data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Follow @prathercc on GitHub"
+            >
+              Follow @prathercc
+            </GitHubButton>
+          </CustomGrid>
+          <CustomGrid item xs={4}>
+            <GitHubButton
+              href="https://github.com/prathercc/discrub-ext/fork"
+              data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
+              data-icon="octicon-repo-forked"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Fork prathercc/discrub-ext on GitHub"
+            >
+              Fork
+            </GitHubButton>
+          </CustomGrid>
+          <CustomGrid item xs={4}>
+            <GitHubButton
+              href="https://github.com/prathercc/discrub-ext/issues"
+              data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
+              data-icon="octicon-issue-opened"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Issue prathercc/discrub-ext on GitHub"
+            >
+              Issue
+            </GitHubButton>
+          </CustomGrid>
+          <CustomGrid item xs={4}>
+            <GitHubButton
+              href="https://github.com/prathercc/discrub-ext"
+              data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
+              data-icon="octicon-star"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Star prathercc/discrub-ext on GitHub"
+            >
+              Star
+            </GitHubButton>
+          </CustomGrid>
+          <CustomGrid item xs={4}>
+            <GitHubButton
+              href="https://github.com/prathercc/discrub-ext/subscription"
+              data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
+              data-icon="octicon-eye"
+              data-size="large"
+              data-show-count="true"
+              aria-label="Watch prathercc/discrub-ext on GitHub"
+            >
+              Watch
+            </GitHubButton>
+          </CustomGrid>
+        </CustomGrid>
+      </DiscordPaper>
+      <DiscordPaper sx={{ width: "85%" }}>
+        <CustomGrid spacing={2} container>
+          <CustomGrid sx={{ flexDirection: "column" }} xs={12} item>
+            <DiscordTypography variant="h6">
+              Support the Developer!
+            </DiscordTypography>
+            <DiscordTypography>
+              This did take some time to make, you know 😜
+            </DiscordTypography>
+          </CustomGrid>
+          <CustomGrid xs={12} item>
+            <a href="https://ko-fi.com/W7W4AAIBR" target="_blank">
+              <img
+                height="36"
+                style={{ border: "0px", height: "36px" }}
+                src="https://cdn.ko-fi.com/cdn/kofi1.png?v=3"
+                border="0"
+                alt="Buy Me a Coffee at ko-fi.com"
+              />
+            </a>
+          </CustomGrid>
+          <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
+            <DiscordTypography variant="caption">Ethereum</DiscordTypography>
+            <Tooltip title="0x09b120deE370ddadf629D2428A3B12cA3F614222">
+              <img style={{ width: "120px" }} src="ethereum.png" />
+            </Tooltip>
+          </CustomGrid>
+          <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
+            <DiscordTypography variant="caption">Bitcoin</DiscordTypography>
+            <Tooltip title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm">
+              <img style={{ width: "120px" }} src="bitcoin.png" />
+            </Tooltip>
+          </CustomGrid>
+          <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
+            <DiscordTypography variant="caption">Litecoin</DiscordTypography>
+            <Tooltip title="MVTPtXVTF6RNwfcTt71J8cn6uqNApb3S75">
+              <img style={{ width: "120px" }} src="litecoin.png" />
+            </Tooltip>
+          </CustomGrid>
+        </CustomGrid>
+      </DiscordPaper>
     </Box>
   );
 }
-const AboutMessages = () => {
-  return (
-    <>
-      <Box
-        sx={{
-          position: "fixed",
-          top: "285px",
-          left: "395px",
-        }}
-      >
-        <GitHubButton
-          href="https://github.com/prathercc/discrub-ext/discussions"
-          data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
-          data-icon="octicon-comment-discussion"
-          data-size="large"
-          aria-label="Discuss prathercc/discrub-ext on GitHub"
-        >
-          Discuss
-        </GitHubButton>
-      </Box>
-      <Box
-        sx={{
-          position: "fixed",
-          top: "250px",
-          left: "365px",
-        }}
-      >
-        <GitHubButton
-          href="https://github.com/prathercc/discrub-ext/fork"
-          data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
-          data-icon="octicon-repo-forked"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Fork prathercc/discrub-ext on GitHub"
-        >
-          Fork
-        </GitHubButton>
-      </Box>
-      <Box
-        sx={{
-          position: "fixed",
-          top: "285px",
-          left: "295px",
-        }}
-      >
-        <GitHubButton
-          href="https://github.com/prathercc/discrub-ext/issues"
-          data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
-          data-icon="octicon-issue-opened"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Issue prathercc/discrub-ext on GitHub"
-        >
-          Issue
-        </GitHubButton>
-      </Box>
 
-      <Box
-        sx={{
-          position: "fixed",
-          top: "250px",
-          left: "270px",
-        }}
-      >
-        <GitHubButton
-          href="https://github.com/prathercc/discrub-ext"
-          data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
-          data-icon="octicon-star"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Star prathercc/discrub-ext on GitHub"
-        >
-          Star
-        </GitHubButton>
-      </Box>
-      <Box
-        sx={{
-          position: "fixed",
-          top: "250px",
-          left: "165px",
-        }}
-      >
-        <GitHubButton
-          href="https://github.com/prathercc/discrub-ext/subscription"
-          data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
-          data-icon="octicon-eye"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Watch prathercc/discrub-ext on GitHub"
-        >
-          Watch
-        </GitHubButton>
-      </Box>
-      <Box
-        sx={{
-          position: "fixed",
-          top: "285px",
-          left: "115px",
-        }}
-      >
-        <GitHubButton
-          href="https://github.com/prathercc"
-          data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Follow @prathercc on GitHub"
-        >
-          Follow @prathercc
-        </GitHubButton>
-      </Box>
-      <Box
-        sx={{
-          position: "fixed",
-          top: "250px",
-          left: "75px",
-        }}
-      >
-        <GitHubButton
-          href="https://github.com/sponsors/prathercc"
-          data-color-scheme="no-preference: light; light: dark_high_contrast; dark: dark_dimmed;"
-          data-icon="octicon-heart"
-          data-size="large"
-          aria-label="Sponsor @prathercc on GitHub"
-        >
-          Sponsor
-        </GitHubButton>
-      </Box>
-    </>
+const CustomGrid = (props) => {
+  return (
+    <Grid
+      {...props}
+      sx={{
+        ...props.sx,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      {props.children}
+    </Grid>
   );
 };
 
@@ -174,6 +181,7 @@ const logoAnim = keyframes`
 `;
 
 const CusImg = styled.img`
+  user-select: none;
   border-radius: 15px;
   width: 180px;
   margin: auto;

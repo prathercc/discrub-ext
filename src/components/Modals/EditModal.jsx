@@ -27,7 +27,7 @@ const EditModal = ({ userData, open, handleClose, selected, rows }) => {
     setUpdatedRows([]);
     let channelId = rows[0]?.channel_id;
     let count = 0;
-    while (count < selected.length && openRef.current) {
+    while (count < selected.length && openRef.current) { 
       let oldMessages = await rows.filter((x) => x.id === selected[count]);
       if (oldMessages.length > 0)
         setEditObj({

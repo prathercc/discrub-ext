@@ -1,7 +1,11 @@
 import React, { forwardRef } from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
-import { textPrimary, textSecondary } from "../../../styleConstants";
+import {
+  discordPrimary,
+  textPrimary,
+  textSecondary,
+} from "../../../styleConstants";
 
 const DiscordTextField = forwardRef(
   (
@@ -62,6 +66,8 @@ const DiscordTextField = forwardRef(
               backgroundColor: "transparent",
             },
           },
+          borderRadius: 2,
+          boxShadow: `1px 1px 1px ${discordPrimary}`,
           ...sx,
         }}
         label={label}

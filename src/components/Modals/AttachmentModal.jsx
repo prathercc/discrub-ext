@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from "react";
 import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
 import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
-import DiscordTextField from "../DiscordComponents/DiscordTextField/DiscordTextField";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Grid from "@mui/material/Grid";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 import { deleteMessage, editMessage } from "../../discordService";
 import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
-import { textPrimary, textSecondary } from "../../styleConstants";
 import DiscordDialog from "../DiscordComponents/DiscordDialog/DiscordDialog";
 import DiscordDialogTitle from "../DiscordComponents/DiscordDialog/DiscordDialogTitle";
 import DiscordDialogContent from "../DiscordComponents/DiscordDialog/DiscordDialogContent";
 import DiscordDialogActions from "../DiscordComponents/DiscordDialog/DiscordDialogActions";
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
-import Avatar from "@mui/material/Avatar";
-import Chip from "@mui/material/Chip";
 import AttachmentChip from "../Chips/AttachmentChip";
 
 const AttachmentModal = ({ open, handleClose, row, userData }) => {

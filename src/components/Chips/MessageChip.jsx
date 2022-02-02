@@ -6,6 +6,7 @@ import {
 } from "../../styleConstants";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
 
 const MessageChip = (props) => {
   return (
@@ -22,10 +23,9 @@ const MessageChip = (props) => {
         },
       }}
       avatar={
-        <Avatar
-          alt={props.username}
-          src={props.avatar}
-        />
+        <Tooltip title={props.username}>
+          <Avatar alt={props.username} src={props.avatar} />
+        </Tooltip>
       }
       label={props.content}
       variant="filled"

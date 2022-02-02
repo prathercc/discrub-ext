@@ -4,7 +4,6 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { sendChromeMessage } from "../../chromeService";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import Typography from "@mui/material/Typography";
 import ChannelMessages from "../ChannelMessages/ChannelMessages";
 import DirectMessages from "../DirectMessages/DirectMessages";
 import Identity from "../Identity/Identity";
@@ -13,7 +12,6 @@ import Box from "@mui/material/Box";
 import About from "../About/About";
 import {
   discordPrimary,
-  discordSecondary,
   fontFamily,
   textSecondary,
 } from "../../styleConstants";
@@ -44,7 +42,7 @@ function InjectedDialog() {
         fontFamily: fontFamily,
         padding: 0,
         margin: 0,
-        border: `1px solid ${textSecondary.slice(0,18) + "0.2)"}`,
+        border: `1px solid ${textSecondary.slice(0, 18) + "0.2)"}`,
         wordWrap: "break-word",
         overflow: "hidden",
         borderRadius: "1px",

@@ -1,34 +1,41 @@
 {
-  "short_name": "Discrub-Ext",
-  "name": "Discrub - Extension",
+  "short_name": "Discrub",
+  "name": "Discrub",
   "version": "1.0.1",
-  "manifest_version": 2,
-  "permissions": ["storage", "tabs", "activeTab", "http://*/*", "https://*/*"],
-  "optional_permissions": ["<all_urls>"],
+  "description": "An extension that allows you to modify, sort, and filter direct & channel messages in bulk.",
+  "manifest_version": 3,
+  "permissions": ["storage", "tabs"],
   "background": {
-    "scripts": ["background.js"]
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "discrub2.png",
+      "32": "discrub2.png",
+      "48": "discrub2.png",
+      "128": "discrub2.png"
+    }
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*"],
+      "matches": ["*://discord.com/*"],
       "js": ["./static/js/content.js"]
     }
   ],
-  "web_accessible_resources": ["*.html"],
-  "browser_action": {
-    "default_popup": "index.html",
-    "default_icon": {
-      "16": "logo.png",
-      "32": "logo.png",
-      "48": "logo.png",
-      "128": "logo.png"
+  "web_accessible_resources": [
+    {
+      "matches": ["*://discord.com/*"],
+      "resources": [
+        "index.html",
+        "injected_button.html",
+        "injected_dialog.html"
+      ]
     }
-  },
+  ],
   "icons": {
-    "16": "logo.png",
-    "32": "logo.png",
-    "48": "logo.png",
-    "128": "logo.png"
+    "16": "discrub2.png",
+    "32": "discrub2.png",
+    "48": "discrub2.png",
+    "128": "discrub2.png"
   }
-  // "content_security_policy": "script-src 'self' 'sha256-fdAfMKZtCTRPKMRznGwonJHC++vCCrQS7XFnVrzSXAE=' 'sha256-YD8w9VLrdvqI5/tFVmpT+1337ly+e/JvPrkRxYZo/w4='; object-src 'self';"
 }

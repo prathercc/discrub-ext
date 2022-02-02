@@ -30,6 +30,7 @@ import {
   textSecondary,
   textPrimary,
   discordSecondary,
+  discordPrimary,
 } from "../../../styleConstants";
 
 function descendingComparator(a, b, orderBy) {
@@ -377,13 +378,11 @@ export default function DiscordTable({
     <Box sx={{ width: "100%" }}>
       <DeleteModal
         open={deleteModalOpen}
-        handleClose={async (deletedRows) => {
+        handleClose={async (returnRows) => {
           setDeleteModalOpen(false);
-          let updatedArr = [];
-          await rows.forEach((x) => {
-            if (!deletedRows.includes(x.id)) updatedArr.push(x);
-          });
-          setRefactoredData(updatedArr);
+          setRefactoredData(returnRows);
+          if (JSON.stringify(returnRows) !== JSON.stringify(rows))
+            setSelected([]);
         }}
         rows={rows}
         selected={selected}
@@ -550,7 +549,14 @@ export default function DiscordTable({
                             }}
                             color="primary"
                           >
-                            <AttachmentIcon sx={{ color: textSecondary }} />
+                            <AttachmentIcon
+                              sx={{
+                                color:
+                                  userData.username !== row.username
+                                    ? discordPrimary
+                                    : textSecondary,
+                              }}
+                            />
                           </IconButton>
                         </Tooltip>
                       </TableCell>
