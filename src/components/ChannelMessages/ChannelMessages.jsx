@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   fetchGuilds,
   fetchChannels,
@@ -21,6 +21,8 @@ function ChannelMessages({ userData }) {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [fetchingData, setFetchingData] = useState(false);
   const [messageData, setMessageData] = useState(null);
+  const [numOfMessagesFetched, setNumOfMessagesFetched] = useState(0);
+  const mountedRef = useRef(false);
 
   const boxSx = {
     alignItems: "center",
@@ -36,7 +38,8 @@ function ChannelMessages({ userData }) {
         let lastId = "";
         let reachedEnd = false;
         let retArr = [];
-        while (!reachedEnd) {
+        while (!reachedEnd && mountedRef.current) {
+          if (!mountedRef.current) break;
           const data = await fetchMessageData(
             userData.token,
             lastId,
@@ -48,9 +51,12 @@ function ChannelMessages({ userData }) {
           if (data.length > 0) {
             lastId = data[data.length - 1].id;
           }
-          if (data && (data[0]?.content || data[0]?.attachments))
+          if (data && (data[0]?.content || data[0]?.attachments)) {
             retArr = retArr.concat(data);
+            setNumOfMessagesFetched(retArr.length);
+          }
         }
+        setNumOfMessagesFetched(0);
         setMessageData(retArr);
         setFetchingData(false);
       } catch (e) {
@@ -94,6 +100,10 @@ function ChannelMessages({ userData }) {
       }
     };
     if (userData && userData.token) getGuilds();
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   return (
@@ -153,10 +163,10 @@ function ChannelMessages({ userData }) {
           )}
           {messageData && messageData.length === 0 && !fetchingData && (
             <DiscordPaper>
-              <Box container sx={boxSx}>
+              <Box sx={boxSx}>
                 <DiscordTypography>No Messages to Display</DiscordTypography>
               </Box>
-              <Box container sx={boxSx}>
+              <Box sx={boxSx}>
                 <DiscordTypography>
                   <SentimentDissatisfiedIcon />
                 </DiscordTypography>
@@ -168,6 +178,13 @@ function ChannelMessages({ userData }) {
       {(!userData || !guilds || fetchingData) && (
         <DiscordPaper>
           <DiscordSpinner />
+          <Box sx={boxSx}>
+            <DiscordTypography variant="caption">
+              {numOfMessagesFetched > 0
+                ? `Fetched ${numOfMessagesFetched} Messages`
+                : "Fetching Data"}
+            </DiscordTypography>
+          </Box>
         </DiscordPaper>
       )}
     </Box>

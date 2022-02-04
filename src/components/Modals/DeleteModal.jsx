@@ -17,7 +17,15 @@ import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import Box from "@mui/material/Box";
 import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 
-const DeleteModal = ({ open, handleClose, rows, selected, userData }) => {
+const DeleteModal = ({
+  open,
+  handleClose,
+  rows,
+  selected,
+  userData,
+  setOriginalRows,
+  originalRows,
+}) => {
   const [deleteConfig, setDeleteConfig] = useState({
     attachments: true,
     messages: true,
@@ -29,6 +37,8 @@ const DeleteModal = ({ open, handleClose, rows, selected, userData }) => {
   openRef.current = open;
   const returnRowsRef = useRef();
   returnRowsRef.current = returnRows;
+  const originalRowsRef = useRef();
+  originalRowsRef.current = originalRows;
 
   useEffect(() => {
     setDeleteConfig({ attachments: true, messages: true });
@@ -57,9 +67,14 @@ const DeleteModal = ({ open, handleClose, rows, selected, userData }) => {
             channelId
           );
           if (response.status === 204) {
-            setReturnRows((prevState) =>
-              prevState.filter((retRow) => retRow.id !== selected[count])
+            let updatedOriginalRows = await originalRowsRef.current.filter(
+              (originalRow) => originalRow.id !== selected[count]
             );
+            let updatedReturnRows = await returnRowsRef.current.filter(
+              (retRow) => retRow.id !== selected[count]
+            );
+            setOriginalRows(updatedOriginalRows);
+            setReturnRows(updatedReturnRows);
             count++;
           } else {
             await new Promise((resolve) =>
@@ -75,6 +90,7 @@ const DeleteModal = ({ open, handleClose, rows, selected, userData }) => {
           );
           if (!data.message) {
             let updatedRows = [];
+            let updatedOriginalRows = [];
             await returnRowsRef.current.forEach((returnRow) => {
               if (returnRow.id === data.id)
                 updatedRows.push({ ...data, username: data.author.username });
@@ -84,6 +100,19 @@ const DeleteModal = ({ open, handleClose, rows, selected, userData }) => {
                   username: returnRow.author.username,
                 });
             });
+            await originalRowsRef.current.forEach((originalRow) => {
+              if (originalRow.id === data.id)
+                updatedOriginalRows.push({
+                  ...data,
+                  username: data.author.username,
+                });
+              else
+                updatedOriginalRows.push({
+                  ...originalRow,
+                  username: originalRow.author.username,
+                });
+            });
+            setOriginalRows(updatedOriginalRows);
             setReturnRows(updatedRows);
             count++;
           } else {

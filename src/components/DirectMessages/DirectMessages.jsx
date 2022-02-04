@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { fetchDirectMessages, fetchMessageData } from "../../discordService";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
@@ -11,10 +11,18 @@ import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 function DirectMessages({ userData }) {
   const [directMessages, setDirectMessages] = useState(null);
   const [selectedDirectMessage, setSelectedDirectMessage] = useState(null);
-
   const [messageData, setMessageData] = useState(null);
-
   const [fetchingData, setFetchingData] = useState(false);
+  const [numOfMessagesFetched, setNumOfMessagesFetched] = useState(0);
+
+  const mountedRef = useRef(false);
+
+  const boxSx = {
+    alignItems: "center",
+    justifyContent: "center",
+    display: "flex",
+    marginTop: "1vh",
+  };
 
   useEffect(() => {
     const getDirectMessages = async () => {
@@ -27,6 +35,10 @@ function DirectMessages({ userData }) {
       }
     };
     if (userData && userData.token) getDirectMessages();
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -36,7 +48,8 @@ function DirectMessages({ userData }) {
       let lastId = "";
       let reachedEnd = false;
       let retArr = [];
-      while (!reachedEnd) {
+      while (!reachedEnd && mountedRef.current) {
+        if (!mountedRef.current) break;
         const data = await fetchMessageData(
           userData.token,
           lastId,
@@ -48,9 +61,12 @@ function DirectMessages({ userData }) {
         if (data.length > 0) {
           lastId = data[data.length - 1].id;
         }
-        if (data && (data[0]?.content || data[0]?.attachments))
+        if (data && (data[0]?.content || data[0]?.attachments)) {
           retArr = retArr.concat(data);
+          setNumOfMessagesFetched(retArr.length);
+        }
       }
+      setNumOfMessagesFetched(0);
       setMessageData(retArr);
       setFetchingData(false);
     };
@@ -101,7 +117,18 @@ function DirectMessages({ userData }) {
           </>
         )}
 
-        {(!userData || !directMessages || fetchingData) && <DiscordSpinner />}
+        {(!userData || !directMessages || fetchingData) && (
+          <>
+            <DiscordSpinner />
+            <Box sx={boxSx}>
+              <DiscordTypography variant="caption">
+                {numOfMessagesFetched > 0
+                  ? `Fetched ${numOfMessagesFetched} Messages`
+                  : "Fetching Data"}
+              </DiscordTypography>
+            </Box>
+          </>
+        )}
       </DiscordPaper>
       {messageData && !fetchingData && (
         <DMTable rows={messageData} userData={userData} />

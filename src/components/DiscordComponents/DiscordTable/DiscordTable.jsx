@@ -377,6 +377,8 @@ export default function DiscordTable({
   return (
     <Box sx={{ width: "100%" }}>
       <DeleteModal
+        setOriginalRows={setOriginalRows}
+        originalRows={originalRows}
         open={deleteModalOpen}
         handleClose={async (returnRows) => {
           setDeleteModalOpen(false);
@@ -389,20 +391,13 @@ export default function DiscordTable({
         userData={userData}
       />
       <EditModal
-        checkModalOpen={() => {
-          return editModalOpen;
-        }}
+        setOriginalRows={setOriginalRows}
+        originalRows={originalRows}
         userData={userData}
         open={editModalOpen}
         handleClose={async (editedRows) => {
           setEditModalOpen(false);
-          let updatedArr = [];
-          await rows.forEach((x) => {
-            let filteredRows = editedRows.filter((y) => y.id === x.id);
-            if (filteredRows.length > 0) updatedArr.push(filteredRows[0]);
-            else updatedArr.push(x);
-          });
-          setRefactoredData(updatedArr);
+          setRefactoredData(editedRows);
         }}
         selected={selected}
         rows={rows}

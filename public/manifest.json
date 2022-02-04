@@ -1,7 +1,7 @@
 {
   "short_name": "Discrub",
   "name": "Discrub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An extension that allows you to modify, sort, and filter direct & channel messages in bulk.",
   "manifest_version": 3,
   "permissions": [],

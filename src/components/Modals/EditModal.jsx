@@ -14,27 +14,42 @@ import MessageChip from "../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import { textSecondary } from "../../styleConstants";
 
-const EditModal = ({ userData, open, handleClose, selected, rows }) => {
+const EditModal = ({
+  userData,
+  open,
+  handleClose,
+  selected,
+  rows,
+  setOriginalRows,
+  originalRows,
+}) => {
   const [updateText, setUpdateText] = useState("");
   const [editing, setEditing] = useState(false);
-  const [updatedRows, setUpdatedRows] = useState([]);
+  const [updatedRows, setUpdatedRows] = useState(rows);
   const [editObj, setEditObj] = useState(null);
   const openRef = useRef();
   openRef.current = open;
+  const updatedRowsRef = useRef();
+  updatedRowsRef.current = updatedRows;
+  const originalRowsRef = useRef();
+  originalRowsRef.current = originalRows;
 
   const handleEditMessage = async () => {
     setEditing(true);
-    setUpdatedRows([]);
+    setUpdatedRows(rows);
     let channelId = rows[0]?.channel_id;
     let count = 0;
-    while (count < selected.length && openRef.current) { 
-      let oldMessages = await rows.filter((x) => x.id === selected[count]);
-      if (oldMessages.length > 0)
+    let selectedRows = await rows.filter((x) => selected.includes(x.id));
+    while (count < selected.length && openRef.current) {
+      let currentMessage = await selectedRows.filter(
+        (x) => x.id === selected[count]
+      )[0];
+      if (currentMessage)
         setEditObj({
-          avatar: oldMessages[0].avatar,
-          content: oldMessages[0].content,
-          username: oldMessages[0].username,
-          id: oldMessages[0].id,
+          avatar: currentMessage.avatar,
+          content: currentMessage.content,
+          username: currentMessage.username,
+          id: currentMessage.id,
         });
       try {
         const data = await editMessage(
@@ -44,10 +59,31 @@ const EditModal = ({ userData, open, handleClose, selected, rows }) => {
           channelId
         );
         if (!data.message) {
-          setUpdatedRows((prevState) => [
-            ...prevState,
-            { ...data, username: data.author.username },
-          ]);
+          let editRows = [];
+          let updatedOriginalRows = [];
+          await updatedRowsRef.current.forEach((updateRow) => {
+            if (updateRow.id === data.id)
+              editRows.push({ ...data, username: data.author.username });
+            else
+              editRows.push({
+                ...updateRow,
+                username: updateRow.author.username,
+              });
+          });
+          await originalRowsRef.current.forEach((originalRow) => {
+            if (originalRow.id === data.id)
+              updatedOriginalRows.push({
+                ...data,
+                username: data.author.username,
+              });
+            else
+              updatedOriginalRows.push({
+                ...originalRow,
+                username: originalRow.author.username,
+              });
+          });
+          setOriginalRows(updatedOriginalRows);
+          setUpdatedRows(editRows);
           count++;
         } else {
           await new Promise((resolve) => setTimeout(resolve, data.retry_after));
@@ -63,7 +99,7 @@ const EditModal = ({ userData, open, handleClose, selected, rows }) => {
     if (open) {
       setUpdateText("");
       setEditing(false);
-      setUpdatedRows([]);
+      setUpdatedRows(rows);
     }
   }, [open]);
 
