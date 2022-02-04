@@ -4,7 +4,7 @@
   "version": "1.0.1",
   "description": "An extension that allows you to modify, sort, and filter direct & channel messages in bulk.",
   "manifest_version": 3,
-  "permissions": ["storage", "tabs"],
+  "permissions": [],
   "background": {
     "service_worker": "background.js"
   },
