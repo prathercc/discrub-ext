@@ -49,10 +49,10 @@ function InjectedDialog() {
       }}
     >
       <MenuBar menuIndex={menuIndex} setMenuIndex={setMenuIndex} />
-      {menuIndex === 0 && <Identity userData={userData} />}
+      {menuIndex === 0 && <About userData={userData} />}
       {menuIndex === 1 && <ChannelMessages userData={userData} />}
       {menuIndex === 2 && <DirectMessages userData={userData} />}
-      {menuIndex === 3 && <About userData={userData} />}
+      {menuIndex === 3 && <Identity userData={userData} />}
       <DevelopmentMessages />
       <CloseWindowButton />
     </Box>
@@ -101,7 +101,7 @@ const DevelopmentMessages = () => {
           pointerEvents: "none",
         }}
       >
-        <DiscordTypography>Version 1.0.2</DiscordTypography>
+        <DiscordTypography>Version 1.0.3</DiscordTypography>
       </Box>
     </>
   );

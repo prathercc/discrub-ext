@@ -41,8 +41,8 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   return (
     <>
       <Tabs className={classes.tabs} value={menuIndex} onChange={handleChange}>
-        <Tooltip title="Identity">
-          <Tab icon={<AccountBoxIcon />} />
+        <Tooltip title="About">
+          <Tab icon={<InfoIcon />} />
         </Tooltip>
         <Tooltip title="Channel Messages">
           <Tab icon={<ChatIcon />} />
@@ -50,8 +50,8 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
         <Tooltip title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
-        <Tooltip title="About">
-          <Tab icon={<InfoIcon />} />
+        <Tooltip title="Identity">
+          <Tab icon={<AccountBoxIcon />} />
         </Tooltip>
       </Tabs>
     </>
