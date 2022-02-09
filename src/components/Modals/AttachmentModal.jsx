@@ -10,10 +10,13 @@ import DiscordDialogContent from "../DiscordComponents/DiscordDialog/DiscordDial
 import DiscordDialogActions from "../DiscordComponents/DiscordDialog/DiscordDialogActions";
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import AttachmentChip from "../Chips/AttachmentChip";
+import ModalDebugMessage from "./Utility/ModalDebugMessage";
+import { toggleDebugPause } from "./Utility/utility";
 
 const AttachmentModal = ({ open, handleClose, row, userData }) => {
   const [deleting, setDeleting] = useState(false);
   const [activeRow, setActiveRow] = useState(null);
+  const [debugMessage, setDebugMessage] = useState("");
 
   /* Delete a message when no content or attachment will exist for it*/
   const handleDeleteAttachment = async (attachment) => {
@@ -33,11 +36,29 @@ const AttachmentModal = ({ open, handleClose, row, userData }) => {
           },
           activeRow.channel_id
         );
-        setActiveRow(data);
-        if (data.attachments.length === 0) handleClose(data);
+        if (!data.message) {
+          setActiveRow(data);
+          if (data.attachments.length === 0) handleClose(data);
+        } else {
+          await toggleDebugPause(
+            setDebugMessage,
+            "Entire message must be removed in order to delete the selected attachment!"
+          );
+        }
       } else {
-        await deleteMessage(userData.token, activeRow.id, activeRow.channel_id);
-        handleClose(null);
+        const response = await deleteMessage(
+          userData.token,
+          activeRow.id,
+          activeRow.channel_id
+        );
+        if (response.status === 204) {
+          handleClose(null);
+        } else {
+          await toggleDebugPause(
+            setDebugMessage,
+            "You do not have permission to modify this message!"
+          );
+        }
       }
     } catch (e) {
       console.error("Error deleting attachment");
@@ -76,6 +97,7 @@ const AttachmentModal = ({ open, handleClose, row, userData }) => {
               })}
           </Grid>
           {deleting && <DiscordSpinner />}
+          <ModalDebugMessage debugMessage={debugMessage} />
         </DiscordPaper>
       </DiscordDialogContent>
       <DiscordDialogActions>

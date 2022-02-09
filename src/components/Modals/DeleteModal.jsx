@@ -16,6 +16,8 @@ import MessageChip from "../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import Box from "@mui/material/Box";
 import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
+import ModalDebugMessage from "./Utility/ModalDebugMessage";
+import { toggleDebugPause } from "./Utility/utility";
 
 const DeleteModal = ({
   open,
@@ -33,6 +35,7 @@ const DeleteModal = ({
   const [deleting, setDeleting] = useState(false);
   const [returnRows, setReturnRows] = useState(rows);
   const [deleteObj, setDeleteObj] = useState(null);
+  const [debugMessage, setDebugMessage] = useState("");
   const openRef = useRef();
   openRef.current = open;
   const returnRowsRef = useRef();
@@ -76,10 +79,20 @@ const DeleteModal = ({
             setOriginalRows(updatedOriginalRows);
             setReturnRows(updatedReturnRows);
             count++;
-          } else {
-            await new Promise((resolve) =>
-              setTimeout(resolve, response.retry_after)
+          } else if (response.retry_after) {
+            await toggleDebugPause(
+              setDebugMessage,
+              `Pausing for ${((response.retry_after % 60000) / 1000).toFixed(
+                0
+              )} seconds...`,
+              response.retry_after
             );
+          } else {
+            await toggleDebugPause(
+              setDebugMessage,
+              "You do not have permission to modify this message!"
+            );
+            count++;
           }
         } else if (deleteConfig.attachments || deleteConfig.messages) {
           const data = await editMessage(
@@ -115,10 +128,20 @@ const DeleteModal = ({
             setOriginalRows(updatedOriginalRows);
             setReturnRows(updatedRows);
             count++;
-          } else {
-            await new Promise((resolve) =>
-              setTimeout(resolve, data.retry_after)
+          } else if (data.retry_after) {
+            await toggleDebugPause(
+              setDebugMessage,
+              `Pausing for ${((data.retry_after % 60000) / 1000).toFixed(
+                0
+              )} seconds...`,
+              data.retry_after
             );
+          } else {
+            await toggleDebugPause(
+              setDebugMessage,
+              "You do not have permission to modify this message!"
+            );
+            count++;
           }
         } else break;
       } catch (e) {
@@ -194,13 +217,14 @@ const DeleteModal = ({
                   }}
                 >
                   <MessageChip
-                    avatar={deleteObj.avatar}
+                    avatar={`https://cdn.discordapp.com/avatars/${deleteObj.author.id}/${deleteObj.author.avatar}.png`}
                     username={deleteObj.username}
                     content={deleteObj.content}
                   />
                   <ArrowRightAltIcon sx={{ color: textSecondary }} />
                   <DeleteSweepIcon sx={{ color: "red" }} />
                 </Box>
+                <ModalDebugMessage debugMessage={debugMessage} />
                 <DiscordSpinner />
                 <DiscordTypography sx={{ display: "block" }} variant="caption">
                   {deleteObj.id}

@@ -13,6 +13,8 @@ import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import MessageChip from "../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import { textSecondary } from "../../styleConstants";
+import ModalDebugMessage from "./Utility/ModalDebugMessage";
+import { toggleDebugPause } from "./Utility/utility";
 
 const EditModal = ({
   userData,
@@ -27,6 +29,7 @@ const EditModal = ({
   const [editing, setEditing] = useState(false);
   const [updatedRows, setUpdatedRows] = useState(rows);
   const [editObj, setEditObj] = useState(null);
+  const [debugMessage, setDebugMessage] = useState("");
   const openRef = useRef();
   openRef.current = open;
   const updatedRowsRef = useRef();
@@ -46,7 +49,7 @@ const EditModal = ({
       )[0];
       if (currentMessage)
         setEditObj({
-          avatar: currentMessage.avatar,
+          author: currentMessage.author,
           content: currentMessage.content,
           username: currentMessage.username,
           id: currentMessage.id,
@@ -85,8 +88,20 @@ const EditModal = ({
           setOriginalRows(updatedOriginalRows);
           setUpdatedRows(editRows);
           count++;
+        } else if (data.retry_after) {
+          await toggleDebugPause(
+            setDebugMessage,
+            `Pausing for ${((data.retry_after % 60000) / 1000).toFixed(
+              0
+            )} seconds...`,
+            data.retry_after
+          );
         } else {
-          await new Promise((resolve) => setTimeout(resolve, data.retry_after));
+          await toggleDebugPause(
+            setDebugMessage,
+            "You do not have permission to modify this message!"
+          );
+          count++;
         }
       } catch (e) {
         console.error("Error Editing Message");
@@ -114,6 +129,7 @@ const EditModal = ({
       <DiscordDialogContent>
         <DiscordPaper>
           <DiscordTextField
+            disabled={editing}
             label="Update Text"
             value={updateText}
             onChange={(e) => setUpdateText(e.target.value)}
@@ -129,17 +145,18 @@ const EditModal = ({
                 }}
               >
                 <MessageChip
-                  avatar={editObj.avatar}
+                  avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
                   username={editObj.username}
                   content={editObj.content}
                 />
                 <ArrowRightAltIcon sx={{ color: textSecondary }} />
                 <MessageChip
-                  avatar={editObj.avatar}
+                  avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
                   username={editObj.username}
                   content={updateText}
                 />
               </Box>
+              <ModalDebugMessage debugMessage={debugMessage} />
               <DiscordSpinner />
               <DiscordTypography sx={{ display: "block" }} variant="caption">
                 {editObj.id}
