@@ -1,5 +1,3 @@
-import { CampaignRounded } from "@mui/icons-material";
-
 const discordUsersUrl = "https://discordapp.com/api/users";
 const discordGuildsUrl = "https://discordapp.com/api/guilds";
 const discordChannelsUrl = "https://discordapp.com/api/channels";
