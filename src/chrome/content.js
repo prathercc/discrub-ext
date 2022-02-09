@@ -7,18 +7,18 @@ chrome.runtime.onMessage.addListener(function (
   const { message } = request;
   switch (message) {
     case "INJECT_BUTTON":
-      if (
-        !document.getElementById("injected_iframe_button") &&
-        document.querySelector('[aria-label="Inbox"]')
-      ) {
-        const button = document.querySelector('[aria-label="Inbox"]');
+      const element =
+        document.querySelector('[aria-label="Channel header"]') ||
+        document.querySelector('[aria-label="Friends"]')?.parentElement
+          ?.parentElement;
+      if (!document.getElementById("injected_iframe_button") && element) {
         const iframe = document.createElement("iframe");
         iframe.id = "injected_iframe_button";
         iframe.src = chrome.runtime.getURL("injected_button.html");
         iframe.scrolling = "no";
         iframe.width = 90;
         iframe.height = 30;
-        button.parentElement.appendChild(iframe);
+        element.appendChild(iframe);
       }
       break;
     case "INJECT_DIALOG":
