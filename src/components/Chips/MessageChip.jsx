@@ -21,6 +21,7 @@ const MessageChip = (props) => {
           color: textSecondary,
           "&:hover": { color: "rgb(166, 2, 2)" },
         },
+        ...props.sx,
       }}
       avatar={
         <Tooltip title={props.username}>
