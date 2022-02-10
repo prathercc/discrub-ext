@@ -16,7 +16,6 @@ import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 function ChannelMessages({ userData }) {
   const [guilds, setGuilds] = useState(null);
   const [channels, setChannels] = useState(null);
-
   const [selectedGuild, setSelectedGuild] = useState(null);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [fetchingData, setFetchingData] = useState(false);
@@ -39,12 +38,14 @@ function ChannelMessages({ userData }) {
         let reachedEnd = false;
         let retArr = [];
         while (!reachedEnd && mountedRef.current) {
-          if (!mountedRef.current) break;
           const data = await fetchMessageData(
             userData.token,
             lastId,
             selectedChannel
           );
+          if (data.message && data.message.includes("Missing Access")) {
+            break;
+          }
           if (data.length < 100) {
             reachedEnd = true;
           }

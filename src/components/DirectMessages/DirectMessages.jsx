@@ -49,7 +49,6 @@ function DirectMessages({ userData }) {
       let reachedEnd = false;
       let retArr = [];
       while (!reachedEnd && mountedRef.current) {
-        if (!mountedRef.current) break;
         const data = await fetchMessageData(
           userData.token,
           lastId,
@@ -131,7 +130,10 @@ function DirectMessages({ userData }) {
         )}
       </DiscordPaper>
       {messageData && !fetchingData && (
-        <DMTable rows={messageData} userData={userData} />
+        <DMTable
+          rows={messageData}
+          userData={userData}
+        />
       )}
     </Box>
   );
