@@ -5,7 +5,7 @@
 
 <a href="https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj"><img src="https://img.shields.io:/chrome-web-store/stars/plhdclenpaecffbcefjmpkkbdpkmhhbj?label=Discrub&logo=javascript&logoColor=89CFF0&color=89CFF0"></a>
 
-An instructional video can be found here - https://www.youtube.com/watch?v=Abu1Y3G5ZzY
+An instructional video can be found here - https://www.youtube.com/watch?v=mxdm-D1Z8tU
 
 #  Discrub
 
