@@ -1,18 +1,18 @@
 import * as React from "react";
 import Checkbox from "@mui/material/Checkbox";
-import { textPrimary } from "../../../styleConstants";
+import { textSecondary } from "../../../styleConstants";
 
 const DiscordCheckBox = (props) => {
   return (
     <Checkbox
       {...props}
       sx={{
-        color: textPrimary,
+        color: textSecondary,
         "&.Mui-checked": {
-          color: textPrimary,
+          color: textSecondary,
         },
         "&.MuiCheckbox-indeterminate": {
-          color: textPrimary,
+          color: textSecondary,
         },
         ...props.sx,
       }}
