@@ -14,6 +14,12 @@ const DiscordDateTimePicker = ({ label, onChange }) => {
         renderInput={(props) => (
           <TextField
             sx={{
+              width: "100%",
+              "& .MuiSvgIcon-root": {
+                "&.MuiSvgIcon-fontSizeMedium": {
+                  color: textSecondary,
+                },
+              },
               "& .MuiInputLabel-root": {
                 color: textSecondary,
                 fontWeight: "bold",

@@ -29,6 +29,11 @@ const DiscordTextField = forwardRef(
           startAdornment: <InputAdornment position="start"></InputAdornment>,
         }}
         sx={{
+          "& .MuiSvgIcon-root": {
+            "&.MuiSvgIcon-fontSizeMedium.MuiSelect-icon.MuiSelect-iconFilled": {
+              color: textSecondary,
+            },
+          },
           "& .MuiInputLabel-root": {
             color: textSecondary,
             fontWeight: "bold",
