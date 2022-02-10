@@ -32,6 +32,43 @@ import {
   discordSecondary,
   discordPrimary,
 } from "../../../styleConstants";
+import MessageChip from "../../Chips/MessageChip";
+import DiscordTypography from "../DiscordTypography/DiscordTypography";
+
+const FormattedContent = ({ message, recipients }) => {
+  const [displayMessage, setDisplayMessage] = useState("");
+  useEffect(() => {
+    const updateMessage = async () => {
+      if (message && recipients) {
+        let msg = message;
+        for (let [key, value] of recipients.entries()) {
+          msg = msg.replace(`<@${key}>`, `@${value}`);
+          msg = msg.replace(`<@!${key}>`, `@${value}`);
+        }
+        setDisplayMessage(msg);
+      } else {
+        setDisplayMessage("");
+      }
+    };
+    updateMessage();
+  }, [message, recipients]);
+
+  return (
+    <>
+      {displayMessage.length > 60 ? (
+        <Tooltip title={displayMessage}>
+          <DiscordTypography variant="caption">
+            {displayMessage.slice(0, 60)}...
+          </DiscordTypography>
+        </Tooltip>
+      ) : (
+        <DiscordTypography variant="caption">
+          {displayMessage}
+        </DiscordTypography>
+      )}
+    </>
+  );
+};
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -200,13 +237,7 @@ const EnhancedTableToolbar = (props) => {
   );
 };
 
-export default function DiscordTable({
-  rows,
-  userData,
-  setRefactoredData,
-  onEditClick,
-  onDeleteClick,
-}) {
+export default function DiscordTable({ rows, userData, setRefactoredData }) {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
   const [filterByParams, setFilterByParams] = useState([]);
@@ -219,6 +250,7 @@ export default function DiscordTable({
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [selectedAttachmentRow, setSelectedAttachmentRow] = useState(null);
+  const [recipients, setRecipients] = useState(null);
   const columns = [
     {
       id: "timestamp",
@@ -241,7 +273,15 @@ export default function DiscordTable({
   ];
 
   useEffect(() => {
+    const parseRecipients = async () => {
+      let uniquieRecipients = new Map();
+      await rows.forEach((x) => {
+        uniquieRecipients.set(x.author.id, x.author.username);
+      });
+      setRecipients(uniquieRecipients);
+    };
     if (originalRows === null && rows) {
+      parseRecipients();
       setOriginalRows(rows);
     }
   }, [rows, originalRows]);
@@ -331,9 +371,7 @@ export default function DiscordTable({
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows
-        .filter((x) => x.username === userData.username)
-        .map((n) => n.id);
+      const newSelecteds = rows.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     } else {
@@ -341,23 +379,21 @@ export default function DiscordTable({
     }
   };
   const handleClick = (event, id) => {
-    if (rows.filter((x) => x.id === id)[0]["username"] === userData.username) {
-      const selectedIndex = selected.indexOf(id);
-      let newSelected = [];
-      if (selectedIndex === -1) {
-        newSelected = newSelected.concat(selected, id);
-      } else if (selectedIndex === 0) {
-        newSelected = newSelected.concat(selected.slice(1));
-      } else if (selectedIndex === selected.length - 1) {
-        newSelected = newSelected.concat(selected.slice(0, -1));
-      } else if (selectedIndex > 0) {
-        newSelected = newSelected.concat(
-          selected.slice(0, selectedIndex),
-          selected.slice(selectedIndex + 1)
-        );
-      }
-      setSelected(newSelected);
+    const selectedIndex = selected.indexOf(id);
+    let newSelected = [];
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
     }
+    setSelected(newSelected);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -380,7 +416,7 @@ export default function DiscordTable({
         setOriginalRows={setOriginalRows}
         originalRows={originalRows}
         open={deleteModalOpen}
-        handleClose={async (returnRows) => {
+        handleClose={(returnRows) => {
           setDeleteModalOpen(false);
           setRefactoredData(returnRows);
           if (JSON.stringify(returnRows) !== JSON.stringify(rows))
@@ -395,7 +431,7 @@ export default function DiscordTable({
         originalRows={originalRows}
         userData={userData}
         open={editModalOpen}
-        handleClose={async (editedRows) => {
+        handleClose={(editedRows) => {
           setEditModalOpen(false);
           setRefactoredData(editedRows);
         }}
@@ -462,9 +498,7 @@ export default function DiscordTable({
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={
-                rows.filter((x) => x.username === userData.username).length
-              }
+              rowCount={rows.length}
               columns={columns}
             />
             <TableBody>
@@ -474,7 +508,6 @@ export default function DiscordTable({
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.id);
-                  const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
@@ -486,57 +519,68 @@ export default function DiscordTable({
                       key={row.id}
                       selected={isItemSelected}
                     >
-                      <TableCell
-                        padding="checkbox"
-                        sx={{ borderBottom: `1px solid ${textPrimary}` }}
+                      <td
+                        style={{
+                          textAlign: "left",
+                          verticalAlign: "middle",
+                          borderBottom: `1px solid ${textPrimary}`,
+                        }}
+                        colspan={4}
                       >
-                        <DiscordCheckBox
-                          disabled={userData.username !== row["username"]}
-                          color="primary"
-                          checked={isItemSelected}
-                          inputProps={{
-                            "aria-labelledby": labelId,
-                          }}
-                        />
-                      </TableCell>
-                      {columns.map((column) => {
-                        return (
-                          <TableCell
+                        <Grid container>
+                          <Grid xs={4} item>
+                            <Grid sx={{ paddingLeft: 2 }} container>
+                              <Grid xs={12} item>
+                                <MessageChip
+                                  sx={{
+                                    border: "none",
+                                    backgroundColor: "transparent",
+                                    userSelect: "none",
+                                  }}
+                                  username={row.username}
+                                  avatar={`https://cdn.discordapp.com/avatars/${row.author.id}/${row.author.avatar}.png`}
+                                  content={row.username}
+                                />
+                              </Grid>
+                              <Grid px={1} item xs={12}>
+                                <DiscordTypography
+                                  sx={{ userSelect: "none" }}
+                                  variant="caption"
+                                >
+                                  {new Date(
+                                    Date.parse(row.timestamp)
+                                  ).toLocaleString("en-US")}
+                                </DiscordTypography>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                          <Grid
                             sx={{
-                              color: textSecondary,
-                              borderBottom: `1px solid ${textPrimary}`,
-                              whiteSpace: "normal",
-                              wordBreak:
-                                column === "content" ? "break-word" : "normal",
-                              cursor: "default",
-                              userSelect: "none",
+                              display: "flex",
+                              alignItems: "center",
                             }}
-                            align="left"
+                            item
+                            xs={8}
+                            px={1}
                           >
-                            {column.id === "timestamp"
-                              ? new Date(
-                                  Date.parse(row[column.id])
-                                ).toLocaleString("en-US")
-                              : row[column.id]}
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell
-                        padding="checkbox"
-                        sx={{ borderBottom: `1px solid ${textPrimary}` }}
+                            <FormattedContent
+                              recipients={recipients}
+                              message={row.content}
+                            />
+                          </Grid>
+                        </Grid>
+                      </td>
+                      <td
+                        colspan={1}
+                        style={{
+                          textAlign: "center",
+                          verticalAlign: "middle",
+                          borderBottom: `1px solid ${textPrimary}`,
+                        }}
                       >
                         <Tooltip title="Attachments">
                           <IconButton
-                            sx={{
-                              display:
-                                row.attachments.length === 0
-                                  ? "none"
-                                  : "initial",
-                            }}
-                            disabled={
-                              row.attachments.length === 0 ||
-                              userData.username !== row.username
-                            }
+                            disabled={row.attachments.length === 0}
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedAttachmentRow(row);
@@ -547,14 +591,14 @@ export default function DiscordTable({
                             <AttachmentIcon
                               sx={{
                                 color:
-                                  userData.username !== row.username
+                                  row.attachments.length === 0
                                     ? discordPrimary
                                     : textSecondary,
                               }}
                             />
                           </IconButton>
                         </Tooltip>
-                      </TableCell>
+                      </td>
                     </TableRow>
                   );
                 })}
@@ -564,14 +608,17 @@ export default function DiscordTable({
                     height: 33 * emptyRows,
                   }}
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell
+                    sx={{ borderBottom: `1px solid ${textPrimary}` }}
+                    colSpan={6}
+                  />
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
-          sx={{ color: textSecondary }}
+          sx={{ color: textSecondary, userSelect: "none" }}
           rowsPerPageOptions={[5, 10, 25, 50, 100, 1000, 10000]}
           component="div"
           count={rows.length}
