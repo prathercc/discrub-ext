@@ -101,7 +101,7 @@ const DevelopmentMessages = () => {
           pointerEvents: "none",
         }}
       >
-        <DiscordTypography>Version 1.0.3</DiscordTypography>
+        <DiscordTypography>Version 1.0.4</DiscordTypography>
       </Box>
     </>
   );

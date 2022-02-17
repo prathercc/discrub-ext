@@ -299,10 +299,24 @@ export default function DiscordTable({ rows, userData, setRefactoredData }) {
         let criteriaMet = true;
         filterByParams.every((param) => {
           if (param.filterType === "text") {
-            let rowValue = x[param.filterName].toLowerCase();
-            let filterValue = param.filterValue.toLowerCase();
-            if (!rowValue.includes(filterValue)) {
-              criteriaMet = false;
+            if (param.filterName === "attachmentName") {
+              let csvAttachments = "";
+              x.attachments.forEach((attachment) => {
+                csvAttachments += attachment.filename + ",";
+              });
+              if (
+                !csvAttachments
+                  .toLowerCase()
+                  .includes(param.filterValue.toLowerCase())
+              ) {
+                criteriaMet = false;
+              }
+            } else {
+              let rowValue = x[param.filterName].toLowerCase();
+              let filterValue = param.filterValue.toLowerCase();
+              if (!rowValue.includes(filterValue)) {
+                criteriaMet = false;
+              }
             }
             return criteriaMet;
           } else if (param.filterType === "date") {
@@ -665,6 +679,14 @@ const FilterComponent = ({ handleFilterUpdate }) => {
             handleFilterUpdate("content", e.target.value, "text")
           }
           label="Message"
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <DiscordTextField
+          onChange={(e) =>
+            handleFilterUpdate("attachmentName", e.target.value, "text")
+          }
+          label="Attachment Name"
         />
       </Grid>
     </Grid>
