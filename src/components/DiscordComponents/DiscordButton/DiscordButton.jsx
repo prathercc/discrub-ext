@@ -22,7 +22,7 @@ function DiscordButton({ icon, label, onClick, neutral = false, ...props }) {
         color: neutral ? discordPrimary : textSecondary,
         ...props.sx,
       }}
-      style={{ width: "90px", height: "30px" }}
+      style={{ width: "auto", height: "30px" }}
       startIcon={icon}
       variant="contained"
       onClick={onClick}
