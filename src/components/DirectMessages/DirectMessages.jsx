@@ -7,6 +7,7 @@ import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTyp
 import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
+import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 
 function DirectMessages({ userData }) {
   const [directMessages, setDirectMessages] = useState(null);
@@ -129,11 +130,20 @@ function DirectMessages({ userData }) {
           </>
         )}
       </DiscordPaper>
-      {messageData && !fetchingData && (
-        <DMTable
-          rows={messageData}
-          userData={userData}
-        />
+      {messageData && messageData.length > 0 && !fetchingData && (
+        <DMTable rows={messageData} userData={userData} />
+      )}
+      {messageData && messageData.length === 0 && !fetchingData && (
+        <DiscordPaper>
+          <Box sx={boxSx}>
+            <DiscordTypography>No Messages to Display</DiscordTypography>
+          </Box>
+          <Box sx={boxSx}>
+            <DiscordTypography>
+              <SentimentDissatisfiedIcon />
+            </DiscordTypography>
+          </Box>
+        </DiscordPaper>
       )}
     </Box>
   );
