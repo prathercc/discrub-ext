@@ -34,6 +34,8 @@ import {
 } from "../../../styleConstants";
 import MessageChip from "../../Chips/MessageChip";
 import DiscordTypography from "../DiscordTypography/DiscordTypography";
+import { Stack } from "@mui/material";
+import ExportButtonGroup from "../../Export/ExportButtonGroup";
 
 const FormattedContent = ({ message, recipients }) => {
   const [displayMessage, setDisplayMessage] = useState("");
@@ -185,54 +187,59 @@ const EnhancedTableToolbar = (props) => {
         }),
       }}
     >
-      {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: "1 1 100%", color: textSecondary }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        ""
-      )}
-
-      <Grid
-        sx={{ display: numSelected > 0 ? "none" : "default" }}
-        container
-        spacing={2}
-      >
-        <Grid item xs={12}>
-          <Tooltip title="Filter list">
-            <IconButton onClick={() => setFilterOpen(!filterOpen)}>
-              <FilterListIcon sx={{ color: textSecondary }} />
-            </IconButton>
-          </Tooltip>
-        </Grid>
-        {filterOpen && (
-          <Grid item>
+      <Stack sx={{ width: "100%" }} direction="column">
+        <Stack sx={{ width: "100%" }} alignItems="baseline" direction="column">
+          <Stack
+            sx={{ width: "100%" }}
+            direction="row"
+            justifyContent="space-between"
+            zIndex={5000}
+          >
+            <Tooltip title="Filter list">
+              <IconButton onClick={() => setFilterOpen(!filterOpen)}>
+                <FilterListIcon sx={{ color: textSecondary }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Filter list">
+              <IconButton onClick={() => console.log("Export messages!")}>
+                <ExportButtonGroup />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+          {filterOpen && (
             <FilterComponent handleFilterUpdate={handleFilterUpdate} />
-          </Grid>
-        )}
-      </Grid>
+          )}
+        </Stack>
 
-      {numSelected > 0 ? (
-        <>
-          <Tooltip title="Delete">
-            <IconButton onClick={() => setDeleteModalOpen(true)}>
-              <DeleteIcon sx={{ color: textSecondary }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Edit">
-            <IconButton onClick={() => setEditModalOpen(true)}>
-              <EditIcon sx={{ color: textSecondary }} />
-            </IconButton>
-          </Tooltip>
-        </>
-      ) : (
-        ""
-      )}
+        {numSelected > 0 && (
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography
+              sx={{ color: textSecondary }}
+              color="inherit"
+              variant="subtitle1"
+              component="div"
+            >
+              {numSelected} selected
+            </Typography>
+            <Stack justifyContent="flex-end" direction="row">
+              <Tooltip title="Delete">
+                <IconButton onClick={() => setDeleteModalOpen(true)}>
+                  <DeleteIcon sx={{ color: textSecondary }} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Edit">
+                <IconButton onClick={() => setEditModalOpen(true)}>
+                  <EditIcon sx={{ color: textSecondary }} />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Stack>
+        )}
+      </Stack>
     </Toolbar>
   );
 };
