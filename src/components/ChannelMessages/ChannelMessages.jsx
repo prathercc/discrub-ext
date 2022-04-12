@@ -160,7 +160,25 @@ function ChannelMessages({ userData }) {
             </DiscordTextField>
           </DiscordPaper>
           {messageData && messageData.length > 0 && !fetchingData && (
-            <ChannelMsgTable rows={messageData} userData={userData} />
+            <ChannelMsgTable
+              rows={messageData}
+              userData={userData}
+              exportTitle={() => (
+                <>
+                  <DiscordTypography variant="h4">
+                    Guild:{" "}
+                    {guilds.find((guild) => guild.id === selectedGuild)?.name}
+                  </DiscordTypography>
+                  <DiscordTypography variant="h6">
+                    Channel:{" "}
+                    {
+                      channels.find((channel) => channel.id === selectedChannel)
+                        ?.name
+                    }
+                  </DiscordTypography>
+                </>
+              )}
+            />
           )}
           {messageData && messageData.length === 0 && !fetchingData && (
             <DiscordPaper>
@@ -192,7 +210,7 @@ function ChannelMessages({ userData }) {
   );
 }
 
-const ChannelMsgTable = ({ rows, userData }) => {
+const ChannelMsgTable = ({ rows, userData, exportTitle }) => {
   const [refactoredData, setRefactoredData] = useState(null);
 
   useEffect(() => {
@@ -213,6 +231,7 @@ const ChannelMsgTable = ({ rows, userData }) => {
     <>
       {refactoredData && (
         <DiscordTable
+          exportTitle={exportTitle}
           rows={refactoredData}
           userData={userData}
           setRefactoredData={setRefactoredData}

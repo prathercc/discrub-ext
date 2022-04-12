@@ -131,7 +131,25 @@ function DirectMessages({ userData }) {
         )}
       </DiscordPaper>
       {messageData && messageData.length > 0 && !fetchingData && (
-        <DMTable rows={messageData} userData={userData} />
+        <DMTable
+          rows={messageData}
+          userData={userData}
+          exportTitle={() => {
+            const directMessage = directMessages.find(
+              (directMessage) => directMessage.id === selectedDirectMessage
+            );
+            return (
+              <DiscordTypography variant="h4">
+                Direct Message:{" "}
+                {directMessage.recipients.length === 1
+                  ? directMessage.recipients[0].username
+                  : directMessage.name
+                  ? `Group Chat - ${directMessage.name}`
+                  : `Unnamed Group Chat - ${directMessage.id}`}
+              </DiscordTypography>
+            );
+          }}
+        />
       )}
       {messageData && messageData.length === 0 && !fetchingData && (
         <DiscordPaper>
@@ -149,7 +167,7 @@ function DirectMessages({ userData }) {
   );
 }
 
-const DMTable = ({ rows, userData }) => {
+const DMTable = ({ rows, userData, exportTitle }) => {
   const [refactoredData, setRefactoredData] = useState(null);
 
   useEffect(() => {
@@ -170,6 +188,7 @@ const DMTable = ({ rows, userData }) => {
     <>
       {refactoredData && (
         <DiscordTable
+          exportTitle={exportTitle}
           rows={refactoredData}
           userData={userData}
           setRefactoredData={setRefactoredData}

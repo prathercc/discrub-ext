@@ -37,7 +37,7 @@ import DiscordTypography from "../DiscordTypography/DiscordTypography";
 import { Stack } from "@mui/material";
 import ExportButtonGroup from "../../Export/ExportButtonGroup";
 
-const FormattedContent = ({ message, recipients }) => {
+export const FormattedContent = ({ message, recipients, shrink = true }) => {
   const [displayMessage, setDisplayMessage] = useState("");
   useEffect(() => {
     const updateMessage = async () => {
@@ -57,7 +57,7 @@ const FormattedContent = ({ message, recipients }) => {
 
   return (
     <>
-      {displayMessage.length > 60 ? (
+      {displayMessage.length > 60 && shrink ? (
         <Tooltip title={displayMessage}>
           <DiscordTypography variant="caption">
             {displayMessage.slice(0, 60)}...
@@ -171,6 +171,9 @@ const EnhancedTableToolbar = (props) => {
     handleFilterUpdate,
     setDeleteModalOpen,
     setEditModalOpen,
+    rows,
+    recipients,
+    exportTitle,
   } = props;
 
   return (
@@ -193,18 +196,19 @@ const EnhancedTableToolbar = (props) => {
             sx={{ width: "100%" }}
             direction="row"
             justifyContent="space-between"
-            zIndex={5000}
           >
             <Tooltip title="Filter list">
               <IconButton onClick={() => setFilterOpen(!filterOpen)}>
                 <FilterListIcon sx={{ color: textSecondary }} />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Filter list">
-              <IconButton onClick={() => console.log("Export messages!")}>
-                <ExportButtonGroup />
-              </IconButton>
-            </Tooltip>
+            <IconButton>
+              <ExportButtonGroup
+                rows={rows}
+                recipients={recipients}
+                exportTitle={exportTitle}
+              />
+            </IconButton>
           </Stack>
           {filterOpen && (
             <FilterComponent handleFilterUpdate={handleFilterUpdate} />
@@ -244,7 +248,12 @@ const EnhancedTableToolbar = (props) => {
   );
 };
 
-export default function DiscordTable({ rows, userData, setRefactoredData }) {
+export default function DiscordTable({
+  rows,
+  userData,
+  setRefactoredData,
+  exportTitle,
+}) {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
   const [filterByParams, setFilterByParams] = useState([]);
@@ -504,6 +513,9 @@ export default function DiscordTable({ rows, userData, setRefactoredData }) {
           handleFilterUpdate={handleFilterUpdate}
           setDeleteModalOpen={setDeleteModalOpen}
           setEditModalOpen={setEditModalOpen}
+          rows={rows}
+          recipients={recipients}
+          exportTitle={exportTitle}
         />
         <TableContainer>
           <Table
