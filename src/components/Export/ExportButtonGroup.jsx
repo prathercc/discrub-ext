@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
@@ -9,18 +9,18 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
 import { useReactToPrint } from "react-to-print";
-import { Box, Grid, Stack } from "@mui/material";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
-import MessageChip from "../Chips/MessageChip";
-import { FormattedContent } from "../DiscordComponents/DiscordTable/DiscordTable";
-import { discordPrimary, discordSecondary } from "../../styleConstants";
-const options = ["PDF", "HTML", "JSON"];
+import { Box, Stack, Typography } from "@mui/material";
+import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
+
+const options = ["HTML", "PDF", "JSON"];
 
 const ExportButtonGroup = ({ rows, recipients, exportTitle }) => {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [printing, setPrinting] = useState(false);
   const componentRef = useRef();
+
   const handleHtml = useReactToPrint({
     content: () => componentRef.current,
     print: (iframe) => {
@@ -34,32 +34,15 @@ const ExportButtonGroup = ({ rows, recipients, exportTitle }) => {
       a.hidden = true;
       document.body.appendChild(a);
       a.click();
+      setPrinting(false);
     },
+    removeAfterPrint: true,
   });
   const handlePdf = useReactToPrint({
     content: () => componentRef.current,
+    onAfterPrint: () => setPrinting(false),
+    removeAfterPrint: true,
   });
-
-  const handleClick = () => {
-    switch (options[selectedIndex]) {
-      case "HTML":
-        handleHtml();
-        break;
-      case "PDF":
-        handlePdf();
-        break;
-      case "JSON":
-        let json_string = JSON.stringify(rows);
-        let link = document.createElement("a");
-        link.download = "Exported Messages.json";
-        let blob = new Blob([json_string], { type: "text/plain" });
-        link.href = window.URL.createObjectURL(blob);
-        link.click();
-        break;
-      default:
-        break;
-    }
-  };
 
   const handleMenuItemClick = (event, index) => {
     setSelectedIndex(index);
@@ -78,75 +61,107 @@ const ExportButtonGroup = ({ rows, recipients, exportTitle }) => {
     setOpen(false);
   };
 
+  useEffect(() => {
+    const handleClick = () => {
+      switch (options[selectedIndex]) {
+        case "HTML":
+          handleHtml();
+          break;
+        case "PDF":
+          handlePdf();
+          break;
+        case "JSON":
+          let json_string = JSON.stringify(rows);
+          let link = document.createElement("a");
+          link.download = "Exported Messages.json";
+          let blob = new Blob([json_string], { type: "text/plain" });
+          link.href = window.URL.createObjectURL(blob);
+          link.click();
+          break;
+        default:
+          break;
+      }
+    };
+    const getLastElement = () =>
+      document.getElementById(`message-data-${rows.length - 1}`);
+    const loadContent = async () => {
+      let lastElement = getLastElement();
+      while (!lastElement) {
+        // eslint-disable-next-line no-loop-func
+        await new Promise(() =>
+          setTimeout(() => {
+            lastElement = getLastElement();
+          }, 5000)
+        );
+      }
+      handleClick();
+    };
+    if (printing) {
+      loadContent();
+    }
+  }, [printing, rows, handleHtml, handlePdf, selectedIndex]);
+
   return (
     <>
       <Box sx={{ display: "none", margin: 0 }}>
-        <Box sx={{ backgroundColor: discordPrimary }} ref={componentRef}>
+        <Box ref={componentRef}>
           <Stack justifyContent="center" alignItems="center">
             {exportTitle()}
+            <Typography sx={{ opacity: 0.4 }}>
+              All times shown below are in GMT*
+            </Typography>
           </Stack>
-          {rows.map((row) => {
-            return (
-              <Grid
-                sx={{ border: `1px solid ${discordSecondary}`, padding: 5 }}
-                container
-              >
-                <Grid xs={4} item>
-                  <Grid sx={{ paddingLeft: 2 }} container>
-                    <Grid xs={12} item>
-                      <MessageChip
-                        sx={{
-                          border: "none",
-                          backgroundColor: "transparent",
-                          userSelect: "none",
-                        }}
-                        username={row.username}
-                        avatar={`https://cdn.discordapp.com/avatars/${row.author.id}/${row.author.avatar}.png`}
-                        content={row.username}
-                      />
-                    </Grid>
-                    <Grid px={1} item xs={12}>
-                      <DiscordTypography
-                        sx={{ userSelect: "none" }}
-                        variant="caption"
-                      >
-                        {new Date(Date.parse(row.timestamp)).toLocaleString(
-                          "en-US"
-                        )}
-                      </DiscordTypography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid
+          {printing &&
+            rows.map((row, index) => {
+              const messageDate = new Date(Date.parse(row.timestamp));
+              return (
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  spacing={20}
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    wordBreak: "break-all",
+                    border: "1px solid silver",
+                    marginBottom: "10px",
+                    padding: "10px",
                   }}
-                  item
-                  xs={8}
-                  px={1}
                 >
-                  <FormattedContent
-                    shrink={false}
-                    recipients={recipients}
-                    message={row.content}
-                  />
-                </Grid>
-              </Grid>
-            );
-          })}
+                  <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="flex-start"
+                    spacing={0}
+                  >
+                    <Typography sx={{ fontWeight: "bold" }}>
+                      {row.username}:
+                    </Typography>
+                    <Typography>{`${messageDate.getUTCDate()}/${messageDate.getUTCMonth()}/${messageDate.getUTCFullYear()}`}</Typography>
+                    <Typography>{`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()}`}</Typography>
+                  </Stack>
+                  <Typography id={`message-data-${index}`}>
+                    {row.content}
+                  </Typography>
+                </Stack>
+              );
+            })}
         </Box>
       </Box>
 
-      <ButtonGroup variant="contained" ref={anchorRef}>
-        <DiscordButton label={options[selectedIndex]} onClick={handleClick} />
-        <DiscordButton
-          icon={<ArrowDropDownIcon />}
-          size="small"
-          onClick={handleToggle}
-        />
-      </ButtonGroup>
+      {!printing && (
+        <ButtonGroup variant="contained" ref={anchorRef}>
+          <DiscordButton
+            label={options[selectedIndex]}
+            onClick={() => setPrinting(true)}
+          />
+          <DiscordButton
+            icon={<ArrowDropDownIcon />}
+            size="small"
+            onClick={handleToggle}
+          />
+        </ButtonGroup>
+      )}
+      {printing && <DiscordSpinner />}
+
       <Popper
         open={open}
         anchorEl={anchorRef.current}

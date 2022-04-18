@@ -8,6 +8,7 @@ import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
+import { Typography } from "@mui/material";
 
 function DirectMessages({ userData }) {
   const [directMessages, setDirectMessages] = useState(null);
@@ -139,14 +140,13 @@ function DirectMessages({ userData }) {
               (directMessage) => directMessage.id === selectedDirectMessage
             );
             return (
-              <DiscordTypography variant="h4">
-                Direct Message:{" "}
+              <Typography variant="h4">
                 {directMessage.recipients.length === 1
                   ? directMessage.recipients[0].username
                   : directMessage.name
                   ? `Group Chat - ${directMessage.name}`
                   : `Unnamed Group Chat - ${directMessage.id}`}
-              </DiscordTypography>
+              </Typography>
             );
           }}
         />

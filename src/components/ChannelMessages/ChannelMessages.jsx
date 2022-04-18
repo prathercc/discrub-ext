@@ -12,6 +12,7 @@ import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
+import { Typography } from "@mui/material";
 
 function ChannelMessages({ userData }) {
   const [guilds, setGuilds] = useState(null);
@@ -165,17 +166,15 @@ function ChannelMessages({ userData }) {
               userData={userData}
               exportTitle={() => (
                 <>
-                  <DiscordTypography variant="h4">
-                    Guild:{" "}
+                  <Typography variant="h4">
                     {guilds.find((guild) => guild.id === selectedGuild)?.name}
-                  </DiscordTypography>
-                  <DiscordTypography variant="h6">
-                    Channel:{" "}
+                  </Typography>
+                  <Typography variant="h6">
                     {
                       channels.find((channel) => channel.id === selectedChannel)
                         ?.name
                     }
-                  </DiscordTypography>
+                  </Typography>
                 </>
               )}
             />
