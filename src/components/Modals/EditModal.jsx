@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
 import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
 import DiscordTextField from "../DiscordComponents/DiscordTextField/DiscordTextField";
@@ -15,9 +15,9 @@ import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import { textSecondary } from "../../styleConstants";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
+import { UserContext } from "../../context/user/UserContext";
 
 const EditModal = ({
-  userData,
   open,
   handleClose,
   selected,
@@ -25,6 +25,9 @@ const EditModal = ({
   setOriginalRows,
   originalRows,
 }) => {
+  const { state: userState } = useContext(UserContext);
+  const { token } = userState;
+
   const [updateText, setUpdateText] = useState("");
   const [editing, setEditing] = useState(false);
   const [updatedRows, setUpdatedRows] = useState(rows);
@@ -56,7 +59,7 @@ const EditModal = ({
         });
       try {
         const data = await editMessage(
-          userData.token,
+          token,
           selected[count],
           { content: updateText },
           channelId

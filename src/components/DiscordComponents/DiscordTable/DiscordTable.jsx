@@ -248,12 +248,7 @@ const EnhancedTableToolbar = (props) => {
   );
 };
 
-export default function DiscordTable({
-  rows,
-  userData,
-  setRefactoredData,
-  exportTitle,
-}) {
+export default function DiscordTable({ rows, setRefactoredData, exportTitle }) {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
   const [filterByParams, setFilterByParams] = useState([]);
@@ -454,12 +449,10 @@ export default function DiscordTable({
         }}
         rows={rows}
         selected={selected}
-        userData={userData}
       />
       <EditModal
         setOriginalRows={setOriginalRows}
         originalRows={originalRows}
-        userData={userData}
         open={editModalOpen}
         handleClose={(editedRows) => {
           setEditModalOpen(false);
@@ -495,7 +488,6 @@ export default function DiscordTable({
           setRefactoredData(updatedArr);
         }}
         row={selectedAttachmentRow}
-        userData={userData}
       />
       <Paper
         sx={{

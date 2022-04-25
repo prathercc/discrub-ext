@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import DiscordCheckBox from "../DiscordComponents/DiscordCheckBox/DiscordCheckBox";
 import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -18,16 +18,19 @@ import Box from "@mui/material/Box";
 import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
+import { UserContext } from "../../context/user/UserContext";
 
 const DeleteModal = ({
   open,
   handleClose,
   rows,
   selected,
-  userData,
   setOriginalRows,
   originalRows,
 }) => {
+  const { state: userState } = useContext(UserContext);
+  const { token } = userState;
+
   const [deleteConfig, setDeleteConfig] = useState({
     attachments: true,
     messages: true,
@@ -65,7 +68,7 @@ const DeleteModal = ({
           (currentRow.attachments.length === 0 && deleteConfig.messages)
         ) {
           const response = await deleteMessage(
-            userData.token,
+            token,
             selected[count],
             channelId
           );
@@ -96,7 +99,7 @@ const DeleteModal = ({
           }
         } else if (deleteConfig.attachments || deleteConfig.messages) {
           const data = await editMessage(
-            userData.token,
+            token,
             selected[count],
             deleteConfig.attachments ? { attachments: [] } : { content: "" },
             channelId

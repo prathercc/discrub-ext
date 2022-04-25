@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import {
   fetchGuilds,
   fetchChannels,
@@ -13,8 +13,12 @@ import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import { Typography } from "@mui/material";
+import { UserContext } from "../../context/user/UserContext";
 
-function ChannelMessages({ userData }) {
+function ChannelMessages() {
+  const { state: userState } = useContext(UserContext);
+  const { token } = userState;
+
   const [guilds, setGuilds] = useState(null);
   const [channels, setChannels] = useState(null);
   const [selectedGuild, setSelectedGuild] = useState(null);
@@ -39,11 +43,7 @@ function ChannelMessages({ userData }) {
         let reachedEnd = false;
         let retArr = [];
         while (!reachedEnd && mountedRef.current) {
-          const data = await fetchMessageData(
-            userData.token,
-            lastId,
-            selectedChannel
-          );
+          const data = await fetchMessageData(token, lastId, selectedChannel);
           if (data.message && data.message.includes("Missing Access")) {
             break;
           }
@@ -75,7 +75,7 @@ function ChannelMessages({ userData }) {
     const getChannels = async () => {
       try {
         setFetchingData(true);
-        let data = await fetchChannels(userData.token, selectedGuild);
+        let data = await fetchChannels(token, selectedGuild);
         if (Array.isArray(data)) setChannels(data);
       } catch (e) {
         console.error("Error fetching channels");
@@ -93,7 +93,7 @@ function ChannelMessages({ userData }) {
       try {
         setMessageData(null);
         setFetchingData(true);
-        let data = await fetchGuilds(userData.token);
+        let data = await fetchGuilds(token);
         if (Array.isArray(data)) setGuilds(data);
       } catch (e) {
         console.error("Error fetching guilds.");
@@ -101,7 +101,7 @@ function ChannelMessages({ userData }) {
         setFetchingData(false);
       }
     };
-    if (userData && userData.token) getGuilds();
+    if (token) getGuilds();
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
@@ -117,7 +117,7 @@ function ChannelMessages({ userData }) {
         overflow: "auto",
       }}
     >
-      {userData && guilds && (
+      {token && guilds && (
         <>
           <DiscordPaper>
             <DiscordTypography variant="h5">
@@ -163,7 +163,6 @@ function ChannelMessages({ userData }) {
           {messageData && messageData.length > 0 && !fetchingData && (
             <ChannelMsgTable
               rows={messageData}
-              userData={userData}
               exportTitle={() => (
                 <>
                   <Typography variant="h4">
@@ -193,7 +192,7 @@ function ChannelMessages({ userData }) {
           )}
         </>
       )}
-      {(!userData || !guilds || fetchingData) && (
+      {(!token || !guilds || fetchingData) && (
         <DiscordPaper>
           <DiscordSpinner />
           <Box sx={boxSx}>
@@ -209,7 +208,7 @@ function ChannelMessages({ userData }) {
   );
 }
 
-const ChannelMsgTable = ({ rows, userData, exportTitle }) => {
+const ChannelMsgTable = ({ rows, exportTitle }) => {
   const [refactoredData, setRefactoredData] = useState(null);
 
   useEffect(() => {
@@ -232,7 +231,6 @@ const ChannelMsgTable = ({ rows, userData, exportTitle }) => {
         <DiscordTable
           exportTitle={exportTitle}
           rows={refactoredData}
-          userData={userData}
           setRefactoredData={setRefactoredData}
         />
       )}

@@ -1,10 +1,13 @@
-import * as React from "react";
+import React from "react";
 import InjectedDialog from "./components/InjectedDialog/InjectedDialog";
+import UserContextProvider from "./context/user/UserContext";
 
 function App() {
   return (
     <>
-      <InjectedDialog />
+      <UserContextProvider>
+        <InjectedDialog />
+      </UserContextProvider>
     </>
   );
 }

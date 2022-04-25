@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
 import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
 import Grid from "@mui/material/Grid";
@@ -12,8 +12,12 @@ import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import AttachmentChip from "../Chips/AttachmentChip";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
+import { UserContext } from "../../context/user/UserContext";
 
-const AttachmentModal = ({ open, handleClose, row, userData }) => {
+const AttachmentModal = ({ open, handleClose, row }) => {
+  const { state: userState } = useContext(UserContext);
+  const { token } = userState;
+
   const [deleting, setDeleting] = useState(false);
   const [activeRow, setActiveRow] = useState(null);
   const [debugMessage, setDebugMessage] = useState("");
@@ -27,7 +31,7 @@ const AttachmentModal = ({ open, handleClose, row, userData }) => {
     try {
       if (messageWillHaveTextOrAttachmentsRemaining) {
         const data = await editMessage(
-          userData.token,
+          token,
           activeRow.id,
           {
             attachments: activeRow.attachments.filter(
@@ -47,7 +51,7 @@ const AttachmentModal = ({ open, handleClose, row, userData }) => {
         }
       } else {
         const response = await deleteMessage(
-          userData.token,
+          token,
           activeRow.id,
           activeRow.channel_id
         );

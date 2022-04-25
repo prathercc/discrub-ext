@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import MenuBar from "../MenuBar/MenuBar";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { sendChromeMessage } from "../../chromeService";
@@ -6,7 +6,6 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ChannelMessages from "../ChannelMessages/ChannelMessages";
 import DirectMessages from "../DirectMessages/DirectMessages";
-import Identity from "../Identity/Identity";
 import { fetchUserData } from "../../discordService";
 import Box from "@mui/material/Box";
 import About from "../About/About";
@@ -16,11 +15,16 @@ import {
   textSecondary,
 } from "../../styleConstants";
 import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
+import { UserContext } from "../../context/user/UserContext";
+import { GET_USER_DATA } from "../../context/user/UserContextConstants";
 
 function InjectedDialog() {
+  const { state: userState, dispatch } = useContext(UserContext);
+  const { hasFetchedData } = userState;
+
   const [menuIndex, setMenuIndex] = useState(0);
   const [userToken, setUserToken] = useState();
-  const [userData, setUserData] = useState();
+
   useEffect(() => {
     sendChromeMessage("GET_TOKEN", setUserToken);
   }, []);
@@ -28,10 +32,11 @@ function InjectedDialog() {
   useEffect(() => {
     const getUserData = async () => {
       const data = await fetchUserData(userToken);
-      setUserData({ ...data, token: userToken });
+      dispatch(GET_USER_DATA, { ...data, token: userToken });
     };
-    if (userToken) getUserData();
-  }, [userToken]);
+    if (userToken && !hasFetchedData) getUserData();
+  }, [userToken, dispatch, hasFetchedData]);
+
   return (
     <Box
       sx={{
@@ -49,10 +54,9 @@ function InjectedDialog() {
       }}
     >
       <MenuBar menuIndex={menuIndex} setMenuIndex={setMenuIndex} />
-      {menuIndex === 0 && <About userData={userData} />}
-      {menuIndex === 1 && <ChannelMessages userData={userData} />}
-      {menuIndex === 2 && <DirectMessages userData={userData} />}
-      {menuIndex === 3 && <Identity userData={userData} />}
+      {menuIndex === 0 && <ChannelMessages />}
+      {menuIndex === 1 && <DirectMessages />}
+      {menuIndex === 2 && <About />}
       <DevelopmentMessages />
       <CloseWindowButton />
     </Box>

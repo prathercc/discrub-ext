@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { fetchDirectMessages, fetchMessageData } from "../../discordService";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
@@ -9,8 +9,12 @@ import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import { Typography } from "@mui/material";
+import { UserContext } from "../../context/user/UserContext";
 
-function DirectMessages({ userData }) {
+function DirectMessages() {
+  const { state: userState } = useContext(UserContext);
+  const { token } = userState;
+
   const [directMessages, setDirectMessages] = useState(null);
   const [selectedDirectMessage, setSelectedDirectMessage] = useState(null);
   const [messageData, setMessageData] = useState(null);
@@ -29,14 +33,14 @@ function DirectMessages({ userData }) {
   useEffect(() => {
     const getDirectMessages = async () => {
       try {
-        const data = await fetchDirectMessages(userData.token);
+        const data = await fetchDirectMessages(token);
         setDirectMessages(data);
       } catch (e) {
         console.error("Error fetching DM's");
         setDirectMessages([]);
       }
     };
-    if (userData && userData.token) getDirectMessages();
+    if (token) getDirectMessages();
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
@@ -52,7 +56,7 @@ function DirectMessages({ userData }) {
       let retArr = [];
       while (!reachedEnd && mountedRef.current) {
         const data = await fetchMessageData(
-          userData.token,
+          token,
           lastId,
           selectedDirectMessage
         );
@@ -87,7 +91,7 @@ function DirectMessages({ userData }) {
       }}
     >
       <DiscordPaper>
-        {userData && directMessages && (
+        {token && directMessages && (
           <>
             <DiscordTypography variant="h5">
               Your Direct Messages
@@ -118,7 +122,7 @@ function DirectMessages({ userData }) {
           </>
         )}
 
-        {(!userData || !directMessages || fetchingData) && (
+        {(!token || !directMessages || fetchingData) && (
           <>
             <DiscordSpinner />
             <Box sx={boxSx}>
@@ -134,7 +138,6 @@ function DirectMessages({ userData }) {
       {messageData && messageData.length > 0 && !fetchingData && (
         <DMTable
           rows={messageData}
-          userData={userData}
           exportTitle={() => {
             const directMessage = directMessages.find(
               (directMessage) => directMessage.id === selectedDirectMessage
@@ -167,7 +170,7 @@ function DirectMessages({ userData }) {
   );
 }
 
-const DMTable = ({ rows, userData, exportTitle }) => {
+const DMTable = ({ rows, exportTitle }) => {
   const [refactoredData, setRefactoredData] = useState(null);
 
   useEffect(() => {
@@ -190,7 +193,6 @@ const DMTable = ({ rows, userData, exportTitle }) => {
         <DiscordTable
           exportTitle={exportTitle}
           rows={refactoredData}
-          userData={userData}
           setRefactoredData={setRefactoredData}
         />
       )}
