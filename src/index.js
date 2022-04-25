@@ -3,7 +3,6 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import InjectedButton from "./components/InjectedButton/InjectedButton";
-import InjectedDialog from "./components/InjectedDialog/InjectedDialog";
 import reportWebVitals from "./reportWebVitals";
 
 const injectionButton = document.getElementById("button_injection");
@@ -16,7 +15,7 @@ if (rootElement) {
 }
 const injectionDialog = document.getElementById("dialog_injection");
 if (injectionDialog) {
-  ReactDOM.render(<InjectedDialog />, injectionDialog);
+  ReactDOM.render(<App />, injectionDialog);
 }
 
 // If you want to start measuring performance in your app, pass a function
