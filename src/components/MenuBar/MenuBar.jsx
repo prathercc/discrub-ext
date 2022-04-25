@@ -1,8 +1,6 @@
-/*global chrome*/
 import React from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import InfoIcon from "@mui/icons-material/Info";
 import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
@@ -41,17 +39,14 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   return (
     <>
       <Tabs className={classes.tabs} value={menuIndex} onChange={handleChange}>
-        <Tooltip title="About">
-          <Tab icon={<InfoIcon />} />
-        </Tooltip>
         <Tooltip title="Channel Messages">
           <Tab icon={<ChatIcon />} />
         </Tooltip>
         <Tooltip title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
-        <Tooltip title="Identity">
-          <Tab icon={<AccountBoxIcon />} />
+        <Tooltip title="About">
+          <Tab icon={<InfoIcon />} />
         </Tooltip>
       </Tabs>
     </>
