@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-target-blank */
 import React from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -50,19 +51,31 @@ function About() {
           <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
             <DiscordTypography variant="caption">Ethereum</DiscordTypography>
             <Tooltip title="0x09b120deE370ddadf629D2428A3B12cA3F614222">
-              <img style={{ width: "120px" }} src="ethereum.png" />
+              <img
+                alt="Donate ETH"
+                style={{ width: "120px" }}
+                src="ethereum.png"
+              />
             </Tooltip>
           </CustomGrid>
           <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
             <DiscordTypography variant="caption">Bitcoin</DiscordTypography>
             <Tooltip title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm">
-              <img style={{ width: "120px" }} src="bitcoin.png" />
+              <img
+                alt="Donate BTC"
+                style={{ width: "120px" }}
+                src="bitcoin.png"
+              />
             </Tooltip>
           </CustomGrid>
           <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
             <DiscordTypography variant="caption">Litecoin</DiscordTypography>
             <Tooltip title="MVTPtXVTF6RNwfcTt71J8cn6uqNApb3S75">
-              <img style={{ width: "120px" }} src="litecoin.png" />
+              <img
+                alt="Donate LTC"
+                style={{ width: "120px" }}
+                src="litecoin.png"
+              />
             </Tooltip>
           </CustomGrid>
         </CustomGrid>
