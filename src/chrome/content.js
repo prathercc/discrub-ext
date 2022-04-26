@@ -1,9 +1,5 @@
 /*global chrome*/
-chrome.runtime.onMessage.addListener(function (
-  request,
-  sender,
-  setResponseObject
-) {
+chrome.runtime.onMessage.addListener(function (request, sender, callback) {
   const { message } = request;
   switch (message) {
     case "INJECT_BUTTON":
@@ -49,7 +45,7 @@ chrome.runtime.onMessage.addListener(function (
       const storage = document.body.appendChild(
         document.createElement("iframe")
       ).contentWindow.localStorage;
-      if (storage.token) setResponseObject(JSON.parse(storage.token));
+      if (storage.token) callback(JSON.parse(storage.token));
       return true;
     default:
       break;
