@@ -11,20 +11,25 @@ import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import { Typography } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
+import { ChannelContext } from "../../context/channel/ChannelContext";
 
 function ChannelMessages() {
   const { state: userState } = useContext(UserContext);
   const { state: guildState, getGuilds, setGuild } = useContext(GuildContext);
+  const {
+    state: channelState,
+    getChannels,
+    setChannel,
+  } = useContext(ChannelContext);
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
+  const { channels, selectedChannel } = channelState;
 
-  const [channels, setChannels] = useState(null);
-  const [selectedChannel, setSelectedChannel] = useState(null);
   const [fetchingData, setFetchingData] = useState(false);
   const [messageData, setMessageData] = useState(null);
   const [numOfMessagesFetched, setNumOfMessagesFetched] = useState(0);
-  const mountedRef = useRef(false);
+  // const mountedRef = useRef(false);
 
   const boxSx = {
     alignItems: "center",
@@ -33,58 +38,45 @@ function ChannelMessages() {
     marginTop: "1vh",
   };
 
-  useEffect(() => {
-    const getMessages = async () => {
-      try {
-        setFetchingData(true);
-        let lastId = "";
-        let reachedEnd = false;
-        let retArr = [];
-        while (!reachedEnd && mountedRef.current) {
-          const data = await fetchMessageData(token, lastId, selectedChannel);
-          if (data.message && data.message.includes("Missing Access")) {
-            break;
-          }
-          if (data.length < 100) {
-            reachedEnd = true;
-          }
-          if (data.length > 0) {
-            lastId = data[data.length - 1].id;
-          }
-          if (data && (data[0]?.content || data[0]?.attachments)) {
-            retArr = retArr.concat(data);
-            setNumOfMessagesFetched(retArr.length);
-          }
-        }
-        setNumOfMessagesFetched(0);
-        setMessageData(retArr);
-        setFetchingData(false);
-      } catch (e) {
-        console.error("Error fetching channel messages");
-      } finally {
-        setFetchingData(false);
-      }
-    };
-    setMessageData(null);
-    if (selectedChannel) getMessages();
-  }, [selectedChannel, token]);
+  // useEffect(() => {
+  //   const getMessages = async () => {
+  //     try {
+  //       setFetchingData(true);
+  //       let lastId = "";
+  //       let reachedEnd = false;
+  //       let retArr = [];
+  //       while (!reachedEnd && mountedRef.current) {
+  //         const data = await fetchMessageData(token, lastId, selectedChannel);
+  //         if (data.message && data.message.includes("Missing Access")) {
+  //           break;
+  //         }
+  //         if (data.length < 100) {
+  //           reachedEnd = true;
+  //         }
+  //         if (data.length > 0) {
+  //           lastId = data[data.length - 1].id;
+  //         }
+  //         if (data && (data[0]?.content || data[0]?.attachments)) {
+  //           retArr = retArr.concat(data);
+  //           setNumOfMessagesFetched(retArr.length);
+  //         }
+  //       }
+  //       setNumOfMessagesFetched(0);
+  //       setMessageData(retArr);
+  //       setFetchingData(false);
+  //     } catch (e) {
+  //       console.error("Error fetching channel messages");
+  //     } finally {
+  //       setFetchingData(false);
+  //     }
+  //   };
+  //   setMessageData(null);
+  //   if (selectedChannel) getMessages();
+  // }, [selectedChannel, token]);
 
   useEffect(() => {
-    const getChannels = async () => {
-      try {
-        setFetchingData(true);
-        let data = await fetchChannels(token, selectedGuild.id);
-        if (Array.isArray(data)) setChannels(data);
-      } catch (e) {
-        console.error("Error fetching channels");
-      } finally {
-        setFetchingData(false);
-      }
-    };
-    setSelectedChannel(null);
-    setMessageData(null);
-    if (selectedGuild.id) getChannels();
-  }, [selectedGuild.id, token]);
+    getChannels();
+  }, [getChannels]);
 
   useEffect(() => {
     getGuilds();
@@ -126,8 +118,8 @@ function ChannelMessages() {
             </DiscordTextField>
             <DiscordTextField
               disabled={selectedGuild.id === null || fetchingData}
-              value={selectedChannel}
-              onChange={(e) => setSelectedChannel(e.target.value)}
+              value={selectedChannel.id}
+              onChange={(e) => setChannel(e.target.value)}
               sx={{ my: "5px" }}
               select
               label="Channels"
@@ -155,8 +147,9 @@ function ChannelMessages() {
                   </Typography>
                   <Typography variant="h6">
                     {
-                      channels.find((channel) => channel.id === selectedChannel)
-                        ?.name
+                      channels.find(
+                        (channel) => channel.id === selectedChannel.id
+                      )?.name
                     }
                   </Typography>
                 </>
