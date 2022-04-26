@@ -1,10 +1,11 @@
-import React, { createContext, useState } from "react";
-import { GET_USER_DATA } from "./UserContextConstants";
-
+import React, { createContext, useCallback, useReducer } from "react";
+import { getUserData as getUserDataAction } from "./UserContextActions";
+import { UserReducer } from "./UserReducer";
 export const UserContext = createContext();
 
 const UserContextProvider = (props) => {
-  const [state, setInitialState] = useState(
+  const [state, dispatch] = useReducer(
+    UserReducer,
     Object.freeze({
       accent_color: null,
       avatar: null,
@@ -25,20 +26,16 @@ const UserContextProvider = (props) => {
       token: null,
       username: null,
       verified: null,
-      hasFetchedData: false,
+      isLoading: null,
     })
   );
-  const dispatch = (type, payload) => {
-    console.info(type);
-    switch (type) {
-      case GET_USER_DATA:
-        return setInitialState({ ...state, ...payload, hasFetchedData: true });
-      default:
-        return setInitialState({ ...state, ...payload });
-    }
-  };
+
+  const getUserData = useCallback(async () => {
+    await getUserDataAction(dispatch);
+  }, []);
+
   return (
-    <UserContext.Provider value={{ state, dispatch }}>
+    <UserContext.Provider value={{ state, dispatch, getUserData }}>
       {props.children}
     </UserContext.Provider>
   );

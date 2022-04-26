@@ -1,1 +1,2 @@
 export const GET_USER_DATA = "GET_USER_DATA";
+export const GET_USER_DATA_COMPLETE = "GET_USER_DATA_COMPLETE";
