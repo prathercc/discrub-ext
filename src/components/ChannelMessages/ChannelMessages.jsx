@@ -69,7 +69,7 @@ function ChannelMessages() {
     };
     setMessageData(null);
     if (selectedChannel) getMessages();
-  }, [selectedChannel]);
+  }, [selectedChannel, token]);
 
   useEffect(() => {
     const getChannels = async () => {
@@ -86,7 +86,7 @@ function ChannelMessages() {
     setSelectedChannel(null);
     setMessageData(null);
     if (selectedGuild) getChannels();
-  }, [selectedGuild]);
+  }, [selectedGuild, token]);
 
   useEffect(() => {
     const getGuilds = async () => {
@@ -106,7 +106,7 @@ function ChannelMessages() {
     return () => {
       mountedRef.current = false;
     };
-  }, []);
+  }, [token]);
 
   return (
     <Box
