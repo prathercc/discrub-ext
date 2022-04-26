@@ -1,0 +1,3 @@
+export const GET_GUILDS = "GET_GUILDS";
+export const GET_GUILDS_COMPLETE = "GET_GUILDS_COMPLETE";
+export const SET_GUILD = "SET_GUILD_COMPLETE";

@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import {
-  fetchGuilds,
-  fetchChannels,
-  fetchMessageData,
-} from "../../discordService";
+import { fetchChannels, fetchMessageData } from "../../discordService";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import DiscordTextField from "../DiscordComponents/DiscordTextField/DiscordTextField";
@@ -14,14 +10,16 @@ import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied
 import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import { Typography } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
+import { GuildContext } from "../../context/guild/GuildContext";
 
 function ChannelMessages() {
   const { state: userState } = useContext(UserContext);
-  const { token } = userState;
+  const { state: guildState, getGuilds, setGuild } = useContext(GuildContext);
 
-  const [guilds, setGuilds] = useState(null);
+  const { token } = userState;
+  const { guilds, selectedGuild } = guildState;
+
   const [channels, setChannels] = useState(null);
-  const [selectedGuild, setSelectedGuild] = useState(null);
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [fetchingData, setFetchingData] = useState(false);
   const [messageData, setMessageData] = useState(null);
@@ -75,7 +73,7 @@ function ChannelMessages() {
     const getChannels = async () => {
       try {
         setFetchingData(true);
-        let data = await fetchChannels(token, selectedGuild);
+        let data = await fetchChannels(token, selectedGuild.id);
         if (Array.isArray(data)) setChannels(data);
       } catch (e) {
         console.error("Error fetching channels");
@@ -85,28 +83,12 @@ function ChannelMessages() {
     };
     setSelectedChannel(null);
     setMessageData(null);
-    if (selectedGuild) getChannels();
-  }, [selectedGuild, token]);
+    if (selectedGuild.id) getChannels();
+  }, [selectedGuild.id, token]);
 
   useEffect(() => {
-    const getGuilds = async () => {
-      try {
-        setMessageData(null);
-        setFetchingData(true);
-        let data = await fetchGuilds(token);
-        if (Array.isArray(data)) setGuilds(data);
-      } catch (e) {
-        console.error("Error fetching guilds.");
-      } finally {
-        setFetchingData(false);
-      }
-    };
-    if (token) getGuilds();
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, [token]);
+    getGuilds();
+  }, [getGuilds]);
 
   return (
     <Box
@@ -128,8 +110,8 @@ function ChannelMessages() {
             </DiscordTypography>
             <DiscordTextField
               disabled={fetchingData}
-              value={selectedGuild}
-              onChange={(e) => setSelectedGuild(e.target.value)}
+              value={selectedGuild.id}
+              onChange={(e) => setGuild(e.target.value)}
               sx={{ my: "5px" }}
               select
               label="Guilds"
@@ -143,7 +125,7 @@ function ChannelMessages() {
               })}
             </DiscordTextField>
             <DiscordTextField
-              disabled={selectedGuild === null || fetchingData}
+              disabled={selectedGuild.id === null || fetchingData}
               value={selectedChannel}
               onChange={(e) => setSelectedChannel(e.target.value)}
               sx={{ my: "5px" }}
@@ -166,7 +148,10 @@ function ChannelMessages() {
               exportTitle={() => (
                 <>
                   <Typography variant="h4">
-                    {guilds.find((guild) => guild.id === selectedGuild)?.name}
+                    {
+                      guilds.find((guild) => guild.id === selectedGuild.id)
+                        ?.name
+                    }
                   </Typography>
                   <Typography variant="h6">
                     {

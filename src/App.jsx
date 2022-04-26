@@ -1,12 +1,15 @@
 import React from "react";
 import InjectedDialog from "./components/InjectedDialog/InjectedDialog";
+import GuildContextProvider from "./context/guild/GuildContext";
 import UserContextProvider from "./context/user/UserContext";
 
 function App() {
   return (
     <>
       <UserContextProvider>
-        <InjectedDialog />
+        <GuildContextProvider>
+          <InjectedDialog />
+        </GuildContextProvider>
       </UserContextProvider>
     </>
   );
