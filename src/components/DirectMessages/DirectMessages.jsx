@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { fetchDirectMessages, fetchMessageData } from "../../discordService";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
-import DiscordTextField from "../DiscordComponents/DiscordTextField/DiscordTextField";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
-import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
-import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
-import { Typography } from "@mui/material";
+import {
+  Typography,
+  Paper,
+  Stack,
+  CircularProgress,
+  TextField,
+} from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 
 function DirectMessages() {
@@ -90,16 +92,16 @@ function DirectMessages() {
         overflow: "auto",
       }}
     >
-      <DiscordPaper>
+      <Paper sx={{ padding: "10px" }}>
         {token && directMessages && (
           <>
-            <DiscordTypography variant="h5">
-              Your Direct Messages
-            </DiscordTypography>
-            <DiscordTypography variant="caption">
+            <Typography variant="h5">Your Direct Messages</Typography>
+            <Typography variant="caption">
               Messages between other Discord users and yourself.
-            </DiscordTypography>
-            <DiscordTextField
+            </Typography>
+            <TextField
+              fullWidth
+              variant="filled"
               disabled={fetchingData}
               value={selectedDirectMessage}
               onChange={(e) => setSelectedDirectMessage(e.target.value)}
@@ -118,23 +120,25 @@ function DirectMessages() {
                   </MenuItem>
                 );
               })}
-            </DiscordTextField>
+            </TextField>
           </>
         )}
 
         {(!token || !directMessages || fetchingData) && (
           <>
-            <DiscordSpinner />
+            <Stack justifyContent="center" alignItems="center">
+              <CircularProgress />
+            </Stack>
             <Box sx={boxSx}>
-              <DiscordTypography variant="caption">
+              <Typography variant="caption">
                 {numOfMessagesFetched > 0
                   ? `Fetched ${numOfMessagesFetched} Messages`
                   : "Fetching Data"}
-              </DiscordTypography>
+              </Typography>
             </Box>
           </>
         )}
-      </DiscordPaper>
+      </Paper>
       {messageData && messageData.length > 0 && !fetchingData && (
         <DMTable
           rows={messageData}
@@ -155,16 +159,16 @@ function DirectMessages() {
         />
       )}
       {messageData && messageData.length === 0 && !fetchingData && (
-        <DiscordPaper>
+        <Paper sx={{ padding: "10px" }}>
           <Box sx={boxSx}>
-            <DiscordTypography>No Messages to Display</DiscordTypography>
+            <Typography>No Messages to Display</Typography>
           </Box>
           <Box sx={boxSx}>
-            <DiscordTypography>
+            <Typography>
               <SentimentDissatisfiedIcon />
-            </DiscordTypography>
+            </Typography>
           </Box>
-        </DiscordPaper>
+        </Paper>
       )}
     </Box>
   );

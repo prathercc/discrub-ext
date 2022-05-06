@@ -4,10 +4,16 @@ import "./index.css";
 import App from "./App";
 import InjectedButton from "./components/InjectedButton/InjectedButton";
 import reportWebVitals from "./reportWebVitals";
+import AppTheme from "./AppTheme";
 
 const injectionButton = document.getElementById("button_injection");
 if (injectionButton) {
-  ReactDOM.render(<InjectedButton />, injectionButton);
+  ReactDOM.render(
+    <AppTheme>
+      <InjectedButton />
+    </AppTheme>,
+    injectionButton
+  );
 }
 const rootElement = document.getElementById("root");
 if (rootElement) {

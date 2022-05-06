@@ -1,6 +1,6 @@
 import React from "react";
-import DiscordTypography from "../../DiscordComponents/DiscordTypography/DiscordTypography";
 import Box from "@mui/material/Box";
+import { Typography } from "@mui/material";
 
 const ModalDebugMessage = ({ debugMessage }) => {
   return (
@@ -13,9 +13,9 @@ const ModalDebugMessage = ({ debugMessage }) => {
         opacity: debugMessage.length === 0 ? 0 : 1,
       }}
     >
-      <DiscordTypography variant="caption" sx={{ color: "orange" }}>
+      <Typography variant="caption" sx={{ color: "orange" }}>
         {debugMessage.length === 0 ? "An Error Occurred!" : debugMessage}
-      </DiscordTypography>
+      </Typography>
     </Box>
   );
 };

@@ -7,6 +7,7 @@ import React, {
 import {
   getGuilds as getGuildsAction,
   setGuild as setGuildAction,
+  resetGuild as resetGuildAction,
 } from "./GuildContextActions";
 import { GuildReducer } from "./GuildReducer";
 import { UserContext } from "../user/UserContext";
@@ -42,8 +43,14 @@ const GuildContextProvider = (props) => {
     setGuildAction(id, dispatch);
   };
 
+  const resetGuild = useCallback(async () => {
+    await resetGuildAction(dispatch);
+  }, []);
+
   return (
-    <GuildContext.Provider value={{ state, dispatch, getGuilds, setGuild }}>
+    <GuildContext.Provider
+      value={{ state, dispatch, getGuilds, setGuild, resetGuild }}
+    >
       {props.children}
     </GuildContext.Provider>
   );

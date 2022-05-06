@@ -4,58 +4,13 @@ import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DateTimePicker from "@mui/lab/DateTimePicker";
 import InputAdornment from "@mui/material/InputAdornment";
-import { textSecondary, textPrimary } from "../../../styleConstants";
 
 const DiscordDateTimePicker = ({ label, onChange }) => {
   const [value, setValue] = React.useState(null);
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <DateTimePicker
-        renderInput={(props) => (
-          <TextField
-            sx={{
-              width: "100%",
-              "& .MuiSvgIcon-root": {
-                "&.MuiSvgIcon-fontSizeMedium": {
-                  color: textSecondary,
-                },
-              },
-              "& .MuiInputLabel-root": {
-                color: textSecondary,
-                fontWeight: "bold",
-                "&.Mui-focused": {
-                  color: textSecondary,
-                  fontWeight: "bold",
-                },
-                "&.Mui-disabled": {
-                  color: textSecondary,
-                  fontWeight: "bold",
-                },
-              },
-              "& .MuiFilledInput-root": {
-                color: textSecondary,
-                backgroundColor: "transparent",
-                border: `1px solid ${textPrimary}`,
-                overflow: "hidden",
-                borderRadius: 2,
-                "&.Mui-focused": {
-                  color: textSecondary,
-                  backgroundColor: "transparent",
-                  borderColor: textPrimary,
-                },
-                "&:hover": {
-                  backgroundColor: "transparent",
-                },
-                "&.Mui-disabled": {
-                  backgroundColor: "transparent",
-                },
-              },
-            }}
-            variant="filled"
-            size="small"
-            {...props}
-          />
-        )}
+        renderInput={(props) => <TextField variant="filled" {...props} />}
         label={label}
         value={value}
         onChange={(e) => {

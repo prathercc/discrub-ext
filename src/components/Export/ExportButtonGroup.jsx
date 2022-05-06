@@ -7,12 +7,24 @@ import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
 import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
-import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
 import { useReactToPrint } from "react-to-print";
-import { Box, Stack, Typography } from "@mui/material";
-import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 
-const options = ["HTML", "PDF", "JSON"];
+const options = [
+  "HTML",
+  "PDF",
+  "JSON",
+  "hhhhhh",
+  "gsdfsdfsdf",
+  "asfsdfsdf",
+  "gsdgsdfsdf",
+];
 
 const ExportButtonGroup = ({ rows, recipients, exportTitle }) => {
   const [open, setOpen] = useState(false);
@@ -149,18 +161,21 @@ const ExportButtonGroup = ({ rows, recipients, exportTitle }) => {
 
       {!printing && (
         <ButtonGroup variant="contained" ref={anchorRef}>
-          <DiscordButton
-            label={options[selectedIndex]}
-            onClick={() => setPrinting(true)}
-          />
-          <DiscordButton
-            icon={<ArrowDropDownIcon />}
+          <Button onClick={() => setPrinting(true)}>
+            {options[selectedIndex]}
+          </Button>
+          <Button
+            startIcon={<ArrowDropDownIcon />}
             size="small"
             onClick={handleToggle}
           />
         </ButtonGroup>
       )}
-      {printing && <DiscordSpinner />}
+      {printing && (
+        <Stack justifyContent="center" alignItems="center">
+          <CircularProgress />
+        </Stack>
+      )}
 
       <Popper
         open={open}
@@ -168,6 +183,7 @@ const ExportButtonGroup = ({ rows, recipients, exportTitle }) => {
         role={undefined}
         transition
         disablePortal
+        sx={{ "z-index": 9999 }}
       >
         {({ TransitionProps, placement }) => (
           <Grow

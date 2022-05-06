@@ -1,6 +1,6 @@
 import React from "react";
 import Box from "@mui/material/Box";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
+import { Typography } from "@mui/material";
 
 const DevelopmentMessages = () => {
   return (
@@ -14,7 +14,7 @@ const DevelopmentMessages = () => {
           pointerEvents: "none",
         }}
       >
-        <DiscordTypography>Discrub</DiscordTypography>
+        <Typography>Discrub</Typography>
       </Box>
       <Box
         sx={{
@@ -25,7 +25,7 @@ const DevelopmentMessages = () => {
           pointerEvents: "none",
         }}
       >
-        <DiscordTypography>Version 1.0.4</DiscordTypography>
+        <Typography>Version 1.0.4</Typography>
       </Box>
     </>
   );

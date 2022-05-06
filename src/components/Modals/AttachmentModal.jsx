@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useContext } from "react";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
-import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
 import Grid from "@mui/material/Grid";
 import { deleteMessage, editMessage } from "../../discordService";
-import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
-import DiscordDialog from "../DiscordComponents/DiscordDialog/DiscordDialog";
-import DiscordDialogTitle from "../DiscordComponents/DiscordDialog/DiscordDialogTitle";
-import DiscordDialogContent from "../DiscordComponents/DiscordDialog/DiscordDialogContent";
-import DiscordDialogActions from "../DiscordComponents/DiscordDialog/DiscordDialogActions";
-import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import AttachmentChip from "../Chips/AttachmentChip";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
+import {
+  Paper,
+  Typography,
+  Button,
+  Stack,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+} from "@mui/material";
 
 const AttachmentModal = ({ open, handleClose, row }) => {
   const { state: userState } = useContext(UserContext);
@@ -76,42 +79,46 @@ const AttachmentModal = ({ open, handleClose, row }) => {
   }, [open]);
 
   return (
-    <DiscordDialog open={open} onClose={() => handleClose(activeRow)}>
-      <DiscordDialogTitle>
-        <DiscordTypography variant="h5">Delete Attachments</DiscordTypography>
-        <DiscordTypography variant="caption">
+    <Dialog fullWidth open={open} onClose={() => handleClose(activeRow)}>
+      <DialogTitle>
+        <Typography variant="h5">Delete Attachments</Typography>
+        <Typography variant="caption">
           Proceed with caution, this is permanent!
-        </DiscordTypography>
-      </DiscordDialogTitle>
-      <DiscordDialogContent>
-        <DiscordPaper>
-          <Grid spacing={2} container>
-            {activeRow &&
-              activeRow.attachments.map((x, i) => {
-                return (
-                  <Grid item>
-                    <AttachmentChip
-                      filename={x.filename}
-                      url={x.url}
-                      onDelete={() => handleDeleteAttachment(x)}
-                      disabled={deleting}
-                    />
-                  </Grid>
-                );
-              })}
-          </Grid>
-          {deleting && <DiscordSpinner />}
-          <ModalDebugMessage debugMessage={debugMessage} />
-        </DiscordPaper>
-      </DiscordDialogContent>
-      <DiscordDialogActions>
-        <DiscordButton
-          label="Close"
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <Grid spacing={2} container>
+          {activeRow &&
+            activeRow.attachments.map((x, i) => {
+              return (
+                <Grid item>
+                  <AttachmentChip
+                    filename={x.filename}
+                    url={x.url}
+                    onDelete={() => handleDeleteAttachment(x)}
+                    disabled={deleting}
+                  />
+                </Grid>
+              );
+            })}
+        </Grid>
+        {deleting && (
+          <Stack justifyContent="center" alignItems="center">
+            <CircularProgress />
+          </Stack>
+        )}
+        <ModalDebugMessage debugMessage={debugMessage} />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
           onClick={() => handleClose(activeRow)}
-          neutral
-        />
-      </DiscordDialogActions>
-    </DiscordDialog>
+          color="secondary"
+        >
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 export default AttachmentModal;

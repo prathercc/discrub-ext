@@ -1,27 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { visuallyHidden } from "@mui/utils";
-import EditIcon from "@mui/icons-material/Edit";
-import DiscordTextField from "../DiscordTextField/DiscordTextField";
 import Grid from "@mui/material/Grid";
-import DiscordDateTimePicker from "../DiscordDateTimePicker/DiscordDateTimePicker";
-import DiscordCheckBox from "../DiscordCheckBox/DiscordCheckBox";
 import DeleteModal from "../../Modals/DeleteModal";
 import EditModal from "../../Modals/EditModal";
 import AttachmentModal from "../../Modals/AttachmentModal";
@@ -33,9 +22,8 @@ import {
   discordPrimary,
 } from "../../../styleConstants";
 import MessageChip from "../../Chips/MessageChip";
-import DiscordTypography from "../DiscordTypography/DiscordTypography";
-import { Stack } from "@mui/material";
-import ExportButtonGroup from "../../Export/ExportButtonGroup";
+import EnhancedTableHead from "./EnhancedTableHead";
+import EnhancedTableToolbar from "./EnhancedTableToolbar";
 
 export const FormattedContent = ({ message, recipients, shrink = true }) => {
   const [displayMessage, setDisplayMessage] = useState("");
@@ -59,14 +47,12 @@ export const FormattedContent = ({ message, recipients, shrink = true }) => {
     <>
       {displayMessage.length > 60 && shrink ? (
         <Tooltip title={displayMessage}>
-          <DiscordTypography variant="caption">
+          <Typography variant="caption">
             {displayMessage.slice(0, 60)}...
-          </DiscordTypography>
+          </Typography>
         </Tooltip>
       ) : (
-        <DiscordTypography variant="caption">
-          {displayMessage}
-        </DiscordTypography>
+        <Typography variant="caption">{displayMessage}</Typography>
       )}
     </>
   );
@@ -88,167 +74,11 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function EnhancedTableHead(props) {
-  const {
-    onSelectAllClick,
-    order,
-    orderBy,
-    numSelected,
-    rowCount,
-    onRequestSort,
-    columns,
-  } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
-  return (
-    <TableHead>
-      <TableRow>
-        <TableCell
-          sx={{ borderBottom: `1px solid ${textPrimary}` }}
-          padding="checkbox"
-        >
-          <DiscordCheckBox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-          />
-        </TableCell>
-        {columns.map((column) => (
-          <TableCell
-            sx={{
-              borderBottom: `1px solid ${textPrimary}`,
-            }}
-            key={column.id}
-            align={column.numeric ? "right" : "left"}
-            padding={column.disablePadding ? "none" : "normal"}
-            sortDirection={orderBy === column.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === column.id}
-              direction={orderBy === column.id ? order : "asc"}
-              onClick={createSortHandler(column.id)}
-              sx={{
-                color: textSecondary,
-                "&:hover": {
-                  color: textSecondary,
-                },
-                "&.Mui-active": {
-                  color: textSecondary,
-                  "&:hover": {
-                    color: textSecondary,
-                  },
-                  ".MuiTableSortLabel-icon": {
-                    color: textSecondary,
-                  },
-                },
-              }}
-            >
-              {column.label}
-              {orderBy === column.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-        <TableCell
-          sx={{ borderBottom: `1px solid ${textPrimary}` }}
-          padding="checkbox"
-        />
-      </TableRow>
-    </TableHead>
-  );
-}
-
-const EnhancedTableToolbar = (props) => {
-  const {
-    numSelected,
-    setFilterOpen,
-    filterOpen,
-    handleFilterUpdate,
-    setDeleteModalOpen,
-    setEditModalOpen,
-    rows,
-    recipients,
-    exportTitle,
-  } = props;
-
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity
-            ),
-        }),
-      }}
-    >
-      <Stack sx={{ width: "100%" }} direction="column">
-        <Stack sx={{ width: "100%" }} alignItems="baseline" direction="column">
-          <Stack
-            sx={{ width: "100%" }}
-            direction="row"
-            justifyContent="space-between"
-          >
-            <Tooltip title="Filter list">
-              <IconButton onClick={() => setFilterOpen(!filterOpen)}>
-                <FilterListIcon sx={{ color: textSecondary }} />
-              </IconButton>
-            </Tooltip>
-            <IconButton>
-              <ExportButtonGroup
-                rows={rows}
-                recipients={recipients}
-                exportTitle={exportTitle}
-              />
-            </IconButton>
-          </Stack>
-          {filterOpen && (
-            <FilterComponent handleFilterUpdate={handleFilterUpdate} />
-          )}
-        </Stack>
-
-        {numSelected > 0 && (
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography
-              sx={{ color: textSecondary }}
-              color="inherit"
-              variant="subtitle1"
-              component="div"
-            >
-              {numSelected} selected
-            </Typography>
-            <Stack justifyContent="flex-end" direction="row">
-              <Tooltip title="Delete">
-                <IconButton onClick={() => setDeleteModalOpen(true)}>
-                  <DeleteIcon sx={{ color: textSecondary }} />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Edit">
-                <IconButton onClick={() => setEditModalOpen(true)}>
-                  <EditIcon sx={{ color: textSecondary }} />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          </Stack>
-        )}
-      </Stack>
-    </Toolbar>
-  );
-};
-
-export default function DiscordTable({ rows, setRefactoredData, exportTitle }) {
+export default function DiscordTable({
+  rows,
+  setRefactoredData = () => {},
+  exportTitle,
+}) {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
   const [filterByParams, setFilterByParams] = useState([]);
@@ -568,14 +398,14 @@ export default function DiscordTable({ rows, setRefactoredData, exportTitle }) {
                                 />
                               </Grid>
                               <Grid px={1} item xs={12}>
-                                <DiscordTypography
+                                <Typography
                                   sx={{ userSelect: "none" }}
                                   variant="caption"
                                 >
                                   {new Date(
                                     Date.parse(row.timestamp)
                                   ).toLocaleString("en-US")}
-                                </DiscordTypography>
+                                </Typography>
                               </Grid>
                             </Grid>
                           </Grid>
@@ -656,50 +486,3 @@ export default function DiscordTable({ rows, setRefactoredData, exportTitle }) {
     </Box>
   );
 }
-
-const FilterComponent = ({ handleFilterUpdate }) => {
-  return (
-    <Grid spacing={2} container>
-      <Grid xs={12} item>
-        <Grid spacing={2} container>
-          <Grid xs={6} item>
-            <DiscordDateTimePicker
-              onChange={(e) => handleFilterUpdate("startTime", e, "date")}
-              label="Start Time"
-            />
-          </Grid>
-          <Grid xs={6} item>
-            <DiscordDateTimePicker
-              onChange={(e) => handleFilterUpdate("endTime", e, "date")}
-              label="End Time"
-            />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={6}>
-        <DiscordTextField
-          label="Username"
-          onChange={(e) =>
-            handleFilterUpdate("username", e.target.value, "text")
-          }
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <DiscordTextField
-          onChange={(e) =>
-            handleFilterUpdate("content", e.target.value, "text")
-          }
-          label="Message"
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <DiscordTextField
-          onChange={(e) =>
-            handleFilterUpdate("attachmentName", e.target.value, "text")
-          }
-          label="Attachment Name"
-        />
-      </Grid>
-    </Grid>
-  );
-};

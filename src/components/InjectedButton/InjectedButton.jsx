@@ -1,14 +1,16 @@
 import React from "react";
-import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
+import { Button } from "@mui/material";
 import { sendChromeMessage } from "../../chromeService";
 
 function InjectedButton() {
   return (
     <div style={{ backgroundColor: "#36393f" }}>
-      <DiscordButton
-        label="Discrub"
+      <Button
+        variant="contained"
         onClick={() => sendChromeMessage("INJECT_DIALOG")}
-      />
+      >
+        Discrub
+      </Button>
     </div>
   );
 }

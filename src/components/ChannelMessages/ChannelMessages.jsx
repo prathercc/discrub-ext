@@ -1,142 +1,119 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
-import { fetchChannels, fetchMessageData } from "../../discordService";
+import React, { useEffect, useContext } from "react";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
-import DiscordTextField from "../DiscordComponents/DiscordTextField/DiscordTextField";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
-import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
-import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
-import { Typography } from "@mui/material";
+import {
+  Stack,
+  Typography,
+  Paper,
+  CircularProgress,
+  TextField,
+} from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
+import { MessageContext } from "../../context/message/MessageContext";
+import ChannelMessagesStyles from "./ChannelMessages.styles";
 
 function ChannelMessages() {
+  const classes = ChannelMessagesStyles();
+  const {
+    state: messageDataState,
+    getMessageData,
+    resetMessageData,
+  } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
   const { state: guildState, getGuilds, setGuild } = useContext(GuildContext);
   const {
     state: channelState,
     getChannels,
     setChannel,
+    resetChannel,
   } = useContext(ChannelContext);
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
   const { channels, selectedChannel } = channelState;
-
-  const [fetchingData, setFetchingData] = useState(false);
-  const [messageData, setMessageData] = useState(null);
-  const [numOfMessagesFetched, setNumOfMessagesFetched] = useState(0);
-  // const mountedRef = useRef(false);
-
-  const boxSx = {
-    alignItems: "center",
-    justifyContent: "center",
-    display: "flex",
-    marginTop: "1vh",
-  };
-
-  // useEffect(() => {
-  //   const getMessages = async () => {
-  //     try {
-  //       setFetchingData(true);
-  //       let lastId = "";
-  //       let reachedEnd = false;
-  //       let retArr = [];
-  //       while (!reachedEnd && mountedRef.current) {
-  //         const data = await fetchMessageData(token, lastId, selectedChannel);
-  //         if (data.message && data.message.includes("Missing Access")) {
-  //           break;
-  //         }
-  //         if (data.length < 100) {
-  //           reachedEnd = true;
-  //         }
-  //         if (data.length > 0) {
-  //           lastId = data[data.length - 1].id;
-  //         }
-  //         if (data && (data[0]?.content || data[0]?.attachments)) {
-  //           retArr = retArr.concat(data);
-  //           setNumOfMessagesFetched(retArr.length);
-  //         }
-  //       }
-  //       setNumOfMessagesFetched(0);
-  //       setMessageData(retArr);
-  //       setFetchingData(false);
-  //     } catch (e) {
-  //       console.error("Error fetching channel messages");
-  //     } finally {
-  //       setFetchingData(false);
-  //     }
-  //   };
-  //   setMessageData(null);
-  //   if (selectedChannel) getMessages();
-  // }, [selectedChannel, token]);
+  const {
+    messages,
+    isLoading: messagesLoading,
+    fetchedMessageLength,
+  } = messageDataState;
 
   useEffect(() => {
-    getChannels();
-  }, [getChannels]);
+    const fetchChannelData = async () => {
+      await resetMessageData();
+      await getMessageData(selectedChannel.id);
+    };
+    if (selectedChannel.id) fetchChannelData();
+  }, [selectedChannel.id, getMessageData, resetMessageData]);
+
+  useEffect(() => {
+    const fetchGuildChannels = async () => {
+      await resetChannel();
+      await resetMessageData();
+      await getChannels(selectedGuild.id);
+    };
+    if (selectedGuild.id) fetchGuildChannels();
+  }, [getChannels, selectedGuild.id, resetMessageData, resetChannel]);
 
   useEffect(() => {
     getGuilds();
   }, [getGuilds]);
 
   return (
-    <Box
-      sx={{
-        padding: "15px",
-        maxHeight: "85%",
-        maxWidth: "100%",
-        overflow: "auto",
-      }}
-    >
+    <Stack spacing={2} className={classes.boxContainer}>
       {token && guilds && (
-        <>
-          <DiscordPaper>
-            <DiscordTypography variant="h5">
-              Your Channel Messages
-            </DiscordTypography>
-            <DiscordTypography variant="caption">
-              Messages between other Discord users and yourself, within Guilds.
-            </DiscordTypography>
-            <DiscordTextField
-              disabled={fetchingData}
-              value={selectedGuild.id}
-              onChange={(e) => setGuild(e.target.value)}
-              sx={{ my: "5px" }}
-              select
-              label="Guilds"
-            >
-              {guilds.map((guild) => {
-                return (
-                  <MenuItem key={guild.id} value={guild.id}>
-                    {guild.name}
-                  </MenuItem>
-                );
-              })}
-            </DiscordTextField>
-            <DiscordTextField
-              disabled={selectedGuild.id === null || fetchingData}
-              value={selectedChannel.id}
-              onChange={(e) => setChannel(e.target.value)}
-              sx={{ my: "5px" }}
-              select
-              label="Channels"
-            >
-              {channels &&
-                channels.map((channel) => {
+        <Stack spacing={2}>
+          <Paper sx={{ padding: "10px" }}>
+            <Stack spacing={2}>
+              <Stack>
+                <Typography variant="h5">Your Channel Messages</Typography>
+                <Typography variant="caption">
+                  Messages between other Discord users and yourself, within
+                  Guilds.
+                </Typography>
+              </Stack>
+              <TextField
+                fullWidth
+                variant="filled"
+                disabled={messagesLoading}
+                value={selectedGuild.id}
+                onChange={(e) => setGuild(e.target.value)}
+                select
+                label="Guilds"
+              >
+                {guilds.map((guild) => {
+                  return (
+                    <MenuItem key={guild.id} value={guild.id}>
+                      {guild.name}
+                    </MenuItem>
+                  );
+                })}
+              </TextField>
+              <TextField
+                fullWidth
+                variant="filled"
+                disabled={selectedGuild.id === null || messagesLoading}
+                value={selectedChannel.id}
+                onChange={(e) => setChannel(e.target.value)}
+                select
+                label="Channels"
+              >
+                {channels.map((channel) => {
                   return (
                     <MenuItem key={channel.id} value={channel.id}>
                       {channel.name}
                     </MenuItem>
                   );
                 })}
-            </DiscordTextField>
-          </DiscordPaper>
-          {messageData && messageData.length > 0 && !fetchingData && (
-            <ChannelMsgTable
-              rows={messageData}
+              </TextField>
+            </Stack>
+          </Paper>
+          {messages.length > 0 && !messagesLoading && (
+            <DiscordTable
+              rows={messages}
               exportTitle={() => (
                 <>
                   <Typography variant="h4">
@@ -156,64 +133,36 @@ function ChannelMessages() {
               )}
             />
           )}
-          {messageData && messageData.length === 0 && !fetchingData && (
-            <DiscordPaper>
-              <Box sx={boxSx}>
-                <DiscordTypography>No Messages to Display</DiscordTypography>
+          {messages.length === 0 && !messagesLoading && selectedChannel.id && (
+            <Paper sx={{ padding: "10px" }}>
+              <Box className={classes.box}>
+                <Typography>No Messages to Display</Typography>
               </Box>
-              <Box sx={boxSx}>
-                <DiscordTypography>
+              <Box className={classes.box}>
+                <Typography>
                   <SentimentDissatisfiedIcon />
-                </DiscordTypography>
+                </Typography>
               </Box>
-            </DiscordPaper>
+            </Paper>
           )}
-        </>
+        </Stack>
       )}
-      {(!token || !guilds || fetchingData) && (
-        <DiscordPaper>
-          <DiscordSpinner />
-          <Box sx={boxSx}>
-            <DiscordTypography variant="caption">
-              {numOfMessagesFetched > 0
-                ? `Fetched ${numOfMessagesFetched} Messages`
+      {(!token || !guilds.length || messagesLoading) && (
+        <Paper justifyContent="center" sx={{ padding: "10px" }}>
+          <Stack justifyContent="center" alignItems="center">
+            <CircularProgress />
+          </Stack>
+          <Box className={classes.box}>
+            <Typography variant="caption">
+              {fetchedMessageLength > 0
+                ? `Fetched ${fetchedMessageLength} Messages`
                 : "Fetching Data"}
-            </DiscordTypography>
+            </Typography>
           </Box>
-        </DiscordPaper>
+        </Paper>
       )}
-    </Box>
+    </Stack>
   );
 }
-
-const ChannelMsgTable = ({ rows, exportTitle }) => {
-  const [refactoredData, setRefactoredData] = useState(null);
-
-  useEffect(() => {
-    const refactorData = async () => {
-      let retArr = [];
-      await rows.forEach((x) =>
-        retArr.push({
-          username: x.author.username,
-          ...x,
-        })
-      );
-      setRefactoredData(retArr);
-    };
-    refactorData();
-  }, []);
-
-  return (
-    <>
-      {refactoredData && (
-        <DiscordTable
-          exportTitle={exportTitle}
-          rows={refactoredData}
-          setRefactoredData={setRefactoredData}
-        />
-      )}
-    </>
-  );
-};
 
 export default ChannelMessages;

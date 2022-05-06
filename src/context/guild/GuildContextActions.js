@@ -3,6 +3,7 @@ import {
   GET_GUILDS,
   GET_GUILDS_COMPLETE,
   SET_GUILD,
+  RESET_GUILD_COMPLETE,
 } from "./GuildContextConstants";
 
 export const getGuilds = async (token, dispatch) => {
@@ -16,4 +17,8 @@ export const getGuilds = async (token, dispatch) => {
 
 export const setGuild = (id, dispatch) => {
   dispatch({ type: SET_GUILD, payload: { id } });
+};
+
+export const resetGuild = (dispatch) => {
+  dispatch({ type: RESET_GUILD_COMPLETE });
 };

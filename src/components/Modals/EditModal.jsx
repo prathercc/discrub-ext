@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
-import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
-import DiscordTextField from "../DiscordComponents/DiscordTextField/DiscordTextField";
-import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import Box from "@mui/material/Box";
 import { editMessage } from "../../discordService";
-import DiscordDialog from "../DiscordComponents/DiscordDialog/DiscordDialog";
-import DiscordDialogTitle from "../DiscordComponents/DiscordDialog/DiscordDialogTitle";
-import DiscordDialogContent from "../DiscordComponents/DiscordDialog/DiscordDialogContent";
-import DiscordDialogActions from "../DiscordComponents/DiscordDialog/DiscordDialogActions";
-import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import MessageChip from "../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import { textSecondary } from "../../styleConstants";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
+import {
+  Typography,
+  Button,
+  Stack,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  TextField,
+} from "@mui/material";
 
 const EditModal = ({
   open,
@@ -122,66 +124,72 @@ const EditModal = ({
   }, [open]);
 
   return (
-    <DiscordDialog open={open} onClose={() => handleClose(updatedRows)}>
-      <DiscordDialogTitle>
-        <DiscordTypography variant="h5">Edit Data</DiscordTypography>
-        <DiscordTypography variant="caption">
+    <Dialog fullWidth open={open} onClose={() => handleClose(updatedRows)}>
+      <DialogTitle>
+        <Typography variant="h5">Edit Data</Typography>
+        <Typography variant="caption">
           Proceed with caution, this is permanent!
-        </DiscordTypography>
-      </DiscordDialogTitle>
-      <DiscordDialogContent>
-        <DiscordPaper>
-          <DiscordTextField
-            disabled={editing}
-            label="Update Text"
-            value={updateText}
-            onChange={(e) => setUpdateText(e.target.value)}
-          />
-          {editing && editObj && (
-            <>
-              <Box
-                my={1}
-                sx={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  display: "flex",
-                }}
-              >
-                <MessageChip
-                  avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
-                  username={editObj.username}
-                  content={editObj.content}
-                />
-                <ArrowRightAltIcon sx={{ color: textSecondary }} />
-                <MessageChip
-                  avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
-                  username={editObj.username}
-                  content={updateText}
-                />
-              </Box>
-              <ModalDebugMessage debugMessage={debugMessage} />
-              <DiscordSpinner />
-              <DiscordTypography sx={{ display: "block" }} variant="caption">
-                {editObj.id}
-              </DiscordTypography>
-            </>
-          )}
-        </DiscordPaper>
-      </DiscordDialogContent>
-      <DiscordDialogActions>
-        <DiscordButton
-          label="Close"
-          onClick={() => handleClose(updatedRows)}
-          neutral
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          fullWidth
+          variant="filled"
+          disabled={editing}
+          label="Update Text"
+          value={updateText}
+          onChange={(e) => setUpdateText(e.target.value)}
         />
-        <DiscordButton
+        {editing && editObj && (
+          <>
+            <Box
+              my={1}
+              sx={{
+                alignItems: "center",
+                justifyContent: "center",
+                display: "flex",
+              }}
+            >
+              <MessageChip
+                avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
+                username={editObj.username}
+                content={editObj.content}
+              />
+              <ArrowRightAltIcon sx={{ color: textSecondary }} />
+              <MessageChip
+                avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
+                username={editObj.username}
+                content={updateText}
+              />
+            </Box>
+            <ModalDebugMessage debugMessage={debugMessage} />
+            <Stack justifyContent="center" alignItems="center">
+              <CircularProgress />
+            </Stack>
+            <Typography sx={{ display: "block" }} variant="caption">
+              {editObj.id}
+            </Typography>
+          </>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
+          onClick={() => handleClose(updatedRows)}
+          color="secondary"
+        >
+          Close
+        </Button>
+        <Button
+          variant="contained"
           disabled={updateText.length === 0 || editing}
-          label="Edit"
           onClick={handleEditMessage}
           autoFocus
-        />
-      </DiscordDialogActions>
-    </DiscordDialog>
+        >
+          Edit
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 export default EditModal;

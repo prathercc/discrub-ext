@@ -4,9 +4,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import styled, { keyframes } from "styled-components";
 import GitHubButton from "react-github-btn";
-import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
-import { Tooltip } from "@mui/material";
+import { Tooltip, Paper, Typography } from "@mui/material";
 
 function About() {
   return (
@@ -28,15 +26,13 @@ function About() {
         </CustomGrid>
       </CustomGrid>
 
-      <DiscordPaper sx={{ width: "85%" }}>
+      <Paper sx={{ width: "85%" }}>
         <CustomGrid spacing={2} container>
           <CustomGrid sx={{ flexDirection: "column" }} xs={12} item>
-            <DiscordTypography variant="h6">
-              Support the Developer!
-            </DiscordTypography>
-            <DiscordTypography>
+            <Typography variant="h6">Support the Developer!</Typography>
+            <Typography>
               This did take some time to make, you know 😜
-            </DiscordTypography>
+            </Typography>
           </CustomGrid>
           <CustomGrid xs={12} item>
             <a href="https://ko-fi.com/W7W4AAIBR" target="_blank">
@@ -49,7 +45,7 @@ function About() {
             </a>
           </CustomGrid>
           <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
-            <DiscordTypography variant="caption">Ethereum</DiscordTypography>
+            <Typography variant="caption">Ethereum</Typography>
             <Tooltip title="0x09b120deE370ddadf629D2428A3B12cA3F614222">
               <img
                 alt="Donate ETH"
@@ -59,7 +55,7 @@ function About() {
             </Tooltip>
           </CustomGrid>
           <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
-            <DiscordTypography variant="caption">Bitcoin</DiscordTypography>
+            <Typography variant="caption">Bitcoin</Typography>
             <Tooltip title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm">
               <img
                 alt="Donate BTC"
@@ -69,7 +65,7 @@ function About() {
             </Tooltip>
           </CustomGrid>
           <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
-            <DiscordTypography variant="caption">Litecoin</DiscordTypography>
+            <Typography variant="caption">Litecoin</Typography>
             <Tooltip title="MVTPtXVTF6RNwfcTt71J8cn6uqNApb3S75">
               <img
                 alt="Donate LTC"
@@ -79,8 +75,8 @@ function About() {
             </Tooltip>
           </CustomGrid>
         </CustomGrid>
-      </DiscordPaper>
-      <DiscordPaper sx={{ width: "85%" }}>
+      </Paper>
+      <Paper sx={{ width: "85%" }}>
         <CustomGrid spacing={2} container>
           <CustomGrid item xs={4}>
             <GitHubButton
@@ -153,7 +149,7 @@ function About() {
             </GitHubButton>
           </CustomGrid>
         </CustomGrid>
-      </DiscordPaper>
+      </Paper>
     </Box>
   );
 }

@@ -12,11 +12,24 @@ import {
 import { UserContext } from "../../context/user/UserContext";
 import CloseWindowButton from "./CloseWindowButton";
 import DevelopmentMessages from "./DevelopmentMessages";
+import { MessageContext } from "../../context/message/MessageContext";
+import { ChannelContext } from "../../context/channel/ChannelContext";
+import { GuildContext } from "../../context/guild/GuildContext";
 
 function InjectedDialog() {
   const { getUserData } = useContext(UserContext);
+  const { resetChannel } = useContext(ChannelContext);
+  const { resetMessageData } = useContext(MessageContext);
+  const { resetGuild } = useContext(GuildContext);
 
   const [menuIndex, setMenuIndex] = useState(0);
+
+  const handleChangeMenuIndex = async (index) => {
+    await resetMessageData();
+    await resetChannel();
+    await resetGuild();
+    setMenuIndex(index);
+  };
 
   useEffect(() => {
     getUserData();
@@ -38,7 +51,7 @@ function InjectedDialog() {
         borderRadius: "1px",
       }}
     >
-      <MenuBar menuIndex={menuIndex} setMenuIndex={setMenuIndex} />
+      <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && <ChannelMessages />}
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <About />}

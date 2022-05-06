@@ -1,24 +1,27 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import DiscordCheckBox from "../DiscordComponents/DiscordCheckBox/DiscordCheckBox";
-import DiscordTypography from "../DiscordComponents/DiscordTypography/DiscordTypography";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import DiscordButton from "../DiscordComponents/DiscordButton/DiscordButton";
-import DiscordDialog from "../DiscordComponents/DiscordDialog/DiscordDialog";
-import DiscordDialogActions from "../DiscordComponents/DiscordDialog/DiscordDialogActions";
-import DiscordDialogContent from "../DiscordComponents/DiscordDialog/DiscordDialogContent";
-import DiscordDialogTitle from "../DiscordComponents/DiscordDialog/DiscordDialogTitle";
-import DiscordPaper from "../DiscordComponents/DiscordPaper/DiscordPaper";
 import { textSecondary } from "../../styleConstants";
 import { deleteMessage, editMessage } from "../../discordService";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import MessageChip from "../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import Box from "@mui/material/Box";
-import DiscordSpinner from "../DiscordComponents/DiscordSpinner/DiscordSpinner";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
+import {
+  Paper,
+  Typography,
+  Button,
+  Checkbox,
+  Stack,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+} from "@mui/material";
 
 const DeleteModal = ({
   open,
@@ -155,102 +158,108 @@ const DeleteModal = ({
     handleClose(returnRowsRef.current);
   };
   return (
-    <DiscordDialog open={open} onClose={() => handleClose(returnRows)}>
-      <DiscordDialogTitle>
-        <DiscordTypography variant="h5">Delete Data</DiscordTypography>
-        <DiscordTypography variant="caption">
+    <Dialog fullWidth open={open} onClose={() => handleClose(returnRows)}>
+      <DialogTitle>
+        <Typography variant="h5">Delete Data</Typography>
+        <Typography variant="caption">
           Proceed with caution, this is permanent!
-        </DiscordTypography>
-      </DiscordDialogTitle>
-      <DiscordDialogContent>
-        <DiscordPaper>
-          <FormGroup>
-            <FormControlLabel
-              sx={{
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <FormGroup>
+          <FormControlLabel
+            sx={{
+              color: textSecondary,
+              userSelect: "none",
+              "& .MuiFormControlLabel-label.Mui-disabled": {
                 color: textSecondary,
-                userSelect: "none",
-                "& .MuiFormControlLabel-label.Mui-disabled": {
-                  color: textSecondary,
-                },
-              }}
-              control={
-                <DiscordCheckBox
-                  disabled={deleting}
-                  defaultChecked
-                  onChange={(e) => {
-                    setDeleteConfig({
-                      ...deleteConfig,
-                      attachments: e.target.checked,
-                    });
-                  }}
-                />
-              }
-              label="Attachments"
-            />
-            <FormControlLabel
-              sx={{
+              },
+            }}
+            control={
+              <Checkbox
+                color="secondary"
+                disabled={deleting}
+                defaultChecked
+                onChange={(e) => {
+                  setDeleteConfig({
+                    ...deleteConfig,
+                    attachments: e.target.checked,
+                  });
+                }}
+              />
+            }
+            label="Attachments"
+          />
+          <FormControlLabel
+            sx={{
+              color: textSecondary,
+              userSelect: "none",
+              "& .MuiFormControlLabel-label.Mui-disabled": {
                 color: textSecondary,
-                userSelect: "none",
-                "& .MuiFormControlLabel-label.Mui-disabled": {
-                  color: textSecondary,
-                },
-              }}
-              control={
-                <DiscordCheckBox
-                  disabled={deleting}
-                  defaultChecked
-                  onChange={(e) => {
-                    setDeleteConfig({
-                      ...deleteConfig,
-                      messages: e.target.checked,
-                    });
-                  }}
+              },
+            }}
+            control={
+              <Checkbox
+                color="secondary"
+                disabled={deleting}
+                defaultChecked
+                onChange={(e) => {
+                  setDeleteConfig({
+                    ...deleteConfig,
+                    messages: e.target.checked,
+                  });
+                }}
+              />
+            }
+            label="Messages"
+          />
+          {deleting && deleteObj && (
+            <>
+              <Box
+                my={1}
+                sx={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  display: "flex",
+                }}
+              >
+                <MessageChip
+                  avatar={`https://cdn.discordapp.com/avatars/${deleteObj.author.id}/${deleteObj.author.avatar}.png`}
+                  username={deleteObj.username}
+                  content={deleteObj.content}
                 />
-              }
-              label="Messages"
-            />
-            {deleting && deleteObj && (
-              <>
-                <Box
-                  my={1}
-                  sx={{
-                    alignItems: "center",
-                    justifyContent: "center",
-                    display: "flex",
-                  }}
-                >
-                  <MessageChip
-                    avatar={`https://cdn.discordapp.com/avatars/${deleteObj.author.id}/${deleteObj.author.avatar}.png`}
-                    username={deleteObj.username}
-                    content={deleteObj.content}
-                  />
-                  <ArrowRightAltIcon sx={{ color: textSecondary }} />
-                  <DeleteSweepIcon sx={{ color: "red" }} />
-                </Box>
-                <ModalDebugMessage debugMessage={debugMessage} />
-                <DiscordSpinner />
-                <DiscordTypography sx={{ display: "block" }} variant="caption">
-                  {deleteObj.id}
-                </DiscordTypography>
-              </>
-            )}
-          </FormGroup>
-        </DiscordPaper>
-      </DiscordDialogContent>
-      <DiscordDialogActions>
-        <DiscordButton
-          label="Close"
+                <ArrowRightAltIcon sx={{ color: textSecondary }} />
+                <DeleteSweepIcon sx={{ color: "red" }} />
+              </Box>
+              <ModalDebugMessage debugMessage={debugMessage} />
+              <Stack justifyContent="center" alignItems="center">
+                <CircularProgress />
+              </Stack>
+              <Typography sx={{ display: "block" }} variant="caption">
+                {deleteObj.id}
+              </Typography>
+            </>
+          )}
+        </FormGroup>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
           onClick={() => handleClose(returnRows)}
-          neutral
-        />
-        <DiscordButton
+          color="secondary"
+        >
+          Close
+        </Button>
+        <Button
+          variant="contained"
           disabled={deleting}
-          label="Delete"
           onClick={handleDeleteMessage}
           autoFocus
-        />
-      </DiscordDialogActions>
-    </DiscordDialog>
+        >
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 export default DeleteModal;
