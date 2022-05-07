@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -24,6 +24,7 @@ import {
 import MessageChip from "../../Chips/MessageChip";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
+import { MessageContext } from "../../../context/message/MessageContext";
 
 export const FormattedContent = ({ message, recipients, shrink = true }) => {
   const [displayMessage, setDisplayMessage] = useState("");
@@ -75,13 +76,11 @@ function getComparator(order, orderBy) {
 }
 
 export default function DiscordTable({
-  rows,
   setRefactoredData = () => {},
   exportTitle,
 }) {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
-  const [filterByParams, setFilterByParams] = useState([]);
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -112,111 +111,34 @@ export default function DiscordTable({
       label: "Message",
     },
   ];
+  const { state: messageState } = useContext(MessageContext);
+  const { filteredMessages, messages, filters } = messageState;
+  const displayRows =
+    filterOpen && filters.length ? filteredMessages : messages;
 
   useEffect(() => {
-    const parseRecipients = async () => {
-      let uniquieRecipients = new Map();
-      await rows.forEach((x) => {
-        uniquieRecipients.set(x.author.id, x.author.username);
-      });
-      setRecipients(uniquieRecipients);
-    };
-    if (originalRows === null && rows) {
-      parseRecipients();
-      setOriginalRows(rows);
-    }
-  }, [rows, originalRows]);
+    setPage(0);
+  }, [filters]);
 
-  useEffect(() => {
-    if (!filterOpen && originalRows != null) {
-      setRefactoredData(originalRows);
-    }
-  }, [filterOpen, originalRows]);
+  // useEffect(() => {
+  //   const parseRecipients = async () => {
+  //     let uniquieRecipients = new Map();
+  //     await displayRows.forEach((x) => {
+  //       uniquieRecipients.set(x.author.id, x.author.username);
+  //     });
+  //     setRecipients(uniquieRecipients);
+  //   };
+  //   if (originalRows === null && displayRows) {
+  //     parseRecipients();
+  //     setOriginalRows(displayRows);
+  //   }
+  // }, [displayRows, originalRows]);
 
-  useEffect(() => {
-    const filterRows = () => {
-      let retArr = [];
-      originalRows.forEach((x) => {
-        let criteriaMet = true;
-        filterByParams.every((param) => {
-          if (param.filterType === "text") {
-            if (param.filterName === "attachmentName") {
-              let csvAttachments = "";
-              x.attachments.forEach((attachment) => {
-                csvAttachments += attachment.filename + ",";
-              });
-              if (
-                !csvAttachments
-                  .toLowerCase()
-                  .includes(param.filterValue.toLowerCase())
-              ) {
-                criteriaMet = false;
-              }
-            } else {
-              let rowValue = x[param.filterName].toLowerCase();
-              let filterValue = param.filterValue.toLowerCase();
-              if (!rowValue.includes(filterValue)) {
-                criteriaMet = false;
-              }
-            }
-            return criteriaMet;
-          } else if (param.filterType === "date") {
-            if (param.filterName === "startTime") {
-              let startTime = Date.parse(param.filterValue);
-              let rowTime = Date.parse(x.timestamp);
-              if (rowTime < startTime) {
-                criteriaMet = false;
-              }
-            } else if (param.filterName === "endTime") {
-              let endTime = Date.parse(param.filterValue);
-              let rowTime = Date.parse(x.timestamp);
-              if (rowTime > endTime) {
-                criteriaMet = false;
-              }
-            }
-            return criteriaMet;
-          }
-        });
-        if (criteriaMet) retArr.push(x);
-      });
-
-      setRefactoredData(retArr);
-      setPage(0);
-    };
-    if (originalRows != null) {
-      if (filterByParams.length > 0) filterRows();
-      else setRefactoredData(originalRows);
-    }
-  }, [filterByParams]);
-
-  const handleFilterUpdate = (filterName, filterValue, filterType) => {
-    let filteredList = filterByParams.filter(
-      (x) => x.filterName !== filterName
-    );
-    if (filterType === "text") {
-      if (filterValue.length > 0)
-        setFilterByParams([
-          ...filteredList,
-          {
-            filterName: filterName,
-            filterValue: filterValue,
-            filterType: filterType,
-          },
-        ]);
-      else setFilterByParams([...filteredList]);
-    } else if (filterType === "date") {
-      if (filterValue !== null && filterValue !== "Invalid Date") {
-        setFilterByParams([
-          ...filteredList,
-          {
-            filterName: filterName,
-            filterValue: filterValue,
-            filterType: filterType,
-          },
-        ]);
-      } else setFilterByParams([...filteredList]);
-    }
-  };
+  // useEffect(() => {
+  //   if (!filterOpen && originalRows != null) {
+  //     setRefactoredData(originalRows);
+  //   }
+  // }, [filterOpen, originalRows]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -226,7 +148,7 @@ export default function DiscordTable({
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.id);
+      const newSelecteds = displayRows.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     } else {
@@ -263,7 +185,7 @@ export default function DiscordTable({
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - displayRows.length) : 0;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -274,10 +196,10 @@ export default function DiscordTable({
         handleClose={(returnRows) => {
           setDeleteModalOpen(false);
           setRefactoredData(returnRows);
-          if (JSON.stringify(returnRows) !== JSON.stringify(rows))
+          if (JSON.stringify(returnRows) !== JSON.stringify(displayRows))
             setSelected([]);
         }}
-        rows={rows}
+        rows={displayRows}
         selected={selected}
       />
       <EditModal
@@ -289,7 +211,7 @@ export default function DiscordTable({
           setRefactoredData(editedRows);
         }}
         selected={selected}
-        rows={rows}
+        rows={displayRows}
       />
       <AttachmentModal
         open={attachmentModalOpen}
@@ -300,7 +222,7 @@ export default function DiscordTable({
           setSelected(updatedSelected);
           setAttachmentModalOpen(false);
           let updatedArr = [];
-          await rows.forEach((x) => {
+          await displayRows.forEach((x) => {
             //Entire message was deleted
             if (e === null) {
               if (x.id !== selectedAttachmentRow.id) {
@@ -332,10 +254,9 @@ export default function DiscordTable({
           setFilterOpen={setFilterOpen}
           filterOpen={filterOpen}
           numSelected={selected.length}
-          handleFilterUpdate={handleFilterUpdate}
           setDeleteModalOpen={setDeleteModalOpen}
           setEditModalOpen={setEditModalOpen}
-          rows={rows}
+          rows={displayRows}
           recipients={recipients}
           exportTitle={exportTitle}
         />
@@ -353,11 +274,11 @@ export default function DiscordTable({
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={displayRows.length}
               columns={columns}
             />
             <TableBody>
-              {rows
+              {displayRows
                 .slice()
                 .sort(getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -476,7 +397,7 @@ export default function DiscordTable({
           sx={{ color: textSecondary, userSelect: "none" }}
           rowsPerPageOptions={[5, 10, 25, 50, 100, 1000, 10000]}
           component="div"
-          count={rows.length}
+          count={displayRows.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

@@ -28,12 +28,11 @@ function About() {
 
       <Paper sx={{ width: "85%" }}>
         <CustomGrid spacing={2} container>
-          <CustomGrid sx={{ flexDirection: "column" }} xs={12} item>
-            <Typography variant="h6">Support the Developer!</Typography>
-            <Typography>
-              This did take some time to make, you know 😜
-            </Typography>
-          </CustomGrid>
+          <CustomGrid
+            sx={{ flexDirection: "column" }}
+            xs={12}
+            item
+          ></CustomGrid>
           <CustomGrid xs={12} item>
             <a href="https://ko-fi.com/W7W4AAIBR" target="_blank">
               <img

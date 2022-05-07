@@ -13,6 +13,19 @@ const ChannelMessagesStyles = makeStyles(() => ({
     display: "flex",
     marginTop: "1vh",
   },
+  tableBox: {
+    maxHeight: "360px",
+    overflow: "auto",
+    "&::-webkit-scrollbar": {
+      width: "5px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      background: "#f1f1f1",
+    },
+    "&::-webkit-scrollbar-track": {
+      background: "#888",
+    },
+  },
 }));
 
 export default ChannelMessagesStyles;

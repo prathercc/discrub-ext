@@ -1,15 +1,16 @@
 import * as React from "react";
 import TextField from "@mui/material/TextField";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import LocalizationProvider from "@mui/lab/LocalizationProvider";
-import DateTimePicker from "@mui/lab/DateTimePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import InputAdornment from "@mui/material/InputAdornment";
+import { MobileDateTimePicker } from "@mui/x-date-pickers/MobileDateTimePicker";
 
 const DiscordDateTimePicker = ({ label, onChange }) => {
   const [value, setValue] = React.useState(null);
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <DateTimePicker
+      <MobileDateTimePicker
+        clearable
         renderInput={(props) => <TextField variant="filled" {...props} />}
         label={label}
         value={value}

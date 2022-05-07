@@ -12,7 +12,6 @@ const CloseWindowButton = () => {
       <Tooltip title="Close">
         <IconButton
           sx={{
-            "&:hover": { color: "rgb(166, 2, 2)" },
             color: textSecondary,
           }}
           onClick={() => sendChromeMessage("CLOSE_INJECTED_DIALOG")}

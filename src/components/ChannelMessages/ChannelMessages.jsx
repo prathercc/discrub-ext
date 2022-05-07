@@ -111,27 +111,29 @@ function ChannelMessages() {
               </TextField>
             </Stack>
           </Paper>
+
           {messages.length > 0 && !messagesLoading && (
-            <DiscordTable
-              rows={messages}
-              exportTitle={() => (
-                <>
-                  <Typography variant="h4">
-                    {
-                      guilds.find((guild) => guild.id === selectedGuild.id)
-                        ?.name
-                    }
-                  </Typography>
-                  <Typography variant="h6">
-                    {
-                      channels.find(
-                        (channel) => channel.id === selectedChannel.id
-                      )?.name
-                    }
-                  </Typography>
-                </>
-              )}
-            />
+            <Box className={classes.tableBox}>
+              <DiscordTable
+                exportTitle={() => (
+                  <>
+                    <Typography variant="h4">
+                      {
+                        guilds.find((guild) => guild.id === selectedGuild.id)
+                          ?.name
+                      }
+                    </Typography>
+                    <Typography variant="h6">
+                      {
+                        channels.find(
+                          (channel) => channel.id === selectedChannel.id
+                        )?.name
+                      }
+                    </Typography>
+                  </>
+                )}
+              />
+            </Box>
           )}
           {messages.length === 0 && !messagesLoading && selectedChannel.id && (
             <Paper sx={{ padding: "10px" }}>

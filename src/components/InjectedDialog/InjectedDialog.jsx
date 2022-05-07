@@ -11,10 +11,10 @@ import {
 } from "../../styleConstants";
 import { UserContext } from "../../context/user/UserContext";
 import CloseWindowButton from "./CloseWindowButton";
-import DevelopmentMessages from "./DevelopmentMessages";
 import { MessageContext } from "../../context/message/MessageContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { GuildContext } from "../../context/guild/GuildContext";
+import { Typography } from "@mui/material";
 
 function InjectedDialog() {
   const { getUserData } = useContext(UserContext);
@@ -40,6 +40,8 @@ function InjectedDialog() {
       sx={{
         backgroundColor: discordPrimary,
         height: "700px",
+        maxHeight: "700px",
+        maxWidth: "775px",
         width: "775px",
         color: textSecondary,
         fontFamily: fontFamily,
@@ -55,7 +57,15 @@ function InjectedDialog() {
       {menuIndex === 0 && <ChannelMessages />}
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <About />}
-      <DevelopmentMessages />
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: "0px",
+          right: "5px",
+        }}
+      >
+        <Typography>Version 1.0.4</Typography>
+      </Box>
       <CloseWindowButton />
     </Box>
   );
