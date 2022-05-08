@@ -26,55 +26,6 @@ import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import { MessageContext } from "../../../context/message/MessageContext";
 
-export const FormattedContent = ({ message, recipients, shrink = true }) => {
-  const [displayMessage, setDisplayMessage] = useState("");
-  useEffect(() => {
-    const updateMessage = async () => {
-      if (message && recipients) {
-        let msg = message;
-        for (let [key, value] of recipients.entries()) {
-          msg = msg.replace(`<@${key}>`, `@${value}`);
-          msg = msg.replace(`<@!${key}>`, `@${value}`);
-        }
-        setDisplayMessage(msg);
-      } else {
-        setDisplayMessage("");
-      }
-    };
-    updateMessage();
-  }, [message, recipients]);
-
-  return (
-    <>
-      {displayMessage.length > 60 && shrink ? (
-        <Tooltip title={displayMessage}>
-          <Typography variant="caption">
-            {displayMessage.slice(0, 60)}...
-          </Typography>
-        </Tooltip>
-      ) : (
-        <Typography variant="caption">{displayMessage}</Typography>
-      )}
-    </>
-  );
-};
-
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
 export default function DiscordTable({
   setRefactoredData = () => {},
   exportTitle,
@@ -90,7 +41,6 @@ export default function DiscordTable({
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [selectedAttachmentRow, setSelectedAttachmentRow] = useState(null);
-  const [recipients, setRecipients] = useState(null);
   const columns = [
     {
       id: "timestamp",
@@ -118,27 +68,7 @@ export default function DiscordTable({
 
   useEffect(() => {
     setPage(0);
-  }, [filters]);
-
-  // useEffect(() => {
-  //   const parseRecipients = async () => {
-  //     let uniquieRecipients = new Map();
-  //     await displayRows.forEach((x) => {
-  //       uniquieRecipients.set(x.author.id, x.author.username);
-  //     });
-  //     setRecipients(uniquieRecipients);
-  //   };
-  //   if (originalRows === null && displayRows) {
-  //     parseRecipients();
-  //     setOriginalRows(displayRows);
-  //   }
-  // }, [displayRows, originalRows]);
-
-  // useEffect(() => {
-  //   if (!filterOpen && originalRows != null) {
-  //     setRefactoredData(originalRows);
-  //   }
-  // }, [filterOpen, originalRows]);
+  }, [filters, filterOpen]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -180,6 +110,10 @@ export default function DiscordTable({
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const descendingComparator = (a, b, orderBy) => {
+    return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
   };
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
@@ -257,7 +191,6 @@ export default function DiscordTable({
           setDeleteModalOpen={setDeleteModalOpen}
           setEditModalOpen={setEditModalOpen}
           rows={displayRows}
-          recipients={recipients}
           exportTitle={exportTitle}
         />
         <TableContainer>
@@ -280,7 +213,11 @@ export default function DiscordTable({
             <TableBody>
               {displayRows
                 .slice()
-                .sort(getComparator(order, orderBy))
+                .sort(
+                  order === "desc"
+                    ? (a, b) => descendingComparator(a, b, orderBy)
+                    : (a, b) => -descendingComparator(a, b, orderBy)
+                )
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
                   const isItemSelected = isSelected(row.id);
@@ -339,10 +276,9 @@ export default function DiscordTable({
                             xs={8}
                             px={1}
                           >
-                            <FormattedContent
-                              recipients={recipients}
-                              message={row.content}
-                            />
+                            <Typography variant="caption">
+                              {row.content}
+                            </Typography>
                           </Grid>
                         </Grid>
                       </td>

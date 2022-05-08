@@ -22,7 +22,6 @@ const EnhancedTableToolbar = (props) => {
     setDeleteModalOpen,
     setEditModalOpen,
     rows,
-    recipients,
     exportTitle,
   } = props;
 
@@ -53,11 +52,7 @@ const EnhancedTableToolbar = (props) => {
               </IconButton>
             </Tooltip>
             <IconButton>
-              <ExportButtonGroup
-                rows={rows}
-                recipients={recipients}
-                exportTitle={exportTitle}
-              />
+              <ExportButtonGroup rows={rows} exportTitle={exportTitle} />
             </IconButton>
           </Stack>
           {filterOpen && (

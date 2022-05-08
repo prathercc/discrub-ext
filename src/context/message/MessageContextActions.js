@@ -121,13 +121,27 @@ export const getMessageData = async (channelIdRef, token, dispatch) => {
   } catch (e) {
     console.error("Error fetching channel messages");
   } finally {
+    let uniqueRecipients = new Map();
+    await retArr.forEach((x) => {
+      uniqueRecipients.set(x.author.id, x.author.username);
+    });
+    const parseAts = (messageContent) => {
+      for (let [key, value] of uniqueRecipients.entries()) {
+        messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
+        messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
+      }
+      return messageContent;
+    };
     dispatch({
       type: GET_MESSAGE_DATA_COMPLETE,
       payload: {
-        messages: retArr.map((message) => ({
-          ...message,
-          username: message.author.username,
-        })),
+        messages: retArr.map((message) => {
+          return {
+            ...message,
+            username: message.author.username,
+            content: parseAts(message.content),
+          };
+        }),
       },
     });
   }

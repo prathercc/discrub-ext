@@ -26,7 +26,7 @@ const options = [
   "gsdgsdfsdf",
 ];
 
-const ExportButtonGroup = ({ rows, recipients, exportTitle }) => {
+const ExportButtonGroup = ({ rows, exportTitle }) => {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
