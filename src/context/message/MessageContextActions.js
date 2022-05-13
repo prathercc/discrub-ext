@@ -1,4 +1,8 @@
-import { fetchMessageData } from "../../discordService";
+import {
+  fetchMessageData,
+  editMessage,
+  deleteMessage as delMsg,
+} from "../../discordService";
 import {
   GET_MESSAGE_DATA,
   GET_MESSAGE_DATA_COMPLETE,
@@ -7,7 +11,53 @@ import {
   FILTER_MESSAGE,
   FILTER_MESSAGE_COMPLETE,
   UPDATE_FILTERS_COMPLETE,
+  UPDATE_MESSAGE_SUCCESS,
+  SET_SELECTED,
+  DELETE_MESSAGE_SUCCESS,
+  SET_ATTACHMENT_MESSAGE_COMPLETE,
 } from "./MessageContextConstants";
+
+export const setAttachmentMessage = async (message, dispatch) => {
+  dispatch({ type: SET_ATTACHMENT_MESSAGE_COMPLETE, payload: message });
+};
+
+export const setSelected = async (messageIds, dispatch) => {
+  dispatch({ type: SET_SELECTED, payload: messageIds });
+};
+
+export const deleteMessage = async (message, channelId, token, dispatch) => {
+  const response = await delMsg(token, message.id, channelId);
+  if (response.status === 204) {
+    dispatch({ type: DELETE_MESSAGE_SUCCESS, payload: message });
+    return null;
+  } else if (response.retry_after) {
+    return response.retry_after;
+  } else {
+    return -1;
+  }
+};
+
+export const updateMessage = async (message, channelId, token, dispatch) => {
+  // Returns null on success, -1 on permission error, and an unsigned int on retry_after error
+  try {
+    const data = await editMessage(
+      token,
+      message.id,
+      { content: message.content, attachments: message.attachments },
+      channelId
+    );
+    if (!data.message) {
+      dispatch({ type: UPDATE_MESSAGE_SUCCESS, payload: data });
+      return null;
+    } else if (data.retry_after) {
+      return data.retry_after;
+    } else {
+      return -1;
+    }
+  } catch (e) {
+    console.error("Error Editing Message");
+  }
+};
 
 export const updateFilters = async (
   filterName,

@@ -30,6 +30,47 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: {
+          color: "rgb(210, 213, 247, 1)",
+          userSelect: "none",
+          "& .MuiFormControlLabel-label.Mui-disabled": {
+            color: "rgb(210, 213, 247, 1)",
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          maxWidth: "200px",
+          border: "1px solid rgb(88, 101, 242, 1)",
+          backgroundColor: "rgb(32, 34, 37, 1)",
+          color: "rgb(210, 213, 247, 1)",
+          ".MuiChip-deleteIcon": {
+            color: "rgb(210, 213, 247, 1)",
+            "&:hover": { color: "rgb(166, 2, 2)" },
+          },
+        },
+      },
+    },
+    MuiTableSortLabel: {
+      styleOverrides: {
+        active: { color: "rgb(210, 213, 247, 1) !important" },
+        root: {
+          color: "rgb(210, 213, 247, 1) !important",
+          "&:hover": {
+            color: "rgb(210, 213, 247, 1) !important",
+          },
+        },
+        icon: {
+          color: "rgb(210, 213, 247, 1) !important",
+        },
+        iconDirectionAsc: { color: "rgb(210, 213, 247, 1) !important" },
+        iconDirectionDesc: { color: "rgb(210, 213, 247, 1) !important" },
+      },
+    },
     MuiCheckbox: {
       styleOverrides: {
         root: {

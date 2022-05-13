@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
@@ -15,22 +15,19 @@ import {
   Button,
   CircularProgress,
 } from "@mui/material";
+import { MessageContext } from "../../context/message/MessageContext";
 
-const options = [
-  "HTML",
-  "PDF",
-  "JSON",
-  "hhhhhh",
-  "gsdfsdfsdf",
-  "asfsdfsdf",
-  "gsdgsdfsdf",
-];
+const options = ["HTML", "PDF", "JSON"];
 
-const ExportButtonGroup = ({ rows, exportTitle }) => {
+const ExportButtonGroup = ({ exportTitle }) => {
+  const { state: messageState } = useContext(MessageContext);
+  const { messages } = messageState;
+
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [printing, setPrinting] = useState(false);
+
   const componentRef = useRef();
 
   const handleHtml = useReactToPrint({
@@ -83,7 +80,7 @@ const ExportButtonGroup = ({ rows, exportTitle }) => {
           handlePdf();
           break;
         case "JSON":
-          let json_string = JSON.stringify(rows);
+          let json_string = JSON.stringify(messages);
           let link = document.createElement("a");
           link.download = "Exported Messages.json";
           let blob = new Blob([json_string], { type: "text/plain" });
@@ -95,7 +92,7 @@ const ExportButtonGroup = ({ rows, exportTitle }) => {
       }
     };
     const getLastElement = () =>
-      document.getElementById(`message-data-${rows.length - 1}`);
+      document.getElementById(`message-data-${messages.length - 1}`);
     const loadContent = async () => {
       let lastElement = getLastElement();
       while (!lastElement) {
@@ -111,7 +108,7 @@ const ExportButtonGroup = ({ rows, exportTitle }) => {
     if (printing) {
       loadContent();
     }
-  }, [printing, rows, handleHtml, handlePdf, selectedIndex]);
+  }, [printing, messages, handleHtml, handlePdf, selectedIndex]);
 
   return (
     <>
@@ -124,7 +121,7 @@ const ExportButtonGroup = ({ rows, exportTitle }) => {
             </Typography>
           </Stack>
           {printing &&
-            rows.map((row, index) => {
+            messages.map((row, index) => {
               const messageDate = new Date(Date.parse(row.timestamp));
               return (
                 <Stack

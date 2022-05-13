@@ -1,31 +1,18 @@
 import React from "react";
-import {
-  textPrimary,
-  textSecondary,
-  discordPrimary,
-} from "../../styleConstants";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
 import Tooltip from "@mui/material/Tooltip";
+import ChipStyles from "./Chip.styles";
 
 const AttachmentChip = (props) => {
+  const classes = ChipStyles();
   return (
     <Chip
-      disabled={props.disabled}
-      sx={{
-        maxWidth: "200px",
-        border: `1px solid ${textPrimary}`,
-        color: textSecondary,
-        backgroundColor: discordPrimary,
-        ".MuiChip-deleteIcon": {
-          color: textSecondary,
-          "&:hover": { color: "rgb(166, 2, 2)" },
-        },
-      }}
+      {...props}
       avatar={
         <Tooltip title="Open">
           <Avatar
-            sx={{ cursor: "pointer" }}
+            className={classes.avatar}
             onClick={() => window.open(props.url, "_blank")}
             alt={props.filename}
             src={props.url}
@@ -34,7 +21,6 @@ const AttachmentChip = (props) => {
       }
       label={props.filename}
       variant="filled"
-      onDelete={props.onDelete}
     />
   );
 };

@@ -6,7 +6,6 @@ import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
 import {
-  Paper,
   Typography,
   Button,
   Stack,

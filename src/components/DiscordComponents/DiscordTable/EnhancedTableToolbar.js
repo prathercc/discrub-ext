@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -8,29 +8,29 @@ import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import EditIcon from "@mui/icons-material/Edit";
-
-import { textSecondary } from "../../../styleConstants";
+import { MessageContext } from "../../../context/message/MessageContext";
 import ExportButtonGroup from "../../Export/ExportButtonGroup";
 import FilterComponent from "./FilterComponent";
+import DiscordTableStyles from "./DiscordTable.styles";
 
-const EnhancedTableToolbar = (props) => {
-  const {
-    numSelected,
-    setFilterOpen,
-    filterOpen,
-    handleFilterUpdate,
-    setDeleteModalOpen,
-    setEditModalOpen,
-    rows,
-    exportTitle,
-  } = props;
+const EnhancedTableToolbar = ({
+  setFilterOpen,
+  filterOpen,
+  setDeleteModalOpen,
+  setEditModalOpen,
+  exportTitle,
+}) => {
+  const classes = DiscordTableStyles();
+
+  const { state: messageState } = useContext(MessageContext);
+  const { selectedMessages } = messageState;
 
   return (
     <Toolbar
       sx={{
         pl: { sm: 2 },
         pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
+        ...(selectedMessages.length > 0 && {
           bgcolor: (theme) =>
             alpha(
               theme.palette.primary.main,
@@ -39,50 +39,47 @@ const EnhancedTableToolbar = (props) => {
         }),
       }}
     >
-      <Stack sx={{ width: "100%" }} direction="column">
-        <Stack sx={{ width: "100%" }} alignItems="baseline" direction="column">
+      <Stack className={classes.stack} direction="column">
+        <Stack
+          className={classes.stack}
+          alignItems="baseline"
+          direction="column"
+        >
           <Stack
-            sx={{ width: "100%" }}
+            className={classes.stack}
             direction="row"
             justifyContent="space-between"
           >
             <Tooltip title="Filter list">
               <IconButton onClick={() => setFilterOpen(!filterOpen)}>
-                <FilterListIcon sx={{ color: textSecondary }} />
+                <FilterListIcon className={classes.icon} />
               </IconButton>
             </Tooltip>
             <IconButton>
-              <ExportButtonGroup rows={rows} exportTitle={exportTitle} />
+              <ExportButtonGroup exportTitle={exportTitle} />
             </IconButton>
           </Stack>
-          {filterOpen && (
-            <FilterComponent handleFilterUpdate={handleFilterUpdate} />
-          )}
+          {filterOpen && <FilterComponent />}
         </Stack>
 
-        {numSelected > 0 && (
+        {selectedMessages.length > 0 && (
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
           >
-            <Typography
-              sx={{ color: textSecondary }}
-              color="inherit"
-              variant="subtitle1"
-              component="div"
-            >
-              {numSelected} selected
+            <Typography variant="subtitle1" component="div">
+              {selectedMessages.length} selected
             </Typography>
             <Stack justifyContent="flex-end" direction="row">
               <Tooltip title="Delete">
                 <IconButton onClick={() => setDeleteModalOpen(true)}>
-                  <DeleteIcon sx={{ color: textSecondary }} />
+                  <DeleteIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Edit">
                 <IconButton onClick={() => setEditModalOpen(true)}>
-                  <EditIcon sx={{ color: textSecondary }} />
+                  <EditIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>
             </Stack>

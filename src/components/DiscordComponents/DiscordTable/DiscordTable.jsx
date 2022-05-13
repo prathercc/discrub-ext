@@ -15,54 +15,47 @@ import DeleteModal from "../../Modals/DeleteModal";
 import EditModal from "../../Modals/EditModal";
 import AttachmentModal from "../../Modals/AttachmentModal";
 import AttachmentIcon from "@mui/icons-material/Attachment";
-import {
-  textSecondary,
-  textPrimary,
-  discordSecondary,
-  discordPrimary,
-} from "../../../styleConstants";
 import MessageChip from "../../Chips/MessageChip";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import { MessageContext } from "../../../context/message/MessageContext";
+import DiscordTableStyles from "./DiscordTable.styles";
 
-export default function DiscordTable({
-  setRefactoredData = () => {},
-  exportTitle,
-}) {
+export default function DiscordTable({ exportTitle }) {
+  const classes = DiscordTableStyles();
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
-  const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [originalRows, setOriginalRows] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
-  const [selectedAttachmentRow, setSelectedAttachmentRow] = useState(null);
+  // const [selectedAttachmentRow, setSelectedAttachmentRow] = useState(null);
   const columns = [
     {
       id: "timestamp",
-      numeric: false,
       disablePadding: true,
       label: "Date",
     },
     {
       id: "username",
-      numeric: false,
       disablePadding: true,
       label: "Username",
     },
     {
       id: "content",
-      numeric: false,
       disablePadding: false,
       label: "Message",
     },
   ];
-  const { state: messageState } = useContext(MessageContext);
-  const { filteredMessages, messages, filters } = messageState;
+  const {
+    state: messageState,
+    setSelected,
+    setAttachmentMessage,
+  } = useContext(MessageContext);
+  const { filteredMessages, messages, filters, selectedMessages } =
+    messageState;
   const displayRows =
     filterOpen && filters.length ? filteredMessages : messages;
 
@@ -78,26 +71,25 @@ export default function DiscordTable({
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = displayRows.map((n) => n.id);
-      setSelected(newSelecteds);
+      setSelected(displayRows.map((n) => n.id));
       return;
     } else {
       setSelected([]);
     }
   };
   const handleClick = (event, id) => {
-    const selectedIndex = selected.indexOf(id);
+    const selectedIndex = selectedMessages.indexOf(id);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
+      newSelected = newSelected.concat(selectedMessages, id);
     } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
+      newSelected = newSelected.concat(selectedMessages.slice(1));
+    } else if (selectedIndex === selectedMessages.length - 1) {
+      newSelected = newSelected.concat(selectedMessages.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
+        selectedMessages.slice(0, selectedIndex),
+        selectedMessages.slice(selectedIndex + 1)
       );
     }
     setSelected(newSelected);
@@ -116,44 +108,30 @@ export default function DiscordTable({
     return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
   };
 
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (name) => selectedMessages.indexOf(name) !== -1;
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - displayRows.length) : 0;
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box className={classes.box}>
       <DeleteModal
-        setOriginalRows={setOriginalRows}
-        originalRows={originalRows}
         open={deleteModalOpen}
-        handleClose={(returnRows) => {
-          setDeleteModalOpen(false);
-          setRefactoredData(returnRows);
-          if (JSON.stringify(returnRows) !== JSON.stringify(displayRows))
-            setSelected([]);
-        }}
+        handleClose={() => setDeleteModalOpen(false)}
         rows={displayRows}
-        selected={selected}
       />
       <EditModal
-        setOriginalRows={setOriginalRows}
-        originalRows={originalRows}
         open={editModalOpen}
-        handleClose={(editedRows) => {
-          setEditModalOpen(false);
-          setRefactoredData(editedRows);
-        }}
-        selected={selected}
-        rows={displayRows}
+        handleClose={() => setEditModalOpen(false)}
       />
       <AttachmentModal
         open={attachmentModalOpen}
         handleClose={async (e) => {
-          let updatedSelected = await selected.filter(
+          let updatedSelected = await selectedMessages.filter(
             (x) => x !== selectedAttachmentRow.id
           );
           setSelected(updatedSelected);
+
           setAttachmentModalOpen(false);
           let updatedArr = [];
           await displayRows.forEach((x) => {
@@ -171,38 +149,20 @@ export default function DiscordTable({
             }
           });
           setSelectedAttachmentRow(null);
-          setRefactoredData(updatedArr);
+          // setRefactoredData(updatedArr);
         }}
-        row={selectedAttachmentRow}
       />
-      <Paper
-        sx={{
-          width: "100%",
-          mb: 2,
-          backgroundColor: discordSecondary,
-          borderRadius: "6px",
-          color: textPrimary,
-        }}
-      >
+      <Paper className={classes.paper}>
         <EnhancedTableToolbar
           setFilterOpen={setFilterOpen}
           filterOpen={filterOpen}
-          numSelected={selected.length}
           setDeleteModalOpen={setDeleteModalOpen}
           setEditModalOpen={setEditModalOpen}
-          rows={displayRows}
           exportTitle={exportTitle}
         />
         <TableContainer>
-          <Table
-            sx={{
-              maxWidth: 774,
-            }}
-            aria-labelledby="tableTitle"
-            size="small"
-          >
+          <Table className={classes.table} size="small">
             <EnhancedTableHead
-              numSelected={selected.length}
               order={order}
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
@@ -219,7 +179,7 @@ export default function DiscordTable({
                     : (a, b) => -descendingComparator(a, b, orderBy)
                 )
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
+                .map((row) => {
                   const isItemSelected = isSelected(row.id);
 
                   return (
@@ -232,24 +192,13 @@ export default function DiscordTable({
                       key={row.id}
                       selected={isItemSelected}
                     >
-                      <td
-                        style={{
-                          textAlign: "left",
-                          verticalAlign: "middle",
-                          borderBottom: `1px solid ${textPrimary}`,
-                        }}
-                        colspan={4}
-                      >
+                      <td className={classes.tdContent} colspan={4}>
                         <Grid container>
                           <Grid xs={4} item>
-                            <Grid sx={{ paddingLeft: 2 }} container>
+                            <Grid className={classes.gridAvatar} container>
                               <Grid xs={12} item>
                                 <MessageChip
-                                  sx={{
-                                    border: "none",
-                                    backgroundColor: "transparent",
-                                    userSelect: "none",
-                                  }}
+                                  className={classes.messageChip}
                                   username={row.username}
                                   avatar={`https://cdn.discordapp.com/avatars/${row.author.id}/${row.author.avatar}.png`}
                                   content={row.username}
@@ -257,7 +206,7 @@ export default function DiscordTable({
                               </Grid>
                               <Grid px={1} item xs={12}>
                                 <Typography
-                                  sx={{ userSelect: "none" }}
+                                  className={classes.typography}
                                   variant="caption"
                                 >
                                   {new Date(
@@ -268,10 +217,7 @@ export default function DiscordTable({
                             </Grid>
                           </Grid>
                           <Grid
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                            }}
+                            className={classes.gridMessage}
                             item
                             xs={8}
                             px={1}
@@ -282,14 +228,7 @@ export default function DiscordTable({
                           </Grid>
                         </Grid>
                       </td>
-                      <td
-                        colspan={1}
-                        style={{
-                          textAlign: "center",
-                          verticalAlign: "middle",
-                          borderBottom: `1px solid ${textPrimary}`,
-                        }}
-                      >
+                      <td colspan={1} className={classes.tdAttachment}>
                         <Tooltip title="Attachments">
                           <IconButton
                             disabled={row.attachments.length === 0}
@@ -300,14 +239,7 @@ export default function DiscordTable({
                             }}
                             color="primary"
                           >
-                            <AttachmentIcon
-                              sx={{
-                                color:
-                                  row.attachments.length === 0
-                                    ? discordPrimary
-                                    : textSecondary,
-                              }}
-                            />
+                            <AttachmentIcon />
                           </IconButton>
                         </Tooltip>
                       </td>
@@ -316,21 +248,18 @@ export default function DiscordTable({
                 })}
               {emptyRows > 0 && (
                 <TableRow
-                  style={{
+                  sx={{
                     height: 33 * emptyRows,
                   }}
                 >
-                  <TableCell
-                    sx={{ borderBottom: `1px solid ${textPrimary}` }}
-                    colSpan={6}
-                  />
+                  <TableCell className={classes.tablecell} colSpan={6} />
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
-          sx={{ color: textSecondary, userSelect: "none" }}
+          className={classes.tablePagination}
           rowsPerPageOptions={[5, 10, 25, 50, 100, 1000, 10000]}
           component="div"
           count={displayRows.length}

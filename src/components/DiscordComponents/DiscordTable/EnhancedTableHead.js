@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import Box from "@mui/material/Box";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
@@ -6,18 +6,22 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { visuallyHidden } from "@mui/utils";
-import { textSecondary, textPrimary } from "../../../styleConstants";
+import { MessageContext } from "../../../context/message/MessageContext";
+import DiscordTableStyles from "./DiscordTable.styles";
 
-const EnhancedTableHead = (props) => {
-  const {
-    onSelectAllClick,
-    order,
-    orderBy,
-    numSelected,
-    rowCount,
-    onRequestSort,
-    columns,
-  } = props;
+const EnhancedTableHead = ({
+  onSelectAllClick,
+  order,
+  orderBy,
+  rowCount,
+  onRequestSort,
+  columns,
+}) => {
+  const classes = DiscordTableStyles();
+
+  const { state: messageState } = useContext(MessageContext);
+  const { selectedMessages } = messageState;
+
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -25,24 +29,21 @@ const EnhancedTableHead = (props) => {
   return (
     <TableHead>
       <TableRow>
-        <TableCell
-          sx={{ borderBottom: `1px solid ${textPrimary}` }}
-          padding="checkbox"
-        >
+        <TableCell className={classes.tablecell} padding="checkbox">
           <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
+            indeterminate={
+              selectedMessages.length > 0 && selectedMessages.length < rowCount
+            }
+            checked={rowCount > 0 && selectedMessages.length === rowCount}
             onChange={onSelectAllClick}
             color="secondary"
           />
         </TableCell>
         {columns.map((column) => (
           <TableCell
-            sx={{
-              borderBottom: `1px solid ${textPrimary}`,
-            }}
+            className={classes.tablecell}
             key={column.id}
-            align={column.numeric ? "right" : "left"}
+            align="left"
             padding={column.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === column.id ? order : false}
           >
@@ -50,21 +51,6 @@ const EnhancedTableHead = (props) => {
               active={orderBy === column.id}
               direction={orderBy === column.id ? order : "asc"}
               onClick={createSortHandler(column.id)}
-              sx={{
-                color: textSecondary,
-                "&:hover": {
-                  color: textSecondary,
-                },
-                "&.Mui-active": {
-                  color: textSecondary,
-                  "&:hover": {
-                    color: textSecondary,
-                  },
-                  ".MuiTableSortLabel-icon": {
-                    color: textSecondary,
-                  },
-                },
-              }}
             >
               {column.label}
               {orderBy === column.id ? (
@@ -75,10 +61,7 @@ const EnhancedTableHead = (props) => {
             </TableSortLabel>
           </TableCell>
         ))}
-        <TableCell
-          sx={{ borderBottom: `1px solid ${textPrimary}` }}
-          padding="checkbox"
-        />
+        <TableCell className={classes.tablecell} padding="checkbox" />
       </TableRow>
     </TableHead>
   );

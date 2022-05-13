@@ -11,6 +11,10 @@ import {
   resetMessageData as resetMessageDataAction,
   filterMessages as filterMessagesAction,
   updateFilters as updateFiltersAction,
+  updateMessage as updateMessageAction,
+  setSelected as setSelectedAction,
+  deleteMessage as deleteMessageAction,
+  setAttachmentMessage as setAttachmentMessageAction,
 } from "./MessageContextActions";
 import { MessageReducer } from "./MessageReducer";
 import { UserContext } from "../user/UserContext";
@@ -32,14 +36,43 @@ const MessageContextProvider = (props) => {
   const [state, dispatch] = useReducer(
     MessageReducer,
     Object.freeze({
-      messages: [],
-      selectedMessages: [],
-      filteredMessages: [],
-      filters: [],
-      fetchedMessageLength: 0,
+      messages: [], // Message objects
+      selectedMessages: [], // Array of id
+      filteredMessages: [], // Message objects
+      filters: [], // Array of object filters
+      fetchedMessageLength: 0, // Current length of fetched messages, used for debugging message fetch progress
       isLoading: null,
+      attachmentMessage: null, // The selected message for deleting attachments
     })
   );
+
+  const setAttachmentMessage = async (message) => {
+    await setAttachmentMessageAction(message, dispatch);
+  };
+
+  const setSelected = async (messageIds) => {
+    await setSelectedAction(messageIds, dispatch);
+  };
+
+  const updateMessage = async (message) => {
+    const response = await updateMessageAction(
+      message,
+      selectedChannel.id,
+      token,
+      dispatch
+    );
+    return response;
+  };
+
+  const deleteMessage = async (message) => {
+    const response = await deleteMessageAction(
+      message,
+      selectedChannel.id,
+      token,
+      dispatch
+    );
+    return response;
+  };
 
   const getMessageData = useCallback(async () => {
     if (selectedChannel.id && token)
@@ -75,6 +108,10 @@ const MessageContextProvider = (props) => {
         getMessageData,
         resetMessageData,
         updateFilters,
+        updateMessage,
+        setSelected,
+        deleteMessage,
+        setAttachmentMessage,
       }}
     >
       {props.children}
