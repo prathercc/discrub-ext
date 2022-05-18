@@ -30,6 +30,15 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          " & th": {
+            borderBottom: "1px solid rgb(88, 101, 242)",
+          },
+        },
+      },
+    },
     MuiFormControlLabel: {
       styleOverrides: {
         root: {
