@@ -43,8 +43,8 @@ const DiscordTableStyles = makeStyles(() => ({
     wordBreak: "break-all",
   },
   messageChip: {
-    border: "none",
-    backgroundColor: "transparent",
+    border: "none !important",
+    backgroundColor: "transparent !important",
     userSelect: "none",
   },
   typography: {
