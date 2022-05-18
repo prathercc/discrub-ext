@@ -40,6 +40,7 @@ const DiscordTableStyles = makeStyles(() => ({
   gridMessage: {
     display: "flex",
     alignItems: "center",
+    wordBreak: "break-all",
   },
   messageChip: {
     border: "none",

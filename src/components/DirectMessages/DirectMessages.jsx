@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
-import { fetchDirectMessages, fetchMessageData } from "../../discordService";
+import React, { useEffect, useContext } from "react";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
@@ -12,196 +11,128 @@ import {
   TextField,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
+import { DmContext } from "../../context/dm/DmContext";
+import { MessageContext } from "../../context/message/MessageContext";
+import DirectMessagesStyles from "./DirectMessages.styles";
 
 function DirectMessages() {
+  const classes = DirectMessagesStyles();
+
   const { state: userState } = useContext(UserContext);
+  const { state: dmState, getDms, setDm } = useContext(DmContext);
+  const {
+    state: messageState,
+    resetMessageData,
+    getMessageData,
+  } = useContext(MessageContext);
+
+  const { selectedDm, dms } = dmState;
+  const {
+    fetchedMessageLength,
+    isLoading: messagesLoading,
+    messages,
+  } = messageState;
   const { token } = userState;
 
-  const [directMessages, setDirectMessages] = useState(null);
-  const [selectedDirectMessage, setSelectedDirectMessage] = useState(null);
-  const [messageData, setMessageData] = useState(null);
-  const [fetchingData, setFetchingData] = useState(false);
-  const [numOfMessagesFetched, setNumOfMessagesFetched] = useState(0);
-
-  const mountedRef = useRef(false);
-
-  const boxSx = {
-    alignItems: "center",
-    justifyContent: "center",
-    display: "flex",
-    marginTop: "1vh",
-  };
+  useEffect(() => {
+    getDms();
+  }, [getDms]);
 
   useEffect(() => {
-    const getDirectMessages = async () => {
-      try {
-        const data = await fetchDirectMessages(token);
-        setDirectMessages(data);
-      } catch (e) {
-        console.error("Error fetching DM's");
-        setDirectMessages([]);
-      }
+    const fetchDmData = async () => {
+      await resetMessageData();
+      await getMessageData(selectedDm.id);
     };
-    if (token) getDirectMessages();
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const getAllMessages = async () => {
-      setMessageData(null);
-      setFetchingData(true);
-      let lastId = "";
-      let reachedEnd = false;
-      let retArr = [];
-      while (!reachedEnd && mountedRef.current) {
-        const data = await fetchMessageData(
-          token,
-          lastId,
-          selectedDirectMessage
-        );
-        if (data.length < 100) {
-          reachedEnd = true;
-        }
-        if (data.length > 0) {
-          lastId = data[data.length - 1].id;
-        }
-        if (data && (data[0]?.content || data[0]?.attachments)) {
-          retArr = retArr.concat(data);
-          setNumOfMessagesFetched(retArr.length);
-        }
-      }
-      setNumOfMessagesFetched(0);
-      setMessageData(retArr);
-      setFetchingData(false);
-    };
-
-    if (selectedDirectMessage) {
-      getAllMessages();
-    }
-  }, [selectedDirectMessage]);
+    if (selectedDm.id) fetchDmData();
+  }, [selectedDm.id, getMessageData, resetMessageData]);
 
   return (
-    <Box
-      sx={{
-        padding: "15px",
-        maxHeight: "85%",
-        maxWidth: "100%",
-        overflow: "auto",
-      }}
-    >
-      <Paper sx={{ padding: "10px" }}>
-        {token && directMessages && (
-          <>
-            <Typography variant="h5">Your Direct Messages</Typography>
-            <Typography variant="caption">
-              Messages between other Discord users and yourself.
-            </Typography>
-            <TextField
-              fullWidth
-              variant="filled"
-              disabled={fetchingData}
-              value={selectedDirectMessage}
-              onChange={(e) => setSelectedDirectMessage(e.target.value)}
-              sx={{ my: "5px" }}
-              select
-              label="Direct Messages"
-            >
-              {directMessages.map((directMessage) => {
-                return (
-                  <MenuItem key={directMessage.id} value={directMessage.id}>
-                    {directMessage.recipients.length === 1
-                      ? directMessage.recipients[0].username
-                      : directMessage.name
-                      ? `Group Chat - ${directMessage.name}`
-                      : `Unnamed Group Chat - ${directMessage.id}`}
-                  </MenuItem>
-                );
-              })}
-            </TextField>
-          </>
-        )}
-
-        {(!token || !directMessages || fetchingData) && (
-          <>
-            <Stack justifyContent="center" alignItems="center">
-              <CircularProgress />
+    <Stack spacing={2} className={classes.boxContainer}>
+      {token && dms && (
+        <Stack spacing={2}>
+          <Paper className={classes.paper}>
+            <Stack spacing={2}>
+              <Stack>
+                <Typography variant="h5">Your Direct Messages</Typography>
+                <Typography variant="caption">
+                  Messages between other Discord users and yourself.
+                </Typography>
+              </Stack>
+              <TextField
+                fullWidth
+                variant="filled"
+                disabled={messagesLoading}
+                value={selectedDm.id}
+                onChange={(e) => setDm(e.target.value)}
+                select
+                label="Direct Messages"
+              >
+                {dms.map((directMessage) => {
+                  return (
+                    <MenuItem key={directMessage.id} value={directMessage.id}>
+                      {directMessage.recipients.length === 1
+                        ? directMessage.recipients[0].username
+                        : directMessage.name
+                        ? `Group Chat - ${directMessage.name}`
+                        : `Unnamed Group Chat - ${directMessage.id}`}
+                    </MenuItem>
+                  );
+                })}
+              </TextField>
             </Stack>
-            <Box sx={boxSx}>
-              <Typography variant="caption">
-                {numOfMessagesFetched > 0
-                  ? `Fetched ${numOfMessagesFetched} Messages`
-                  : "Fetching Data"}
-              </Typography>
-            </Box>
-          </>
-        )}
-      </Paper>
-      {messageData && messageData.length > 0 && !fetchingData && (
-        <DMTable
-          rows={messageData}
-          exportTitle={() => {
-            const directMessage = directMessages.find(
-              (directMessage) => directMessage.id === selectedDirectMessage
-            );
-            return (
-              <Typography variant="h4">
-                {directMessage.recipients.length === 1
-                  ? directMessage.recipients[0].username
-                  : directMessage.name
-                  ? `Group Chat - ${directMessage.name}`
-                  : `Unnamed Group Chat - ${directMessage.id}`}
-              </Typography>
-            );
-          }}
-        />
+          </Paper>
+        </Stack>
       )}
-      {messageData && messageData.length === 0 && !fetchingData && (
-        <Paper sx={{ padding: "10px" }}>
-          <Box sx={boxSx}>
+
+      {(!token || !dms || messagesLoading) && (
+        <Paper justifyContent="center" className={classes.paper}>
+          <Stack justifyContent="center" alignItems="center">
+            <CircularProgress />
+          </Stack>
+          <Box className={classes.box}>
+            <Typography variant="caption">
+              {fetchedMessageLength > 0
+                ? `Fetched ${fetchedMessageLength} Messages`
+                : "Fetching Data"}
+            </Typography>
+          </Box>
+        </Paper>
+      )}
+
+      {messages?.length > 0 && !messagesLoading && (
+        <Box className={classes.tableBox}>
+          <DiscordTable
+            exportTitle={() => {
+              const directMessage = dms.find(
+                (directMessage) => directMessage.id === selectedDm.id
+              );
+              return (
+                <Typography variant="h4">
+                  {directMessage.recipients.length === 1
+                    ? directMessage.recipients[0].username
+                    : directMessage.name
+                    ? `Group Chat - ${directMessage.name}`
+                    : `Unnamed Group Chat - ${directMessage.id}`}
+                </Typography>
+              );
+            }}
+          />
+        </Box>
+      )}
+      {messages?.length === 0 && !messagesLoading && selectedDm.id && (
+        <Paper className={classes.paper}>
+          <Box className={classes.box}>
             <Typography>No Messages to Display</Typography>
           </Box>
-          <Box sx={boxSx}>
+          <Box className={classes.box}>
             <Typography>
               <SentimentDissatisfiedIcon />
             </Typography>
           </Box>
         </Paper>
       )}
-    </Box>
+    </Stack>
   );
 }
-
-const DMTable = ({ rows, exportTitle }) => {
-  const [refactoredData, setRefactoredData] = useState(null);
-
-  useEffect(() => {
-    const refactorData = async () => {
-      let retArr = [];
-      await rows.forEach((x) =>
-        retArr.push({
-          username: x.author.username,
-          ...x,
-        })
-      );
-      setRefactoredData(retArr);
-    };
-    refactorData();
-  }, []);
-
-  return (
-    <>
-      {refactoredData && (
-        <DiscordTable
-          exportTitle={exportTitle}
-          rows={refactoredData}
-          setRefactoredData={setRefactoredData}
-        />
-      )}
-    </>
-  );
-};
 
 export default DirectMessages;

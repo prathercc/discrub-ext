@@ -4,16 +4,14 @@ import { sendChromeMessage } from "../../chromeService";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Box from "@mui/material/Box";
-import { textSecondary } from "../../styleConstants";
+import CloseWindowButtonStyles from "./CloseWindowButton.styles";
 
 const CloseWindowButton = () => {
+  const classes = CloseWindowButtonStyles();
   return (
-    <Box sx={{ position: "fixed", top: "5px", right: "5px" }}>
+    <Box className={classes.boxContainer}>
       <Tooltip title="Close">
         <IconButton
-          sx={{
-            color: textSecondary,
-          }}
           onClick={() => sendChromeMessage("CLOSE_INJECTED_DIALOG")}
           color="primary"
         >

@@ -31,7 +31,6 @@ export default function DiscordTable({ exportTitle }) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
-  // const [selectedAttachmentRow, setSelectedAttachmentRow] = useState(null);
   const columns = [
     {
       id: "timestamp",
@@ -118,7 +117,6 @@ export default function DiscordTable({ exportTitle }) {
       <DeleteModal
         open={deleteModalOpen}
         handleClose={() => setDeleteModalOpen(false)}
-        rows={displayRows}
       />
       <EditModal
         open={editModalOpen}
@@ -126,31 +124,7 @@ export default function DiscordTable({ exportTitle }) {
       />
       <AttachmentModal
         open={attachmentModalOpen}
-        handleClose={async (e) => {
-          let updatedSelected = await selectedMessages.filter(
-            (x) => x !== selectedAttachmentRow.id
-          );
-          setSelected(updatedSelected);
-
-          setAttachmentModalOpen(false);
-          let updatedArr = [];
-          await displayRows.forEach((x) => {
-            //Entire message was deleted
-            if (e === null) {
-              if (x.id !== selectedAttachmentRow.id) {
-                updatedArr.push(x);
-              }
-            }
-            //Attachment(s) trimmed out
-            else {
-              if (x.id === e.id) {
-                updatedArr.push({ ...e, username: e.author.username });
-              } else updatedArr.push(x);
-            }
-          });
-          setSelectedAttachmentRow(null);
-          // setRefactoredData(updatedArr);
-        }}
+        handleClose={() => setAttachmentModalOpen(false)}
       />
       <Paper className={classes.paper}>
         <EnhancedTableToolbar
@@ -232,9 +206,9 @@ export default function DiscordTable({ exportTitle }) {
                         <Tooltip title="Attachments">
                           <IconButton
                             disabled={row.attachments.length === 0}
-                            onClick={(e) => {
+                            onClick={async (e) => {
                               e.stopPropagation();
-                              setSelectedAttachmentRow(row);
+                              await setAttachmentMessage(row);
                               setAttachmentModalOpen(true);
                             }}
                             color="primary"

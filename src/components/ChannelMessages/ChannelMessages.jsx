@@ -66,7 +66,7 @@ function ChannelMessages() {
     <Stack spacing={2} className={classes.boxContainer}>
       {token && guilds && (
         <Stack spacing={2}>
-          <Paper sx={{ padding: "10px" }}>
+          <Paper className={classes.paper}>
             <Stack spacing={2}>
               <Stack>
                 <Typography variant="h5">Your Channel Messages</Typography>
@@ -136,7 +136,7 @@ function ChannelMessages() {
             </Box>
           )}
           {messages.length === 0 && !messagesLoading && selectedChannel.id && (
-            <Paper sx={{ padding: "10px" }}>
+            <Paper className={classes.paper}>
               <Box className={classes.box}>
                 <Typography>No Messages to Display</Typography>
               </Box>
@@ -150,7 +150,7 @@ function ChannelMessages() {
         </Stack>
       )}
       {(!token || !guilds.length || messagesLoading) && (
-        <Paper justifyContent="center" sx={{ padding: "10px" }}>
+        <Paper justifyContent="center" className={classes.paper}>
           <Stack justifyContent="center" alignItems="center">
             <CircularProgress />
           </Stack>

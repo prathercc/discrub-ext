@@ -1,6 +1,6 @@
 import { makeStyles } from "@mui/styles";
 
-const ChannelMessagesStyles = makeStyles(() => ({
+const DirectMessagesStyles = makeStyles(() => ({
   boxContainer: {
     padding: "15px",
     maxHeight: "85%",
@@ -14,7 +14,7 @@ const ChannelMessagesStyles = makeStyles(() => ({
     marginTop: "1vh",
   },
   tableBox: {
-    maxHeight: "360px",
+    maxHeight: "460px",
     overflow: "auto",
     "&::-webkit-scrollbar": {
       width: "5px",
@@ -31,4 +31,4 @@ const ChannelMessagesStyles = makeStyles(() => ({
   },
 }));
 
-export default ChannelMessagesStyles;
+export default DirectMessagesStyles;

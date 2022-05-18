@@ -19,19 +19,24 @@ import {
 import { MessageReducer } from "./MessageReducer";
 import { UserContext } from "../user/UserContext";
 import { ChannelContext } from "../channel/ChannelContext";
+import { DmContext } from "../dm/DmContext";
 
 export const MessageContext = createContext();
 
 const MessageContextProvider = (props) => {
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
+  const { state: dmState } = useContext(DmContext);
 
   const selectedChannelIdRef = useRef();
+  const selectedDmIdRef = useRef();
 
   const { token } = userState;
   const { selectedChannel } = channelState;
+  const { selectedDm } = dmState;
 
   selectedChannelIdRef.current = selectedChannel.id; // Needed incase channelId changes and we can cancel the fetching.
+  selectedDmIdRef.current = selectedDm.id;
 
   const [state, dispatch] = useReducer(
     MessageReducer,
@@ -77,7 +82,9 @@ const MessageContextProvider = (props) => {
   const getMessageData = useCallback(async () => {
     if (selectedChannel.id && token)
       await getMessageDataAction(selectedChannelIdRef, token, dispatch);
-  }, [token, selectedChannel.id]);
+    else if (selectedDm.id && token)
+      await getMessageDataAction(selectedDmIdRef, token, dispatch);
+  }, [token, selectedChannel.id, selectedDm.id]);
 
   const resetMessageData = useCallback(async () => {
     await resetMessageDataAction(dispatch);

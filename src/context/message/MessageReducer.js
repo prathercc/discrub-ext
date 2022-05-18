@@ -60,6 +60,10 @@ export const MessageReducer = (state, action) => {
             ? { ...payload, username: message.username }
             : { ...message }
         ),
+        attachmentMessage:
+          state.attachmentMessage?.id === payload.id
+            ? { ...payload, username: state.attachmentMessage.username }
+            : state.attachmentMessage,
       };
     case DELETE_MESSAGE_SUCCESS:
       return {
