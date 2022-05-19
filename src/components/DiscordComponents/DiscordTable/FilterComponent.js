@@ -1,47 +1,56 @@
 import React, { useContext } from "react";
 import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
 import DiscordDateTimePicker from "../DiscordDateTimePicker/DiscordDateTimePicker";
 import { MessageContext } from "../../../context/message/MessageContext";
+import FilterComponentStyles from "./FilterComponent.styles";
 
 const FilterComponent = () => {
+  const classes = FilterComponentStyles();
   const { updateFilters } = useContext(MessageContext);
 
   return (
-    <Grid spacing={2} container>
-      <Grid xs={12} item>
-        <Grid spacing={2} container>
-          <Grid xs={6} item>
-            <DiscordDateTimePicker
-              onChange={(e) => updateFilters("startTime", e, "date")}
-              label="Start Time"
-            />
-          </Grid>
-          <Grid xs={6} item>
-            <DiscordDateTimePicker
-              onChange={(e) => updateFilters("endTime", e, "date")}
-              label="End Time"
-            />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={6}>
+    <Stack className={classes.stack} spacing={2}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        spacing={2}
+      >
+        <DiscordDateTimePicker
+          onChange={(e) => updateFilters("startTime", e, "date")}
+          label="Start Time"
+        />
+        <DiscordDateTimePicker
+          onChange={(e) => updateFilters("endTime", e, "date")}
+          label="End Time"
+        />
+      </Stack>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        spacing={2}
+      >
         <TextField
           fullWidth
           variant="filled"
           label="Username"
           onChange={(e) => updateFilters("username", e.target.value, "text")}
         />
-      </Grid>
-      <Grid item xs={6}>
         <TextField
           fullWidth
           variant="filled"
           onChange={(e) => updateFilters("content", e.target.value, "text")}
           label="Message"
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Stack>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        spacing={2}
+      >
         <TextField
           fullWidth
           variant="filled"
@@ -50,8 +59,8 @@ const FilterComponent = () => {
           }
           label="Attachment Name"
         />
-      </Grid>
-    </Grid>
+      </Stack>
+    </Stack>
   );
 };
 

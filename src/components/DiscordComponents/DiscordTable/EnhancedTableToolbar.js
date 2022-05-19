@@ -18,7 +18,6 @@ const EnhancedTableToolbar = ({
   filterOpen,
   setDeleteModalOpen,
   setEditModalOpen,
-  exportTitle,
 }) => {
   const classes = DiscordTableStyles();
 
@@ -44,11 +43,15 @@ const EnhancedTableToolbar = ({
           className={classes.stack}
           alignItems="baseline"
           direction="column"
+          spacing={2}
+          mb="10px"
         >
           <Stack
             className={classes.stack}
+            mt="20px"
             direction="row"
             justifyContent="space-between"
+            zIndex={5000} // This ensures that the Export options show over FilterComponent
           >
             <Tooltip title="Filter list">
               <IconButton onClick={() => setFilterOpen(!filterOpen)}>
@@ -56,7 +59,7 @@ const EnhancedTableToolbar = ({
               </IconButton>
             </Tooltip>
             <IconButton>
-              <ExportButtonGroup exportTitle={exportTitle} />
+              <ExportButtonGroup />
             </IconButton>
           </Stack>
           {filterOpen && <FilterComponent />}

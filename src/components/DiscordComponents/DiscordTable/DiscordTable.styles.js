@@ -8,7 +8,7 @@ const DiscordTableStyles = makeStyles(() => ({
     color: "rgb(210, 213, 247, 1)",
   },
   tablecell: {
-    borderBottom: "1px solid rgb(88, 101, 242, 1)",
+    borderBottom: "1px solid rgb(88, 101, 242, 1) !important",
   },
   tablePagination: { color: "rgb(210, 213, 247, 1)", userSelect: "none" },
   box: {

@@ -101,22 +101,7 @@ function DirectMessages() {
 
       {messages?.length > 0 && !messagesLoading && (
         <Box className={classes.tableBox}>
-          <DiscordTable
-            exportTitle={() => {
-              const directMessage = dms.find(
-                (directMessage) => directMessage.id === selectedDm.id
-              );
-              return (
-                <Typography variant="h4">
-                  {directMessage.recipients.length === 1
-                    ? directMessage.recipients[0].username
-                    : directMessage.name
-                    ? `Group Chat - ${directMessage.name}`
-                    : `Unnamed Group Chat - ${directMessage.id}`}
-                </Typography>
-              );
-            }}
-          />
+          <DiscordTable />
         </Box>
       )}
       {messages?.length === 0 && !messagesLoading && selectedDm.id && (

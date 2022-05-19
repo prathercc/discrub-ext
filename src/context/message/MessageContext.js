@@ -20,12 +20,15 @@ import { MessageReducer } from "./MessageReducer";
 import { UserContext } from "../user/UserContext";
 import { ChannelContext } from "../channel/ChannelContext";
 import { DmContext } from "../dm/DmContext";
+import Typography from "@mui/material/Typography";
+import { GuildContext } from "../guild/GuildContext";
 
 export const MessageContext = createContext();
 
 const MessageContextProvider = (props) => {
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
+  const { state: guildState } = useContext(GuildContext);
   const { state: dmState } = useContext(DmContext);
 
   const selectedChannelIdRef = useRef();
@@ -50,6 +53,43 @@ const MessageContextProvider = (props) => {
       attachmentMessage: null, // The selected message for deleting attachments
     })
   );
+
+  const getExportTitle = () => {
+    const directMessage = dmState.dms.find(
+      (directMessage) => directMessage.id === selectedDm.id
+    );
+
+    return (
+      <>
+        {directMessage ? (
+          <Typography variant="h4">
+            {directMessage.recipients.length === 1
+              ? directMessage.recipients[0].username
+              : directMessage.name
+              ? `Group Chat - ${directMessage.name}`
+              : `Unnamed Group Chat - ${directMessage.id}`}
+          </Typography>
+        ) : (
+          <>
+            <Typography variant="h4">
+              {
+                guildState.guilds.find(
+                  (guild) => guild.id === guildState.selectedGuild.id
+                )?.name
+              }
+            </Typography>
+            <Typography variant="h6">
+              {
+                channelState.channels.find(
+                  (channel) => channel.id === selectedChannel.id
+                )?.name
+              }
+            </Typography>
+          </>
+        )}
+      </>
+    );
+  };
 
   const setAttachmentMessage = async (message) => {
     await setAttachmentMessageAction(message, dispatch);
@@ -119,6 +159,7 @@ const MessageContextProvider = (props) => {
         setSelected,
         deleteMessage,
         setAttachmentMessage,
+        getExportTitle,
       }}
     >
       {props.children}

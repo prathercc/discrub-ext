@@ -114,25 +114,7 @@ function ChannelMessages() {
 
           {messages.length > 0 && !messagesLoading && (
             <Box className={classes.tableBox}>
-              <DiscordTable
-                exportTitle={() => (
-                  <>
-                    <Typography variant="h4">
-                      {
-                        guilds.find((guild) => guild.id === selectedGuild.id)
-                          ?.name
-                      }
-                    </Typography>
-                    <Typography variant="h6">
-                      {
-                        channels.find(
-                          (channel) => channel.id === selectedChannel.id
-                        )?.name
-                      }
-                    </Typography>
-                  </>
-                )}
-              />
+              <DiscordTable />
             </Box>
           )}
           {messages.length === 0 && !messagesLoading && selectedChannel.id && (

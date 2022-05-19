@@ -16,11 +16,14 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { MessageContext } from "../../context/message/MessageContext";
+import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
 
 const options = ["HTML", "PDF", "JSON"];
 
-const ExportButtonGroup = ({ exportTitle }) => {
-  const { state: messageState } = useContext(MessageContext);
+const ExportButtonGroup = () => {
+  const classes = ExportButtonGroupStyles();
+
+  const { state: messageState, getExportTitle } = useContext(MessageContext);
   const { messages } = messageState;
 
   const [open, setOpen] = useState(false);
@@ -112,11 +115,11 @@ const ExportButtonGroup = ({ exportTitle }) => {
 
   return (
     <>
-      <Box sx={{ display: "none", margin: 0 }}>
+      <Box className={classes.boxContainer}>
         <Box ref={componentRef}>
           <Stack justifyContent="center" alignItems="center">
             {exportTitle()}
-            <Typography sx={{ opacity: 0.4 }}>
+            <Typography className={classes.typography}>
               All times shown below are in GMT*
             </Typography>
           </Stack>
@@ -129,11 +132,7 @@ const ExportButtonGroup = ({ exportTitle }) => {
                   alignItems="center"
                   justifyContent="space-between"
                   spacing={20}
-                  sx={{
-                    border: "1px solid silver",
-                    marginBottom: "10px",
-                    padding: "10px",
-                  }}
+                  className={classes.stack}
                 >
                   <Stack
                     direction="column"
@@ -141,7 +140,7 @@ const ExportButtonGroup = ({ exportTitle }) => {
                     alignItems="flex-start"
                     spacing={0}
                   >
-                    <Typography sx={{ fontWeight: "bold" }}>
+                    <Typography className={classes.boldTypography}>
                       {row.username}:
                     </Typography>
                     <Typography>{`${messageDate.getUTCDate()}/${messageDate.getUTCMonth()}/${messageDate.getUTCFullYear()}`}</Typography>
@@ -180,7 +179,6 @@ const ExportButtonGroup = ({ exportTitle }) => {
         role={undefined}
         transition
         disablePortal
-        sx={{ "z-index": 9999 }}
       >
         {({ TransitionProps, placement }) => (
           <Grow

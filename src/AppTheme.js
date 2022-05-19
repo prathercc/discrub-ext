@@ -94,6 +94,7 @@ const theme = createTheme({
           fontWeight: 500,
           width: "auto",
           height: "30px",
+          cursor: "pointer",
         },
       },
     },

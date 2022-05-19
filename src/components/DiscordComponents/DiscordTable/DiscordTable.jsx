@@ -21,7 +21,7 @@ import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import { MessageContext } from "../../../context/message/MessageContext";
 import DiscordTableStyles from "./DiscordTable.styles";
 
-export default function DiscordTable({ exportTitle }) {
+export default function DiscordTable() {
   const classes = DiscordTableStyles();
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("");
@@ -132,7 +132,6 @@ export default function DiscordTable({ exportTitle }) {
           filterOpen={filterOpen}
           setDeleteModalOpen={setDeleteModalOpen}
           setEditModalOpen={setEditModalOpen}
-          exportTitle={exportTitle}
         />
         <TableContainer>
           <Table className={classes.table} size="small">
