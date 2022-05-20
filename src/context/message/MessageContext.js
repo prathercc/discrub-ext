@@ -22,10 +22,13 @@ import { ChannelContext } from "../channel/ChannelContext";
 import { DmContext } from "../dm/DmContext";
 import Typography from "@mui/material/Typography";
 import { GuildContext } from "../guild/GuildContext";
+import ExportButtonGroupStyles from "../../components/Export/ExportButtonGroup.styles";
 
 export const MessageContext = createContext();
 
 const MessageContextProvider = (props) => {
+  const classes = ExportButtonGroupStyles();
+
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
   const { state: guildState } = useContext(GuildContext);
@@ -62,7 +65,7 @@ const MessageContextProvider = (props) => {
     return (
       <>
         {directMessage ? (
-          <Typography variant="h4">
+          <Typography className={classes.typographyTitle} variant="h4">
             {directMessage.recipients.length === 1
               ? directMessage.recipients[0].username
               : directMessage.name
@@ -71,14 +74,14 @@ const MessageContextProvider = (props) => {
           </Typography>
         ) : (
           <>
-            <Typography variant="h4">
+            <Typography className={classes.typographyTitle} variant="h4">
               {
                 guildState.guilds.find(
                   (guild) => guild.id === guildState.selectedGuild.id
                 )?.name
               }
             </Typography>
-            <Typography variant="h6">
+            <Typography className={classes.typographyTitle} variant="h6">
               {
                 channelState.channels.find(
                   (channel) => channel.id === selectedChannel.id

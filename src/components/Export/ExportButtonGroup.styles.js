@@ -5,16 +5,22 @@ const ExportButtonGroupStyles = makeStyles(() => ({
     display: "none",
     margin: 0,
   },
+  typographyTitle: {
+    color: "rgb(88, 101, 242, 1) !important",
+  },
   typography: {
-    opacity: 0.4,
+    color: "rgb(47, 49, 54, 1) !important",
   },
   boldTypography: {
     fontWeight: "bold",
+    color: "rgb(88, 101, 242, 1) !important",
   },
   stack: {
+    width: "100%",
+  },
+  stackContentContainer: {
     border: "1px solid silver",
-    marginBottom: "10px",
-    padding: "10px",
+    width: "95%",
   },
 }));
 

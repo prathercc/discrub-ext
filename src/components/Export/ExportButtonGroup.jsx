@@ -89,6 +89,7 @@ const ExportButtonGroup = () => {
           let blob = new Blob([json_string], { type: "text/plain" });
           link.href = window.URL.createObjectURL(blob);
           link.click();
+          setPrinting(false);
           break;
         default:
           break;
@@ -116,11 +117,17 @@ const ExportButtonGroup = () => {
   return (
     <>
       <Box className={classes.boxContainer}>
-        <Box ref={componentRef}>
+        <Stack
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          ref={componentRef}
+          className={classes.stackMessageContainer}
+        >
           <Stack justifyContent="center" alignItems="center">
-            {exportTitle()}
+            {getExportTitle()}
             <Typography className={classes.typography}>
-              All times shown below are in GMT*
+              Timezone: UTC/GMT
             </Typography>
           </Stack>
           {printing &&
@@ -128,31 +135,63 @@ const ExportButtonGroup = () => {
               const messageDate = new Date(Date.parse(row.timestamp));
               return (
                 <Stack
-                  direction="row"
+                  direction="column"
                   alignItems="center"
-                  justifyContent="space-between"
-                  spacing={20}
-                  className={classes.stack}
+                  justifyContent="center"
+                  spacing={2}
+                  className={classes.stackContentContainer}
+                  my={1}
+                  padding={1}
                 >
                   <Stack
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="flex-start"
-                    spacing={0}
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    spacing={20}
+                    className={classes.stack}
                   >
-                    <Typography className={classes.boldTypography}>
-                      {row.username}:
+                    <Stack
+                      direction="column"
+                      justifyContent="center"
+                      alignItems="flex-start"
+                      spacing={0}
+                    >
+                      <Typography className={classes.boldTypography}>
+                        {row.username}:
+                      </Typography>
+                      <Typography
+                        className={classes.typography}
+                      >{`${messageDate.getUTCDate()}/${messageDate.getUTCMonth()}/${messageDate.getUTCFullYear()}`}</Typography>
+                      <Typography
+                        className={classes.typography}
+                      >{`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()}`}</Typography>
+                    </Stack>
+                    <Typography
+                      className={classes.typography}
+                      id={`message-data-${index}`}
+                    >
+                      {row.content}
                     </Typography>
-                    <Typography>{`${messageDate.getUTCDate()}/${messageDate.getUTCMonth()}/${messageDate.getUTCFullYear()}`}</Typography>
-                    <Typography>{`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()}`}</Typography>
                   </Stack>
-                  <Typography id={`message-data-${index}`}>
-                    {row.content}
-                  </Typography>
+                  {row.attachments?.length > 0 ? (
+                    <Stack
+                      direction="row"
+                      alignItems="flex-start"
+                      justifyContent="flex-start"
+                      spacing={1}
+                      className={classes.stack}
+                    >
+                      {row.attachments.map((attachment) => (
+                        <Typography className={classes.typography}>
+                          <a href={attachment.url}>{attachment.filename}</a>
+                        </Typography>
+                      ))}
+                    </Stack>
+                  ) : null}
                 </Stack>
               );
             })}
-        </Box>
+        </Stack>
       </Box>
 
       {!printing && (
