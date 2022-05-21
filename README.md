@@ -1,6 +1,7 @@
 
 
 
+
 # Discrub
 
  **Discrub** is a Google Chrome extension that is used to modify and delete Channel Message / Direct Message data for [Discord](https://discord.com/). It can be installed via the [Chrome Webstore](https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj)
@@ -12,32 +13,53 @@ An instructional video can be found here - https://www.youtube.com/watch?v=mxdm-
 
 **Users may also remove messages and attachments from other Discord users if they have the proper permissions for the given channel.**
  
- Written using [React](https://reactjs.org/) and hitting the public [Discord API](https://discord.com/developers/docs/intro) for all data manipulation.
+ Written using [React](https://reactjs.org/) and hitting the [Discord API](https://discord.com/developers/docs/intro) for all data manipulation.
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png">
-</p>
-<p align="center">
-<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z7.PNG">
-</p>
+<details>
+<summary>Location</summary>
 <p align="center">
 <img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z1.png">
+</p>
+</details>
+<details>
+<summary>Messages</summary>
+<p align="center">
+<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z2.png">
 </p>
 <p align="center">
 <img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z3.png">
 </p>
+</details>
+
+<details>
+<summary>Filtering</summary>
 <p align="center">
 <img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z4.png">
 </p>
+</details>
+
+<details>
+<summary>Deleting / Editing</summary>
 <p align="center">
-<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z8.PNG">
+<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z5.png">
 </p>
 <p align="center">
-<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z9.PNG">
+<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png">
 </p>
 <p align="center">
-<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z10.PNG">
+<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z7.png">
 </p>
+</details>
+
+<details>
+<summary>Information</summary>
+<p align="center">
+<img src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z8.png">
+</p>
+</details>
+
+
+
 
 ## Contributing
 
