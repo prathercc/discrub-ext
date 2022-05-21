@@ -15,6 +15,10 @@ const ExportButtonGroupStyles = makeStyles(() => ({
     fontWeight: "bold",
     color: "rgb(88, 101, 242, 1) !important",
   },
+  typographyId: {
+    color: "rgb(47, 49, 54, 1) !important",
+    opacity: "0.4 !important",
+  },
   stack: {
     width: "100%",
   },

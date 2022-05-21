@@ -10,7 +10,7 @@ const FilterComponent = () => {
   const { updateFilters } = useContext(MessageContext);
 
   return (
-    <Stack className={classes.stack} spacing={2}>
+    <Stack zIndex={1} className={classes.stack} spacing={2}>
       <Stack
         direction="row"
         justifyContent="space-between"

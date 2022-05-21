@@ -1,83 +1,25 @@
-/* eslint-disable react/jsx-no-target-blank */
 import React from "react";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import styled, { keyframes } from "styled-components";
 import GitHubButton from "react-github-btn";
-import { Tooltip, Paper, Typography } from "@mui/material";
+import { Tooltip, Paper, Typography, Stack } from "@mui/material";
+import AboutStyles from "./About.styles";
 
 function About() {
-  return (
-    <Box
-      sx={{
-        padding: "15px",
-        maxHeight: "85%",
-        maxWidth: "100%",
-        overflow: "auto",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-      }}
-    >
-      <CustomGrid my={2} container>
-        <CustomGrid item xs={12}>
-          <CusImg src="discrub2.png" />
-        </CustomGrid>
-      </CustomGrid>
+  const classes = AboutStyles();
 
-      <Paper sx={{ width: "85%" }}>
-        <CustomGrid spacing={2} container>
-          <CustomGrid
-            sx={{ flexDirection: "column" }}
-            xs={12}
-            item
-          ></CustomGrid>
-          <CustomGrid xs={12} item>
-            <a href="https://ko-fi.com/W7W4AAIBR" target="_blank">
-              <img
-                style={{ border: "0px", width: 165 }}
-                src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
-                border="0"
-                alt="Buy Me a Coffee at ko-fi.com"
-              />
-            </a>
-          </CustomGrid>
-          <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
-            <Typography variant="caption">Ethereum</Typography>
-            <Tooltip title="0x09b120deE370ddadf629D2428A3B12cA3F614222">
-              <img
-                alt="Donate ETH"
-                style={{ width: "120px" }}
-                src="ethereum.png"
-              />
-            </Tooltip>
-          </CustomGrid>
-          <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
-            <Typography variant="caption">Bitcoin</Typography>
-            <Tooltip title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm">
-              <img
-                alt="Donate BTC"
-                style={{ width: "120px" }}
-                src="bitcoin.png"
-              />
-            </Tooltip>
-          </CustomGrid>
-          <CustomGrid sx={{ flexDirection: "column" }} item xs={4}>
-            <Typography variant="caption">Litecoin</Typography>
-            <Tooltip title="MVTPtXVTF6RNwfcTt71J8cn6uqNApb3S75">
-              <img
-                alt="Donate LTC"
-                style={{ width: "120px" }}
-                src="litecoin.png"
-              />
-            </Tooltip>
-          </CustomGrid>
-        </CustomGrid>
-      </Paper>
-      <Paper sx={{ width: "85%" }}>
-        <CustomGrid spacing={2} container>
-          <CustomGrid item xs={4}>
+  return (
+    <Stack spacing={3} className={classes.boxContainer}>
+      <Stack>
+        <CusImg src="discrub2.png" />
+      </Stack>
+      <Paper>
+        <Stack padding={3} spacing={2}>
+          <Stack
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-around"
+            direction="row"
+          >
             <GitHubButton
               href="https://github.com/sponsors/prathercc"
               data-color-scheme="no-preference: light; light: dark; dark: dark;"
@@ -87,8 +29,6 @@ function About() {
             >
               Sponsor
             </GitHubButton>
-          </CustomGrid>
-          <CustomGrid item xs={4}>
             <GitHubButton
               href="https://github.com/prathercc"
               data-color-scheme="no-preference: light; light: dark; dark: dark;"
@@ -98,8 +38,6 @@ function About() {
             >
               Follow @prathercc
             </GitHubButton>
-          </CustomGrid>
-          <CustomGrid item xs={4}>
             <GitHubButton
               href="https://github.com/prathercc/discrub-ext/fork"
               data-color-scheme="no-preference: light; light: dark; dark: dark;"
@@ -110,8 +48,13 @@ function About() {
             >
               Fork
             </GitHubButton>
-          </CustomGrid>
-          <CustomGrid item xs={4}>
+          </Stack>
+          <Stack
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-around"
+            direction="row"
+          >
             <GitHubButton
               href="https://github.com/prathercc/discrub-ext/issues"
               data-color-scheme="no-preference: light; light: dark; dark: dark;"
@@ -122,8 +65,6 @@ function About() {
             >
               Issue
             </GitHubButton>
-          </CustomGrid>
-          <CustomGrid item xs={4}>
             <GitHubButton
               href="https://github.com/prathercc/discrub-ext"
               data-color-scheme="no-preference: light; light: dark; dark: dark;"
@@ -134,8 +75,6 @@ function About() {
             >
               Star
             </GitHubButton>
-          </CustomGrid>
-          <CustomGrid item xs={4}>
             <GitHubButton
               href="https://github.com/prathercc/discrub-ext/subscription"
               data-color-scheme="no-preference: light; light: dark; dark: dark;"
@@ -146,28 +85,57 @@ function About() {
             >
               Watch
             </GitHubButton>
-          </CustomGrid>
-        </CustomGrid>
+          </Stack>
+
+          <Stack alignItems="center" justifyContent="center">
+            <a href="https://ko-fi.com/W7W4AAIBR">
+              <img
+                style={{ border: "0px", width: 240 }}
+                src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
+                border="0"
+                alt="Buy Me a Coffee at ko-fi.com"
+              />
+            </a>
+          </Stack>
+
+          <Stack
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-around"
+            direction="row"
+          >
+            <Stack alignItems="center">
+              <Typography variant="caption">Bitcoin</Typography>
+              <Tooltip
+                leaveDelay={3000}
+                title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm"
+              >
+                <img
+                  alt="Donate BTC"
+                  style={{ width: "150px" }}
+                  src="bitcoin.png"
+                />
+              </Tooltip>
+            </Stack>
+            <Stack alignItems="center">
+              <Typography variant="caption">Ethereum</Typography>
+              <Tooltip
+                leaveDelay={3000}
+                title="0x01aC5D8C7B814eC70Ff5E402297f5b78Ef81137C"
+              >
+                <img
+                  alt="Donate ETH"
+                  style={{ width: "150px" }}
+                  src="ethereum.png"
+                />
+              </Tooltip>
+            </Stack>
+          </Stack>
+        </Stack>
       </Paper>
-    </Box>
+    </Stack>
   );
 }
-
-const CustomGrid = (props) => {
-  return (
-    <Grid
-      {...props}
-      sx={{
-        ...props.sx,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      {props.children}
-    </Grid>
-  );
-};
 
 const logoAnim = keyframes`
 0% {
@@ -190,7 +158,7 @@ const logoAnim = keyframes`
 const CusImg = styled.img`
   user-select: none;
   border-radius: 15px;
-  width: 180px;
+  width: 200px;
   margin: auto;
   pointer-events: none;
   animation: ${logoAnim} infinite 55s both;

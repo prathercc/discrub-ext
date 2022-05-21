@@ -25,7 +25,7 @@ const theme = createTheme({
     fontFamily: ["Ubuntu", "sans-serif"].join(","),
     allVariants: {
       color: "rgb(210, 213, 247)",
-      userSelect: "none",
+      userSelect: "text",
       cursor: "default",
     },
   },

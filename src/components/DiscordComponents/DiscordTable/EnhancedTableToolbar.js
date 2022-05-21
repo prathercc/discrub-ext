@@ -51,7 +51,7 @@ const EnhancedTableToolbar = ({
             mt="20px"
             direction="row"
             justifyContent="space-between"
-            zIndex={5000} // This ensures that the Export options show over FilterComponent
+            zIndex={2} // This ensures that the Export options show over FilterComponent
           >
             <Tooltip title="Filter list">
               <IconButton onClick={() => setFilterOpen(!filterOpen)}>

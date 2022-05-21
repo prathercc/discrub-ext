@@ -126,8 +126,8 @@ const ExportButtonGroup = () => {
         >
           <Stack justifyContent="center" alignItems="center">
             {getExportTitle()}
-            <Typography className={classes.typography}>
-              Timezone: UTC/GMT
+            <Typography className={classes.typographyId}>
+              UTC mm/dd/yyyy hh:mm:ss
             </Typography>
           </Stack>
           {printing &&
@@ -159,12 +159,15 @@ const ExportButtonGroup = () => {
                       <Typography className={classes.boldTypography}>
                         {row.username}:
                       </Typography>
-                      <Typography
-                        className={classes.typography}
-                      >{`${messageDate.getUTCDate()}/${messageDate.getUTCMonth()}/${messageDate.getUTCFullYear()}`}</Typography>
+                      <Typography className={classes.typography}>{`${
+                        messageDate.getUTCMonth() + 1
+                      }/${messageDate.getUTCDate()}/${messageDate.getUTCFullYear()}`}</Typography>
                       <Typography
                         className={classes.typography}
                       >{`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()}`}</Typography>
+                      <Typography className={classes.typographyId}>
+                        {row.id}
+                      </Typography>
                     </Stack>
                     <Typography
                       className={classes.typography}
@@ -181,9 +184,9 @@ const ExportButtonGroup = () => {
                       spacing={1}
                       className={classes.stack}
                     >
-                      {row.attachments.map((attachment) => (
+                      {row.attachments.map((attachment, index) => (
                         <Typography className={classes.typography}>
-                          <a href={attachment.url}>{attachment.filename}</a>
+                          <a href={attachment.url}>Attachment {index + 1}</a>
                         </Typography>
                       ))}
                     </Stack>
