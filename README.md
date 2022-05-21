@@ -4,14 +4,14 @@
 
 # Discrub
 
- **Discrub** is a Google Chrome extension that is used to modify and delete Channel Message / Direct Message data for [Discord](https://discord.com/). It can be installed via the [Chrome Webstore](https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj)
+ **Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML, PDF, and JSON supported) [Discord](https://discord.com/) messages. It can be installed via the [Chrome Webstore](https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj)
 
 
 <a href="https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj"><img src="https://img.shields.io:/chrome-web-store/stars/plhdclenpaecffbcefjmpkkbdpkmhhbj?label=Discrub&logo=javascript&logoColor=89CFF0&color=89CFF0"></a>
 
 An instructional video can be found here - https://www.youtube.com/watch?v=mxdm-D1Z8tU
 
-**Users may also remove messages and attachments from other Discord users if they have the proper permissions for the given channel.**
+**Users may also remove messages and attachments from other Discord users if they have the proper permissions for any given channel.**
  
  Written using [React](https://reactjs.org/) and hitting the [Discord API](https://discord.com/developers/docs/intro) for all data manipulation.
 
