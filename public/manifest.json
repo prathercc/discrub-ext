@@ -1,8 +1,8 @@
 {
   "short_name": "Discrub",
   "name": "Discrub",
-  "version": "1.0.5",
-  "description": "An extension that allows Discord users to mass Edit/Delete, Sort/Filter, and Export messages.",
+  "version": "1.0.6",
+  "description": "A data manipulation and export tool for Discord.",
   "manifest_version": 3,
   "permissions": [],
   "background": {
