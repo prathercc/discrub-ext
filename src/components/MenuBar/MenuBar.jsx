@@ -23,7 +23,7 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
         <Tooltip title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
-        <Tooltip title="About">
+        <Tooltip title="General Information">
           <Tab icon={<InfoIcon />} />
         </Tooltip>
       </Tabs>
