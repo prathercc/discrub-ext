@@ -15,6 +15,7 @@ import {
   SET_SELECTED,
   DELETE_MESSAGE_SUCCESS,
   SET_ATTACHMENT_MESSAGE_COMPLETE,
+  RESET_FILTERS_COMPLETE,
 } from "./MessageContextConstants";
 
 export const setAttachmentMessage = async (message, dispatch) => {
@@ -57,6 +58,10 @@ export const updateMessage = async (message, channelId, token, dispatch) => {
   } catch (e) {
     console.error("Error Editing Message");
   }
+};
+
+export const resetFilters = (dispatch) => {
+  dispatch({ type: RESET_FILTERS_COMPLETE });
 };
 
 export const updateFilters = async (

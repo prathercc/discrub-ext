@@ -18,17 +18,20 @@ function InjectedDialog() {
 
   const { getUserData } = useContext(UserContext);
   const { resetChannel } = useContext(ChannelContext);
-  const { resetMessageData } = useContext(MessageContext);
+  const { resetMessageData, resetFilters } = useContext(MessageContext);
   const { resetGuild } = useContext(GuildContext);
   const { resetDm } = useContext(DmContext);
 
   const [menuIndex, setMenuIndex] = useState(0);
 
   const handleChangeMenuIndex = async (index) => {
-    await resetMessageData();
-    await resetDm();
-    await resetChannel();
-    await resetGuild();
+    await Promise.all([
+      resetMessageData(),
+      resetDm(),
+      resetChannel(),
+      resetGuild(),
+      resetFilters(),
+    ]);
     setMenuIndex(index);
   };
 
@@ -43,7 +46,7 @@ function InjectedDialog() {
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <About />}
       <Box className={classes.box}>
-        <Typography>Version 1.0.5</Typography>
+        <Typography>Version 1.0.6</Typography>
       </Box>
       <CloseWindowButton />
     </Box>

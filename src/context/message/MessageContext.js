@@ -15,6 +15,7 @@ import {
   setSelected as setSelectedAction,
   deleteMessage as deleteMessageAction,
   setAttachmentMessage as setAttachmentMessageAction,
+  resetFilters as resetFiltersAction,
 } from "./MessageContextActions";
 import { MessageReducer } from "./MessageReducer";
 import { UserContext } from "../user/UserContext";
@@ -143,6 +144,10 @@ const MessageContextProvider = (props) => {
     );
   };
 
+  const resetFilters = () => {
+    resetFiltersAction(dispatch);
+  };
+
   useEffect(() => {
     const filterMessages = async () => {
       await filterMessagesAction(state.filters, state.messages, dispatch);
@@ -163,6 +168,7 @@ const MessageContextProvider = (props) => {
         deleteMessage,
         setAttachmentMessage,
         getExportTitle,
+        resetFilters,
       }}
     >
       {props.children}
