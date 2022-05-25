@@ -1,0 +1,24 @@
+[
+  {
+    "version": "1.0.6",
+    "changes": [
+      "Fix bug where message filters did not reset behind the scenes.",
+      "Rename 'About' tab to 'General Information', refactor layout."
+    ]
+  },
+  {
+    "version": "1.0.5",
+    "changes": [
+      "Add ability to export to the following file formats: HTML, PDF, and JSON.",
+      "Behind the scenes performance enhancements."
+    ]
+  },
+  {
+    "version": "1.0.4",
+    "changes": ["Add ability to filter messages by attachment name."]
+  },
+  {
+    "version": "<=1.0.3",
+    "changes": ["Extension created along with various bug fixes."]
+  }
+]

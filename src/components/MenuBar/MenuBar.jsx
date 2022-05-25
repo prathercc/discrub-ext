@@ -6,6 +6,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
 import Tooltip from "@mui/material/Tooltip";
 import MenuBarStyles from "./MenuBar.styles";
+import SickIcon from "@mui/icons-material/Sick";
 
 const MenuBar = ({ menuIndex, setMenuIndex }) => {
   const classes = MenuBarStyles();
@@ -23,7 +24,10 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
         <Tooltip title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
-        <Tooltip title="About">
+        <Tooltip title="Nuke Account">
+          <Tab disabled icon={<SickIcon />} />
+        </Tooltip>
+        <Tooltip title="General Information">
           <Tab icon={<InfoIcon />} />
         </Tooltip>
       </Tabs>

@@ -10,6 +10,7 @@ import {
   SET_SELECTED,
   DELETE_MESSAGE_SUCCESS,
   SET_ATTACHMENT_MESSAGE_COMPLETE,
+  RESET_FILTERS_COMPLETE,
 } from "./MessageContextConstants";
 export const MessageReducer = (state, action) => {
   const { type, payload } = action;
@@ -34,6 +35,8 @@ export const MessageReducer = (state, action) => {
         fetchedMessageLength: 0,
         isLoading: null,
       };
+    case RESET_FILTERS_COMPLETE:
+      return { ...state, filters: [] };
     case FILTER_MESSAGE_COMPLETE:
       return {
         ...state,

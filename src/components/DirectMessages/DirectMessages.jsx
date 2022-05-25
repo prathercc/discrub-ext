@@ -53,7 +53,7 @@ function DirectMessages() {
           <Paper className={classes.paper}>
             <Stack spacing={2}>
               <Stack>
-                <Typography variant="h5">Your Direct Messages</Typography>
+                <Typography variant="h5">Direct Messages</Typography>
                 <Typography variant="caption">
                   Messages between other Discord users and yourself.
                 </Typography>
