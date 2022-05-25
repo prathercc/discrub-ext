@@ -69,7 +69,7 @@ function ChannelMessages() {
           <Paper className={classes.paper}>
             <Stack spacing={2}>
               <Stack>
-                <Typography variant="h5">Your Channel Messages</Typography>
+                <Typography variant="h5">Channel Messages</Typography>
                 <Typography variant="caption">
                   Messages between other Discord users and yourself, within
                   Guilds.
