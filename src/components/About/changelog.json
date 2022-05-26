@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.0.7",
+    "changes": [
+      "Fix bug where active filters did not affect the messages exported."
+    ]
+  },
+  {
     "version": "1.0.6",
     "changes": [
       "Fix bug where message filters did not reset behind the scenes.",
