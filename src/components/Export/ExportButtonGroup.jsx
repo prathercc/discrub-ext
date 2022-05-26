@@ -24,7 +24,8 @@ const ExportButtonGroup = () => {
   const classes = ExportButtonGroupStyles();
 
   const { state: messageState, getExportTitle } = useContext(MessageContext);
-  const { messages } = messageState;
+  const { messages, filters, filteredMessages } = messageState;
+  const exportMessages = filters.length > 0 ? filteredMessages : messages;
 
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
@@ -83,7 +84,7 @@ const ExportButtonGroup = () => {
           handlePdf();
           break;
         case "JSON":
-          let json_string = JSON.stringify(messages);
+          let json_string = JSON.stringify(exportMessages);
           let link = document.createElement("a");
           link.download = "Exported Messages.json";
           let blob = new Blob([json_string], { type: "text/plain" });
@@ -96,7 +97,7 @@ const ExportButtonGroup = () => {
       }
     };
     const getLastElement = () =>
-      document.getElementById(`message-data-${messages.length - 1}`);
+      document.getElementById(`message-data-${exportMessages.length - 1}`);
     const loadContent = async () => {
       let lastElement = getLastElement();
       while (!lastElement) {
@@ -112,7 +113,7 @@ const ExportButtonGroup = () => {
     if (printing) {
       loadContent();
     }
-  }, [printing, messages, handleHtml, handlePdf, selectedIndex]);
+  }, [printing, exportMessages, handleHtml, handlePdf, selectedIndex]);
 
   return (
     <>
@@ -131,7 +132,7 @@ const ExportButtonGroup = () => {
             </Typography>
           </Stack>
           {printing &&
-            messages.map((row, index) => {
+            exportMessages.map((row, index) => {
               const messageDate = new Date(Date.parse(row.timestamp));
               return (
                 <Stack
