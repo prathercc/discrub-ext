@@ -3,7 +3,8 @@
     "version": "1.0.7",
     "changes": [
       "Fix bug where active filters did not affect the messages exported.",
-      "Restyle the Attachment Popup."
+      "Adjustments to Attachment Modal.",
+      "Style changes to Message Table."
     ]
   },
   {
