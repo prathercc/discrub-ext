@@ -2,7 +2,8 @@
   {
     "version": "1.0.7",
     "changes": [
-      "Fix bug where active filters did not affect the messages exported."
+      "Fix bug where active filters did not affect the messages exported.",
+      "Restyle the Attachment Popup."
     ]
   },
   {

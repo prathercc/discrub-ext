@@ -1,6 +1,4 @@
 import React, { useState, useContext } from "react";
-import Grid from "@mui/material/Grid";
-import AttachmentChip from "../Chips/AttachmentChip";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
 import { toggleDebugPause } from "./Utility/utility";
 import {
@@ -12,10 +10,17 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
+  Avatar,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { MessageContext } from "../../context/message/MessageContext";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import ModalStyles from "./Modal.styles";
 
 const AttachmentModal = ({ open, handleClose }) => {
+  const classes = ModalStyles();
+
   const {
     state: messageState,
     updateMessage,
@@ -70,33 +75,69 @@ const AttachmentModal = ({ open, handleClose }) => {
           Proceed with caution, this is permanent!
         </Typography>
       </DialogTitle>
-      <DialogContent>
-        <Grid spacing={2} container>
+      <DialogContent className={classes.dialogContent}>
+        <Stack className={classes.stackContainer} spacing={1}>
           {attachmentMessage &&
             attachmentMessage.attachments.map((x, i) => {
               return (
-                <Grid item>
-                  <AttachmentChip
-                    filename={x.filename}
-                    url={x.url}
-                    onDelete={() => handleDeleteAttachment(x)}
-                    disabled={deleting}
-                  />
-                </Grid>
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  alignItems="center"
+                  justifyContent="space-between"
+                  className={classes.attachment}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <Tooltip title="Open">
+                      <Avatar
+                        className={classes.avatar}
+                        src={x.url}
+                        alt={x.filename}
+                        onClick={() => window.open(x.url, "_blank")}
+                      />
+                    </Tooltip>
+                    <Typography variant="caption">
+                      {x.filename.length > 60
+                        ? `${x.filename.slice(0, 50)}...`
+                        : x.filename}
+                    </Typography>
+                  </Stack>
+                  <Tooltip title="Delete">
+                    <IconButton
+                      disabled={deleting}
+                      onClick={() => handleDeleteAttachment(x)}
+                    >
+                      <DeleteForeverIcon color="error" />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
               );
             })}
-        </Grid>
-        {deleting && (
-          <Stack justifyContent="center" alignItems="center">
-            <CircularProgress />
-          </Stack>
-        )}
+        </Stack>
         <ModalDebugMessage debugMessage={debugMessage} />
       </DialogContent>
-      <DialogActions>
-        <Button variant="contained" onClick={handleClose} color="secondary">
-          Close
-        </Button>
+      <DialogActions className={classes.dialogActions}>
+        <Stack
+          direction="row"
+          justifyContent="flex-end"
+          alignItems="center"
+          spacing={2}
+        >
+          {deleting && <CircularProgress />}
+          <Button
+            disabled={deleting}
+            variant="contained"
+            onClick={handleClose}
+            color="secondary"
+          >
+            Close
+          </Button>
+        </Stack>
       </DialogActions>
     </Dialog>
   );
