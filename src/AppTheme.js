@@ -30,11 +30,25 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiTablePagination: {
+      styleOverrides: {
+        selectIcon: {
+          color: "rgb(210, 213, 247)",
+        },
+      },
+    },
+    MuiAccordionSummary: {
+      styleOverrides: {
+        expandIconWrapper: {
+          color: "rgb(210, 213, 247)",
+        },
+      },
+    },
     MuiTableHead: {
       styleOverrides: {
         root: {
           " & th": {
-            borderBottom: "1px solid rgb(88, 101, 242)",
+            borderBottom: "1px solid rgba(79,84,92,0.48) !important",
           },
         },
       },

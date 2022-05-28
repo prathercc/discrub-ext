@@ -8,7 +8,7 @@ const DiscordTableStyles = makeStyles(() => ({
     color: "rgb(210, 213, 247, 1)",
   },
   tablecell: {
-    borderBottom: "1px solid rgb(88, 101, 242, 1) !important",
+    borderBottom: "1px solid rgba(79,84,92,0.48) !important",
   },
   tablePagination: { color: "rgb(210, 213, 247, 1)", userSelect: "none" },
   box: {
@@ -27,12 +27,12 @@ const DiscordTableStyles = makeStyles(() => ({
   tdContent: {
     textAlign: "left",
     verticalAlign: "middle",
-    borderBottom: "1px solid rgb(88, 101, 242, 1)",
+    borderBottom: "1px solid rgba(79,84,92,0.48)",
   },
   tdAttachment: {
     textAlign: "center",
     verticalAlign: "middle",
-    borderBottom: "1px solid rgb(88, 101, 242, 1)",
+    borderBottom: "1px solid rgba(79,84,92,0.48)",
   },
   gridAvatar: {
     paddingLeft: 2,
@@ -49,6 +49,9 @@ const DiscordTableStyles = makeStyles(() => ({
   },
   typography: {
     userSelect: "none",
+  },
+  toolbar: {
+    minHeight: "116px",
   },
 }));
 
