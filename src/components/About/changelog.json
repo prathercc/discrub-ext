@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.0.8",
+    "changes": [
+      "Hide disabled 'Nuke Account' tab.",
+      "Add r/discrub subreddit link to General Information tab."
+    ]
+  },
+  {
     "version": "1.0.7",
     "changes": [
       "Fix bug where active filters did not affect the messages exported.",
