@@ -15,6 +15,8 @@ import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import PaidIcon from "@mui/icons-material/Paid";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import changelog from "./changelog.json";
+import RedditIcon from "@mui/icons-material/Reddit";
+import LinkIcon from "@mui/icons-material/Link";
 
 function About() {
   const classes = AboutStyles();
@@ -26,6 +28,28 @@ function About() {
       </Stack>
       <Stack className={classes.paper}>
         <Stack padding={3} spacing={2}>
+          <Accordion
+            expanded={false}
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open("https://www.reddit.com/r/discrub/", "_blank");
+            }}
+          >
+            <AccordionSummary expandIcon={<LinkIcon />}>
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={1}
+              >
+                <RedditIcon />
+                <Typography className={classes.accordianTitle}>
+                  r/discrub
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+          </Accordion>
+
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Stack
@@ -203,13 +227,18 @@ function About() {
                       <Typography variant="h6">
                         Version {change.version}
                       </Typography>
-                      {change.changes.map((innerChange) => {
-                        return (
-                          <Typography variant="caption">
-                            {innerChange}
-                          </Typography>
-                        );
-                      })}
+                      <ul>
+                        {change.changes.map((innerChange) => {
+                          return (
+                            <Typography
+                              className={classes.changelogText}
+                              variant="caption"
+                            >
+                              <li>{innerChange}</li>
+                            </Typography>
+                          );
+                        })}
+                      </ul>
                     </Stack>
                   );
                 })}

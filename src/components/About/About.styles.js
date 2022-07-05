@@ -30,6 +30,9 @@ const AboutStyles = makeStyles(() => ({
     border: "0px",
     width: 240,
   },
+  changelogText: {
+    opacity: 0.5,
+  },
 }));
 
 export default AboutStyles;
