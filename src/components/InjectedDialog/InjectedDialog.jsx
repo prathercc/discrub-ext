@@ -44,9 +44,9 @@ function InjectedDialog() {
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && <ChannelMessages />}
       {menuIndex === 1 && <DirectMessages />}
-      {menuIndex === 3 && <About />}
+      {menuIndex === 2 && <About />}
       <Box className={classes.box}>
-        <Typography>Version 1.0.7</Typography>
+        <Typography>Version 1.0.8</Typography>
       </Box>
       <CloseWindowButton />
     </Box>
