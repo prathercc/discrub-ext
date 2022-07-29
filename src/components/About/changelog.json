@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.0.9",
+    "changes": [
+      "Fix bug where deleting/editing direct messages would crash the extension.",
+      "Add support for Discord threads.",
+      "Due to a Discord API limitation, active threads that have had the first message deleted are unable to be found by Discrub for the time being. (However archiving a thread, then finding it on Discrub, and then unarchiving it in a separate tab will allow you to edit/delete messages for this specific scenario)."
+    ]
+  },
+  {
     "version": "1.0.8",
     "changes": [
       "Hide disabled 'Nuke Account' tab.",
