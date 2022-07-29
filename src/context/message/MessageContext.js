@@ -55,6 +55,7 @@ const MessageContextProvider = (props) => {
       fetchedMessageLength: 0, // Current length of fetched messages, used for debugging message fetch progress
       isLoading: null,
       attachmentMessage: null, // The selected message for deleting attachments
+      threads: [], // The list of threads for a given messages arr
     })
   );
 
@@ -106,7 +107,7 @@ const MessageContextProvider = (props) => {
   const updateMessage = async (message) => {
     const response = await updateMessageAction(
       message,
-      selectedChannel.id,
+      message.channel_id,
       token,
       dispatch
     );
@@ -116,7 +117,7 @@ const MessageContextProvider = (props) => {
   const deleteMessage = async (message) => {
     const response = await deleteMessageAction(
       message,
-      selectedChannel.id,
+      message.channel_id,
       token,
       dispatch
     );
@@ -127,7 +128,7 @@ const MessageContextProvider = (props) => {
     if (selectedChannel.id && token)
       await getMessageDataAction(selectedChannelIdRef, token, dispatch);
     else if (selectedDm.id && token)
-      await getMessageDataAction(selectedDmIdRef, token, dispatch);
+      await getMessageDataAction(selectedDmIdRef, token, dispatch, true);
   }, [token, selectedChannel.id, selectedDm.id]);
 
   const resetMessageData = useCallback(async () => {

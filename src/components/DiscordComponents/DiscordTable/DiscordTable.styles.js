@@ -53,6 +53,14 @@ const DiscordTableStyles = makeStyles(() => ({
   toolbar: {
     minHeight: "116px",
   },
+  threadText: {
+    opacity: 0.85,
+    borderBottom: "1px dotted green",
+  },
+  threadTextArchived: {
+    opacity: 0.85,
+    borderBottom: "1px dotted red",
+  },
 }));
 
 export default DiscordTableStyles;

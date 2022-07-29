@@ -53,7 +53,7 @@ export default function DiscordTable() {
     setSelected,
     setAttachmentMessage,
   } = useContext(MessageContext);
-  const { filteredMessages, messages, filters, selectedMessages } =
+  const { filteredMessages, messages, filters, selectedMessages, threads } =
     messageState;
   const displayRows =
     filterOpen && filters.length ? filteredMessages : messages;
@@ -154,6 +154,10 @@ export default function DiscordTable() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   const isItemSelected = isSelected(row.id);
+                  const foundThread = threads.find(
+                    (thread) =>
+                      thread.id === row.id || thread.id === row.channel_id
+                  );
 
                   return (
                     <TableRow
@@ -187,6 +191,28 @@ export default function DiscordTable() {
                                   ).toLocaleString("en-US")}
                                 </Typography>
                               </Grid>
+                              {foundThread && (
+                                <Grid px={1} item xs={12}>
+                                  <Tooltip
+                                    title={`Thread ID: ${foundThread.id}${
+                                      foundThread.archived
+                                        ? " (Archived)"
+                                        : " (Active)"
+                                    }`}
+                                  >
+                                    <Typography
+                                      variant="caption"
+                                      className={
+                                        foundThread.archived
+                                          ? classes.threadTextArchived
+                                          : classes.threadText
+                                      }
+                                    >
+                                      {foundThread.name?.slice(0, 20)}
+                                    </Typography>
+                                  </Tooltip>
+                                </Grid>
+                              )}
                             </Grid>
                           </Grid>
                           <Grid

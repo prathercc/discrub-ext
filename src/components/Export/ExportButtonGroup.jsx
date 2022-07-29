@@ -24,7 +24,7 @@ const ExportButtonGroup = () => {
   const classes = ExportButtonGroupStyles();
 
   const { state: messageState, getExportTitle } = useContext(MessageContext);
-  const { messages, filters, filteredMessages } = messageState;
+  const { messages, filters, filteredMessages, threads } = messageState;
   const exportMessages = filters.length > 0 ? filteredMessages : messages;
 
   const [open, setOpen] = useState(false);
@@ -134,6 +134,9 @@ const ExportButtonGroup = () => {
           {printing &&
             exportMessages.map((row, index) => {
               const messageDate = new Date(Date.parse(row.timestamp));
+              const foundThread = threads.find(
+                (thread) => thread.id === row.id || thread.id === row.channel_id
+              );
               return (
                 <Stack
                   direction="column"
@@ -167,8 +170,18 @@ const ExportButtonGroup = () => {
                         className={classes.typography}
                       >{`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()}`}</Typography>
                       <Typography className={classes.typographyId}>
-                        {row.id}
+                        Message ID: {row.id}
                       </Typography>
+                      {foundThread && (
+                        <>
+                          <Typography className={classes.typographyId}>
+                            Thread Name {foundThread.name}
+                          </Typography>
+                          <Typography className={classes.typographyId}>
+                            Thread ID: {foundThread.id}
+                          </Typography>
+                        </>
+                      )}
                     </Stack>
                     <Typography
                       className={classes.typography}

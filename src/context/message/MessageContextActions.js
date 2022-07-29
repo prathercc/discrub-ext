@@ -2,6 +2,7 @@ import {
   fetchMessageData,
   editMessage,
   deleteMessage as delMsg,
+  fetchThreads,
 } from "../../discordService";
 import {
   GET_MESSAGE_DATA,
@@ -95,6 +96,17 @@ export const updateFilters = async (
         },
       ];
     } else retFilters = [...filteredList];
+  } else if (filterType === "thread") {
+    if (filterValue?.length > 0)
+      retFilters = [
+        ...filteredList.filter((f) => f.filterType !== filterType),
+        {
+          filterValue: filterValue,
+          filterType: filterType,
+        },
+      ];
+    else
+      retFilters = [...filteredList.filter((f) => f.filterType !== filterType)];
   }
 
   dispatch({ type: UPDATE_FILTERS_COMPLETE, payload: retFilters });
@@ -141,6 +153,13 @@ export const filterMessages = async (filters, messages, dispatch) => {
             criteriaMet = false;
           }
         }
+      } else if (param.filterType === "thread") {
+        if (
+          x.channel_id !== param.filterValue &&
+          x.thread?.id !== param.filterValue
+        ) {
+          criteriaMet = false;
+        }
       }
     });
     if (criteriaMet) retArr.push(x);
@@ -152,13 +171,63 @@ export const resetMessageData = async (dispatch) => {
   dispatch({ type: RESET_MESSAGE_DATA_COMPLETE });
 };
 
-export const getMessageData = async (channelIdRef, token, dispatch) => {
-  const originalChannelId = channelIdRef?.current?.slice();
+export const getMessageData = async (
+  channelIdRef,
+  token,
+  dispatch,
+  isDM = false
+) => {
+  const parseAts = (messageContent, uniqueRecipients) => {
+    for (let [key, value] of uniqueRecipients.entries()) {
+      messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
+      messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
+    }
+    return messageContent;
+  };
+
   dispatch({ type: GET_MESSAGE_DATA });
-  let retArr = [];
+  let tempArr = [];
+  const { retArr, retThreads } = await _getMessages(
+    channelIdRef,
+    token,
+    dispatch,
+    tempArr,
+    false,
+    isDM
+  );
+  let uniqueRecipients = new Map();
+  await retArr.forEach((x) => {
+    uniqueRecipients.set(x.author.id, x.author.username);
+  });
+  dispatch({
+    type: GET_MESSAGE_DATA_COMPLETE,
+    payload: {
+      threads: retThreads,
+      messages: retArr.map((message) => {
+        return {
+          ...message,
+          username: message.author.username,
+          content: parseAts(message.content, uniqueRecipients),
+        };
+      }),
+    },
+  });
+};
+
+const _getMessages = async (
+  channelIdRef,
+  token,
+  dispatch,
+  retArr,
+  thread = false,
+  isDM = false
+) => {
+  const originalChannelId = channelIdRef?.current?.slice();
+  const trackedThreads = []; // The thread ids that we found while parsing messages
   try {
     let lastId = "";
     let reachedEnd = false;
+    let threadedData = [];
     while (!reachedEnd) {
       if (channelIdRef.current !== originalChannelId) break;
       const data = await fetchMessageData(token, lastId, originalChannelId);
@@ -166,38 +235,75 @@ export const getMessageData = async (channelIdRef, token, dispatch) => {
       if (data.length < 100) reachedEnd = true;
       if (data.length > 0) lastId = data[data.length - 1].id;
       if (data && (data[0]?.content || data[0]?.attachments)) {
-        retArr = retArr.concat(data);
+        for (const m of data) {
+          if (m.type !== 21) {
+            if (m.thread) {
+              channelIdRef.current = m.thread?.id?.slice();
+              trackedThreads.push({
+                id: m.thread?.id?.slice(),
+                name: m.thread?.name.slice(),
+                archived: m.thread?.thread_metadata?.archived,
+              }); // Found a thread
+              const foundMessages = await _getMessages(
+                channelIdRef,
+                token,
+                dispatch,
+                retArr,
+                true
+              );
+              threadedData = threadedData.concat(
+                [m].concat(
+                  foundMessages.sort((a, b) => a.position - b.position)
+                )
+              );
+              channelIdRef.current = originalChannelId?.slice();
+            } else threadedData.push(m);
+          }
+        }
+
+        if (!thread) {
+          retArr = retArr.concat(threadedData);
+          threadedData = [];
+        }
+
         dispatch({
           type: UPDATE_FETCHED_MESSAGES,
-          payload: { fetchedMessageLength: retArr.length },
+          payload: {
+            fetchedMessageLength: retArr.length,
+          },
         });
       }
     }
-  } catch (e) {
-    console.error("Error fetching channel messages");
-  } finally {
-    let uniqueRecipients = new Map();
-    await retArr.forEach((x) => {
-      uniqueRecipients.set(x.author.id, x.author.username);
-    });
-    const parseAts = (messageContent) => {
-      for (let [key, value] of uniqueRecipients.entries()) {
-        messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
-        messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
+    //Final check for unfounded threads
+    let retThreads = [...trackedThreads];
+    if (!thread && !isDM) {
+      let unfoundedThreads = await fetchThreads(token, originalChannelId);
+      unfoundedThreads = unfoundedThreads
+        .filter((ft) => !trackedThreads.find((tt) => ft.id === tt.id))
+        .map((x) => ({ id: x.id, name: x.name, archived: true }));
+      retThreads = retThreads.concat(unfoundedThreads);
+      for (const ut of unfoundedThreads) {
+        channelIdRef.current = ut?.id?.slice();
+        const data = await _getMessages(
+          channelIdRef,
+          token,
+          dispatch,
+          retArr,
+          true
+        );
+        retArr = retArr.concat(data);
+        channelIdRef.current = originalChannelId?.slice();
+        dispatch({
+          type: UPDATE_FETCHED_MESSAGES,
+          payload: {
+            fetchedMessageLength: retArr.length,
+          },
+        });
       }
-      return messageContent;
-    };
-    dispatch({
-      type: GET_MESSAGE_DATA_COMPLETE,
-      payload: {
-        messages: retArr.map((message) => {
-          return {
-            ...message,
-            username: message.author.username,
-            content: parseAts(message.content),
-          };
-        }),
-      },
-    });
+    }
+
+    return thread ? threadedData : { retArr, retThreads };
+  } catch (e) {
+    console.error("Error fetching channel messages", e);
   }
 };
