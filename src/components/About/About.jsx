@@ -58,6 +58,110 @@ function About() {
                 alignItems="center"
                 spacing={1}
               >
+                <ChangeCircleIcon />
+                <Typography className={classes.accordianTitle}>
+                  Change-log
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={3}>
+                {changelog.map((change) => {
+                  return (
+                    <Stack>
+                      <Typography variant="h6">
+                        Version {change.version}
+                      </Typography>
+                      <ul>
+                        {change.changes.map((innerChange) => {
+                          return (
+                            <Typography
+                              className={classes.changelogText}
+                              variant="caption"
+                            >
+                              <li>{innerChange}</li>
+                            </Typography>
+                          );
+                        })}
+                      </ul>
+                    </Stack>
+                  );
+                })}
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={1}
+              >
+                <PaidIcon />
+                <Typography className={classes.accordianTitle}>
+                  Donate
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack
+                spacing={2}
+                alignItems="center"
+                justifyContent="space-around"
+                direction="row"
+              >
+                <Stack alignItems="center">
+                  <Typography variant="caption">Bitcoin</Typography>
+                  <Tooltip
+                    leaveDelay={3000}
+                    title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm"
+                  >
+                    <img
+                      alt="Donate BTC"
+                      className={classes.cryptoImg}
+                      src="bitcoin.png"
+                    />
+                  </Tooltip>
+                </Stack>
+
+                <Stack alignItems="center">
+                  <a href="https://ko-fi.com/W7W4AAIBR">
+                    <img
+                      className={classes.kofiImg}
+                      src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
+                      border="0"
+                      alt="Buy Me a Coffee at ko-fi.com"
+                    />
+                  </a>
+                </Stack>
+
+                <Stack alignItems="center">
+                  <Typography variant="caption">Ethereum</Typography>
+                  <Tooltip
+                    leaveDelay={3000}
+                    title="0x01aC5D8C7B814eC70Ff5E402297f5b78Ef81137C"
+                  >
+                    <img
+                      alt="Donate ETH"
+                      className={classes.cryptoImg}
+                      src="ethereum.png"
+                    />
+                  </Tooltip>
+                </Stack>
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                spacing={1}
+              >
                 <GitHubIcon />
                 <Typography className={classes.accordianTitle}>
                   Development
@@ -138,110 +242,6 @@ function About() {
                     Watch
                   </GitHubButton>
                 </Stack>
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Stack
-                direction="row"
-                justifyContent="flex-start"
-                alignItems="center"
-                spacing={1}
-              >
-                <PaidIcon />
-                <Typography className={classes.accordianTitle}>
-                  Donate
-                </Typography>
-              </Stack>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Stack
-                spacing={2}
-                alignItems="center"
-                justifyContent="space-around"
-                direction="row"
-              >
-                <Stack alignItems="center">
-                  <Typography variant="caption">Bitcoin</Typography>
-                  <Tooltip
-                    leaveDelay={3000}
-                    title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm"
-                  >
-                    <img
-                      alt="Donate BTC"
-                      className={classes.cryptoImg}
-                      src="bitcoin.png"
-                    />
-                  </Tooltip>
-                </Stack>
-
-                <Stack alignItems="center">
-                  <a href="https://ko-fi.com/W7W4AAIBR">
-                    <img
-                      className={classes.kofiImg}
-                      src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
-                      border="0"
-                      alt="Buy Me a Coffee at ko-fi.com"
-                    />
-                  </a>
-                </Stack>
-
-                <Stack alignItems="center">
-                  <Typography variant="caption">Ethereum</Typography>
-                  <Tooltip
-                    leaveDelay={3000}
-                    title="0x01aC5D8C7B814eC70Ff5E402297f5b78Ef81137C"
-                  >
-                    <img
-                      alt="Donate ETH"
-                      className={classes.cryptoImg}
-                      src="ethereum.png"
-                    />
-                  </Tooltip>
-                </Stack>
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Stack
-                direction="row"
-                justifyContent="flex-start"
-                alignItems="center"
-                spacing={1}
-              >
-                <ChangeCircleIcon />
-                <Typography className={classes.accordianTitle}>
-                  Change-log
-                </Typography>
-              </Stack>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Stack spacing={3}>
-                {changelog.map((change) => {
-                  return (
-                    <Stack>
-                      <Typography variant="h6">
-                        Version {change.version}
-                      </Typography>
-                      <ul>
-                        {change.changes.map((innerChange) => {
-                          return (
-                            <Typography
-                              className={classes.changelogText}
-                              variant="caption"
-                            >
-                              <li>{innerChange}</li>
-                            </Typography>
-                          );
-                        })}
-                      </ul>
-                    </Stack>
-                  );
-                })}
               </Stack>
             </AccordionDetails>
           </Accordion>
