@@ -69,7 +69,7 @@ export const deleteMessage = (authorization, messageId, channelId) => {
     else return resp;
   });
 };
-//For some reason if the last message was attachment only (no message), the table will not render!
+
 export const fetchMessageData = (authorization, lastId, channelId) => {
   return fetch(
     `${discordChannelsUrl}/${channelId}/messages?limit=100${
@@ -84,4 +84,32 @@ export const fetchMessageData = (authorization, lastId, channelId) => {
       },
     }
   ).then((resp) => resp.json());
+};
+
+export const fetchThreads = async (authorization, channelId) => {
+  const privateThreads = await _fetchPrivateThreads(authorization, channelId);
+  const publicThreads = await _fetchPublicThreads(authorization, channelId);
+  return privateThreads.threads?.concat(publicThreads.threads) || [];
+};
+
+const _fetchPrivateThreads = (authorization, channelId) => {
+  return fetch(`${discordChannelsUrl}/${channelId}/threads/archived/private`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+  }).then((resp) => resp.json());
+};
+
+const _fetchPublicThreads = (authorization, channelId) => {
+  return fetch(`${discordChannelsUrl}/${channelId}/threads/archived/public`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+  }).then((resp) => resp.json());
 };

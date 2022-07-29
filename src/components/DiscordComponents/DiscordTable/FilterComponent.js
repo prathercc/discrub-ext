@@ -4,10 +4,12 @@ import Stack from "@mui/material/Stack";
 import DiscordDateTimePicker from "../DiscordDateTimePicker/DiscordDateTimePicker";
 import { MessageContext } from "../../../context/message/MessageContext";
 import FilterComponentStyles from "./FilterComponent.styles";
+import { MenuItem } from "@mui/material";
 
 const FilterComponent = () => {
   const classes = FilterComponentStyles();
-  const { updateFilters } = useContext(MessageContext);
+  const { updateFilters, state: messageState } = useContext(MessageContext);
+  const { threads } = messageState;
 
   return (
     <Stack zIndex={1} className={classes.stack} spacing={2}>
@@ -59,6 +61,24 @@ const FilterComponent = () => {
           }
           label="Attachment Name"
         />
+        <TextField
+          fullWidth
+          variant="filled"
+          onChange={(e) => updateFilters(null, e.target.value, "thread")}
+          select
+          label="Threads"
+        >
+          <MenuItem value={null} key={-1}>
+            <strong>Reset Selection</strong>
+          </MenuItem>
+          {threads.map((thread) => {
+            return (
+              <MenuItem value={thread.id} key={thread.id}>
+                {thread.name}
+              </MenuItem>
+            );
+          })}
+        </TextField>
       </Stack>
     </Stack>
   );
