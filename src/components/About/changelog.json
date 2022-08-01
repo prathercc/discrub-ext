@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.1.0",
+    "changes": [
+      "Add ability to open extension dialog via the Chrome extension popup button."
+    ]
+  },
+  {
     "version": "1.0.9",
     "changes": [
       "Fix bug where deleting/editing direct messages would crash the extension.",
