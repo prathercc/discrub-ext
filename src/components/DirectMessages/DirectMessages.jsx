@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
@@ -9,6 +9,7 @@ import {
   Stack,
   CircularProgress,
   TextField,
+  Button,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
@@ -18,15 +19,21 @@ import DirectMessagesStyles from "./DirectMessages.styles";
 function DirectMessages() {
   const classes = DirectMessagesStyles();
 
+  const [searchTouched, setSearchTouched] = useState(false);
   const { state: userState } = useContext(UserContext);
-  const { state: dmState, getDms, setDm } = useContext(DmContext);
+  const {
+    state: dmState,
+    getDms,
+    setDm,
+    setPreFilterUserId,
+  } = useContext(DmContext);
   const {
     state: messageState,
     resetMessageData,
     getMessageData,
   } = useContext(MessageContext);
 
-  const { selectedDm, dms } = dmState;
+  const { selectedDm, dms, preFilterUserId, preFilterUserIds } = dmState;
   const {
     fetchedMessageLength,
     isLoading: messagesLoading,
@@ -34,17 +41,15 @@ function DirectMessages() {
   } = messageState;
   const { token } = userState;
 
+  const fetchDmData = async () => {
+    await resetMessageData();
+    await getMessageData(selectedDm.id);
+    setSearchTouched(true);
+  };
+
   useEffect(() => {
     getDms();
   }, [getDms]);
-
-  useEffect(() => {
-    const fetchDmData = async () => {
-      await resetMessageData();
-      await getMessageData(selectedDm.id);
-    };
-    if (selectedDm.id) fetchDmData();
-  }, [selectedDm.id, getMessageData, resetMessageData]);
 
   return (
     <Stack spacing={2} className={classes.boxContainer}>
@@ -79,6 +84,35 @@ function DirectMessages() {
                   );
                 })}
               </TextField>
+              <Stack alignItems="center" direction="row" spacing={1}>
+                <TextField
+                  fullWidth
+                  variant="filled"
+                  disabled={selectedDm.id === null || messagesLoading}
+                  value={preFilterUserId}
+                  onChange={(e) => setPreFilterUserId(e.target.value)}
+                  select
+                  label="Filter By Username (Optional)"
+                >
+                  <MenuItem value={null} key={-1}>
+                    <strong>Reset Selection</strong>
+                  </MenuItem>
+                  {preFilterUserIds.map((user) => {
+                    return (
+                      <MenuItem key={user.id} value={user.id}>
+                        {user.name}
+                      </MenuItem>
+                    );
+                  })}
+                </TextField>
+                <Button
+                  disabled={selectedDm.id === null || messagesLoading}
+                  onClick={() => selectedDm.id && fetchDmData()}
+                  variant="contained"
+                >
+                  Search
+                </Button>
+              </Stack>
             </Stack>
           </Paper>
         </Stack>
@@ -104,18 +138,21 @@ function DirectMessages() {
           <DiscordTable />
         </Box>
       )}
-      {messages?.length === 0 && !messagesLoading && selectedDm.id && (
-        <Paper className={classes.paper}>
-          <Box className={classes.box}>
-            <Typography>No Messages to Display</Typography>
-          </Box>
-          <Box className={classes.box}>
-            <Typography>
-              <SentimentDissatisfiedIcon />
-            </Typography>
-          </Box>
-        </Paper>
-      )}
+      {messages?.length === 0 &&
+        !messagesLoading &&
+        selectedDm.id &&
+        searchTouched && (
+          <Paper className={classes.paper}>
+            <Box className={classes.box}>
+              <Typography>No Messages to Display</Typography>
+            </Box>
+            <Box className={classes.box}>
+              <Typography>
+                <SentimentDissatisfiedIcon />
+              </Typography>
+            </Box>
+          </Paper>
+        )}
     </Stack>
   );
 }
