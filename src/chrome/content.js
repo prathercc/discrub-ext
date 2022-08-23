@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, callback) {
         const iframe = document.createElement("iframe");
         iframe.id = "injected_dialog_iframe";
         iframe.src = chrome.runtime.getURL("injected_dialog.html");
-        iframe.height = "702px";
+        iframe.height = "822px";
         iframe.width = "777px";
         modal.appendChild(iframe);
         document.body.appendChild(modal);
