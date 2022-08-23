@@ -3,6 +3,7 @@ import {
   GET_DMS_COMPLETE,
   SET_DM,
   RESET_DM_COMPLETE,
+  SET_PREFILTER_USERID,
 } from "./DmContextConstants";
 export const DmReducer = (state, action) => {
   const { type, payload } = action;
@@ -13,7 +14,20 @@ export const DmReducer = (state, action) => {
       return { ...state, dms: [...payload], isLoading: false };
     case SET_DM:
       const selectedDm = state.dms.find((dm) => dm.id === payload.id);
-      return { ...state, selectedDm: selectedDm };
+      const preFilterIds = [
+        { name: payload.user.name, id: payload.user.id },
+        selectedDm.recipients.map((x) => ({
+          name: x.username,
+          id: x.id,
+        })),
+      ];
+      return {
+        ...state,
+        selectedDm: selectedDm,
+        preFilterUserIds: preFilterIds.flat(),
+      };
+    case SET_PREFILTER_USERID:
+      return { ...state, preFilterUserId: payload.userId };
     case RESET_DM_COMPLETE:
       return {
         ...state,
@@ -23,6 +37,8 @@ export const DmReducer = (state, action) => {
           type: null,
           owner_id: null,
         },
+        preFilterUserId: null,
+        preFilterUserIds: [],
       };
     default:
       return { ...state, ...payload };

@@ -3,6 +3,7 @@ import {
   editMessage,
   deleteMessage as delMsg,
   fetchThreads,
+  fetchUserMessageData,
 } from "../../discordService";
 import {
   GET_MESSAGE_DATA,
@@ -175,7 +176,8 @@ export const getMessageData = async (
   channelIdRef,
   token,
   dispatch,
-  isDM = false
+  isDM = false,
+  preFilterUserId
 ) => {
   const parseAts = (messageContent, uniqueRecipients) => {
     for (let [key, value] of uniqueRecipients.entries()) {
@@ -186,15 +188,27 @@ export const getMessageData = async (
   };
 
   dispatch({ type: GET_MESSAGE_DATA });
-  let tempArr = [];
-  const { retArr, retThreads } = await _getMessages(
-    channelIdRef,
-    token,
-    dispatch,
-    tempArr,
-    false,
-    isDM
-  );
+
+  let retArr = [],
+    retThreads = [];
+  if (preFilterUserId) {
+    ({ retArr, retThreads } = await _getUserMessages(
+      channelIdRef,
+      token,
+      preFilterUserId,
+      dispatch
+    ));
+  } else {
+    let tempArr = [];
+    ({ retArr, retThreads } = await _getMessages(
+      channelIdRef,
+      token,
+      dispatch,
+      tempArr,
+      false,
+      isDM
+    ));
+  }
   let uniqueRecipients = new Map();
   await retArr.forEach((x) => {
     uniqueRecipients.set(x.author.id, x.author.username);
@@ -303,6 +317,52 @@ const _getMessages = async (
     }
 
     return thread ? threadedData : { retArr, retThreads };
+  } catch (e) {
+    console.error("Error fetching channel messages", e);
+  }
+};
+
+const _getUserMessages = async (
+  channelIdRef,
+  token,
+  preFilterUserId,
+  dispatch
+) => {
+  const originalChannelId = channelIdRef?.current?.slice();
+  let retArr = [];
+  let retThreads = [];
+  try {
+    let offset = 0;
+    let reachedEnd = false;
+    while (!reachedEnd) {
+      if (channelIdRef.current !== originalChannelId) break;
+      const data = await fetchUserMessageData(
+        token,
+        offset,
+        originalChannelId,
+        preFilterUserId
+      );
+
+      if (data.retry_after) {
+        await new Promise((resolve) => setTimeout(resolve, data.retry_after));
+        continue;
+      }
+      if (!data || data?.messages?.length === 0) break;
+      if (data.threads)
+        for (const th of data.threads)
+          if (!retThreads.find((eTh) => eTh.id === th.id)) retThreads.push(th);
+      const foundMessages = data.messages.flat();
+      if (foundMessages.length < 25) reachedEnd = true;
+      offset += 25;
+      for (const m of foundMessages) if (m.type !== 21) retArr.push(m);
+      dispatch({
+        type: UPDATE_FETCHED_MESSAGES,
+        payload: {
+          fetchedMessageLength: retArr.length,
+        },
+      });
+    }
+    return { retArr, retThreads };
   } catch (e) {
     console.error("Error fetching channel messages", e);
   }
