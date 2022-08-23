@@ -86,6 +86,27 @@ export const fetchMessageData = (authorization, lastId, channelId) => {
   ).then((resp) => resp.json());
 };
 
+export const fetchUserMessageData = (
+  authorization,
+  offset,
+  channelId,
+  authorId
+) => {
+  return fetch(
+    `${discordChannelsUrl}/${channelId}/messages/search?author_id=${authorId}${
+      offset > 0 ? `&offset=${offset}` : ""
+    }`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: authorization,
+        "user-agent": userAgent,
+      },
+    }
+  ).then((resp) => resp.json());
+};
+
 export const fetchThreads = async (authorization, channelId) => {
   const privateThreads = await _fetchPrivateThreads(authorization, channelId);
   const publicThreads = await _fetchPublicThreads(authorization, channelId);
