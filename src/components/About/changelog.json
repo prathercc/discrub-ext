@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.1.1",
+    "changes": [
+      "Add the ability to pre-filter messages by username, this will allow faster searching if only looking for messages for a specific user.",
+      "One limitation of the pre-filter feature is that Channel Messages can only be pre-filtered by your own username due to Discord API restrictions. Direct Messages do not have this limitation.",
+      "The second pre-filter limitation is that messages within Archived Threads are not able to be found by pre-filtering, these messages can be found however by not using the pre-filter feature. Active/Unarchived Threads can still be found by pre-filtering."
+    ]
+  },
+  {
     "version": "1.1.0",
     "changes": [
       "Add ability to open extension dialog via the Chrome extension popup button."

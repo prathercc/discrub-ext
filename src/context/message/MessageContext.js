@@ -39,8 +39,9 @@ const MessageContextProvider = (props) => {
   const selectedDmIdRef = useRef();
 
   const { token } = userState;
-  const { selectedChannel } = channelState;
-  const { selectedDm } = dmState;
+  const { selectedChannel, preFilterUserId: channelPreFilterUserId } =
+    channelState;
+  const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
 
   selectedChannelIdRef.current = selectedChannel.id; // Needed incase channelId changes and we can cancel the fetching.
   selectedDmIdRef.current = selectedDm.id;
@@ -126,10 +127,28 @@ const MessageContextProvider = (props) => {
 
   const getMessageData = useCallback(async () => {
     if (selectedChannel.id && token)
-      await getMessageDataAction(selectedChannelIdRef, token, dispatch);
+      await getMessageDataAction(
+        selectedChannelIdRef,
+        token,
+        dispatch,
+        false,
+        channelPreFilterUserId
+      );
     else if (selectedDm.id && token)
-      await getMessageDataAction(selectedDmIdRef, token, dispatch, true);
-  }, [token, selectedChannel.id, selectedDm.id]);
+      await getMessageDataAction(
+        selectedDmIdRef,
+        token,
+        dispatch,
+        true,
+        dmPreFilterUserId
+      );
+  }, [
+    token,
+    selectedChannel.id,
+    selectedDm.id,
+    dmPreFilterUserId,
+    channelPreFilterUserId,
+  ]);
 
   const resetMessageData = useCallback(async () => {
     await resetMessageDataAction(dispatch);

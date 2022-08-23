@@ -8,6 +8,7 @@ import {
   getChannels as getChannelsAction,
   setChannel as setChannelAction,
   resetChannel as resetChannelAction,
+  setPreFilterUserId as setPreFilterUserIdAction,
 } from "./ChannelContextActions";
 import { ChannelReducer } from "./ChannelReducer";
 import { UserContext } from "../user/UserContext";
@@ -17,7 +18,7 @@ export const ChannelContext = createContext();
 const ChannelContextProvider = (props) => {
   const { state: userState } = useContext(UserContext);
 
-  const { token } = userState;
+  const { token, id: userId, username } = userState;
 
   const [state, dispatch] = useReducer(
     ChannelReducer,
@@ -34,6 +35,8 @@ const ChannelContextProvider = (props) => {
         type: null,
       },
       isLoading: null,
+      preFilterUserId: null,
+      preFilterUserIds: [],
     })
   );
 
@@ -45,16 +48,27 @@ const ChannelContextProvider = (props) => {
   );
 
   const setChannel = (id) => {
-    setChannelAction(id, dispatch);
+    setChannelAction(id, { name: username, id: userId }, dispatch);
   };
 
   const resetChannel = useCallback(async () => {
     await resetChannelAction(dispatch);
   }, []);
 
+  const setPreFilterUserId = async (userId) => {
+    setPreFilterUserIdAction(userId, dispatch);
+  };
+
   return (
     <ChannelContext.Provider
-      value={{ state, dispatch, getChannels, setChannel, resetChannel }}
+      value={{
+        state,
+        dispatch,
+        getChannels,
+        setChannel,
+        resetChannel,
+        setPreFilterUserId,
+      }}
     >
       {props.children}
     </ChannelContext.Provider>

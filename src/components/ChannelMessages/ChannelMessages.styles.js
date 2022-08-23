@@ -14,7 +14,7 @@ const ChannelMessagesStyles = makeStyles(() => ({
     marginTop: "1vh",
   },
   tableBox: {
-    maxHeight: "360px",
+    maxHeight: "390px",
     overflow: "auto",
     "&::-webkit-scrollbar": {
       width: "5px",

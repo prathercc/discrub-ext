@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
@@ -9,6 +9,7 @@ import {
   Paper,
   CircularProgress,
   TextField,
+  Button,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
@@ -30,24 +31,26 @@ function ChannelMessages() {
     getChannels,
     setChannel,
     resetChannel,
+    setPreFilterUserId,
   } = useContext(ChannelContext);
+
+  const [searchTouched, setSearchTouched] = useState(false);
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
-  const { channels, selectedChannel } = channelState;
+  const { channels, selectedChannel, preFilterUserIds, preFilterUserId } =
+    channelState;
   const {
     messages,
     isLoading: messagesLoading,
     fetchedMessageLength,
   } = messageDataState;
 
-  useEffect(() => {
-    const fetchChannelData = async () => {
-      await resetMessageData();
-      await getMessageData(selectedChannel.id);
-    };
-    if (selectedChannel.id) fetchChannelData();
-  }, [selectedChannel.id, getMessageData, resetMessageData]);
+  const fetchChannelData = async () => {
+    await resetMessageData();
+    await getMessageData(selectedChannel.id);
+    setSearchTouched(true);
+  };
 
   useEffect(() => {
     const fetchGuildChannels = async () => {
@@ -97,7 +100,10 @@ function ChannelMessages() {
                 variant="filled"
                 disabled={selectedGuild.id === null || messagesLoading}
                 value={selectedChannel.id}
-                onChange={(e) => setChannel(e.target.value)}
+                onChange={(e) => {
+                  setSearchTouched(false);
+                  setChannel(e.target.value);
+                }}
                 select
                 label="Channels"
               >
@@ -109,6 +115,35 @@ function ChannelMessages() {
                   );
                 })}
               </TextField>
+              <Stack alignItems="center" direction="row" spacing={1}>
+                <TextField
+                  fullWidth
+                  variant="filled"
+                  disabled={selectedChannel.id === null || messagesLoading}
+                  value={preFilterUserId}
+                  onChange={(e) => setPreFilterUserId(e.target.value)}
+                  select
+                  label="Filter By Username (Optional)"
+                >
+                  <MenuItem value={null} key={-1}>
+                    <strong>Reset Selection</strong>
+                  </MenuItem>
+                  {preFilterUserIds.map((user) => {
+                    return (
+                      <MenuItem key={user.id} value={user.id}>
+                        {user.name}
+                      </MenuItem>
+                    );
+                  })}
+                </TextField>
+                <Button
+                  disabled={selectedChannel.id === null || messagesLoading}
+                  onClick={() => selectedChannel.id && fetchChannelData()}
+                  variant="contained"
+                >
+                  Search
+                </Button>
+              </Stack>
             </Stack>
           </Paper>
 
@@ -117,18 +152,21 @@ function ChannelMessages() {
               <DiscordTable />
             </Box>
           )}
-          {messages.length === 0 && !messagesLoading && selectedChannel.id && (
-            <Paper className={classes.paper}>
-              <Box className={classes.box}>
-                <Typography>No Messages to Display</Typography>
-              </Box>
-              <Box className={classes.box}>
-                <Typography>
-                  <SentimentDissatisfiedIcon />
-                </Typography>
-              </Box>
-            </Paper>
-          )}
+          {messages.length === 0 &&
+            !messagesLoading &&
+            selectedChannel.id &&
+            searchTouched && (
+              <Paper className={classes.paper}>
+                <Box className={classes.box}>
+                  <Typography>No Messages to Display</Typography>
+                </Box>
+                <Box className={classes.box}>
+                  <Typography>
+                    <SentimentDissatisfiedIcon />
+                  </Typography>
+                </Box>
+              </Paper>
+            )}
         </Stack>
       )}
       {(!token || !guilds.length || messagesLoading) && (
