@@ -8,6 +8,7 @@ import {
   getDms as getDmsAction,
   setDm as setDmAction,
   resetDm as resetDmAction,
+  setPreFilterUserId as setPreFilterUserIdAction,
 } from "./DmContextActions";
 import { DmReducer } from "./DmReducer";
 import { UserContext } from "../user/UserContext";
@@ -17,7 +18,7 @@ export const DmContext = createContext();
 const DmContextProvider = (props) => {
   const { state: userState } = useContext(UserContext);
 
-  const { token } = userState;
+  const { token, id: userId, username } = userState;
 
   const [state, dispatch] = useReducer(
     DmReducer,
@@ -31,6 +32,8 @@ const DmContextProvider = (props) => {
         owner_id: null,
       },
       isLoading: null,
+      preFilterUserId: null,
+      preFilterUserIds: [],
     })
   );
 
@@ -39,12 +42,16 @@ const DmContextProvider = (props) => {
   }, [token]);
 
   const setDm = (id) => {
-    setDmAction(id, dispatch);
+    setDmAction(id, { name: username, id: userId }, dispatch);
   };
 
   const resetDm = useCallback(async () => {
     await resetDmAction(dispatch);
   }, []);
+
+  const setPreFilterUserId = async (userId) => {
+    setPreFilterUserIdAction(userId, dispatch);
+  };
 
   return (
     <DmContext.Provider
@@ -54,6 +61,7 @@ const DmContextProvider = (props) => {
         getDms,
         setDm,
         resetDm,
+        setPreFilterUserId,
       }}
     >
       {props.children}

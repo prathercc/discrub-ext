@@ -4,6 +4,7 @@ import {
   GET_DMS_COMPLETE,
   SET_DM,
   RESET_DM_COMPLETE,
+  SET_PREFILTER_USERID,
 } from "./DmContextConstants";
 
 export const getDms = async (token, dispatch) => {
@@ -15,10 +16,14 @@ export const getDms = async (token, dispatch) => {
   });
 };
 
-export const setDm = (id, dispatch) => {
-  dispatch({ type: SET_DM, payload: { id } });
+export const setDm = (id, user, dispatch) => {
+  dispatch({ type: SET_DM, payload: { id, user } });
 };
 
 export const resetDm = (dispatch) => {
   dispatch({ type: RESET_DM_COMPLETE });
+};
+
+export const setPreFilterUserId = (userId, dispatch) => {
+  dispatch({ type: SET_PREFILTER_USERID, payload: { userId } });
 };

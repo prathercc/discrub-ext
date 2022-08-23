@@ -3,6 +3,7 @@ import {
   GET_CHANNELS_COMPLETE,
   SET_CHANNEL,
   RESET_CHANNEL_COMPLETE,
+  SET_PREFILTER_USERID,
 } from "./ChannelContextConstants";
 export const ChannelReducer = (state, action) => {
   const { type, payload } = action;
@@ -15,7 +16,13 @@ export const ChannelReducer = (state, action) => {
       const selectedChannel = state.channels.find(
         (channel) => channel.id === payload.id
       );
-      return { ...state, selectedChannel: selectedChannel };
+      return {
+        ...state,
+        selectedChannel: selectedChannel,
+        preFilterUserIds: [{ name: payload.user.name, id: payload.user.id }],
+      };
+    case SET_PREFILTER_USERID:
+      return { ...state, preFilterUserId: payload.userId };
     case RESET_CHANNEL_COMPLETE:
       return {
         ...state,
@@ -29,6 +36,8 @@ export const ChannelReducer = (state, action) => {
           position: null,
           type: null,
         },
+        preFilterUserId: null,
+        preFilterUserIds: [],
       };
     default:
       return { ...state, ...payload };
