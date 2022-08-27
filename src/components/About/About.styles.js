@@ -8,17 +8,8 @@ const AboutStyles = makeStyles(() => ({
     overflow: "hidden",
   },
   paper: {
-    maxHeight: "400px",
+    maxHeight: "600px",
     overflow: "auto",
-    "&::-webkit-scrollbar": {
-      width: "5px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      background: "#f1f1f1",
-    },
-    "&::-webkit-scrollbar-track": {
-      background: "#888",
-    },
   },
   accordianTitle: {
     cursor: "pointer !important",
