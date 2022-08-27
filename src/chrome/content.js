@@ -21,9 +21,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, callback) {
       if (!document.getElementById("injected_dialog")) {
         const modal = document.createElement("dialog");
         modal.id = "injected_dialog";
+        modal.innerHTML =
+          "<style>::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:#f1f1f1;}::-webkit-scrollbar-track{background:#888;}</style>";
         modal.style.padding = 0;
         modal.style.border = "none";
         modal.style.backgroundColor = "transparent";
+        modal.style.overflow = "auto";
         const iframe = document.createElement("iframe");
         iframe.id = "injected_dialog_iframe";
         iframe.src = chrome.runtime.getURL("injected_dialog.html");
