@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.1.2",
+    "changes": [
+      "Stop delete function from breaking the extension if an unknown error occurs."
+    ]
+  },
+  {
     "version": "1.1.1",
     "changes": [
       "Add the ability to pre-filter messages by username, this will allow faster searching if only looking for messages for a specific user.",
