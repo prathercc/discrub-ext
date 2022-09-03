@@ -29,14 +29,18 @@ export const setSelected = async (messageIds, dispatch) => {
 };
 
 export const deleteMessage = async (message, channelId, token, dispatch) => {
-  const response = await delMsg(token, message.id, channelId);
-  if (response.status === 204) {
-    dispatch({ type: DELETE_MESSAGE_SUCCESS, payload: message });
-    return null;
-  } else if (response.retry_after) {
-    return response.retry_after;
-  } else {
-    return -1;
+  try {
+    const response = await delMsg(token, message.id, channelId);
+    if (response.status === 204) {
+      dispatch({ type: DELETE_MESSAGE_SUCCESS, payload: message });
+      return null;
+    } else if (response.retry_after) {
+      return response.retry_after;
+    } else {
+      return -1;
+    }
+  } catch (e) {
+    console.error("Error Deleting Message", e, message);
   }
 };
 
