@@ -369,5 +369,6 @@ const _getUserMessages = async (
     return { retArr, retThreads };
   } catch (e) {
     console.error("Error fetching channel messages", e);
+    return { retArr, retThreads };
   }
 };

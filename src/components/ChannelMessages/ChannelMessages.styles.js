@@ -29,6 +29,12 @@ const ChannelMessagesStyles = makeStyles(() => ({
   paper: {
     padding: "10px",
   },
+  objIdTypography: {
+    display: "block",
+  },
+  purgeHidden: {
+    opacity: ({ purgeDialogOpen }) => purgeDialogOpen && 0,
+  },
 }));
 
 export default ChannelMessagesStyles;
