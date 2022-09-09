@@ -25,6 +25,7 @@ export const DmReducer = (state, action) => {
         ...state,
         selectedDm: selectedDm,
         preFilterUserIds: preFilterIds.flat(),
+        preFilterUserId: null,
       };
     case SET_PREFILTER_USERID:
       return { ...state, preFilterUserId: payload.userId };
