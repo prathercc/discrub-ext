@@ -5,11 +5,14 @@ import DiscordDateTimePicker from "../DiscordDateTimePicker/DiscordDateTimePicke
 import { MessageContext } from "../../../context/message/MessageContext";
 import FilterComponentStyles from "./FilterComponent.styles";
 import { MenuItem } from "@mui/material";
+import { ChannelContext } from "../../../context/channel/ChannelContext";
 
 const FilterComponent = () => {
   const classes = FilterComponentStyles();
   const { updateFilters, state: messageState } = useContext(MessageContext);
+  const { state: channelState } = useContext(ChannelContext);
   const { threads } = messageState;
+  const { selectedChannel } = channelState;
 
   return (
     <Stack zIndex={1} className={classes.stack} spacing={2}>
@@ -61,24 +64,26 @@ const FilterComponent = () => {
           }
           label="Attachment Name"
         />
-        <TextField
-          fullWidth
-          variant="filled"
-          onChange={(e) => updateFilters(null, e.target.value, "thread")}
-          select
-          label="Threads"
-        >
-          <MenuItem value={null} key={-1}>
-            <strong>Reset Selection</strong>
-          </MenuItem>
-          {threads.map((thread) => {
-            return (
-              <MenuItem value={thread.id} key={thread.id}>
-                {thread.name}
-              </MenuItem>
-            );
-          })}
-        </TextField>
+        {selectedChannel.id && (
+          <TextField
+            fullWidth
+            variant="filled"
+            onChange={(e) => updateFilters(null, e.target.value, "thread")}
+            select
+            label="Threads"
+          >
+            <MenuItem value={null} key={-1}>
+              <strong>Reset Selection</strong>
+            </MenuItem>
+            {threads.map((thread) => {
+              return (
+                <MenuItem value={thread.id} key={thread.id}>
+                  {thread.name}
+                </MenuItem>
+              );
+            })}
+          </TextField>
+        )}
       </Stack>
     </Stack>
   );

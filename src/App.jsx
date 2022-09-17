@@ -6,22 +6,38 @@ import DmContextProvider from "./context/dm/DmContext";
 import GuildContextProvider from "./context/guild/GuildContext";
 import MessageContextProvider from "./context/message/MessageContext";
 import UserContextProvider from "./context/user/UserContext";
+import GlobalStyles from "@mui/material/GlobalStyles";
 
 function App() {
   return (
-    <AppTheme>
-      <UserContextProvider>
-        <GuildContextProvider>
-          <ChannelContextProvider>
-            <DmContextProvider>
-              <MessageContextProvider>
-                <InjectedDialog />
-              </MessageContextProvider>
-            </DmContextProvider>
-          </ChannelContextProvider>
-        </GuildContextProvider>
-      </UserContextProvider>
-    </AppTheme>
+    <>
+      <GlobalStyles
+        styles={{
+          "&::-webkit-scrollbar": {
+            width: "5px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "#f1f1f1",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "#888",
+          },
+        }}
+      />
+      <AppTheme>
+        <UserContextProvider>
+          <GuildContextProvider>
+            <ChannelContextProvider>
+              <DmContextProvider>
+                <MessageContextProvider>
+                  <InjectedDialog />
+                </MessageContextProvider>
+              </DmContextProvider>
+            </ChannelContextProvider>
+          </GuildContextProvider>
+        </UserContextProvider>
+      </AppTheme>
+    </>
   );
 }
 
