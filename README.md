@@ -91,18 +91,14 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <details>
 
-<summary>Open via Chrome popup button</summary>
+<summary>Open By Clicking Extension Icon</summary>
 
 <p  align="center">
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z9.png">
 
 </p>
-<p  align="center">
 
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z10.png">
-
-</p>
 
 </details>
 
