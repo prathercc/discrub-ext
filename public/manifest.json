@@ -1,7 +1,7 @@
 {
   "short_name": "Discrub",
   "name": "Discrub",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A data manipulation and export tool for Discord.",
   "manifest_version": 3,
   "permissions": [],
@@ -9,13 +9,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "injected_button.html",
-    "default_icon": {
-      "16": "discrub2.png",
-      "32": "discrub2.png",
-      "48": "discrub2.png",
-      "128": "discrub2.png"
-    }
+    "default_title": "Open Discrub"
   },
   "content_scripts": [
     {

@@ -33,15 +33,6 @@ const ModalStyles = makeStyles(() => ({
   stackContainer: {
     height: "100%",
     overflow: "auto",
-    "&::-webkit-scrollbar": {
-      width: "5px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      background: "#f1f1f1",
-    },
-    "&::-webkit-scrollbar-track": {
-      background: "#888",
-    },
     padding: "10px",
   },
 }));
