@@ -1,3 +1,4 @@
+
 # Discrub
 
 **Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML, PDF, and JSON supported) [Discord](https://discord.com/) messages. It can be installed via the [Chrome Webstore](https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj)
@@ -100,6 +101,29 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 <p  align="center">
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z10.png">
+
+</p>
+
+</details>
+
+<details>
+
+<summary>Purge Guild</summary>
+
+<p  align="center">
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z11.png">
+
+</p>
+<p  align="center">
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z12.png">
+
+</p>
+
+<p  align="center">
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png">
 
 </p>
 

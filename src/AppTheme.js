@@ -122,6 +122,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiDialogContentText: {
+      styleOverrides: {
+        root: {
+          color: "rgb(210, 213, 247)",
+        },
+      },
+    },
   },
 });
 

@@ -16,9 +16,9 @@ import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
+import PurgeGuild from "./PurgeGuild";
 
 function ChannelMessages() {
-  const classes = ChannelMessagesStyles();
   const {
     state: messageDataState,
     getMessageData,
@@ -35,6 +35,8 @@ function ChannelMessages() {
   } = useContext(ChannelContext);
 
   const [searchTouched, setSearchTouched] = useState(false);
+  const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
+  const classes = ChannelMessagesStyles({ purgeDialogOpen });
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
@@ -78,24 +80,31 @@ function ChannelMessages() {
                   Guilds.
                 </Typography>
               </Stack>
+              <Stack alignItems="center" direction="row" spacing={1}>
+                <TextField
+                  fullWidth
+                  variant="filled"
+                  disabled={messagesLoading || purgeDialogOpen}
+                  value={selectedGuild.id}
+                  onChange={(e) => setGuild(e.target.value)}
+                  select
+                  label="Guilds"
+                >
+                  {guilds.map((guild) => {
+                    return (
+                      <MenuItem key={guild.id} value={guild.id}>
+                        {guild.name}
+                      </MenuItem>
+                    );
+                  })}
+                </TextField>
+                <PurgeGuild
+                  dialogOpen={purgeDialogOpen}
+                  setDialogOpen={setPurgeDialogOpen}
+                />
+              </Stack>
               <TextField
-                fullWidth
-                variant="filled"
-                disabled={messagesLoading}
-                value={selectedGuild.id}
-                onChange={(e) => setGuild(e.target.value)}
-                select
-                label="Guilds"
-              >
-                {guilds.map((guild) => {
-                  return (
-                    <MenuItem key={guild.id} value={guild.id}>
-                      {guild.name}
-                    </MenuItem>
-                  );
-                })}
-              </TextField>
-              <TextField
+                className={classes.purgeHidden}
                 fullWidth
                 variant="filled"
                 disabled={selectedGuild.id === null || messagesLoading}
@@ -115,7 +124,12 @@ function ChannelMessages() {
                   );
                 })}
               </TextField>
-              <Stack alignItems="center" direction="row" spacing={1}>
+              <Stack
+                className={classes.purgeHidden}
+                alignItems="center"
+                direction="row"
+                spacing={1}
+              >
                 <TextField
                   fullWidth
                   variant="filled"
@@ -147,7 +161,7 @@ function ChannelMessages() {
             </Stack>
           </Paper>
 
-          {messages.length > 0 && !messagesLoading && (
+          {messages.length > 0 && !messagesLoading && !purgeDialogOpen && (
             <Box className={classes.tableBox}>
               <DiscordTable />
             </Box>
@@ -155,7 +169,8 @@ function ChannelMessages() {
           {messages.length === 0 &&
             !messagesLoading &&
             selectedChannel.id &&
-            searchTouched && (
+            searchTouched &&
+            !purgeDialogOpen && (
               <Paper className={classes.paper}>
                 <Box className={classes.box}>
                   <Typography>No Messages to Display</Typography>
@@ -169,7 +184,7 @@ function ChannelMessages() {
             )}
         </Stack>
       )}
-      {(!token || !guilds.length || messagesLoading) && (
+      {(!token || !guilds.length || messagesLoading) && !purgeDialogOpen && (
         <Paper justifyContent="center" className={classes.paper}>
           <Stack justifyContent="center" alignItems="center">
             <CircularProgress />
