@@ -89,6 +89,7 @@ function ChannelMessages() {
                 spacing={1}
               >
                 <TextField
+                  size="small"
                   fullWidth
                   variant="filled"
                   disabled={messagesLoading || purgeDialogOpen}
@@ -107,6 +108,7 @@ function ChannelMessages() {
                 </TextField>
 
                 <TextField
+                  size="small"
                   className={classes.purgeHidden}
                   fullWidth
                   variant="filled"
@@ -133,6 +135,7 @@ function ChannelMessages() {
                   placement="top"
                 >
                   <TextField
+                    size="small"
                     fullWidth
                     variant="filled"
                     disabled={selectedChannel.id === null || messagesLoading}

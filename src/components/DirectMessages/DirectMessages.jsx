@@ -72,6 +72,7 @@ function DirectMessages() {
                 spacing={1}
               >
                 <TextField
+                  size="small"
                   fullWidth
                   variant="filled"
                   disabled={messagesLoading}
@@ -97,6 +98,7 @@ function DirectMessages() {
                   placement="top"
                 >
                   <TextField
+                    size="small"
                     fullWidth
                     variant="filled"
                     disabled={selectedDm.id === null || messagesLoading}

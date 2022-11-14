@@ -12,7 +12,7 @@ const DiscordDateTimePicker = ({ label, onChange }) => {
       <MobileDateTimePicker
         clearable
         renderInput={(props) => (
-          <TextField fullWidth variant="filled" {...props} />
+          <TextField size="small" fullWidth variant="filled" {...props} />
         )}
         label={label}
         value={value}
