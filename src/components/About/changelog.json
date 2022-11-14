@@ -1,6 +1,14 @@
 [
   {
-    "version": "1.1.4",
+    "version": "1.6.6",
+    "changes": [
+      "Slight adjustments to versioning and window dimensions.",
+      "Disable button injection from within the Discord app (Users should click the Discrub chrome extension button instead).",
+      "Move Channel/Direct Message selection boxes on one row to reduce vertical screen waste."
+    ]
+  },
+  {
+    "version": "1.6.5",
     "changes": [
       "Clicking extension icon will open Discrub without requiring second button click.",
       "Hide thread filter when filtering Direct Messages.",
@@ -8,20 +16,20 @@
     ]
   },
   {
-    "version": "1.1.3",
+    "version": "1.6.4",
     "changes": [
       "Add Purge Guild feature - Users can now select a Guild and click the Purge button, which will delete all of the users messages within all Channels.",
       "Fix bug where the DM Pre-filter selection would carry over to the next selected DM."
     ]
   },
   {
-    "version": "1.1.2",
+    "version": "1.5.4",
     "changes": [
       "Stop delete function from breaking the extension if an unknown error occurs."
     ]
   },
   {
-    "version": "1.1.1",
+    "version": "1.5.3",
     "changes": [
       "Add the ability to pre-filter messages by username, this will allow faster searching if only looking for messages for a specific user.",
       "One limitation of the pre-filter feature is that Channel Messages can only be pre-filtered by your own username due to Discord API restrictions. Direct Messages do not have this limitation.",
@@ -29,13 +37,13 @@
     ]
   },
   {
-    "version": "1.1.0",
+    "version": "1.4.3",
     "changes": [
       "Add ability to open extension dialog via the Chrome extension popup button."
     ]
   },
   {
-    "version": "1.0.9",
+    "version": "1.3.3",
     "changes": [
       "Fix bug where deleting/editing direct messages would crash the extension.",
       "Add support for Discord threads.",
@@ -43,14 +51,14 @@
     ]
   },
   {
-    "version": "1.0.8",
+    "version": "1.2.3",
     "changes": [
       "Hide disabled 'Nuke Account' tab.",
       "Add r/discrub subreddit link to General Information tab."
     ]
   },
   {
-    "version": "1.0.7",
+    "version": "1.2.2",
     "changes": [
       "Fix bug where active filters did not affect the messages exported.",
       "Adjustments to Attachment Modal.",
@@ -58,25 +66,21 @@
     ]
   },
   {
-    "version": "1.0.6",
+    "version": "1.2.1",
     "changes": [
       "Fix bug where message filters did not reset behind the scenes.",
       "Rename 'About' tab to 'General Information', refactor layout."
     ]
   },
   {
-    "version": "1.0.5",
+    "version": "1.2.0",
     "changes": [
       "Add ability to export to the following file formats: HTML, PDF, and JSON.",
       "Behind the scenes performance enhancements."
     ]
   },
   {
-    "version": "1.0.4",
+    "version": "1.1.0",
     "changes": ["Add ability to filter messages by attachment name."]
-  },
-  {
-    "version": "<=1.0.3",
-    "changes": ["Extension created along with various bug fixes."]
   }
 ]

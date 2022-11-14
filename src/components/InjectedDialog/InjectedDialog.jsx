@@ -46,7 +46,7 @@ function InjectedDialog() {
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <About />}
       <Box className={classes.box}>
-        <Typography>Version 1.1.4</Typography>
+        <Typography variant="caption">Discrub 1.6.6</Typography>
       </Box>
       <CloseWindowButton />
     </Box>
