@@ -14,7 +14,7 @@ const DirectMessagesStyles = makeStyles(() => ({
     marginTop: "1vh",
   },
   tableBox: {
-    maxHeight: "460px",
+    maxHeight: "350px",
     overflow: "auto",
   },
   paper: {

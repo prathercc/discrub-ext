@@ -10,6 +10,7 @@ import {
   CircularProgress,
   TextField,
   Button,
+  Tooltip,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
@@ -63,48 +64,66 @@ function DirectMessages() {
                   Messages between other Discord users and yourself.
                 </Typography>
               </Stack>
-              <TextField
-                fullWidth
-                variant="filled"
-                disabled={messagesLoading}
-                value={selectedDm.id}
-                onChange={(e) => setDm(e.target.value)}
-                select
-                label="Direct Messages"
+
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                spacing={1}
               >
-                {dms.map((directMessage) => {
-                  return (
-                    <MenuItem key={directMessage.id} value={directMessage.id}>
-                      {directMessage.recipients.length === 1
-                        ? directMessage.recipients[0].username
-                        : directMessage.name
-                        ? `Group Chat - ${directMessage.name}`
-                        : `Unnamed Group Chat - ${directMessage.id}`}
-                    </MenuItem>
-                  );
-                })}
-              </TextField>
-              <Stack alignItems="center" direction="row" spacing={1}>
                 <TextField
                   fullWidth
                   variant="filled"
-                  disabled={selectedDm.id === null || messagesLoading}
-                  value={preFilterUserId}
-                  onChange={(e) => setPreFilterUserId(e.target.value)}
+                  disabled={messagesLoading}
+                  value={selectedDm.id}
+                  onChange={(e) => setDm(e.target.value)}
                   select
-                  label="Filter By Username (Optional)"
+                  label="Direct Messages"
                 >
-                  <MenuItem value={null} key={-1}>
-                    <strong>Reset Selection</strong>
-                  </MenuItem>
-                  {preFilterUserIds.map((user) => {
+                  {dms.map((directMessage) => {
                     return (
-                      <MenuItem key={user.id} value={user.id}>
-                        {user.name}
+                      <MenuItem key={directMessage.id} value={directMessage.id}>
+                        {directMessage.recipients.length === 1
+                          ? directMessage.recipients[0].username
+                          : directMessage.name
+                          ? `Group Chat - ${directMessage.name}`
+                          : `Unnamed Group Chat - ${directMessage.id}`}
                       </MenuItem>
                     );
                   })}
                 </TextField>
+                <Tooltip
+                  title="Filtering by username is optional"
+                  placement="top"
+                >
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    disabled={selectedDm.id === null || messagesLoading}
+                    value={preFilterUserId}
+                    onChange={(e) => setPreFilterUserId(e.target.value)}
+                    select
+                    label="Filter By Username"
+                  >
+                    <MenuItem value={null} key={-1}>
+                      <strong>Reset Selection</strong>
+                    </MenuItem>
+                    {preFilterUserIds.map((user) => {
+                      return (
+                        <MenuItem key={user.id} value={user.id}>
+                          {user.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </TextField>
+                </Tooltip>
+              </Stack>
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+              >
                 <Button
                   disabled={selectedDm.id === null || messagesLoading}
                   onClick={() => selectedDm.id && fetchDmData()}

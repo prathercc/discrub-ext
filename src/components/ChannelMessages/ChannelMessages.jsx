@@ -10,6 +10,7 @@ import {
   CircularProgress,
   TextField,
   Button,
+  Tooltip,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
@@ -80,7 +81,13 @@ function ChannelMessages() {
                   Guilds.
                 </Typography>
               </Stack>
-              <Stack alignItems="center" direction="row" spacing={1}>
+
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                spacing={1}
+              >
                 <TextField
                   fullWidth
                   variant="filled"
@@ -98,58 +105,66 @@ function ChannelMessages() {
                     );
                   })}
                 </TextField>
-                <PurgeGuild
-                  dialogOpen={purgeDialogOpen}
-                  setDialogOpen={setPurgeDialogOpen}
-                />
-              </Stack>
-              <TextField
-                className={classes.purgeHidden}
-                fullWidth
-                variant="filled"
-                disabled={selectedGuild.id === null || messagesLoading}
-                value={selectedChannel.id}
-                onChange={(e) => {
-                  setSearchTouched(false);
-                  setChannel(e.target.value);
-                }}
-                select
-                label="Channels"
-              >
-                {channels.map((channel) => {
-                  return (
-                    <MenuItem key={channel.id} value={channel.id}>
-                      {channel.name}
-                    </MenuItem>
-                  );
-                })}
-              </TextField>
-              <Stack
-                className={classes.purgeHidden}
-                alignItems="center"
-                direction="row"
-                spacing={1}
-              >
+
                 <TextField
+                  className={classes.purgeHidden}
                   fullWidth
                   variant="filled"
-                  disabled={selectedChannel.id === null || messagesLoading}
-                  value={preFilterUserId}
-                  onChange={(e) => setPreFilterUserId(e.target.value)}
+                  disabled={selectedGuild.id === null || messagesLoading}
+                  value={selectedChannel.id}
+                  onChange={(e) => {
+                    setSearchTouched(false);
+                    setChannel(e.target.value);
+                  }}
                   select
-                  label="Filter By Username (Optional)"
+                  label="Channels"
                 >
-                  <MenuItem value={null} key={-1}>
-                    <strong>Reset Selection</strong>
-                  </MenuItem>
-                  {preFilterUserIds.map((user) => {
+                  {channels.map((channel) => {
                     return (
-                      <MenuItem key={user.id} value={user.id}>
-                        {user.name}
+                      <MenuItem key={channel.id} value={channel.id}>
+                        {channel.name}
                       </MenuItem>
                     );
                   })}
                 </TextField>
+
+                <Tooltip
+                  title="Filtering by username is optional"
+                  placement="top"
+                >
+                  <TextField
+                    fullWidth
+                    variant="filled"
+                    disabled={selectedChannel.id === null || messagesLoading}
+                    value={preFilterUserId}
+                    onChange={(e) => setPreFilterUserId(e.target.value)}
+                    select
+                    label="Filter By Username"
+                  >
+                    <MenuItem value={null} key={-1}>
+                      <strong>Reset Selection</strong>
+                    </MenuItem>
+                    {preFilterUserIds.map((user) => {
+                      return (
+                        <MenuItem key={user.id} value={user.id}>
+                          {user.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </TextField>
+                </Tooltip>
+              </Stack>
+
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+              >
+                <PurgeGuild
+                  dialogOpen={purgeDialogOpen}
+                  setDialogOpen={setPurgeDialogOpen}
+                />
                 <Button
                   disabled={selectedChannel.id === null || messagesLoading}
                   onClick={() => selectedChannel.id && fetchChannelData()}
