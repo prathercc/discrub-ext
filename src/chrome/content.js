@@ -5,8 +5,8 @@ if (!chrome.runtime.onMessage.hasListeners())
     switch (message) {
       case "INJECT_BUTTON":
         const element =
-          document.querySelector('[aria-label="Channel header"]') ||
-          document.querySelector('[aria-label="Friends"]')?.parentElement
+          document.querySelector('[aria-label="Inbox"]') ||
+          document.querySelector('[aria-label="Help"]')?.parentElement
             ?.parentElement;
         if (!document.getElementById("injected_iframe_button") && element) {
           const iframe = document.createElement("iframe");
