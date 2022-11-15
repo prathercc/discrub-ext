@@ -135,6 +135,7 @@ function ChannelMessages() {
                   placement="top"
                 >
                   <TextField
+                    className={classes.purgeHidden}
                     size="small"
                     fullWidth
                     variant="filled"
@@ -169,6 +170,7 @@ function ChannelMessages() {
                   setDialogOpen={setPurgeDialogOpen}
                 />
                 <Button
+                  className={classes.purgeHidden}
                   disabled={selectedChannel.id === null || messagesLoading}
                   onClick={() => selectedChannel.id && fetchChannelData()}
                   variant="contained"
