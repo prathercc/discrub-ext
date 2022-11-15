@@ -5,15 +5,14 @@ if (!chrome.runtime.onMessage.hasListeners())
     switch (message) {
       case "INJECT_BUTTON":
         const element =
-          document.querySelector('[aria-label="Inbox"]') ||
-          document.querySelector('[aria-label="Help"]')?.parentElement
-            ?.parentElement;
+          document.querySelector('[aria-label="Inbox"]')?.parentElement ||
+          document.querySelector('[aria-label="Help"]')?.parentElement;
         if (!document.getElementById("injected_iframe_button") && element) {
           const iframe = document.createElement("iframe");
           iframe.id = "injected_iframe_button";
           iframe.src = chrome.runtime.getURL("injected_button.html");
           iframe.scrolling = "no";
-          iframe.width = 90;
+          iframe.width = 30;
           iframe.height = 30;
           element.appendChild(iframe);
         }
