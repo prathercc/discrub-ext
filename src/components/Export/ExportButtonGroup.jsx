@@ -1,31 +1,26 @@
 import React, { useState, useRef, useContext } from "react";
-import ButtonGroup from "@mui/material/ButtonGroup";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
-import Grow from "@mui/material/Grow";
-import Paper from "@mui/material/Paper";
-import Popper from "@mui/material/Popper";
-import MenuItem from "@mui/material/MenuItem";
-import MenuList from "@mui/material/MenuList";
 import {
-  Box,
   Stack,
-  Typography,
   Button,
   CircularProgress,
+  Grow,
+  Paper,
+  Popper,
+  MenuItem,
+  MenuList,
+  ButtonGroup,
+  ClickAwayListener,
 } from "@mui/material";
 import { MessageContext } from "../../context/message/MessageContext";
-import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
-import MessageMock from "./MessageMock";
 import ExportUtils from "./ExportUtils";
+import ExportMessages from "./ExportMessages";
 
 const options = ["HTML", "PDF", "JSON"];
 
 const ExportButtonGroup = () => {
-  const classes = ExportButtonGroupStyles();
-
-  const { state: messageState, getExportTitle } = useContext(MessageContext);
-  const { messages, filters, filteredMessages, threads } = messageState;
+  const { state: messageState } = useContext(MessageContext);
+  const { messages, filters, filteredMessages } = messageState;
   const exportMessages = filters.length > 0 ? filteredMessages : messages;
 
   const [open, setOpen] = useState(false);
@@ -81,28 +76,13 @@ const ExportButtonGroup = () => {
 
   return (
     <>
-      <Box className={classes.boxContainer}>
-        <Stack
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          ref={componentRef}
-          className={classes.stackMessageContainer}
-        >
-          <Stack justifyContent="center" alignItems="center">
-            {getExportTitle()}
-            <Typography className={classes.typographyId}>
-              UTC mm/dd/yyyy hh:mm:ss
-            </Typography>
-          </Stack>
-          {printing &&
-            exportMessages.map((row, index) => {
-              return <MessageMock row={row} index={index} threads={threads} />;
-            })}
-        </Stack>
-      </Box>
+      <ExportMessages componentRef={componentRef} exporting={printing} />
 
-      {!printing && (
+      {printing ? (
+        <Stack justifyContent="center" alignItems="center">
+          <CircularProgress />
+        </Stack>
+      ) : (
         <ButtonGroup variant="contained" ref={anchorRef}>
           <Button onClick={() => handleDownload(options[selectedIndex])}>
             {options[selectedIndex]}
@@ -113,11 +93,6 @@ const ExportButtonGroup = () => {
             onClick={handleToggle}
           />
         </ButtonGroup>
-      )}
-      {printing && (
-        <Stack justifyContent="center" alignItems="center">
-          <CircularProgress />
-        </Stack>
       )}
 
       <Popper
