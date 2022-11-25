@@ -9,6 +9,7 @@ import {
   setChannel as setChannelAction,
   resetChannel as resetChannelAction,
   setPreFilterUserId as setPreFilterUserIdAction,
+  setSelectedExportChannels as setSelectedExportChannelsAction,
 } from "./ChannelContextActions";
 import { ChannelReducer } from "./ChannelReducer";
 import { UserContext } from "../user/UserContext";
@@ -37,6 +38,7 @@ const ChannelContextProvider = (props) => {
       isLoading: null,
       preFilterUserId: null,
       preFilterUserIds: [],
+      selectedExportChannels: [], // Array of channel ID's, used for exporting Guild
     })
   );
 
@@ -59,6 +61,10 @@ const ChannelContextProvider = (props) => {
     setPreFilterUserIdAction(userId, dispatch);
   };
 
+  const setSelectedExportChannels = (selectedExportChannels) => {
+    setSelectedExportChannelsAction(selectedExportChannels, dispatch);
+  };
+
   return (
     <ChannelContext.Provider
       value={{
@@ -68,6 +74,7 @@ const ChannelContextProvider = (props) => {
         setChannel,
         resetChannel,
         setPreFilterUserId,
+        setSelectedExportChannels,
       }}
     >
       {props.children}

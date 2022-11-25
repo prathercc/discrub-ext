@@ -4,6 +4,7 @@ import {
   SET_CHANNEL,
   RESET_CHANNEL_COMPLETE,
   SET_PREFILTER_USERID,
+  SET_SELECTED_EXPORT_CHANNELS,
 } from "./ChannelContextConstants";
 export const ChannelReducer = (state, action) => {
   const { type, payload } = action;
@@ -23,6 +24,11 @@ export const ChannelReducer = (state, action) => {
       };
     case SET_PREFILTER_USERID:
       return { ...state, preFilterUserId: payload.userId };
+    case SET_SELECTED_EXPORT_CHANNELS:
+      return {
+        ...state,
+        selectedExportChannels: payload.selectedExportChannels,
+      };
     case RESET_CHANNEL_COMPLETE:
       return {
         ...state,
