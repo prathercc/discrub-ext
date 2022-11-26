@@ -172,8 +172,8 @@ export const filterMessages = async (filters, messages, dispatch) => {
   dispatch({ type: FILTER_MESSAGE_COMPLETE, payload: retArr });
 };
 
-export const resetMessageData = async (dispatch) => {
-  dispatch({ type: RESET_MESSAGE_DATA_COMPLETE });
+export const resetMessageData = (dispatch) => {
+  return dispatch({ type: RESET_MESSAGE_DATA_COMPLETE });
 };
 
 export const getMessageData = async (

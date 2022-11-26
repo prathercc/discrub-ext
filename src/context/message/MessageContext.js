@@ -1,6 +1,5 @@
 import React, {
   createContext,
-  useCallback,
   useReducer,
   useContext,
   useRef,
@@ -146,9 +145,9 @@ const MessageContextProvider = (props) => {
       );
   };
 
-  const resetMessageData = useCallback(async () => {
+  const resetMessageData = async () => {
     await resetMessageDataAction(dispatch);
-  }, []);
+  };
 
   const updateFilters = async (filterName, filterValue, filterType) => {
     await updateFiltersAction(
