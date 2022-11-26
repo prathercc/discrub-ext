@@ -127,9 +127,9 @@ const MessageContextProvider = (props) => {
     return response;
   };
 
-  const getMessageData = useCallback(async () => {
+  const getMessageData = async () => {
     if (selectedChannelIdRef.current && token)
-      await getMessageDataAction(
+      return await getMessageDataAction(
         selectedChannelIdRef,
         token,
         dispatch,
@@ -137,14 +137,14 @@ const MessageContextProvider = (props) => {
         channelPreFilterUserIdRef.current
       );
     else if (selectedDm.id && token)
-      await getMessageDataAction(
+      return await getMessageDataAction(
         selectedDmIdRef,
         token,
         dispatch,
         true,
         dmPreFilterUserId
       );
-  }, [token, selectedDm.id, dmPreFilterUserId]);
+  };
 
   const resetMessageData = useCallback(async () => {
     await resetMessageDataAction(dispatch);

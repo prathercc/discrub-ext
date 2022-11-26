@@ -217,19 +217,24 @@ export const getMessageData = async (
   await retArr.forEach((x) => {
     uniqueRecipients.set(x.author.id, x.author.username);
   });
+
+  const payload = {
+    threads: retThreads,
+    messages: retArr.map((message) => {
+      return {
+        ...message,
+        username: message.author.username,
+        content: parseAts(message.content, uniqueRecipients),
+      };
+    }),
+  };
+
   dispatch({
     type: GET_MESSAGE_DATA_COMPLETE,
-    payload: {
-      threads: retThreads,
-      messages: retArr.map((message) => {
-        return {
-          ...message,
-          username: message.author.username,
-          content: parseAts(message.content, uniqueRecipients),
-        };
-      }),
-    },
+    payload,
   });
+
+  return payload;
 };
 
 const _getMessages = async (
