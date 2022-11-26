@@ -47,6 +47,7 @@ const ExportGuild = () => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    setSelectedExportChannels([]);
   };
 
   const handleChannelSelect = (id) => {
