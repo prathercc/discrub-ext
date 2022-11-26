@@ -26,16 +26,21 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { GuildContext } from "../../context/guild/GuildContext";
 import { MessageContext } from "../../context/message/MessageContext";
-import { UserContext } from "../../context/user/UserContext";
 import ExportUtils from "../Export/ExportUtils";
 
 const ExportGuild = () => {
-  const { state: messageState } = useContext(MessageContext);
-  const { state: channelState, setSelectedExportChannels } =
-    useContext(ChannelContext);
+  const {
+    state: messageState,
+    getMessageData,
+    resetMessageData,
+  } = useContext(MessageContext);
+  const {
+    state: channelState,
+    setSelectedExportChannels,
+    setChannel,
+    resetChannel,
+  } = useContext(ChannelContext);
   const { state: guildState } = useContext(GuildContext);
-  const { state: userState } = useContext(UserContext);
-  const { token } = userState;
   const { isLoading: messagesLoading } = messageState;
   const { channels, selectedExportChannels } = channelState;
   const { selectedGuild } = guildState;
@@ -43,15 +48,11 @@ const ExportGuild = () => {
     active: false,
     name: null,
   });
+  const exportingActiveRef = useRef();
+  exportingActiveRef.current = exporting?.active;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const contentRef = useRef();
-  const { downloadSelectedJSON } = new ExportUtils(
-    contentRef,
-    setExporting,
-    null,
-    token
-  );
+  const { addToZip, generateZip, resetZip } = new ExportUtils();
   const open = !!anchorEl;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -63,6 +64,9 @@ const ExportGuild = () => {
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedExportChannels([]);
+    resetChannel();
+    resetMessageData();
+    setExporting({ active: false, name: null });
   };
 
   const handleChannelSelect = (id) => {
@@ -72,6 +76,31 @@ const ExportGuild = () => {
         ...selectedExportChannels.filter((cId) => cId !== id),
       ]);
     else setSelectedExportChannels([...selectedExportChannels, id]);
+  };
+
+  const handleExportSelectedJSON = async () => {
+    handleClose();
+    const selectedChannels = channels.filter((c) =>
+      selectedExportChannels.some((id) => id === c.id)
+    );
+    let count = 0;
+    while (count < selectedChannels.length) {
+      const channel = selectedChannels[count];
+      setExporting({ active: true, name: channel.name });
+      await setChannel(channel.id);
+      const { messages } = await getMessageData();
+      addToZip(
+        new Blob([JSON.stringify(messages)], { type: "text/plain" }),
+        channel.name
+      );
+      count += 1;
+      if (!exportingActiveRef.current) break;
+    }
+    await generateZip();
+    await resetChannel();
+    await resetMessageData();
+    setExporting({ active: false, name: null });
+    resetZip();
   };
 
   return (
@@ -197,17 +226,7 @@ const ExportGuild = () => {
             <MenuItem dense onClick={handleClose}>
               HTML
             </MenuItem>
-            <MenuItem
-              dense
-              onClick={async () => {
-                handleClose();
-                await downloadSelectedJSON(
-                  channels.filter((c) =>
-                    selectedExportChannels.some((id) => id === c.id)
-                  )
-                );
-              }}
-            >
+            <MenuItem dense onClick={handleExportSelectedJSON}>
               JSON
             </MenuItem>
           </Menu>
