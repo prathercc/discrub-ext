@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useReducer,
-} from "react";
+import React, { createContext, useContext, useReducer } from "react";
 import {
   getChannels as getChannelsAction,
   setChannel as setChannelAction,
@@ -42,27 +37,24 @@ const ChannelContextProvider = (props) => {
     })
   );
 
-  const getChannels = useCallback(
-    async (selectedGuildId) => {
-      if (token) await getChannelsAction(token, selectedGuildId, dispatch);
-    },
-    [token]
-  );
+  const getChannels = async (selectedGuildId) => {
+    if (token) return await getChannelsAction(token, selectedGuildId, dispatch);
+  };
 
   const setChannel = async (id) => {
     await setChannelAction(id, { name: username, id: userId }, dispatch);
   };
 
-  const resetChannel = useCallback(async () => {
+  const resetChannel = async () => {
     await resetChannelAction(dispatch);
-  }, []);
-
-  const setPreFilterUserId = async (userId) => {
-    setPreFilterUserIdAction(userId, dispatch);
   };
 
-  const setSelectedExportChannels = (selectedExportChannels) => {
-    setSelectedExportChannelsAction(selectedExportChannels, dispatch);
+  const setPreFilterUserId = async (userId) => {
+    await setPreFilterUserIdAction(userId, dispatch);
+  };
+
+  const setSelectedExportChannels = async (selectedExportChannels) => {
+    await setSelectedExportChannelsAction(selectedExportChannels, dispatch);
   };
 
   return (

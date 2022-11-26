@@ -63,7 +63,8 @@ function ChannelMessages() {
       await getChannels(selectedGuild.id);
     };
     if (selectedGuild.id) fetchGuildChannels();
-  }, [getChannels, selectedGuild.id, resetMessageData, resetChannel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGuild.id]);
 
   useEffect(() => {
     getGuilds();

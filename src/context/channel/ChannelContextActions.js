@@ -11,7 +11,7 @@ import {
 export const getChannels = async (token, guildId, dispatch) => {
   dispatch({ type: GET_CHANNELS });
   const data = await fetchChannels(token, guildId);
-  dispatch({
+  return dispatch({
     type: GET_CHANNELS_COMPLETE,
     payload: [...data],
   });
@@ -22,15 +22,15 @@ export const setChannel = (id, user, dispatch) => {
 };
 
 export const resetChannel = (dispatch) => {
-  dispatch({ type: RESET_CHANNEL_COMPLETE });
+  return dispatch({ type: RESET_CHANNEL_COMPLETE });
 };
 
 export const setPreFilterUserId = (userId, dispatch) => {
-  dispatch({ type: SET_PREFILTER_USERID, payload: { userId } });
+  return dispatch({ type: SET_PREFILTER_USERID, payload: { userId } });
 };
 
 export const setSelectedExportChannels = (selectedExportChannels, dispatch) => {
-  dispatch({
+  return dispatch({
     type: SET_SELECTED_EXPORT_CHANNELS,
     payload: { selectedExportChannels },
   });
