@@ -21,14 +21,13 @@ import {
   Box,
 } from "@mui/material";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
+import DeselectIcon from "@mui/icons-material/Deselect";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import ChannelMessagesStyles from "./ChannelMessages.styles";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { GuildContext } from "../../context/guild/GuildContext";
 import { MessageContext } from "../../context/message/MessageContext";
 
 const ExportGuild = () => {
-  const classes = ChannelMessagesStyles();
   const { state: messageState } = useContext(MessageContext);
   const { state: channelState, setSelectedExportChannels } =
     useContext(ChannelContext);
@@ -51,7 +50,12 @@ const ExportGuild = () => {
   };
 
   const handleChannelSelect = (id) => {
-    // TODO: Implement
+    const isSelected = selectedExportChannels.some((cId) => cId === id);
+    if (isSelected)
+      setSelectedExportChannels([
+        ...selectedExportChannels.filter((cId) => cId !== id),
+      ]);
+    else setSelectedExportChannels([...selectedExportChannels, id]);
   };
 
   return (
@@ -75,9 +79,9 @@ const ExportGuild = () => {
                 overflow: "auto",
               }}
             >
-              <List>
+              <List disablePadding dense>
                 {channels.map((channel) => (
-                  <ListItem key={channel.id} value={channel.id}>
+                  <ListItem key={channel.id} value={channel.id} dense>
                     <ListItemButton
                       role={undefined}
                       onClick={() => handleChannelSelect(channel.id)}
@@ -85,10 +89,11 @@ const ExportGuild = () => {
                     >
                       <ListItemIcon>
                         <Checkbox
+                          size="small"
                           edge="start"
-                          checked={
-                            selectedExportChannels.indexOf(channel.id) !== -1
-                          }
+                          checked={selectedExportChannels.some(
+                            (cId) => cId === channel.id
+                          )}
                           tabIndex={-1}
                           disableRipple
                         />
@@ -105,9 +110,28 @@ const ExportGuild = () => {
               justifyContent="flex-start"
               alignItems="flex-start"
             >
-              <Tooltip title="Select All">
-                <IconButton color="primary">
-                  <SelectAllIcon />
+              <Tooltip
+                title={
+                  selectedExportChannels.length ? "Deselect All" : "Select All"
+                }
+              >
+                <IconButton
+                  onClick={() =>
+                    setSelectedExportChannels(
+                      selectedExportChannels.length
+                        ? []
+                        : channels.map((c) => c.id)
+                    )
+                  }
+                  color={
+                    selectedExportChannels.length ? "secondary" : "primary"
+                  }
+                >
+                  {selectedExportChannels.length ? (
+                    <DeselectIcon />
+                  ) : (
+                    <SelectAllIcon />
+                  )}
                 </IconButton>
               </Tooltip>
             </Stack>

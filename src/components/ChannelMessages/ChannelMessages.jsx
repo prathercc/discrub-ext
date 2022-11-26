@@ -18,6 +18,7 @@ import { ChannelContext } from "../../context/channel/ChannelContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
 import PurgeGuild from "./PurgeGuild";
+import ExportGuild from "./ExportGuild";
 
 function ChannelMessages() {
   const {
@@ -165,6 +166,7 @@ function ChannelMessages() {
                 spacing={1}
                 justifyContent="flex-end"
               >
+                <ExportGuild />
                 <PurgeGuild
                   dialogOpen={purgeDialogOpen}
                   setDialogOpen={setPurgeDialogOpen}
