@@ -49,8 +49,8 @@ const ChannelContextProvider = (props) => {
     [token]
   );
 
-  const setChannel = (id) => {
-    setChannelAction(id, { name: username, id: userId }, dispatch);
+  const setChannel = async (id) => {
+    await setChannelAction(id, { name: username, id: userId }, dispatch);
   };
 
   const resetChannel = useCallback(async () => {

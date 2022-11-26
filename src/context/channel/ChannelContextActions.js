@@ -18,7 +18,7 @@ export const getChannels = async (token, guildId, dispatch) => {
 };
 
 export const setChannel = (id, user, dispatch) => {
-  dispatch({ type: SET_CHANNEL, payload: { id, user } });
+  return dispatch({ type: SET_CHANNEL, payload: { id, user } });
 };
 
 export const resetChannel = (dispatch) => {
