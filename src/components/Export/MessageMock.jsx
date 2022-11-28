@@ -68,7 +68,9 @@ const MessageMock = ({ row, index, threads }) => {
         >
           {row.attachments.map((attachment, index) => (
             <Typography className={classes.typography}>
-              <a href={attachment.url}>Attachment {index + 1}</a>
+              <a href={attachment.local_url || attachment.url}>
+                Attachment {index + 1}
+              </a>
             </Typography>
           ))}
         </Stack>
