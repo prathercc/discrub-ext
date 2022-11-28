@@ -16,6 +16,25 @@ export default class ExportUtils {
     );
   }
 
+  generateHTML = async () => {
+    this.html = null;
+    this.callback(true);
+    this._generateHTMLHelperFunc();
+    while (!this.html) await this._delay(2000);
+    this.callback(false);
+    return new Blob([this.html], { type: "text/html" });
+  };
+
+  _generateHTMLHelperFunc = useReactToPrint({
+    content: () => this.contentRef.current,
+    print: (iframe) => {
+      iframe.contentWindow.document.lastElementChild.getElementsByTagName(
+        "body"
+      )[0].margin = 0;
+      this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
+    },
+  });
+
   createZipFolder = (folderName) => {
     return this.zip.folder(folderName.replace(/\W/g, ""));
   };
@@ -34,8 +53,8 @@ export default class ExportUtils {
     return { size: 0 };
   };
 
-  addToZip = (blob, filename) => {
-    this.zip.file(`${filename.replace(/\W/g, "")}.${uuidv4()}.json`, blob);
+  addToZip = (blob, filename, format = "json") => {
+    this.zip.file(`${filename.replace(/\W/g, "")}.${uuidv4()}.${format}`, blob);
   };
 
   generateZip = async () => {
