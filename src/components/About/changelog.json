@@ -1,7 +1,8 @@
 [
   {
-    "version": "1.6.6",
+    "version": "1.7.5",
     "changes": [
+      "Add Guild Export feature, which allows User to select all or some channels to export into a combined .ZIP file (also downloads image attachments). Messages can be exported into HTML or JSON. ",
       "Slight adjustments to versioning and window dimensions.",
       "Disable button injection from within the Discord app (Users should click the Discrub chrome extension button instead).",
       "Move Channel/Direct Message selection boxes on one row to reduce vertical screen waste."
