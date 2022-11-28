@@ -19,6 +19,7 @@ import {
   Checkbox,
   Box,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
 import DeselectIcon from "@mui/icons-material/Deselect";
@@ -41,7 +42,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
     resetChannel,
   } = useContext(ChannelContext);
   const { state: guildState } = useContext(GuildContext);
-  const { isLoading: messagesLoading } = messageState;
+  const { isLoading: messagesLoading, fetchedMessageLength } = messageState;
   const { channels, selectedExportChannels } = channelState;
   const { selectedGuild } = guildState;
   const [exporting, setExporting] = useState({
@@ -89,7 +90,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
       setExporting({ active: true, name: channel.name });
       await setChannel(channel.id);
       const { messages } = await getMessageData();
-      const attachmentFolderName = `${channel.name}_attachments`;
+      const attachmentFolderName = `${channel.name}_images`;
       let attachmentFolder = null;
       const updatedMessages = [];
       for (let c1 = 0; c1 < messages.length; c1 += 1) {
@@ -229,11 +230,13 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
               justifyContent="center"
               alignItems="center"
               spacing={2}
+              sx={{ minWidth: 300 }}
             >
-              <DialogContentText>
-                Exporting {exporting.name}...
-              </DialogContentText>
+              <Typography>{exporting.name}</Typography>
               <CircularProgress />
+              <Typography variant="caption">
+                {fetchedMessageLength || "No"} Messages Found
+              </Typography>
             </Stack>
           )}
         </DialogContent>
