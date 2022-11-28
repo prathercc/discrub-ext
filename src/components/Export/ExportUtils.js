@@ -21,16 +21,14 @@ export default class ExportUtils {
   };
 
   addToFolder = (folder, data, filename) => {
-    const cleanFileName = filename.replace(/[^\w.]+/g, "");
+    let cleanFileName = filename.replace(/[^\w.]+/g, "");
     if (cleanFileName.length > 0 && cleanFileName.includes(".")) {
       const splitArr = cleanFileName.split(".");
-      folder.file(
-        `${cleanFileName.replace(
-          splitArr[splitArr.length - 1],
-          ""
-        )}${uuidv4()}.${splitArr[splitArr.length - 1]}`,
-        data
-      );
+      cleanFileName = `${cleanFileName.replace(
+        splitArr[splitArr.length - 1],
+        ""
+      )}${uuidv4()}.${splitArr[splitArr.length - 1]}`;
+      folder.file(cleanFileName, data);
       return cleanFileName;
     }
     return { size: 0 };
