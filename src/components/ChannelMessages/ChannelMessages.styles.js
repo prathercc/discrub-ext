@@ -24,7 +24,8 @@ const ChannelMessagesStyles = makeStyles(() => ({
     display: "block",
   },
   purgeHidden: {
-    opacity: ({ purgeDialogOpen }) => purgeDialogOpen && 0,
+    opacity: ({ purgeDialogOpen, exportDialogOpen }) =>
+      (purgeDialogOpen || exportDialogOpen) && 0,
   },
 }));
 

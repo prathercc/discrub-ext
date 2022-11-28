@@ -28,7 +28,7 @@ import { GuildContext } from "../../context/guild/GuildContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ExportUtils from "../Export/ExportUtils";
 
-const ExportGuild = () => {
+const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
   const {
     state: messageState,
     getMessageData,
@@ -50,7 +50,6 @@ const ExportGuild = () => {
   });
   const exportingActiveRef = useRef();
   exportingActiveRef.current = exporting?.active;
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const { addToZip, generateZip, resetZip, addToFolder, createZipFolder } =
     new ExportUtils();

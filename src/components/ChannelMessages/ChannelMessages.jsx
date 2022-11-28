@@ -38,7 +38,8 @@ function ChannelMessages() {
 
   const [searchTouched, setSearchTouched] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
-  const classes = ChannelMessagesStyles({ purgeDialogOpen });
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const classes = ChannelMessagesStyles({ purgeDialogOpen, exportDialogOpen });
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
@@ -167,7 +168,10 @@ function ChannelMessages() {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <ExportGuild />
+                <ExportGuild
+                  dialogOpen={exportDialogOpen}
+                  setDialogOpen={setExportDialogOpen}
+                />
                 <PurgeGuild
                   dialogOpen={purgeDialogOpen}
                   setDialogOpen={setPurgeDialogOpen}
@@ -184,16 +188,20 @@ function ChannelMessages() {
             </Stack>
           </Paper>
 
-          {messages.length > 0 && !messagesLoading && !purgeDialogOpen && (
-            <Box className={classes.tableBox}>
-              <DiscordTable />
-            </Box>
-          )}
+          {messages.length > 0 &&
+            !messagesLoading &&
+            !purgeDialogOpen &&
+            !exportDialogOpen && (
+              <Box className={classes.tableBox}>
+                <DiscordTable />
+              </Box>
+            )}
           {messages.length === 0 &&
             !messagesLoading &&
             selectedChannel.id &&
             searchTouched &&
-            !purgeDialogOpen && (
+            !purgeDialogOpen &&
+            !exportDialogOpen && (
               <Paper className={classes.paper}>
                 <Box className={classes.box}>
                   <Typography>No Messages to Display</Typography>
@@ -207,20 +215,22 @@ function ChannelMessages() {
             )}
         </Stack>
       )}
-      {(!token || !guilds.length || messagesLoading) && !purgeDialogOpen && (
-        <Paper justifyContent="center" className={classes.paper}>
-          <Stack justifyContent="center" alignItems="center">
-            <CircularProgress />
-          </Stack>
-          <Box className={classes.box}>
-            <Typography variant="caption">
-              {fetchedMessageLength > 0
-                ? `Fetched ${fetchedMessageLength} Messages`
-                : "Fetching Data"}
-            </Typography>
-          </Box>
-        </Paper>
-      )}
+      {(!token || !guilds.length || messagesLoading) &&
+        !purgeDialogOpen &&
+        !exportDialogOpen && (
+          <Paper justifyContent="center" className={classes.paper}>
+            <Stack justifyContent="center" alignItems="center">
+              <CircularProgress />
+            </Stack>
+            <Box className={classes.box}>
+              <Typography variant="caption">
+                {fetchedMessageLength > 0
+                  ? `Fetched ${fetchedMessageLength} Messages`
+                  : "Fetching Data"}
+              </Typography>
+            </Box>
+          </Paper>
+        )}
     </Stack>
   );
 }
