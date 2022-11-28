@@ -52,7 +52,8 @@ const ExportGuild = () => {
   exportingActiveRef.current = exporting?.active;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { addToZip, generateZip, resetZip } = new ExportUtils();
+  const { addToZip, generateZip, resetZip, addToFolder, createZipFolder } =
+    new ExportUtils();
   const open = !!anchorEl;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -89,10 +90,42 @@ const ExportGuild = () => {
       setExporting({ active: true, name: channel.name });
       await setChannel(channel.id);
       const { messages } = await getMessageData();
-      addToZip(
-        new Blob([JSON.stringify(messages)], { type: "text/plain" }),
-        channel.name
-      );
+      const attachmentFolderName = `${channel.name}_attachments`;
+      let attachmentFolder = null;
+      const updatedMessages = [];
+      for (let c1 = 0; c1 < messages.length; c1 += 1) {
+        let updatedMessage = { ...messages[c1] };
+        for (let c2 = 0; c2 < messages[c1].attachments.length; c2 += 1) {
+          try {
+            const attachment = messages[c1].attachments[c2];
+            const blob = await fetch(attachment.proxy_url).then((r) =>
+              r.blob()
+            );
+            if (blob.size) {
+              if (!attachmentFolder)
+                attachmentFolder = createZipFolder(attachmentFolderName);
+              const cleanFileName = addToFolder(
+                attachmentFolder,
+                blob,
+                attachment.filename
+              );
+              updatedMessage.attachments[c2] = {
+                ...updatedMessage.attachments[c2],
+                local_url: `${attachmentFolderName}/${cleanFileName}`,
+              };
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        updatedMessages.push(updatedMessage);
+      }
+
+      if (updatedMessages.length > 0)
+        addToZip(
+          new Blob([JSON.stringify(updatedMessages)], { type: "text/plain" }),
+          channel.name
+        );
       count += 1;
       if (!exportingActiveRef.current) break;
     }
@@ -122,6 +155,7 @@ const ExportGuild = () => {
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
+                spacing={3}
               >
                 <Box
                   sx={{
@@ -213,7 +247,7 @@ const ExportGuild = () => {
             Cancel
           </Button>
           <Button
-            disabled={exporting.active}
+            disabled={exporting.active || selectedExportChannels.length === 0}
             variant="contained"
             disableElevation
             onClick={handleClick}

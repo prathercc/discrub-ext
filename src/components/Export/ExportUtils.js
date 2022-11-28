@@ -1,6 +1,6 @@
 import { useReactToPrint } from "react-to-print";
 import JSZip from "jszip";
-
+import { v4 as uuidv4 } from "uuid";
 export default class ExportUtils {
   constructor(contentRef, callback, lastElementId) {
     this.contentRef = contentRef;
@@ -16,14 +16,34 @@ export default class ExportUtils {
     );
   }
 
+  createZipFolder = (folderName) => {
+    return this.zip.folder(folderName.replace(/\W/g, ""));
+  };
+
+  addToFolder = (folder, data, filename) => {
+    const cleanFileName = filename.replace(/[^\w.]+/g, "");
+    if (cleanFileName.length > 0 && cleanFileName.includes(".")) {
+      const splitArr = cleanFileName.split(".");
+      folder.file(
+        `${cleanFileName.replace(
+          splitArr[splitArr.length - 1],
+          ""
+        )}${uuidv4()}.${splitArr[splitArr.length - 1]}`,
+        data
+      );
+      return cleanFileName;
+    }
+    return { size: 0 };
+  };
+
   addToZip = (blob, filename) => {
-    this.zip.file(`${filename.replace(/\W/g, "")}.json`, blob);
+    this.zip.file(`${filename.replace(/\W/g, "")}.${uuidv4()}.json`, blob);
   };
 
   generateZip = async () => {
     await this.zip.generateAsync({ type: "blob" }).then(function (content) {
       let link = document.createElement("a");
-      link.download = "Guild Export.zip";
+      link.download = `Guild Export.${uuidv4()}.zip`;
       link.href = window.URL.createObjectURL(content);
       link.click();
     });

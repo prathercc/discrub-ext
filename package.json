@@ -23,6 +23,7 @@
     "react-scripts": "5.0.0",
     "react-to-print": "^2.14.6",
     "styled-components": "^5.3.3",
+    "uuid": "^9.0.0",
     "web-vitals": "^2.1.2"
   },
   "scripts": {
