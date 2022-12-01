@@ -68,8 +68,9 @@ function ChannelMessages() {
   }, [selectedGuild.id]);
 
   useEffect(() => {
-    getGuilds();
-  }, [getGuilds]);
+    if (token) getGuilds();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   return (
     <Stack spacing={2} className={classes.boxContainer}>

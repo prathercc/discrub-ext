@@ -10,20 +10,20 @@ import {
 export const getDms = async (token, dispatch) => {
   dispatch({ type: GET_DMS });
   const data = await fetchDirectMessages(token);
-  dispatch({
+  return dispatch({
     type: GET_DMS_COMPLETE,
     payload: [...data],
   });
 };
 
 export const setDm = (id, user, dispatch) => {
-  dispatch({ type: SET_DM, payload: { id, user } });
+  return dispatch({ type: SET_DM, payload: { id, user } });
 };
 
 export const resetDm = (dispatch) => {
-  dispatch({ type: RESET_DM_COMPLETE });
+  return dispatch({ type: RESET_DM_COMPLETE });
 };
 
 export const setPreFilterUserId = (userId, dispatch) => {
-  dispatch({ type: SET_PREFILTER_USERID, payload: { userId } });
+  return dispatch({ type: SET_PREFILTER_USERID, payload: { userId } });
 };

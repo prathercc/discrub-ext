@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useReducer } from "react";
+import React, { createContext, useReducer } from "react";
 import { getUserData as getUserDataAction } from "./UserContextActions";
 import { UserReducer } from "./UserReducer";
 export const UserContext = createContext();
@@ -30,9 +30,9 @@ const UserContextProvider = (props) => {
     })
   );
 
-  const getUserData = useCallback(async () => {
+  const getUserData = async () => {
     await getUserDataAction(dispatch);
-  }, []);
+  };
 
   return (
     <UserContext.Provider value={{ state, dispatch, getUserData }}>

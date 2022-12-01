@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useReducer,
-  useContext,
-} from "react";
+import React, { createContext, useReducer, useContext } from "react";
 import {
   getDms as getDmsAction,
   setDm as setDmAction,
@@ -37,20 +32,20 @@ const DmContextProvider = (props) => {
     })
   );
 
-  const getDms = useCallback(async () => {
+  const getDms = async () => {
     if (token) await getDmsAction(token, dispatch);
-  }, [token]);
-
-  const setDm = (id) => {
-    setDmAction(id, { name: username, id: userId }, dispatch);
   };
 
-  const resetDm = useCallback(async () => {
+  const setDm = async (id) => {
+    await setDmAction(id, { name: username, id: userId }, dispatch);
+  };
+
+  const resetDm = async () => {
     await resetDmAction(dispatch);
-  }, []);
+  };
 
   const setPreFilterUserId = async (userId) => {
-    setPreFilterUserIdAction(userId, dispatch);
+    await setPreFilterUserIdAction(userId, dispatch);
   };
 
   return (
