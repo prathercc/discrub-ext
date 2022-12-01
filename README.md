@@ -65,6 +65,12 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <p  align="center">
 
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png">
+
+</p>
+
+<p  align="center">
+
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png">
 
 </p>
@@ -120,6 +126,12 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 <p  align="center">
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png">
+
+</p>
+
+<p  align="center">
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png">
 
 </p>
 
