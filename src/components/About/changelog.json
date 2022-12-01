@@ -1,10 +1,13 @@
 [
   {
+    "version": "1.7.6",
+    "changes": ["Add Purge option to DM's.", "Add Export feature to DM's."]
+  },
+  {
     "version": "1.7.5",
     "changes": [
       "Add Guild Export feature, which allows User to select all or some channels to export into a combined .ZIP file (also downloads image attachments). Messages can be exported into HTML or JSON. ",
-      "Slight adjustments to versioning and window dimensions.",
-      "Disable button injection from within the Discord app (Users should click the Discrub chrome extension button instead).",
+      "Adjustments to versioning and window dimensions.",
       "Move Channel/Direct Message selection boxes on one row to reduce vertical screen waste."
     ]
   },
