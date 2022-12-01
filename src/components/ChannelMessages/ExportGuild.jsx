@@ -29,13 +29,17 @@ import { GuildContext } from "../../context/guild/GuildContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ExportUtils from "../Export/ExportUtils";
 import ExportMessages from "../Export/ExportMessages";
+import { DmContext } from "../../context/dm/DmContext";
 
-const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
+const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+  const exportType = isDm ? "DM" : "Guild";
   const {
     state: messageState,
     getMessageData,
     resetMessageData,
   } = useContext(MessageContext);
+
+  const { state: dmState } = useContext(DmContext);
   const {
     state: channelState,
     setSelectedExportChannels,
@@ -49,6 +53,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
     messages,
   } = messageState;
   const { channels, selectedExportChannels } = channelState;
+  const { selectedDm } = dmState;
   const { selectedGuild } = guildState;
   const [exporting, setExporting] = useState({
     active: false,
@@ -98,16 +103,18 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
 
   const handleExportSelected = async (format = "json") => {
     handleClose();
-    const selectedChannels = channels.filter((c) =>
-      selectedExportChannels.some((id) => id === c.id)
-    );
+    const selectedChannels = isDm
+      ? [selectedDm]
+      : channels.filter((c) =>
+          selectedExportChannels.some((id) => id === c.id)
+        );
     let count = 0;
     while (count < selectedChannels.length) {
-      const channel = selectedChannels[count];
-      setExporting({ active: true, name: channel.name });
-      await setChannel(channel.id);
+      const entity = selectedChannels[count];
+      setExporting({ active: true, name: entity.name });
+      !isDm && (await setChannel(entity.id));
       const { messages } = await getMessageData();
-      const attachmentFolderName = `${channel.name}_images`;
+      const attachmentFolderName = `${entity.name}_images`;
       let attachmentFolder = null;
       const updatedMessages = [];
       for (let c1 = 0; c1 < messages.length; c1 += 1) {
@@ -142,11 +149,11 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
         if (format === "json")
           addToZip(
             new Blob([JSON.stringify(updatedMessages)], { type: "text/plain" }),
-            channel.name
+            entity.name
           );
         else {
           const htmlBlob = await generateHTML();
-          addToZip(htmlBlob, channel.name, "html");
+          addToZip(htmlBlob, entity.name, "html");
         }
       }
 
@@ -163,7 +170,11 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
   return (
     <>
       <Button
-        disabled={selectedGuild.id === null || messagesLoading || dialogOpen}
+        disabled={
+          (isDm ? selectedDm.id === null : selectedGuild.id === null) ||
+          messagesLoading ||
+          dialogOpen
+        }
         onClick={() => setDialogOpen(true)}
         variant="contained"
       >
@@ -171,9 +182,9 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
       </Button>
       <ExportMessages componentRef={contentRef} exporting={generatingHTML} />
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>Export Guild</DialogTitle>
+        <DialogTitle>Export {exportType}</DialogTitle>
         <DialogContent>
-          {!exporting.active ? (
+          {!exporting.active && !isDm && (
             <>
               <DialogContentText>Select Channel(s) to export</DialogContentText>
               <Stack
@@ -249,7 +260,8 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
                 </Stack>
               </Stack>
             </>
-          ) : (
+          )}
+          {exporting.active && (
             <Stack
               direction="column"
               justifyContent="center"
@@ -274,7 +286,9 @@ const ExportGuild = ({ dialogOpen, setDialogOpen }) => {
             Cancel
           </Button>
           <Button
-            disabled={exporting.active || selectedExportChannels.length === 0}
+            disabled={
+              exporting.active || (!isDm && selectedExportChannels.length === 0)
+            }
             variant="contained"
             disableElevation
             onClick={handleClick}

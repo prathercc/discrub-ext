@@ -169,14 +169,18 @@ function ChannelMessages() {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <ExportGuild
-                  dialogOpen={exportDialogOpen}
-                  setDialogOpen={setExportDialogOpen}
-                />
-                <PurgeGuild
-                  dialogOpen={purgeDialogOpen}
-                  setDialogOpen={setPurgeDialogOpen}
-                />
+                <span className={purgeDialogOpen && classes.purgeHidden}>
+                  <ExportGuild
+                    dialogOpen={exportDialogOpen}
+                    setDialogOpen={setExportDialogOpen}
+                  />
+                </span>
+                <span className={exportDialogOpen && classes.purgeHidden}>
+                  <PurgeGuild
+                    dialogOpen={purgeDialogOpen}
+                    setDialogOpen={setPurgeDialogOpen}
+                  />
+                </span>
                 <Button
                   className={classes.purgeHidden}
                   disabled={selectedChannel.id === null || messagesLoading}

@@ -11,7 +11,21 @@ export const DmReducer = (state, action) => {
     case GET_DMS:
       return { ...state, isLoading: true };
     case GET_DMS_COMPLETE:
-      return { ...state, dms: [...payload], isLoading: false };
+      return {
+        ...state,
+        dms: [
+          ...payload.map((dm) => ({
+            ...dm,
+            name:
+              dm.recipients.length === 1
+                ? dm.recipients[0].username
+                : dm.name
+                ? `Group Chat - ${dm.name}`
+                : `Unnamed Group Chat - ${dm.id}`,
+          })),
+        ],
+        isLoading: false,
+      };
     case SET_DM:
       const selectedDm = state.dms.find((dm) => dm.id === payload.id);
       const preFilterIds = [

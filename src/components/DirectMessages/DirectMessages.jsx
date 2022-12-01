@@ -17,6 +17,7 @@ import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
 import PurgeGuild from "../ChannelMessages/PurgeGuild";
+import ExportGuild from "../ChannelMessages/ExportGuild";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -90,11 +91,7 @@ function DirectMessages() {
                   {dms.map((directMessage) => {
                     return (
                       <MenuItem key={directMessage.id} value={directMessage.id}>
-                        {directMessage.recipients.length === 1
-                          ? directMessage.recipients[0].username
-                          : directMessage.name
-                          ? `Group Chat - ${directMessage.name}`
-                          : `Unnamed Group Chat - ${directMessage.id}`}
+                        {directMessage.name}
                       </MenuItem>
                     );
                   })}
@@ -133,11 +130,21 @@ function DirectMessages() {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <PurgeGuild
-                  dialogOpen={purgeDialogOpen}
-                  setDialogOpen={setPurgeDialogOpen}
-                  isDm
-                />
+                <span className={purgeDialogOpen && classes.purgeHidden}>
+                  <ExportGuild
+                    dialogOpen={exportDialogOpen}
+                    setDialogOpen={setExportDialogOpen}
+                    isDm
+                  />
+                </span>
+                <span className={exportDialogOpen && classes.purgeHidden}>
+                  <PurgeGuild
+                    dialogOpen={purgeDialogOpen}
+                    setDialogOpen={setPurgeDialogOpen}
+                    isDm
+                  />
+                </span>
+
                 <Button
                   className={classes.purgeHidden}
                   disabled={selectedDm.id === null || messagesLoading}
