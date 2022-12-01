@@ -9,16 +9,16 @@ import {
 export const getGuilds = async (token, dispatch) => {
   dispatch({ type: GET_GUILDS });
   const data = await fetchGuilds(token);
-  dispatch({
+  return dispatch({
     type: GET_GUILDS_COMPLETE,
     payload: [...data],
   });
 };
 
 export const setGuild = (id, dispatch) => {
-  dispatch({ type: SET_GUILD, payload: { id } });
+  return dispatch({ type: SET_GUILD, payload: { id } });
 };
 
 export const resetGuild = (dispatch) => {
-  dispatch({ type: RESET_GUILD_COMPLETE });
+  return dispatch({ type: RESET_GUILD_COMPLETE });
 };

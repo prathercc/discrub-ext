@@ -38,12 +38,14 @@ const FilterComponent = () => {
         spacing={2}
       >
         <TextField
+          size="small"
           fullWidth
           variant="filled"
           label="Username"
           onChange={(e) => updateFilters("username", e.target.value, "text")}
         />
         <TextField
+          size="small"
           fullWidth
           variant="filled"
           onChange={(e) => updateFilters("content", e.target.value, "text")}
@@ -57,6 +59,7 @@ const FilterComponent = () => {
         spacing={2}
       >
         <TextField
+          size="small"
           fullWidth
           variant="filled"
           onChange={(e) =>
@@ -66,6 +69,7 @@ const FilterComponent = () => {
         />
         {selectedChannel.id && (
           <TextField
+            size="small"
             fullWidth
             variant="filled"
             onChange={(e) => updateFilters(null, e.target.value, "thread")}

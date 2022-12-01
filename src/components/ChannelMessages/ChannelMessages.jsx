@@ -10,6 +10,7 @@ import {
   CircularProgress,
   TextField,
   Button,
+  Tooltip,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
@@ -17,6 +18,7 @@ import { ChannelContext } from "../../context/channel/ChannelContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
 import PurgeGuild from "./PurgeGuild";
+import ExportGuild from "./ExportGuild";
 
 function ChannelMessages() {
   const {
@@ -36,7 +38,8 @@ function ChannelMessages() {
 
   const [searchTouched, setSearchTouched] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
-  const classes = ChannelMessagesStyles({ purgeDialogOpen });
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const classes = ChannelMessagesStyles({ purgeDialogOpen, exportDialogOpen });
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
@@ -61,11 +64,13 @@ function ChannelMessages() {
       await getChannels(selectedGuild.id);
     };
     if (selectedGuild.id) fetchGuildChannels();
-  }, [getChannels, selectedGuild.id, resetMessageData, resetChannel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGuild.id]);
 
   useEffect(() => {
-    getGuilds();
-  }, [getGuilds]);
+    if (token) getGuilds();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   return (
     <Stack spacing={2} className={classes.boxContainer}>
@@ -80,8 +85,15 @@ function ChannelMessages() {
                   Guilds.
                 </Typography>
               </Stack>
-              <Stack alignItems="center" direction="row" spacing={1}>
+
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                spacing={1}
+              >
                 <TextField
+                  size="small"
                   fullWidth
                   variant="filled"
                   disabled={messagesLoading || purgeDialogOpen}
@@ -98,59 +110,79 @@ function ChannelMessages() {
                     );
                   })}
                 </TextField>
-                <PurgeGuild
-                  dialogOpen={purgeDialogOpen}
-                  setDialogOpen={setPurgeDialogOpen}
-                />
-              </Stack>
-              <TextField
-                className={classes.purgeHidden}
-                fullWidth
-                variant="filled"
-                disabled={selectedGuild.id === null || messagesLoading}
-                value={selectedChannel.id}
-                onChange={(e) => {
-                  setSearchTouched(false);
-                  setChannel(e.target.value);
-                }}
-                select
-                label="Channels"
-              >
-                {channels.map((channel) => {
-                  return (
-                    <MenuItem key={channel.id} value={channel.id}>
-                      {channel.name}
-                    </MenuItem>
-                  );
-                })}
-              </TextField>
-              <Stack
-                className={classes.purgeHidden}
-                alignItems="center"
-                direction="row"
-                spacing={1}
-              >
+
                 <TextField
+                  size="small"
+                  className={classes.purgeHidden}
                   fullWidth
                   variant="filled"
-                  disabled={selectedChannel.id === null || messagesLoading}
-                  value={preFilterUserId}
-                  onChange={(e) => setPreFilterUserId(e.target.value)}
+                  disabled={selectedGuild.id === null || messagesLoading}
+                  value={selectedChannel.id}
+                  onChange={(e) => {
+                    setSearchTouched(false);
+                    setChannel(e.target.value);
+                  }}
                   select
-                  label="Filter By Username (Optional)"
+                  label="Channels"
                 >
-                  <MenuItem value={null} key={-1}>
-                    <strong>Reset Selection</strong>
-                  </MenuItem>
-                  {preFilterUserIds.map((user) => {
+                  {channels.map((channel) => {
                     return (
-                      <MenuItem key={user.id} value={user.id}>
-                        {user.name}
+                      <MenuItem key={channel.id} value={channel.id}>
+                        {channel.name}
                       </MenuItem>
                     );
                   })}
                 </TextField>
+
+                <Tooltip
+                  title="Filtering by username is optional"
+                  placement="top"
+                >
+                  <TextField
+                    className={classes.purgeHidden}
+                    size="small"
+                    fullWidth
+                    variant="filled"
+                    disabled={selectedChannel.id === null || messagesLoading}
+                    value={preFilterUserId}
+                    onChange={(e) => setPreFilterUserId(e.target.value)}
+                    select
+                    label="Filter By Username"
+                  >
+                    <MenuItem value={null} key={-1}>
+                      <strong>Reset Selection</strong>
+                    </MenuItem>
+                    {preFilterUserIds.map((user) => {
+                      return (
+                        <MenuItem key={user.id} value={user.id}>
+                          {user.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </TextField>
+                </Tooltip>
+              </Stack>
+
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+              >
+                <span className={purgeDialogOpen && classes.purgeHidden}>
+                  <ExportGuild
+                    dialogOpen={exportDialogOpen}
+                    setDialogOpen={setExportDialogOpen}
+                  />
+                </span>
+                <span className={exportDialogOpen && classes.purgeHidden}>
+                  <PurgeGuild
+                    dialogOpen={purgeDialogOpen}
+                    setDialogOpen={setPurgeDialogOpen}
+                  />
+                </span>
                 <Button
+                  className={classes.purgeHidden}
                   disabled={selectedChannel.id === null || messagesLoading}
                   onClick={() => selectedChannel.id && fetchChannelData()}
                   variant="contained"
@@ -161,16 +193,20 @@ function ChannelMessages() {
             </Stack>
           </Paper>
 
-          {messages.length > 0 && !messagesLoading && !purgeDialogOpen && (
-            <Box className={classes.tableBox}>
-              <DiscordTable />
-            </Box>
-          )}
+          {messages.length > 0 &&
+            !messagesLoading &&
+            !purgeDialogOpen &&
+            !exportDialogOpen && (
+              <Box className={classes.tableBox}>
+                <DiscordTable />
+              </Box>
+            )}
           {messages.length === 0 &&
             !messagesLoading &&
             selectedChannel.id &&
             searchTouched &&
-            !purgeDialogOpen && (
+            !purgeDialogOpen &&
+            !exportDialogOpen && (
               <Paper className={classes.paper}>
                 <Box className={classes.box}>
                   <Typography>No Messages to Display</Typography>
@@ -184,20 +220,22 @@ function ChannelMessages() {
             )}
         </Stack>
       )}
-      {(!token || !guilds.length || messagesLoading) && !purgeDialogOpen && (
-        <Paper justifyContent="center" className={classes.paper}>
-          <Stack justifyContent="center" alignItems="center">
-            <CircularProgress />
-          </Stack>
-          <Box className={classes.box}>
-            <Typography variant="caption">
-              {fetchedMessageLength > 0
-                ? `Fetched ${fetchedMessageLength} Messages`
-                : "Fetching Data"}
-            </Typography>
-          </Box>
-        </Paper>
-      )}
+      {(!token || !guilds.length || messagesLoading) &&
+        !purgeDialogOpen &&
+        !exportDialogOpen && (
+          <Paper justifyContent="center" className={classes.paper}>
+            <Stack justifyContent="center" alignItems="center">
+              <CircularProgress />
+            </Stack>
+            <Box className={classes.box}>
+              <Typography variant="caption">
+                {fetchedMessageLength > 0
+                  ? `Fetched ${fetchedMessageLength} Messages`
+                  : "Fetching Data"}
+              </Typography>
+            </Box>
+          </Paper>
+        )}
     </Stack>
   );
 }

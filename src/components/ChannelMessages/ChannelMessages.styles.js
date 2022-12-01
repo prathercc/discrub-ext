@@ -14,7 +14,7 @@ const ChannelMessagesStyles = makeStyles(() => ({
     marginTop: "1vh",
   },
   tableBox: {
-    maxHeight: "390px",
+    maxHeight: "350px",
     overflow: "auto",
   },
   paper: {
@@ -24,7 +24,8 @@ const ChannelMessagesStyles = makeStyles(() => ({
     display: "block",
   },
   purgeHidden: {
-    opacity: ({ purgeDialogOpen }) => purgeDialogOpen && 0,
+    opacity: ({ purgeDialogOpen, exportDialogOpen }) =>
+      (purgeDialogOpen || exportDialogOpen) && 0,
   },
 }));
 

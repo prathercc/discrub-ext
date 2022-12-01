@@ -10,17 +10,24 @@ import {
   CircularProgress,
   TextField,
   Button,
+  Tooltip,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
+import PurgeGuild from "../ChannelMessages/PurgeGuild";
+import ExportGuild from "../ChannelMessages/ExportGuild";
 
 function DirectMessages() {
-  const classes = DirectMessagesStyles();
-
   const [searchTouched, setSearchTouched] = useState(false);
+  const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+
   const { state: userState } = useContext(UserContext);
+
+  const classes = DirectMessagesStyles({ purgeDialogOpen, exportDialogOpen });
+
   const {
     state: dmState,
     getDms,
@@ -48,8 +55,9 @@ function DirectMessages() {
   };
 
   useEffect(() => {
-    getDms();
-  }, [getDms]);
+    if (token) getDms();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   return (
     <Stack spacing={2} className={classes.boxContainer}>
@@ -63,49 +71,82 @@ function DirectMessages() {
                   Messages between other Discord users and yourself.
                 </Typography>
               </Stack>
-              <TextField
-                fullWidth
-                variant="filled"
-                disabled={messagesLoading}
-                value={selectedDm.id}
-                onChange={(e) => setDm(e.target.value)}
-                select
-                label="Direct Messages"
+
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                spacing={1}
               >
-                {dms.map((directMessage) => {
-                  return (
-                    <MenuItem key={directMessage.id} value={directMessage.id}>
-                      {directMessage.recipients.length === 1
-                        ? directMessage.recipients[0].username
-                        : directMessage.name
-                        ? `Group Chat - ${directMessage.name}`
-                        : `Unnamed Group Chat - ${directMessage.id}`}
-                    </MenuItem>
-                  );
-                })}
-              </TextField>
-              <Stack alignItems="center" direction="row" spacing={1}>
                 <TextField
+                  size="small"
                   fullWidth
                   variant="filled"
-                  disabled={selectedDm.id === null || messagesLoading}
-                  value={preFilterUserId}
-                  onChange={(e) => setPreFilterUserId(e.target.value)}
+                  disabled={messagesLoading || purgeDialogOpen}
+                  value={selectedDm.id}
+                  onChange={(e) => setDm(e.target.value)}
                   select
-                  label="Filter By Username (Optional)"
+                  label="Direct Messages"
                 >
-                  <MenuItem value={null} key={-1}>
-                    <strong>Reset Selection</strong>
-                  </MenuItem>
-                  {preFilterUserIds.map((user) => {
+                  {dms.map((directMessage) => {
                     return (
-                      <MenuItem key={user.id} value={user.id}>
-                        {user.name}
+                      <MenuItem key={directMessage.id} value={directMessage.id}>
+                        {directMessage.name}
                       </MenuItem>
                     );
                   })}
                 </TextField>
+                <Tooltip
+                  title="Filtering by username is optional"
+                  placement="top"
+                >
+                  <TextField
+                    className={classes.purgeHidden}
+                    size="small"
+                    fullWidth
+                    variant="filled"
+                    disabled={selectedDm.id === null || messagesLoading}
+                    value={preFilterUserId}
+                    onChange={(e) => setPreFilterUserId(e.target.value)}
+                    select
+                    label="Filter By Username"
+                  >
+                    <MenuItem value={null} key={-1}>
+                      <strong>Reset Selection</strong>
+                    </MenuItem>
+                    {preFilterUserIds.map((user) => {
+                      return (
+                        <MenuItem key={user.id} value={user.id}>
+                          {user.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </TextField>
+                </Tooltip>
+              </Stack>
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+              >
+                <span className={purgeDialogOpen && classes.purgeHidden}>
+                  <ExportGuild
+                    dialogOpen={exportDialogOpen}
+                    setDialogOpen={setExportDialogOpen}
+                    isDm
+                  />
+                </span>
+                <span className={exportDialogOpen && classes.purgeHidden}>
+                  <PurgeGuild
+                    dialogOpen={purgeDialogOpen}
+                    setDialogOpen={setPurgeDialogOpen}
+                    isDm
+                  />
+                </span>
+
                 <Button
+                  className={classes.purgeHidden}
                   disabled={selectedDm.id === null || messagesLoading}
                   onClick={() => selectedDm.id && fetchDmData()}
                   variant="contained"
@@ -118,30 +159,37 @@ function DirectMessages() {
         </Stack>
       )}
 
-      {(!token || !dms || messagesLoading) && (
-        <Paper justifyContent="center" className={classes.paper}>
-          <Stack justifyContent="center" alignItems="center">
-            <CircularProgress />
-          </Stack>
-          <Box className={classes.box}>
-            <Typography variant="caption">
-              {fetchedMessageLength > 0
-                ? `Fetched ${fetchedMessageLength} Messages`
-                : "Fetching Data"}
-            </Typography>
-          </Box>
-        </Paper>
-      )}
+      {(!token || !dms || messagesLoading) &&
+        !purgeDialogOpen &&
+        !exportDialogOpen && (
+          <Paper justifyContent="center" className={classes.paper}>
+            <Stack justifyContent="center" alignItems="center">
+              <CircularProgress />
+            </Stack>
+            <Box className={classes.box}>
+              <Typography variant="caption">
+                {fetchedMessageLength > 0
+                  ? `Fetched ${fetchedMessageLength} Messages`
+                  : "Fetching Data"}
+              </Typography>
+            </Box>
+          </Paper>
+        )}
 
-      {messages?.length > 0 && !messagesLoading && (
-        <Box className={classes.tableBox}>
-          <DiscordTable />
-        </Box>
-      )}
+      {messages?.length > 0 &&
+        !messagesLoading &&
+        !purgeDialogOpen &&
+        !exportDialogOpen && (
+          <Box className={classes.tableBox}>
+            <DiscordTable />
+          </Box>
+        )}
       {messages?.length === 0 &&
         !messagesLoading &&
         selectedDm.id &&
-        searchTouched && (
+        searchTouched &&
+        !purgeDialogOpen &&
+        !exportDialogOpen && (
           <Paper className={classes.paper}>
             <Box className={classes.box}>
               <Typography>No Messages to Display</Typography>

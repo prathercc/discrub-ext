@@ -37,7 +37,8 @@ function InjectedDialog() {
 
   useEffect(() => {
     getUserData();
-  }, [getUserData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box className={classes.boxContainer}>
@@ -46,7 +47,7 @@ function InjectedDialog() {
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <About />}
       <Box className={classes.box}>
-        <Typography>Version 1.1.4</Typography>
+        <Typography variant="caption">Discrub 1.7.6</Typography>
       </Box>
       <CloseWindowButton />
     </Box>

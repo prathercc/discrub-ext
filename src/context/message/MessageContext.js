@@ -1,6 +1,5 @@
 import React, {
   createContext,
-  useCallback,
   useReducer,
   useContext,
   useRef,
@@ -38,6 +37,7 @@ const MessageContextProvider = (props) => {
   const selectedChannelIdRef = useRef();
   const selectedDmIdRef = useRef();
   const channelPreFilterUserIdRef = useRef();
+  const dmPreFilterUserIdRef = useRef();
 
   const { token } = userState;
   const { selectedChannel, preFilterUserId: channelPreFilterUserId } =
@@ -47,6 +47,7 @@ const MessageContextProvider = (props) => {
   selectedChannelIdRef.current = selectedChannel.id; // Needed incase channelId changes and we can cancel the fetching.
   selectedDmIdRef.current = selectedDm.id;
   channelPreFilterUserIdRef.current = channelPreFilterUserId;
+  dmPreFilterUserIdRef.current = dmPreFilterUserId;
 
   const [state, dispatch] = useReducer(
     MessageReducer,
@@ -127,9 +128,9 @@ const MessageContextProvider = (props) => {
     return response;
   };
 
-  const getMessageData = useCallback(async () => {
+  const getMessageData = async () => {
     if (selectedChannelIdRef.current && token)
-      await getMessageDataAction(
+      return await getMessageDataAction(
         selectedChannelIdRef,
         token,
         dispatch,
@@ -137,18 +138,18 @@ const MessageContextProvider = (props) => {
         channelPreFilterUserIdRef.current
       );
     else if (selectedDm.id && token)
-      await getMessageDataAction(
+      return await getMessageDataAction(
         selectedDmIdRef,
         token,
         dispatch,
         true,
-        dmPreFilterUserId
+        dmPreFilterUserIdRef.current
       );
-  }, [token, selectedDm.id, dmPreFilterUserId]);
+  };
 
-  const resetMessageData = useCallback(async () => {
+  const resetMessageData = async () => {
     await resetMessageDataAction(dispatch);
-  }, []);
+  };
 
   const updateFilters = async (filterName, filterValue, filterType) => {
     await updateFiltersAction(

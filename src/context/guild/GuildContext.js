@@ -1,9 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useReducer,
-} from "react";
+import React, { createContext, useContext, useReducer } from "react";
 import {
   getGuilds as getGuildsAction,
   setGuild as setGuildAction,
@@ -35,17 +30,17 @@ const GuildContextProvider = (props) => {
     })
   );
 
-  const getGuilds = useCallback(async () => {
+  const getGuilds = async () => {
     if (token) await getGuildsAction(token, dispatch);
-  }, [token]);
-
-  const setGuild = (id) => {
-    setGuildAction(id, dispatch);
   };
 
-  const resetGuild = useCallback(async () => {
+  const setGuild = async (id) => {
+    await setGuildAction(id, dispatch);
+  };
+
+  const resetGuild = async () => {
     await resetGuildAction(dispatch);
-  }, []);
+  };
 
   return (
     <GuildContext.Provider

@@ -14,11 +14,15 @@ const DirectMessagesStyles = makeStyles(() => ({
     marginTop: "1vh",
   },
   tableBox: {
-    maxHeight: "460px",
+    maxHeight: "350px",
     overflow: "auto",
   },
   paper: {
     padding: "10px",
+  },
+  purgeHidden: {
+    opacity: ({ purgeDialogOpen, exportDialogOpen }) =>
+      (purgeDialogOpen || exportDialogOpen) && 0,
   },
 }));
 

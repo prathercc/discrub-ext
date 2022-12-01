@@ -172,8 +172,8 @@ export const filterMessages = async (filters, messages, dispatch) => {
   dispatch({ type: FILTER_MESSAGE_COMPLETE, payload: retArr });
 };
 
-export const resetMessageData = async (dispatch) => {
-  dispatch({ type: RESET_MESSAGE_DATA_COMPLETE });
+export const resetMessageData = (dispatch) => {
+  return dispatch({ type: RESET_MESSAGE_DATA_COMPLETE });
 };
 
 export const getMessageData = async (
@@ -217,19 +217,24 @@ export const getMessageData = async (
   await retArr.forEach((x) => {
     uniqueRecipients.set(x.author.id, x.author.username);
   });
+
+  const payload = {
+    threads: retThreads,
+    messages: retArr.map((message) => {
+      return {
+        ...message,
+        username: message.author.username,
+        content: parseAts(message.content, uniqueRecipients),
+      };
+    }),
+  };
+
   dispatch({
     type: GET_MESSAGE_DATA_COMPLETE,
-    payload: {
-      threads: retThreads,
-      messages: retArr.map((message) => {
-        return {
-          ...message,
-          username: message.author.username,
-          content: parseAts(message.content, uniqueRecipients),
-        };
-      }),
-    },
+    payload,
   });
+
+  return payload;
 };
 
 const _getMessages = async (
