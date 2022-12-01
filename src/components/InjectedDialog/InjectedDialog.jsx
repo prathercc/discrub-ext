@@ -37,7 +37,8 @@ function InjectedDialog() {
 
   useEffect(() => {
     getUserData();
-  }, [getUserData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box className={classes.boxContainer}>

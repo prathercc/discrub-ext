@@ -37,6 +37,7 @@ const MessageContextProvider = (props) => {
   const selectedChannelIdRef = useRef();
   const selectedDmIdRef = useRef();
   const channelPreFilterUserIdRef = useRef();
+  const dmPreFilterUserIdRef = useRef();
 
   const { token } = userState;
   const { selectedChannel, preFilterUserId: channelPreFilterUserId } =
@@ -46,6 +47,7 @@ const MessageContextProvider = (props) => {
   selectedChannelIdRef.current = selectedChannel.id; // Needed incase channelId changes and we can cancel the fetching.
   selectedDmIdRef.current = selectedDm.id;
   channelPreFilterUserIdRef.current = channelPreFilterUserId;
+  dmPreFilterUserIdRef.current = dmPreFilterUserId;
 
   const [state, dispatch] = useReducer(
     MessageReducer,
@@ -141,7 +143,7 @@ const MessageContextProvider = (props) => {
         token,
         dispatch,
         true,
-        dmPreFilterUserId
+        dmPreFilterUserIdRef.current
       );
   };
 
