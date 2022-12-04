@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.7.7",
+    "changes": [
+      "Upgrade API to v10 and fix issue where Discord retry_after value was parsed incorrectly."
+    ]
+  },
+  {
     "version": "1.7.6",
     "changes": ["Add Purge option to DM's.", "Add Export feature to DM's."]
   },

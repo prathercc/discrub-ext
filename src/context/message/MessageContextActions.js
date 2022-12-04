@@ -353,7 +353,9 @@ const _getUserMessages = async (
       );
 
       if (data.retry_after) {
-        await new Promise((resolve) => setTimeout(resolve, data.retry_after));
+        await new Promise((resolve) =>
+          setTimeout(resolve, data.retry_after * 1000)
+        );
         continue;
       }
       if (!data || data?.messages?.length === 0) break;

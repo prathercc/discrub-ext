@@ -1,6 +1,6 @@
-const discordUsersUrl = "https://discordapp.com/api/users";
-const discordGuildsUrl = "https://discordapp.com/api/guilds";
-const discordChannelsUrl = "https://discordapp.com/api/channels";
+const discordUsersUrl = "https://discord.com/api/v10/users";
+const discordGuildsUrl = "https://discord.com/api/v10/guilds";
+const discordChannelsUrl = "https://discord.com/api/v10/channels";
 const userAgent =
   "Mozilla/5.0 (X11; Linux x86_64; rv:17.0) Gecko/20121202 Firefox/17.0 Iceweasel/17.0.1";
 

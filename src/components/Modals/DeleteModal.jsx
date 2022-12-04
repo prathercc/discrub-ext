@@ -68,8 +68,8 @@ const DeleteModal = ({ open, handleClose }) => {
         } else if (response > 0) {
           await toggleDebugPause(
             setDebugMessage,
-            `Pausing for ${((response % 60000) / 1000).toFixed(0)} seconds...`,
-            response
+            `Pausing for ${response} seconds...`,
+            response * 1000
           );
         } else {
           await toggleDebugPause(
@@ -89,8 +89,8 @@ const DeleteModal = ({ open, handleClose }) => {
         } else if (response > 0) {
           await toggleDebugPause(
             setDebugMessage,
-            `Pausing for ${((response % 60000) / 1000).toFixed(0)} seconds...`,
-            response
+            `Pausing for ${response} seconds...`,
+            response * 1000
           );
         } else {
           await toggleDebugPause(
