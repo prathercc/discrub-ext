@@ -9,9 +9,19 @@ import CloseWindowButton from "./CloseWindowButton";
 import { MessageContext } from "../../context/message/MessageContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { GuildContext } from "../../context/guild/GuildContext";
-import { Typography } from "@mui/material";
+import {
+  Alert,
+  AlertTitle,
+  Collapse,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { DmContext } from "../../context/dm/DmContext";
 import InjectedDialogStyles from "./InjectedDialog.styles";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { fetchAnnouncementData } from "../../announcementService";
 
 function InjectedDialog() {
   const classes = InjectedDialogStyles();
@@ -23,6 +33,8 @@ function InjectedDialog() {
   const { resetDm } = useContext(DmContext);
 
   const [menuIndex, setMenuIndex] = useState(0);
+  const [alertOpen, setAlertOpen] = useState(true);
+  const [announcement, setAnnouncement] = useState(null);
 
   const handleChangeMenuIndex = async (index) => {
     await Promise.all([
@@ -36,6 +48,11 @@ function InjectedDialog() {
   };
 
   useEffect(() => {
+    const getAnnouncementData = async () => {
+      const data = await fetchAnnouncementData();
+      setAnnouncement(data);
+    };
+    getAnnouncementData();
     getUserData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -46,8 +63,35 @@ function InjectedDialog() {
       {menuIndex === 0 && <ChannelMessages />}
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <About />}
+      {announcement && (
+        <Box className={classes.alertBox}>
+          {!alertOpen && (
+            <Stack direction="row" justifyContent="center" alignItems="center">
+              <Tooltip title="Show Announcement">
+                <IconButton
+                  onClick={() => setAlertOpen(true)}
+                  color="secondary"
+                >
+                  <ExpandLessIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          )}
+          <Collapse in={alertOpen}>
+            <Alert severity="info" onClose={() => setAlertOpen(false)}>
+              <AlertTitle sx={{ color: "rgb(1, 67, 97)" }}>
+                <strong>
+                  {announcement.title} - {announcement.date}
+                </strong>
+              </AlertTitle>
+              {announcement.message}
+            </Alert>
+          </Collapse>
+        </Box>
+      )}
+
       <Box className={classes.box}>
-        <Typography variant="caption">Discrub 1.7.7</Typography>
+        <Typography variant="h6">1.7.7</Typography>
       </Box>
       <CloseWindowButton />
     </Box>
