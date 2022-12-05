@@ -1,9 +1,11 @@
 [
   {
+    "version": "1.7.8",
+    "changes": ["Add dismissable announcements to Discrub."]
+  },
+  {
     "version": "1.7.7",
-    "changes": [
-      "Upgrade API to v10 and fix issue where Discord retry_after value was parsed incorrectly."
-    ]
+    "changes": ["Ugrade to Discord's V10 API and fix retry_after issue."]
   },
   {
     "version": "1.7.6",
