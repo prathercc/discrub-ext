@@ -25,7 +25,7 @@ const InjectedDialogStyles = makeStyles(() => ({
     position: "fixed",
     bottom: "5px",
     left: "5px",
-    width: "768px",
+    width: "767px",
   },
 }));
 

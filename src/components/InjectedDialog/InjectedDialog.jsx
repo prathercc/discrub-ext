@@ -45,6 +45,7 @@ function InjectedDialog() {
       resetFilters(),
     ]);
     setMenuIndex(index);
+    setAlertOpen(false);
   };
 
   useEffect(() => {
@@ -60,7 +61,9 @@ function InjectedDialog() {
   return (
     <Box className={classes.boxContainer}>
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
-      {menuIndex === 0 && <ChannelMessages />}
+      {menuIndex === 0 && (
+        <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
+      )}
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <About />}
       {announcement && (
@@ -81,7 +84,8 @@ function InjectedDialog() {
             <Alert severity="info" onClose={() => setAlertOpen(false)}>
               <AlertTitle sx={{ color: "rgb(1, 67, 97)" }}>
                 <strong>
-                  {announcement.title} - {announcement.date}
+                  {announcement.title}
+                  {announcement.date && ` - ${announcement.date}`}
                 </strong>
               </AlertTitle>
               {announcement.message}
