@@ -45,7 +45,6 @@ function About() {
                 Opening new tab to external link:{" "}
                 <strong>https://www.reddit.com/r/discrub/</strong>
               </DialogContentText>
-              <DialogContentText>Do you wish to continue?</DialogContentText>
             </DialogContent>
             <DialogActions>
               <Button
