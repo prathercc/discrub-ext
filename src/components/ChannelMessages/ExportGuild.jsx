@@ -59,6 +59,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     active: false,
     name: null,
   });
+  const [debugText, setDebugText] = useState(null);
   const exportingActiveRef = useRef();
   const contentRef = useRef();
   exportingActiveRef.current = exporting?.active;
@@ -122,6 +123,11 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         for (let c2 = 0; c2 < messages[c1].attachments.length; c2 += 1) {
           try {
             const attachment = messages[c1].attachments[c2];
+            setDebugText(
+              `Downloading ${attachment.filename.slice(0, 20)}${
+                attachment.filename.length > 20 ? "..." : ""
+              }`
+            );
             const blob = await fetch(attachment.proxy_url).then((r) =>
               r.blob()
             );
@@ -143,9 +149,11 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           }
         }
         updatedMessages.push(updatedMessage);
+        setDebugText(null);
       }
 
       if (updatedMessages.length > 0) {
+        setDebugText("Adding data to archive");
         if (format === "json")
           addToZip(
             new Blob([JSON.stringify(updatedMessages)], { type: "text/plain" }),
@@ -160,11 +168,13 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       count += 1;
       if (!exportingActiveRef.current) break;
     }
+    setDebugText("Generating archive");
     await generateZip();
     await resetChannel();
     await resetMessageData();
     setExporting({ active: false, name: null });
     resetZip();
+    setDebugText(null);
   };
 
   return (
@@ -272,7 +282,9 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               <Typography>{exporting.name}</Typography>
               <CircularProgress />
               <Typography variant="caption">
-                {fetchedMessageLength || "No"} Messages Found
+                {debugText || (
+                  <>{fetchedMessageLength || "No"} Messages Found</>
+                )}
               </Typography>
             </Stack>
           )}
