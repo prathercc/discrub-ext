@@ -20,7 +20,7 @@ import ChannelMessagesStyles from "./ChannelMessages.styles";
 import PurgeGuild from "./PurgeGuild";
 import ExportGuild from "./ExportGuild";
 
-function ChannelMessages() {
+function ChannelMessages({ closeAnnouncement }) {
   const {
     state: messageDataState,
     getMessageData,
@@ -101,6 +101,7 @@ function ChannelMessages() {
                   onChange={(e) => setGuild(e.target.value)}
                   select
                   label="Guilds"
+                  onFocus={closeAnnouncement}
                 >
                   {guilds.map((guild) => {
                     return (

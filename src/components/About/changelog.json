@@ -1,9 +1,14 @@
 [
   {
-    "version": "1.7.7",
+    "version": "1.7.8",
     "changes": [
-      "Upgrade API to v10 and fix issue where Discord retry_after value was parsed incorrectly."
+      "Add dismissable announcements to Discrub.",
+      "Improve loading text while exporting Guilds/DMs."
     ]
+  },
+  {
+    "version": "1.7.7",
+    "changes": ["Switch to Discord's v10 API."]
   },
   {
     "version": "1.7.6",
