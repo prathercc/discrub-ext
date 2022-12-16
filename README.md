@@ -155,11 +155,6 @@ Developed using [React.js](https://reactjs.org/)
 
 </p>
 
-<p  align="left">
-
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png">
-
-</p>
 
 </details>
 
