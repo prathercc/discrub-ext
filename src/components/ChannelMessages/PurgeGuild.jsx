@@ -57,8 +57,8 @@ const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
 
   const { messages, isLoading: messagesLoading } = messageDataState;
   const { selectedGuild } = guildState;
-  const { channels } = channelState;
-  const { selectedDm } = dmState;
+  const { channels, selectedChannel, preFilterUserId } = channelState;
+  const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
 
   const messagesRef = useRef();
   messagesRef.current = messages;
@@ -136,6 +136,10 @@ const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         disabled={
           (selectedGuild.id === null && selectedDm.id === null) ||
           messagesLoading ||
+          selectedChannel.id !== null ||
+          messages.length > 0 ||
+          !!dmPreFilterUserId ||
+          !!preFilterUserId ||
           dialogOpen
         }
         onClick={() =>
@@ -147,11 +151,16 @@ const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       </Button>
       <Dialog open={dialogOpen} onClose={handleClose}>
         <DialogTitle>
-          {deleting && deleteObj
-            ? `Purging ${deleteType}`
-            : finishedPurge
-            ? `${deleteType} Purged`
-            : `Purge ${deleteType}?`}
+          {deleting && deleteObj ? (
+            `Purging ${deleteType}`
+          ) : finishedPurge ? (
+            `${deleteType} Purged`
+          ) : (
+            <>
+              <span style={{ color: "red" }}>WARNING: </span> This is
+              non-reversible!
+            </>
+          )}
         </DialogTitle>
         <DialogContent>
           <Stack
@@ -169,11 +178,17 @@ const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               {!finishedPurge && <WarningAmberIcon fontSize="large" />}
               {finishedPurge && <ThumbUpIcon fontSize="large" />}
               <DialogContentText>
-                {finishedPurge
-                  ? `${deleteType} was successfully purged!`
-                  : `Are you sure you want to purge this ${deleteType}? All of your messages will be deleted${
-                      isDm ? "." : " for each Channel."
-                    }`}
+                {finishedPurge ? (
+                  `${deleteType} was successfully purged!`
+                ) : (
+                  <span>
+                    Are you sure you want to purge this {deleteType}?{" "}
+                    <span style={{ color: "red" }}>
+                      All of YOUR messages will be deleted
+                      {isDm ? "." : " for each Channel."}
+                    </span>
+                  </span>
+                )}
               </DialogContentText>
             </Stack>
             {deleting && deleteObj && (
