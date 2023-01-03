@@ -237,6 +237,12 @@ export const getMessageData = async (
   return payload;
 };
 
+const _messageTypeAllowed = (type) => {
+  return [0, 6, 7, 8, 9, 10, 11, 12, 18, 19, 20, 22, 23, 24].some(
+    (t) => t === type
+  );
+};
+
 const _getMessages = async (
   channelIdRef,
   token,
@@ -259,7 +265,7 @@ const _getMessages = async (
       if (data.length > 0) lastId = data[data.length - 1].id;
       if (data && (data[0]?.content || data[0]?.attachments)) {
         for (const m of data) {
-          if (m.type !== 21) {
+          if (_messageTypeAllowed(m.type)) {
             if (m.thread) {
               channelIdRef.current = m.thread?.id?.slice();
               trackedThreads.push({
@@ -365,7 +371,8 @@ const _getUserMessages = async (
       const foundMessages = data.messages.flat();
       if (foundMessages.length < 25) reachedEnd = true;
       offset += 25;
-      for (const m of foundMessages) if (m.type !== 21) retArr.push(m);
+      for (const m of foundMessages)
+        if (_messageTypeAllowed(m.type)) retArr.push(m);
       dispatch({
         type: UPDATE_FETCHED_MESSAGES,
         payload: {
