@@ -1,7 +1,8 @@
 
+
 # Discrub
 
-**Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML, PDF, and JSON supported) [Discord](https://discord.com/) messages. It can be installed via the [Chrome Webstore](https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj)
+**Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML and JSON supported) [Discord](https://discord.com/) messages. It can be installed via the [Chrome Webstore](https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj)
 
 <a  href="https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj"><img  src="https://img.shields.io:/chrome-web-store/stars/plhdclenpaecffbcefjmpkkbdpkmhhbj?label=Discrub&logo=javascript&logoColor=89CFF0&color=89CFF0"></a>
 
@@ -9,15 +10,26 @@ An instructional video can be found here - https://www.youtube.com/watch?v=niRSY
 
 **Users may also remove messages and attachments from other Discord users if they have the proper permissions for any given channel.**
 
-Written using [React](https://reactjs.org/) and hitting the [Discord API](https://discord.com/developers/docs/intro) for all data manipulation.
-
+Developed using [React.js](https://reactjs.org/)
 <details>
 
-<summary>Location</summary>
+<summary>Access Points</summary>
 
-<p  align="center">
+## Open Discrub
+
+### Top-Right corner of Discord
+
+<p  align="left">
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z1.png">
+
+</p>
+
+### Extension Icon
+
+<p  align="left">
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z9.png">
 
 </p>
 
@@ -27,13 +39,22 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <summary>Messages</summary>
 
-<p  align="center">
+## Select Guild/DM
+
+
+<p  align="left">
+
+### Channel Messages View
+
+ #### Select a Guild and Channel, optionally select a username to pre-filter by.
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z2.png">
 
 </p>
 
-<p  align="center">
+<p  align="left">
+
+### Direct Messages View
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z3.png">
 
@@ -45,7 +66,13 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <summary>Filtering</summary>
 
-<p  align="center">
+## Filter Messages
+
+<p  align="left">
+
+### Filter View
+
+ #### Optionally filter messages by the following criteria: Start Time, End Time, Username, Message (content), Attachment Name, Threads.
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z4.png">
 
@@ -55,27 +82,25 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <details>
 
-<summary>Deleting / Editing</summary>
+<summary>Message Manipulation</summary>
 
-<p  align="center">
+## Delete/Edit Messages
+ 
+<p  align="left">
 
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z5.png">
+### Bulk Delete
 
-</p>
-
-<p  align="center">
-
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png">
-
-</p>
-
-<p  align="center">
+ #### After messages have been loaded, messages can be selected and deleted in bulk.
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png">
 
 </p>
 
-<p  align="center">
+<p  align="left">
+
+### Individual Attachment Deletion
+
+ #### Attachments can be viewed and deleted separately.
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z7.png">
 
@@ -87,7 +112,11 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <summary>Information</summary>
 
-<p  align="center">
+## View Resources
+
+<p  align="left">
+
+### Project Information & Links
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z8.png">
 
@@ -97,11 +126,32 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <details>
 
-<summary>Open By Clicking Extension Icon</summary>
+<summary>Purging</summary>
 
-<p  align="center">
+## Purge Guild/DM
 
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z9.png">
+ #### Purging will remove all of your messages from the specified Guild (and all inner Channels) or the selected DM.
+
+<p  align="left">
+
+### Purge Guild View
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z11.png">
+
+</p>
+<p  align="left">
+
+### Purge DM View
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z12.png">
+
+</p>
+
+<p  align="left">
+
+### Purge Progress
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png">
 
 </p>
 
@@ -110,28 +160,27 @@ Written using [React](https://reactjs.org/) and hitting the [Discord API](https:
 
 <details>
 
-<summary>Purge Guild</summary>
+<summary>Exporting</summary>
 
-<p  align="center">
+## Export Guild/DM
 
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z11.png">
+ #### Exporting will download all messages (and media attachments) from a selected Guilds channels or a selected DM.
 
-</p>
-<p  align="center">
+<p  align="left">
 
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z12.png">
-
-</p>
-
-<p  align="center">
-
-<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png">
-
-</p>
-
-<p  align="center">
+### Export DM View
 
 <img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png">
+
+</p>
+
+<p  align="left">
+
+### Export Guild View
+
+ #### Any Channel belonging to the Guild can be selected for export.
+
+<img  src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z5.png">
 
 </p>
 

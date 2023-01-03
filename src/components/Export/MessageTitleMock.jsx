@@ -1,18 +1,23 @@
 import React, { useContext } from "react";
-import { Stack, Typography } from "@mui/material";
+import { Stack } from "@mui/material";
 import { MessageContext } from "../../context/message/MessageContext";
 import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
+import PoweredBy from "./PoweredBy";
+
 const MessageTitleMock = () => {
   const classes = ExportButtonGroupStyles();
 
   const { getExportTitle } = useContext(MessageContext);
 
   return (
-    <Stack justifyContent="center" alignItems="center">
+    <Stack
+      className={classes.exportTitleStack}
+      direction="row"
+      justifyContent="space-between"
+      alignItems="center"
+    >
       {getExportTitle()}
-      <Typography className={classes.typographyId}>
-        UTC mm/dd/yyyy hh:mm:ss
-      </Typography>
+      <PoweredBy />
     </Stack>
   );
 };

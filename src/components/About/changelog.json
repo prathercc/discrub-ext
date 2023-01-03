@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.8.0",
+    "changes": ["Re-design and refactor message export formatting."]
+  },
+  {
+    "version": "1.7.9",
+    "changes": [
+      "Make Purge warning more apparant and disable Purge button in scenarios that are not needed."
+    ]
+  },
+  {
     "version": "1.7.8",
     "changes": [
       "Add dismissable announcements to Discrub.",

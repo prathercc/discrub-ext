@@ -1,6 +1,8 @@
 import React from "react";
 import { Stack, Typography } from "@mui/material";
 import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
+import AttachmentMock from "./Attachment/AttachmentMock";
+import AuthorAvatar from "./AuthorAvatar";
 
 const MessageMock = ({ row, index, threads }) => {
   const classes = ExportButtonGroupStyles();
@@ -10,71 +12,63 @@ const MessageMock = ({ row, index, threads }) => {
   );
   return (
     <Stack
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      spacing={2}
-      className={classes.stackContentContainer}
-      my={1}
-      padding={1}
+      direction="row"
+      alignItems="flex-start"
+      justifyContent="flex-start"
+      spacing={1}
+      className={classes.messageMockMainStack}
     >
+      <AuthorAvatar author={row.author} />
       <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        spacing={20}
-        className={classes.stack}
+        direction="column"
+        alignItems="flex-start"
+        justifyContent="flex-start"
       >
         <Stack
-          direction="column"
-          justifyContent="center"
-          alignItems="flex-start"
-          spacing={0}
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="center"
+          spacing={1}
         >
-          <Typography className={classes.boldTypography}>
-            {row.username}:
+          <Typography className={classes.typographyTitle} variant="body2">
+            <strong>{row.username}</strong>
           </Typography>
-          <Typography className={classes.typography}>{`${
-            messageDate.getUTCMonth() + 1
-          }/${messageDate.getUTCDate()}/${messageDate.getUTCFullYear()}`}</Typography>
           <Typography
-            className={classes.typography}
-          >{`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()}`}</Typography>
-          <Typography className={classes.typographyId}>
-            Message ID: {row.id}
+            mt="1px"
+            className={classes.typographyHash}
+            variant="caption"
+          >
+            {`${
+              messageDate.getUTCMonth() + 1
+            }/${messageDate.getUTCDate()}/${messageDate.getUTCFullYear()}`}{" "}
+            at{" "}
+            {`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()} UTC`}
           </Typography>
-          {foundThread && (
-            <>
-              <Typography className={classes.typographyId}>
-                Thread Name {foundThread.name}
-              </Typography>
-              <Typography className={classes.typographyId}>
-                Thread ID: {foundThread.id}
-              </Typography>
-            </>
-          )}
         </Stack>
-        <Typography className={classes.typography} id={`message-data-${index}`}>
+        {foundThread && (
+          <Typography variant="caption" className={classes.typographyHash}>
+            {foundThread.name}
+          </Typography>
+        )}
+        <Typography
+          className={classes.typographyMessageText}
+          variant="body1"
+          id={`message-data-${index}`}
+        >
           {row.content}
         </Typography>
-      </Stack>
-      {row.attachments?.length > 0 ? (
         <Stack
+          mt="5px"
           direction="row"
-          alignItems="flex-start"
           justifyContent="flex-start"
+          alignItems="center"
           spacing={1}
-          className={classes.stack}
         >
           {row.attachments.map((attachment, index) => (
-            <Typography className={classes.typography}>
-              <a href={attachment.local_url || attachment.url}>
-                Attachment {index + 1}
-              </a>
-            </Typography>
+            <AttachmentMock attachment={attachment} />
           ))}
         </Stack>
-      ) : null}
+      </Stack>
     </Stack>
   );
 };

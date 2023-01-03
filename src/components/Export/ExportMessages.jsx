@@ -22,10 +22,18 @@ const ExportMessages = ({ componentRef, exporting }) => {
         className={classes.stackMessageContainer}
       >
         <MessageTitleMock />
-        {exporting &&
-          exportMessages.map((row, index) => {
-            return <MessageMock row={row} index={index} threads={threads} />;
-          })}
+        <Stack
+          direction="column"
+          justifyContent="flex-start"
+          alignItems="flex-start"
+          spacing={1}
+          className={classes.messagesStack}
+        >
+          {exporting &&
+            exportMessages.map((row, index) => {
+              return <MessageMock row={row} index={index} threads={threads} />;
+            })}
+        </Stack>
       </Stack>
     </Box>
   );

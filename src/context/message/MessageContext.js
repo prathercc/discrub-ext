@@ -23,6 +23,7 @@ import { DmContext } from "../dm/DmContext";
 import Typography from "@mui/material/Typography";
 import { GuildContext } from "../guild/GuildContext";
 import ExportButtonGroupStyles from "../../components/Export/ExportButtonGroup.styles";
+import { Stack } from "@mui/material";
 
 export const MessageContext = createContext();
 
@@ -71,21 +72,34 @@ const MessageContextProvider = (props) => {
     return (
       <>
         {directMessage ? (
-          <Typography className={classes.typographyTitle} variant="h4">
-            {directMessage.recipients.length === 1
-              ? directMessage.recipients[0].username
-              : directMessage.name
-              ? `Group Chat - ${directMessage.name}`
-              : `Unnamed Group Chat - ${directMessage.id}`}
-          </Typography>
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+            spacing={1}
+            ml="10px"
+          >
+            <Typography className={classes.typographyHash} variant="h4">
+              @
+            </Typography>
+            <Typography className={classes.typographyTitle} variant="h6">
+              {directMessage.recipients.length === 1
+                ? directMessage.recipients[0].username
+                : directMessage.name
+                ? `Group Chat - ${directMessage.name}`
+                : `Unnamed Group Chat - ${directMessage.id}`}
+            </Typography>
+          </Stack>
         ) : (
-          <>
-            <Typography className={classes.typographyTitle} variant="h4">
-              {
-                guildState.guilds.find(
-                  (guild) => guild.id === guildState.selectedGuild.id
-                )?.name
-              }
+          <Stack
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+            spacing={1}
+            ml="10px"
+          >
+            <Typography className={classes.typographyHash} variant="h4">
+              #
             </Typography>
             <Typography className={classes.typographyTitle} variant="h6">
               {
@@ -94,7 +108,7 @@ const MessageContextProvider = (props) => {
                 )?.name
               }
             </Typography>
-          </>
+          </Stack>
         )}
       </>
     );
