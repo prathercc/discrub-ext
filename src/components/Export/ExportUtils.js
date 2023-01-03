@@ -28,9 +28,12 @@ export default class ExportUtils {
   _generateHTMLHelperFunc = useReactToPrint({
     content: () => this.contentRef.current,
     print: (iframe) => {
-      iframe.contentWindow.document.lastElementChild.getElementsByTagName(
-        "body"
-      )[0].margin = 0;
+      const bodyElementStyle =
+        iframe.contentWindow.document.lastElementChild.getElementsByTagName(
+          "body"
+        )[0].style;
+      bodyElementStyle.margin = "3px";
+      bodyElementStyle.backgroundColor = "#36393f";
       this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
     },
   });
@@ -60,7 +63,7 @@ export default class ExportUtils {
   generateZip = async () => {
     await this.zip.generateAsync({ type: "blob" }).then(function (content) {
       let link = document.createElement("a");
-      link.download = `Guild Export.${uuidv4()}.zip`;
+      link.download = `Export.${uuidv4()}.zip`;
       link.href = window.URL.createObjectURL(content);
       link.click();
     });
