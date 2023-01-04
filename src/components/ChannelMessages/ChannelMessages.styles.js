@@ -27,6 +27,9 @@ const ChannelMessagesStyles = makeStyles(() => ({
     opacity: ({ purgeDialogOpen, exportDialogOpen }) =>
       (purgeDialogOpen || exportDialogOpen) && 0,
   },
+  purgeWarning: {
+    color: "#f44336",
+  },
 }));
 
 export default ChannelMessagesStyles;
