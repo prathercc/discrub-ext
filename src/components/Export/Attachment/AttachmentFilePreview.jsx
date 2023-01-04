@@ -11,9 +11,13 @@ const AttachmentFilePreview = ({ attachment }) => {
       <Avatar
         className={attachmentClasses.attachmentAvatar}
         variant="rounded"
-        src={attachment.local_url || attachment.url}
-      />
-      <InsertDriveFileIcon className={attachmentClasses.attachmentFileIcon} />
+        src={
+          attachment.content_type?.includes("image") &&
+          (attachment.local_url || attachment.url)
+        }
+      >
+        <InsertDriveFileIcon />
+      </Avatar>
     </Box>
   );
 };
