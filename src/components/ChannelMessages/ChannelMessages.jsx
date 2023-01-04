@@ -126,6 +126,9 @@ function ChannelMessages({ closeAnnouncement }) {
                   select
                   label="Channels"
                 >
+                  <MenuItem value={null} key={-1}>
+                    <strong>Reset Selection</strong>
+                  </MenuItem>
                   {channels.map((channel) => {
                     return (
                       <MenuItem key={channel.id} value={channel.id}>

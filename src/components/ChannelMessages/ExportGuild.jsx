@@ -52,8 +52,9 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     fetchedMessageLength,
     messages,
   } = messageState;
-  const { channels, selectedExportChannels } = channelState;
-  const { selectedDm } = dmState;
+  const { channels, selectedExportChannels, preFilterUserId, selectedChannel } =
+    channelState;
+  const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
   const { selectedGuild } = guildState;
   const [exporting, setExporting] = useState({
     active: false,
@@ -183,6 +184,10 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         disabled={
           (isDm ? selectedDm.id === null : selectedGuild.id === null) ||
           messagesLoading ||
+          selectedChannel.id !== null ||
+          messages.length > 0 ||
+          !!dmPreFilterUserId ||
+          !!preFilterUserId ||
           dialogOpen
         }
         onClick={() => setDialogOpen(true)}

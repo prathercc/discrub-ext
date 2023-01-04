@@ -19,7 +19,16 @@ export const ChannelReducer = (state, action) => {
       );
       return {
         ...state,
-        selectedChannel: selectedChannel,
+        selectedChannel: selectedChannel || {
+          flags: null,
+          guild_id: null,
+          id: null,
+          name: null,
+          parent_id: null,
+          permission_overwrites: [],
+          position: null,
+          type: null,
+        },
         preFilterUserIds: [{ name: payload.user.name, id: payload.user.id }],
       };
     case SET_PREFILTER_USERID:
