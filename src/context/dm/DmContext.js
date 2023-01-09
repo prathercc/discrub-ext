@@ -1,12 +1,14 @@
 import React, { createContext, useReducer, useContext } from "react";
-import {
-  getDms as getDmsAction,
-  setDm as setDmAction,
-  resetDm as resetDmAction,
-  setPreFilterUserId as setPreFilterUserIdAction,
-} from "./DmContextActions";
 import { DmReducer } from "./DmReducer";
 import { UserContext } from "../user/UserContext";
+import {
+  GET_DMS,
+  GET_DMS_COMPLETE,
+  SET_DM,
+  RESET_DM_COMPLETE,
+  SET_PREFILTER_USERID,
+} from "./DmContextConstants";
+import { fetchDirectMessages } from "../../discordService";
 
 export const DmContext = createContext();
 
@@ -33,19 +35,29 @@ const DmContextProvider = (props) => {
   );
 
   const getDms = async () => {
-    if (token) await getDmsAction(token, dispatch);
+    if (token) {
+      dispatch({ type: GET_DMS });
+      const data = await fetchDirectMessages(token);
+      return dispatch({
+        type: GET_DMS_COMPLETE,
+        payload: [...data],
+      });
+    }
   };
 
   const setDm = async (id) => {
-    await setDmAction(id, { name: username, id: userId }, dispatch);
+    return dispatch({
+      type: SET_DM,
+      payload: { id, user: { name: username, id: userId } },
+    });
   };
 
   const resetDm = async () => {
-    await resetDmAction(dispatch);
+    return dispatch({ type: RESET_DM_COMPLETE });
   };
 
   const setPreFilterUserId = async (userId) => {
-    await setPreFilterUserIdAction(userId, dispatch);
+    return dispatch({ type: SET_PREFILTER_USERID, payload: { userId } });
   };
 
   return (
