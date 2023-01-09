@@ -1,5 +1,7 @@
 import React, { createContext, useReducer } from "react";
-import { getUserData as getUserDataAction } from "./UserContextActions";
+import { sendChromeMessage } from "../../chromeService";
+import { fetchUserData } from "../../discordService";
+import { GET_USER_DATA, GET_USER_DATA_COMPLETE } from "./UserContextConstants";
 import { UserReducer } from "./UserReducer";
 export const UserContext = createContext();
 
@@ -31,7 +33,17 @@ const UserContextProvider = (props) => {
   );
 
   const getUserData = async () => {
-    await getUserDataAction(dispatch);
+    const chromeCallback = async (userToken) => {
+      const data = await fetchUserData(userToken);
+      if (data)
+        return dispatch({
+          type: GET_USER_DATA_COMPLETE,
+          payload: { ...data, token: userToken },
+        });
+    };
+
+    dispatch({ type: GET_USER_DATA });
+    return sendChromeMessage("GET_TOKEN", chromeCallback);
   };
 
   return (
