@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.8.2",
+    "changes": ["Reset pre-filter user if Channel selection is reset."]
+  },
+  {
     "version": "1.8.1",
     "changes": [
       "Patch fix for additional export formatting graphical issues.",
