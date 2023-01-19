@@ -157,8 +157,8 @@ const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
             `${deleteType} Purged`
           ) : (
             <>
-              <span style={{ color: "red" }}>WARNING: </span> This is
-              non-reversible!
+              <span className={classes.purgeWarning}>WARNING - </span>{" "}
+              Irreversible Action!
             </>
           )}
         </DialogTitle>
@@ -182,11 +182,10 @@ const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   `${deleteType} was successfully purged!`
                 ) : (
                   <span>
-                    Are you sure you want to purge this {deleteType}?{" "}
-                    <span style={{ color: "red" }}>
-                      All of YOUR messages will be deleted
-                      {isDm ? "." : " for each Channel."}
-                    </span>
+                    Are you sure you want to purge this {deleteType}? All of{" "}
+                    <strong className={classes.purgeWarning}>your</strong>{" "}
+                    messages will be deleted
+                    {isDm ? "." : " for each Channel."}
                   </span>
                 )}
               </DialogContentText>

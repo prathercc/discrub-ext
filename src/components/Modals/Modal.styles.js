@@ -35,6 +35,12 @@ const ModalStyles = makeStyles(() => ({
     overflow: "auto",
     padding: "10px",
   },
+  embedAccordian: {
+    backgroundColor: "#202225 !important",
+  },
+  embedTitleTypography: {
+    cursor: "pointer !important",
+  },
 }));
 
 export default ModalStyles;

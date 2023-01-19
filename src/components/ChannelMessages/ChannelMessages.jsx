@@ -120,12 +120,16 @@ function ChannelMessages({ closeAnnouncement }) {
                   disabled={selectedGuild.id === null || messagesLoading}
                   value={selectedChannel.id}
                   onChange={(e) => {
+                    if (!e.target.value) setPreFilterUserId(null);
                     setSearchTouched(false);
                     setChannel(e.target.value);
                   }}
                   select
                   label="Channels"
                 >
+                  <MenuItem value={null} key={-1}>
+                    <strong>Reset Selection</strong>
+                  </MenuItem>
                   {channels.map((channel) => {
                     return (
                       <MenuItem key={channel.id} value={channel.id}>

@@ -1,5 +1,21 @@
 [
   {
+    "version": "1.8.2",
+    "changes": [
+      "Reset pre-filter user if Channel selection is reset.",
+      "Add ability to view message embed(s).",
+      "Include message embed(s) when filtering by message content."
+    ]
+  },
+  {
+    "version": "1.8.1",
+    "changes": [
+      "Patch fix for additional export formatting graphical issues.",
+      "Fix Purge dialog warning styling.",
+      "Disable main Export buttons during unnecessary/unneeded scenarios."
+    ]
+  },
+  {
     "version": "1.8.0",
     "changes": ["Re-design and refactor message export formatting."]
   },

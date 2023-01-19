@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useReducer } from "react";
-import {
-  getGuilds as getGuildsAction,
-  setGuild as setGuildAction,
-  resetGuild as resetGuildAction,
-} from "./GuildContextActions";
 import { GuildReducer } from "./GuildReducer";
 import { UserContext } from "../user/UserContext";
+import {
+  GET_GUILDS,
+  GET_GUILDS_COMPLETE,
+  SET_GUILD,
+  RESET_GUILD_COMPLETE,
+} from "./GuildContextConstants";
+import { fetchGuilds } from "../../discordService";
 
 export const GuildContext = createContext();
 
@@ -31,15 +33,22 @@ const GuildContextProvider = (props) => {
   );
 
   const getGuilds = async () => {
-    if (token) await getGuildsAction(token, dispatch);
+    if (token) {
+      dispatch({ type: GET_GUILDS });
+      const data = await fetchGuilds(token);
+      return dispatch({
+        type: GET_GUILDS_COMPLETE,
+        payload: [...data],
+      });
+    }
   };
 
   const setGuild = async (id) => {
-    await setGuildAction(id, dispatch);
+    return dispatch({ type: SET_GUILD, payload: { id } });
   };
 
   const resetGuild = async () => {
-    await resetGuildAction(dispatch);
+    return dispatch({ type: RESET_GUILD_COMPLETE });
   };
 
   return (

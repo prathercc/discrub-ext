@@ -16,7 +16,7 @@ import { MessageContext } from "../../context/message/MessageContext";
 import ExportUtils from "./ExportUtils";
 import ExportMessages from "./ExportMessages";
 
-const options = ["HTML", "PDF", "JSON"];
+const options = ["HTML", "JSON"];
 
 const ExportButtonGroup = () => {
   const { state: messageState } = useContext(MessageContext);
@@ -30,12 +30,11 @@ const ExportButtonGroup = () => {
 
   const componentRef = useRef();
 
-  const { downloadHTML, downloadPDF, downloadJSON, loadAllContent } =
-    new ExportUtils(
-      componentRef,
-      () => setPrinting(false),
-      `message-data-${exportMessages.length - 1}`
-    );
+  const { downloadHTML, downloadJSON, loadAllContent } = new ExportUtils(
+    componentRef,
+    () => setPrinting(false),
+    `message-data-${exportMessages.length - 1}`
+  );
 
   const handleMenuItemClick = (event, index) => {
     setSelectedIndex(index);
@@ -61,9 +60,6 @@ const ExportButtonGroup = () => {
       const allContentLoaded = await loadAllContent();
       if (allContentLoaded) {
         switch (option) {
-          case "PDF":
-            downloadPDF();
-            break;
           case "HTML":
             downloadHTML();
             break;

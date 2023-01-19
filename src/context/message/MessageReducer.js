@@ -11,12 +11,15 @@ import {
   DELETE_MESSAGE_SUCCESS,
   SET_ATTACHMENT_MESSAGE_COMPLETE,
   RESET_FILTERS_COMPLETE,
+  SET_EMBED_MESSAGE_COMPLETE,
 } from "./MessageContextConstants";
 export const MessageReducer = (state, action) => {
   const { type, payload } = action;
   switch (type) {
     case SET_ATTACHMENT_MESSAGE_COMPLETE:
       return { ...state, attachmentMessage: payload };
+    case SET_EMBED_MESSAGE_COMPLETE:
+      return { ...state, embedMessage: payload };
     case FILTER_MESSAGE:
     case GET_MESSAGE_DATA:
       return { ...state, isLoading: true };

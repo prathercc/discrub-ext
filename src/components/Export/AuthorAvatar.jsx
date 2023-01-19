@@ -10,9 +10,11 @@ const AuthorAvatar = ({ author }) => {
     <Box className={classes.avatarBox}>
       <Avatar
         className={classes.avatarMain}
-        src={`https://cdn.discordapp.com/avatars/${author?.id}/${author?.avatar}.png`}
-      />
-      <Avatar className={classes.avatarFallback}>
+        src={
+          author.avatar &&
+          `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png`
+        }
+      >
         <PersonIcon />
       </Avatar>
     </Box>

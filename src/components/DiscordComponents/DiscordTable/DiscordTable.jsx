@@ -6,20 +6,16 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import Grid from "@mui/material/Grid";
 import DeleteModal from "../../Modals/DeleteModal";
 import EditModal from "../../Modals/EditModal";
 import AttachmentModal from "../../Modals/AttachmentModal";
-import AttachmentIcon from "@mui/icons-material/Attachment";
-import MessageChip from "../../Chips/MessageChip";
 import EnhancedTableHead from "./EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar";
 import { MessageContext } from "../../../context/message/MessageContext";
 import DiscordTableStyles from "./DiscordTable.styles";
+import DiscordTableMessage from "./DiscordTableMessage";
+import EmbedModal from "../../Modals/EmbedModal";
 
 export default function DiscordTable() {
   const classes = DiscordTableStyles();
@@ -31,6 +27,7 @@ export default function DiscordTable() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
+  const [embedModalOpen, setEmbedModalOpen] = useState(false);
   const columns = [
     {
       id: "timestamp",
@@ -48,11 +45,7 @@ export default function DiscordTable() {
       label: "Message",
     },
   ];
-  const {
-    state: messageState,
-    setSelected,
-    setAttachmentMessage,
-  } = useContext(MessageContext);
+  const { state: messageState, setSelected } = useContext(MessageContext);
   const { filteredMessages, messages, filters, selectedMessages, threads } =
     messageState;
   const displayRows =
@@ -126,6 +119,10 @@ export default function DiscordTable() {
         open={attachmentModalOpen}
         handleClose={() => setAttachmentModalOpen(false)}
       />
+      <EmbedModal
+        open={embedModalOpen}
+        handleClose={() => setEmbedModalOpen(false)}
+      />
       <Paper className={classes.paper}>
         <EnhancedTableToolbar
           setFilterOpen={setFilterOpen}
@@ -169,79 +166,12 @@ export default function DiscordTable() {
                       key={row.id}
                       selected={isItemSelected}
                     >
-                      <td className={classes.tdContent} colspan={4}>
-                        <Grid container>
-                          <Grid xs={4} item>
-                            <Grid className={classes.gridAvatar} container>
-                              <Grid xs={12} item>
-                                <MessageChip
-                                  className={classes.messageChip}
-                                  username={row.username}
-                                  avatar={`https://cdn.discordapp.com/avatars/${row.author.id}/${row.author.avatar}.png`}
-                                  content={row.username}
-                                />
-                              </Grid>
-                              <Grid px={1} item xs={12}>
-                                <Typography
-                                  className={classes.typography}
-                                  variant="caption"
-                                >
-                                  {new Date(
-                                    Date.parse(row.timestamp)
-                                  ).toLocaleString("en-US")}
-                                </Typography>
-                              </Grid>
-                              {foundThread && (
-                                <Grid px={1} item xs={12}>
-                                  <Tooltip
-                                    title={`Thread ID: ${foundThread.id}${
-                                      foundThread.archived
-                                        ? " (Archived)"
-                                        : " (Active)"
-                                    }`}
-                                  >
-                                    <Typography
-                                      variant="caption"
-                                      className={
-                                        foundThread.archived
-                                          ? classes.threadTextArchived
-                                          : classes.threadText
-                                      }
-                                    >
-                                      {foundThread.name?.slice(0, 20)}
-                                    </Typography>
-                                  </Tooltip>
-                                </Grid>
-                              )}
-                            </Grid>
-                          </Grid>
-                          <Grid
-                            className={classes.gridMessage}
-                            item
-                            xs={8}
-                            px={1}
-                          >
-                            <Typography variant="caption">
-                              {row.content}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </td>
-                      <td colspan={1} className={classes.tdAttachment}>
-                        <Tooltip title="Attachments">
-                          <IconButton
-                            disabled={row.attachments.length === 0}
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              await setAttachmentMessage(row);
-                              setAttachmentModalOpen(true);
-                            }}
-                            color="primary"
-                          >
-                            <AttachmentIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </td>
+                      <DiscordTableMessage
+                        row={row}
+                        foundThread={foundThread}
+                        openAttachmentModal={() => setAttachmentModalOpen(true)}
+                        openEmbedModal={() => setEmbedModalOpen(true)}
+                      />
                     </TableRow>
                   );
                 })}

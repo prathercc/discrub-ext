@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useReducer } from "react";
 import {
-  getChannels as getChannelsAction,
-  setChannel as setChannelAction,
-  resetChannel as resetChannelAction,
-  setPreFilterUserId as setPreFilterUserIdAction,
-  setSelectedExportChannels as setSelectedExportChannelsAction,
-} from "./ChannelContextActions";
+  GET_CHANNELS,
+  GET_CHANNELS_COMPLETE,
+  SET_CHANNEL,
+  RESET_CHANNEL_COMPLETE,
+  SET_PREFILTER_USERID,
+  SET_SELECTED_EXPORT_CHANNELS,
+} from "./ChannelContextConstants";
 import { ChannelReducer } from "./ChannelReducer";
 import { UserContext } from "../user/UserContext";
+import { fetchChannels } from "../../discordService";
 
 export const ChannelContext = createContext();
 
@@ -38,23 +40,36 @@ const ChannelContextProvider = (props) => {
   );
 
   const getChannels = async (selectedGuildId) => {
-    if (token) return await getChannelsAction(token, selectedGuildId, dispatch);
+    if (token) {
+      dispatch({ type: GET_CHANNELS });
+      const data = await fetchChannels(token, selectedGuildId);
+      return dispatch({
+        type: GET_CHANNELS_COMPLETE,
+        payload: [...data],
+      });
+    }
   };
 
   const setChannel = async (id) => {
-    await setChannelAction(id, { name: username, id: userId }, dispatch);
+    return dispatch({
+      type: SET_CHANNEL,
+      payload: { id, user: { name: username, id: userId } },
+    });
   };
 
   const resetChannel = async () => {
-    await resetChannelAction(dispatch);
+    return dispatch({ type: RESET_CHANNEL_COMPLETE });
   };
 
   const setPreFilterUserId = async (userId) => {
-    await setPreFilterUserIdAction(userId, dispatch);
+    return dispatch({ type: SET_PREFILTER_USERID, payload: { userId } });
   };
 
   const setSelectedExportChannels = async (selectedExportChannels) => {
-    await setSelectedExportChannelsAction(selectedExportChannels, dispatch);
+    return dispatch({
+      type: SET_SELECTED_EXPORT_CHANNELS,
+      payload: { selectedExportChannels },
+    });
   };
 
   return (

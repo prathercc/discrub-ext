@@ -67,12 +67,6 @@ const ExportButtonGroupStyles = makeStyles(() => ({
   },
   avatarMain: {
     position: "absolute !important",
-    zIndex: 2,
-  },
-  avatarFallback: {
-    position: "absolute !important",
-    zIndex: 1,
-    color: "#fff",
   },
 }));
 

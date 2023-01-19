@@ -82,17 +82,16 @@ export default class ExportUtils {
     link.click();
     this.callback();
   };
-  downloadPDF = useReactToPrint({
-    content: () => this.contentRef.current,
-    onAfterPrint: () => this.callback(),
-    removeAfterPrint: true,
-  });
+
   downloadHTML = useReactToPrint({
     content: () => this.contentRef.current,
     print: (iframe) => {
-      iframe.contentWindow.document.lastElementChild.getElementsByTagName(
-        "body"
-      )[0].margin = 0;
+      const bodyElementStyle =
+        iframe.contentWindow.document.lastElementChild.getElementsByTagName(
+          "body"
+        )[0].style;
+      bodyElementStyle.margin = "3px";
+      bodyElementStyle.backgroundColor = "#36393f";
       const html = iframe.contentWindow.document.lastElementChild.outerHTML;
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
