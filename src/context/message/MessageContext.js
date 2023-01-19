@@ -349,9 +349,44 @@ const _filterMessages = async (filters, messages, dispatch) => {
           ) {
             criteriaMet = false;
           }
+        } else if (param.filterName === "content") {
+          const messageContent = x[param.filterName].toLowerCase();
+          const filterValue = param.filterValue.toLowerCase();
+          const embedsContainFilter = () => {
+            if (x.embeds) {
+              return x.embeds.some((embed) => {
+                const {
+                  author,
+                  description,
+                  fields,
+                  footer,
+                  title,
+                  type,
+                  url,
+                } = embed || {};
+                return (
+                  type === "rich" &&
+                  (author?.name?.toLowerCase()?.includes(filterValue) ||
+                    author?.url?.toLowerCase()?.includes(filterValue) ||
+                    description?.toLowerCase()?.includes(filterValue) ||
+                    footer?.text?.toLowerCase()?.includes(filterValue) ||
+                    title?.toLowerCase()?.includes(filterValue) ||
+                    url?.toLowerCase()?.includes(filterValue) ||
+                    fields?.some(
+                      (field) =>
+                        field?.name?.toLowerCase()?.includes(filterValue) ||
+                        field?.value?.toLowerCase()?.includes(filterValue)
+                    ))
+                );
+              });
+            }
+          };
+          if (!messageContent.includes(filterValue) && !embedsContainFilter()) {
+            criteriaMet = false;
+          }
         } else {
-          let rowValue = x[param.filterName].toLowerCase();
-          let filterValue = param.filterValue.toLowerCase();
+          const rowValue = x[param.filterName].toLowerCase();
+          const filterValue = param.filterValue.toLowerCase();
           if (!rowValue.includes(filterValue)) {
             criteriaMet = false;
           }
@@ -359,14 +394,14 @@ const _filterMessages = async (filters, messages, dispatch) => {
         return criteriaMet;
       } else if (param.filterType === "date") {
         if (param.filterName === "startTime") {
-          let startTime = Date.parse(param.filterValue);
-          let rowTime = Date.parse(x.timestamp);
+          const startTime = Date.parse(param.filterValue);
+          const rowTime = Date.parse(x.timestamp);
           if (rowTime < startTime) {
             criteriaMet = false;
           }
         } else if (param.filterName === "endTime") {
-          let endTime = Date.parse(param.filterValue);
-          let rowTime = Date.parse(x.timestamp);
+          const endTime = Date.parse(param.filterValue);
+          const rowTime = Date.parse(x.timestamp);
           if (rowTime > endTime) {
             criteriaMet = false;
           }
