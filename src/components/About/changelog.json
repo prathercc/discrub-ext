@@ -1,7 +1,11 @@
 [
   {
     "version": "1.8.2",
-    "changes": ["Reset pre-filter user if Channel selection is reset."]
+    "changes": [
+      "Reset pre-filter user if Channel selection is reset.",
+      "Add ability to view message embed(s).",
+      "Include message embed(s) when filtering by message content."
+    ]
   },
   {
     "version": "1.8.1",
