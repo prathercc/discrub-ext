@@ -26,6 +26,7 @@ import {
   UPDATE_FETCHED_MESSAGES,
   UPDATE_FILTERS_COMPLETE,
   UPDATE_MESSAGE_SUCCESS,
+  SET_EMBED_MESSAGE_COMPLETE,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -69,7 +70,8 @@ const MessageContextProvider = (props) => {
       filters: [], // Array of object filters
       fetchedMessageLength: 0, // Current length of fetched messages, used for debugging message fetch progress
       isLoading: null,
-      attachmentMessage: null, // The selected message for deleting attachments
+      attachmentMessage: null, // The selected message for deleting attachments.
+      embedMessage: null, // The selected message for viewing embeds.
       threads: [], // The list of threads for a given messages arr
     })
   );
@@ -129,6 +131,13 @@ const MessageContextProvider = (props) => {
         )}
       </>
     );
+  };
+
+  const setEmbedMessage = async (message) => {
+    return dispatch({
+      type: SET_EMBED_MESSAGE_COMPLETE,
+      payload: message,
+    });
   };
 
   const setAttachmentMessage = async (message) => {
@@ -313,6 +322,7 @@ const MessageContextProvider = (props) => {
         setAttachmentMessage,
         getExportTitle,
         resetFilters,
+        setEmbedMessage,
       }}
     >
       {props.children}
