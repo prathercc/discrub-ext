@@ -95,7 +95,7 @@ function InjectedDialog() {
       )}
 
       <Box className={classes.box}>
-        <Typography variant="h6">1.8.2</Typography>
+        <Typography variant="h6">1.8.3</Typography>
       </Box>
       <CloseWindowButton />
     </Box>
