@@ -24,6 +24,18 @@ const DiscordDateTimePicker = ({ label, onChange }) => {
           disableUnderline: true,
           startAdornment: <InputAdornment position="start"></InputAdornment>,
         }}
+        DialogProps={{
+          sx: {
+            "& .MuiButton-textSizeMedium": {
+              color: "rgb(210, 213, 247) !important",
+              background: "rgb(88, 101, 242)",
+              "&:hover": {
+                background: "rgb(88, 101, 242)",
+              },
+            },
+            "& .MuiTypography-caption": { color: "rgb(210, 213, 247)" },
+          },
+        }}
       />
     </LocalizationProvider>
   );
