@@ -52,9 +52,6 @@ const DiscordTableStyles = makeStyles(() => ({
   typography: {
     userSelect: "none",
   },
-  toolbar: {
-    minHeight: "116px",
-  },
   threadText: {
     opacity: 0.85,
     borderBottom: "1px dotted green",

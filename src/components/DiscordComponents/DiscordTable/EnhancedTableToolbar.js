@@ -12,7 +12,6 @@ import { MessageContext } from "../../../context/message/MessageContext";
 import ExportButtonGroup from "../../Export/ExportButtonGroup";
 import FilterComponent from "./FilterComponent";
 import DiscordTableStyles from "./DiscordTable.styles";
-import classnames from "classnames";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -39,10 +38,7 @@ const EnhancedTableToolbar = ({
         }),
       }}
     >
-      <Stack
-        className={classnames(classes.stack, classes.toolbar)}
-        direction="column"
-      >
+      <Stack className={classes.stack} direction="column">
         <Stack
           className={classes.stack}
           alignItems="baseline"
