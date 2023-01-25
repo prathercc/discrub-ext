@@ -81,7 +81,7 @@ const ExportButtonGroup = () => {
       ) : (
         <ButtonGroup variant="contained" ref={anchorRef}>
           <Button onClick={() => handleDownload(options[selectedIndex])}>
-            {options[selectedIndex]}
+            Export to {options[selectedIndex]}
           </Button>
           <Button
             startIcon={<ArrowDropDownIcon />}
