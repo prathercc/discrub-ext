@@ -34,6 +34,10 @@ const DiscordDateTimePicker = ({ label, onChange }) => {
               },
             },
             "& .MuiTypography-caption": { color: "rgb(210, 213, 247)" },
+            "& .MuiPickersDay-today": {
+              border: "1px solid rgb(210, 213, 247) !important",
+            },
+            "& .MuiSvgIcon-root": { color: "rgb(210, 213, 247)" },
           },
         }}
       />
