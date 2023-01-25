@@ -148,6 +148,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          userSelect: "none !important",
+        },
+      },
+    },
   },
 });
 

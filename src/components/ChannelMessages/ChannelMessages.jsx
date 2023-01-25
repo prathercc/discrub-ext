@@ -105,7 +105,7 @@ function ChannelMessages({ closeAnnouncement }) {
                 >
                   {guilds.map((guild) => {
                     return (
-                      <MenuItem key={guild.id} value={guild.id}>
+                      <MenuItem dense key={guild.id} value={guild.id}>
                         {guild.name}
                       </MenuItem>
                     );
@@ -127,12 +127,12 @@ function ChannelMessages({ closeAnnouncement }) {
                   select
                   label="Channels"
                 >
-                  <MenuItem value={null} key={-1}>
+                  <MenuItem dense value={null} key={-1}>
                     <strong>Reset Selection</strong>
                   </MenuItem>
                   {channels.map((channel) => {
                     return (
-                      <MenuItem key={channel.id} value={channel.id}>
+                      <MenuItem dense key={channel.id} value={channel.id}>
                         {channel.name}
                       </MenuItem>
                     );
@@ -155,12 +155,12 @@ function ChannelMessages({ closeAnnouncement }) {
                     select
                     label="Filter By Username"
                   >
-                    <MenuItem value={null} key={-1}>
+                    <MenuItem dense value={null} key={-1}>
                       <strong>Reset Selection</strong>
                     </MenuItem>
                     {preFilterUserIds.map((user) => {
                       return (
-                        <MenuItem key={user.id} value={user.id}>
+                        <MenuItem dense key={user.id} value={user.id}>
                           {user.name}
                         </MenuItem>
                       );

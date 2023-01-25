@@ -90,7 +90,11 @@ function DirectMessages() {
                 >
                   {dms.map((directMessage) => {
                     return (
-                      <MenuItem key={directMessage.id} value={directMessage.id}>
+                      <MenuItem
+                        dense
+                        key={directMessage.id}
+                        value={directMessage.id}
+                      >
                         {directMessage.name}
                       </MenuItem>
                     );
@@ -112,12 +116,12 @@ function DirectMessages() {
                     select
                     label="Filter By Username"
                   >
-                    <MenuItem value={null} key={-1}>
+                    <MenuItem dense value={null} key={-1}>
                       <strong>Reset Selection</strong>
                     </MenuItem>
                     {preFilterUserIds.map((user) => {
                       return (
-                        <MenuItem key={user.id} value={user.id}>
+                        <MenuItem dense key={user.id} value={user.id}>
                           {user.name}
                         </MenuItem>
                       );

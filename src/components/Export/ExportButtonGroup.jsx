@@ -111,6 +111,7 @@ const ExportButtonGroup = () => {
                 <MenuList>
                   {options.map((option, index) => (
                     <MenuItem
+                      dense
                       key={option}
                       selected={index === selectedIndex}
                       onClick={(event) => handleMenuItemClick(event, index)}
