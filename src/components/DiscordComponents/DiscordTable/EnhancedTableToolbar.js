@@ -57,7 +57,11 @@ const EnhancedTableToolbar = ({
             justifyContent="space-between"
             zIndex={2} // This ensures that the Export options show over FilterComponent
           >
-            <Tooltip arrow title="Filter list">
+            <Tooltip
+              arrow
+              placement="right"
+              title={`${filterOpen ? "Close" : "Open"} message filters`}
+            >
               <IconButton onClick={() => setFilterOpen(!filterOpen)}>
                 <FilterListIcon className={classes.icon} />
               </IconButton>
