@@ -57,7 +57,7 @@ const EnhancedTableToolbar = ({
             justifyContent="space-between"
             zIndex={2} // This ensures that the Export options show over FilterComponent
           >
-            <Tooltip title="Filter list">
+            <Tooltip arrow title="Filter list">
               <IconButton onClick={() => setFilterOpen(!filterOpen)}>
                 <FilterListIcon className={classes.icon} />
               </IconButton>
@@ -79,12 +79,12 @@ const EnhancedTableToolbar = ({
               {selectedMessages.length} selected
             </Typography>
             <Stack justifyContent="flex-end" direction="row">
-              <Tooltip title="Delete">
+              <Tooltip arrow title="Delete">
                 <IconButton onClick={() => setDeleteModalOpen(true)}>
                   <DeleteIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Edit">
+              <Tooltip arrow title="Edit">
                 <IconButton onClick={() => setEditModalOpen(true)}>
                   <EditIcon className={classes.icon} />
                 </IconButton>

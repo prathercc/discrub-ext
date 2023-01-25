@@ -93,7 +93,7 @@ const AttachmentModal = ({ open, handleClose }) => {
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <Tooltip title="Open">
+                    <Tooltip arrow title="Open">
                       <Avatar
                         className={classes.avatar}
                         src={x.url}
@@ -107,7 +107,7 @@ const AttachmentModal = ({ open, handleClose }) => {
                         : x.filename}
                     </Typography>
                   </Stack>
-                  <Tooltip title="Delete">
+                  <Tooltip arrow title="Delete">
                     <IconButton
                       disabled={deleting}
                       onClick={() => handleDeleteAttachment(x)}

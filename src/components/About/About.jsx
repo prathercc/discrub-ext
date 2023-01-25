@@ -152,6 +152,7 @@ function About() {
                 <Stack alignItems="center">
                   <Typography variant="caption">Bitcoin</Typography>
                   <Tooltip
+                    arrow
                     leaveDelay={3000}
                     title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm"
                   >
@@ -177,6 +178,7 @@ function About() {
                 <Stack alignItems="center">
                   <Typography variant="caption">Ethereum</Typography>
                   <Tooltip
+                    arrow
                     leaveDelay={3000}
                     title="0x01aC5D8C7B814eC70Ff5E402297f5b78Ef81137C"
                   >

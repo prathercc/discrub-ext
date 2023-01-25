@@ -8,7 +8,7 @@ const MessageChip = (props) => {
     <Chip
       {...props}
       avatar={
-        <Tooltip title={props.username}>
+        <Tooltip arrow title={props.username}>
           <Avatar alt={props.username} src={props.avatar} />
         </Tooltip>
       }

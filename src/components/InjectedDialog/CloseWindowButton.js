@@ -10,7 +10,7 @@ const CloseWindowButton = () => {
   const classes = CloseWindowButtonStyles();
   return (
     <Box className={classes.boxContainer}>
-      <Tooltip title="Close">
+      <Tooltip arrow title="Close">
         <IconButton
           onClick={() => sendChromeMessage("CLOSE_INJECTED_DIALOG")}
           color="primary"

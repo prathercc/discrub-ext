@@ -140,6 +140,7 @@ function ChannelMessages({ closeAnnouncement }) {
                 </TextField>
 
                 <Tooltip
+                  arrow
                   title="Filtering by username is optional"
                   placement="top"
                 >

@@ -42,6 +42,7 @@ export default function DiscordTableMessage({
               {foundThread && (
                 <Grid px={1} item xs={12}>
                   <Tooltip
+                    arrow
                     title={`Thread ID: ${foundThread.id}${
                       foundThread.archived ? " (Archived)" : " (Active)"
                     }`}
@@ -69,6 +70,7 @@ export default function DiscordTableMessage({
       <td colspan={1} className={classes.tdAttachment}>
         <Stack direction="column" justifyContent="center" alignItems="center">
           <Tooltip
+            arrow
             placement={hasValidEmbed ? "top" : "bottom"}
             title="Attachments"
           >
@@ -85,7 +87,7 @@ export default function DiscordTableMessage({
             </IconButton>
           </Tooltip>
           {hasValidEmbed && (
-            <Tooltip title="Embeds">
+            <Tooltip arrow title="Embeds">
               <IconButton
                 onClick={async (e) => {
                   e.stopPropagation();

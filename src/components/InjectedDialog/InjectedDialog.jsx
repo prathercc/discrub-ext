@@ -70,7 +70,7 @@ function InjectedDialog() {
         <Box className={classes.alertBox}>
           {!alertOpen && (
             <Stack direction="row" justifyContent="center" alignItems="center">
-              <Tooltip title="Show Announcement">
+              <Tooltip arrow title="Show Announcement">
                 <IconButton
                   onClick={() => setAlertOpen(true)}
                   color="secondary"

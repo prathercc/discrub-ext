@@ -97,6 +97,7 @@ function DirectMessages() {
                   })}
                 </TextField>
                 <Tooltip
+                  arrow
                   title="Filtering by username is optional"
                   placement="top"
                 >

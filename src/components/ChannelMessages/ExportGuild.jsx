@@ -247,6 +247,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   alignItems="flex-start"
                 >
                   <Tooltip
+                    arrow
                     title={
                       selectedExportChannels.length
                         ? "Deselect All"
