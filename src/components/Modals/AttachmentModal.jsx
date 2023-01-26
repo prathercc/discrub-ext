@@ -95,6 +95,7 @@ const AttachmentModal = ({ open, handleClose }) => {
                   >
                     <Tooltip arrow title="Open">
                       <Avatar
+                        variant="square"
                         className={classes.avatar}
                         src={x.url}
                         alt={x.filename}

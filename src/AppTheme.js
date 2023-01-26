@@ -164,6 +164,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiListItemText: {
+      styleOverrides: {
+        primary: {
+          userSelect: "none !important",
+        },
+      },
+    },
   },
 });
 
