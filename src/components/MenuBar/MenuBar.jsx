@@ -4,7 +4,7 @@ import Tab from "@mui/material/Tab";
 import InfoIcon from "@mui/icons-material/Info";
 import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import MenuBarStyles from "./MenuBar.styles";
 // import SickIcon from "@mui/icons-material/Sick";
 

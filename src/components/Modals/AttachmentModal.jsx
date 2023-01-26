@@ -12,8 +12,8 @@ import {
   DialogContent,
   Avatar,
   IconButton,
-  Tooltip,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { MessageContext } from "../../context/message/MessageContext";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ModalStyles from "./Modal.styles";

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "../DiscordTooltip/DiscordToolTip";
 import AttachmentIcon from "@mui/icons-material/Attachment";
 import { MessageContext } from "../../../context/message/MessageContext";
 import DiscordTableStyles from "./DiscordTable.styles";

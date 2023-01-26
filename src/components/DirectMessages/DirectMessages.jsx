@@ -10,8 +10,8 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Tooltip,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";

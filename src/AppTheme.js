@@ -142,6 +142,15 @@ const theme = createTheme({
           background: "#18191c",
           fontWeight: 600,
           fontSize: "0.8rem",
+          "& .MuiTypography-caption": {
+            color: "#919498",
+            lineHeight: 1.1,
+            fontWeight: 550,
+          },
+          "& .MuiBox-root": {
+            display: "flex",
+            flexDirection: "column",
+          },
         },
         arrow: {
           color: "#18191c",

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
 import GitHubButton from "react-github-btn";
 import {
-  Tooltip,
   Typography,
   Stack,
   Accordion,
@@ -15,6 +14,7 @@ import {
   DialogContentText,
   Button,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import AboutStyles from "./About.styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";

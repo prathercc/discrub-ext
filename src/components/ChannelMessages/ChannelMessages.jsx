@@ -10,8 +10,8 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Tooltip,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
@@ -142,7 +142,8 @@ function ChannelMessages({ closeAnnouncement }) {
                 <Tooltip
                   arrow
                   title="Filtering by username is optional"
-                  placement="top"
+                  description="Due to API limitations, Channel Messages can only be pre-filtered by your username"
+                  placement="left"
                 >
                   <TextField
                     className={classes.purgeHidden}
