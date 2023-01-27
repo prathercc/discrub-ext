@@ -7,6 +7,13 @@ const DiscordTooltip = (props) => {
   const { title, description } = props;
   return (
     <Tooltip
+      TransitionProps={{
+        timeout: {
+          appear: 1,
+          enter: 1,
+          exit: 500,
+        },
+      }}
       {...props}
       title={
         <Box>
