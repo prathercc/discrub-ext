@@ -1,13 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Stack, Typography } from "@mui/material";
 import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
 import AttachmentMock from "./Attachment/AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
+import { MessageContext } from "../../context/message/MessageContext";
 
-const MessageMock = ({ row, index, threads }) => {
+const MessageMock = ({ row, index, hideAttachments = false }) => {
+  const { state: messageState } = useContext(MessageContext);
+  const { threads } = messageState;
   const classes = ExportButtonGroupStyles();
   const messageDate = new Date(Date.parse(row.timestamp));
-  const foundThread = threads.find(
+  const foundThread = threads?.find(
     (thread) => thread.id === row.id || thread.id === row.channel_id
   );
   return (
@@ -57,17 +60,19 @@ const MessageMock = ({ row, index, threads }) => {
         >
           {row.content}
         </Typography>
-        <Stack
-          mt="5px"
-          direction="row"
-          justifyContent="flex-start"
-          alignItems="center"
-          spacing={1}
-        >
-          {row.attachments.map((attachment, index) => (
-            <AttachmentMock attachment={attachment} />
-          ))}
-        </Stack>
+        {!hideAttachments && (
+          <Stack
+            mt="5px"
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center"
+            spacing={1}
+          >
+            {row.attachments.map((attachment, index) => (
+              <AttachmentMock attachment={attachment} />
+            ))}
+          </Stack>
+        )}
       </Stack>
     </Stack>
   );

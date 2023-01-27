@@ -15,9 +15,9 @@ import {
   Collapse,
   IconButton,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { DmContext } from "../../context/dm/DmContext";
 import InjectedDialogStyles from "./InjectedDialog.styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -70,7 +70,7 @@ function InjectedDialog() {
         <Box className={classes.alertBox}>
           {!alertOpen && (
             <Stack direction="row" justifyContent="center" alignItems="center">
-              <Tooltip title="Show Announcement">
+              <Tooltip arrow title="Show Announcement">
                 <IconButton
                   onClick={() => setAlertOpen(true)}
                   color="secondary"
@@ -95,7 +95,7 @@ function InjectedDialog() {
       )}
 
       <Box className={classes.box}>
-        <Typography variant="h6">1.8.3</Typography>
+        <Typography variant="h6">1.8.4</Typography>
       </Box>
       <CloseWindowButton />
     </Box>

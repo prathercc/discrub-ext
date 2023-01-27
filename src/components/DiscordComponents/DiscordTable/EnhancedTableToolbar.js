@@ -3,7 +3,7 @@ import { alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "../DiscordTooltip/DiscordToolTip";
 import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -12,7 +12,6 @@ import { MessageContext } from "../../../context/message/MessageContext";
 import ExportButtonGroup from "../../Export/ExportButtonGroup";
 import FilterComponent from "./FilterComponent";
 import DiscordTableStyles from "./DiscordTable.styles";
-import classnames from "classnames";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -39,10 +38,7 @@ const EnhancedTableToolbar = ({
         }),
       }}
     >
-      <Stack
-        className={classnames(classes.stack, classes.toolbar)}
-        direction="column"
-      >
+      <Stack className={classes.stack} direction="column">
         <Stack
           className={classes.stack}
           alignItems="baseline"
@@ -57,7 +53,11 @@ const EnhancedTableToolbar = ({
             justifyContent="space-between"
             zIndex={2} // This ensures that the Export options show over FilterComponent
           >
-            <Tooltip title="Filter list">
+            <Tooltip
+              arrow
+              placement="right"
+              title={`${filterOpen ? "Close" : "Open"} message filters`}
+            >
               <IconButton onClick={() => setFilterOpen(!filterOpen)}>
                 <FilterListIcon className={classes.icon} />
               </IconButton>
@@ -79,12 +79,12 @@ const EnhancedTableToolbar = ({
               {selectedMessages.length} selected
             </Typography>
             <Stack justifyContent="flex-end" direction="row">
-              <Tooltip title="Delete">
+              <Tooltip arrow title="Delete">
                 <IconButton onClick={() => setDeleteModalOpen(true)}>
                   <DeleteIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Edit">
+              <Tooltip arrow title="Edit">
                 <IconButton onClick={() => setEditModalOpen(true)}>
                   <EditIcon className={classes.icon} />
                 </IconButton>

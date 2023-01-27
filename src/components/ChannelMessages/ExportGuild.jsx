@@ -3,7 +3,6 @@ import {
   Button,
   Menu,
   MenuItem,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -21,6 +20,7 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
 import DeselectIcon from "@mui/icons-material/Deselect";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -247,6 +247,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   alignItems="flex-start"
                 >
                   <Tooltip
+                    arrow
                     title={
                       selectedExportChannels.length
                         ? "Deselect All"

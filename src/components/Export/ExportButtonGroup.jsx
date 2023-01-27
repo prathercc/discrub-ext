@@ -81,7 +81,7 @@ const ExportButtonGroup = () => {
       ) : (
         <ButtonGroup variant="contained" ref={anchorRef}>
           <Button onClick={() => handleDownload(options[selectedIndex])}>
-            {options[selectedIndex]}
+            Export to {options[selectedIndex]}
           </Button>
           <Button
             startIcon={<ArrowDropDownIcon />}
@@ -111,6 +111,7 @@ const ExportButtonGroup = () => {
                 <MenuList>
                   {options.map((option, index) => (
                     <MenuItem
+                      dense
                       key={option}
                       selected={index === selectedIndex}
                       onClick={(event) => handleMenuItemClick(event, index)}

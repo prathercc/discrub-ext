@@ -12,8 +12,8 @@ import {
   DialogContent,
   Avatar,
   IconButton,
-  Tooltip,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { MessageContext } from "../../context/message/MessageContext";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ModalStyles from "./Modal.styles";
@@ -93,8 +93,9 @@ const AttachmentModal = ({ open, handleClose }) => {
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <Tooltip title="Open">
+                    <Tooltip arrow title="Open">
                       <Avatar
+                        variant="square"
                         className={classes.avatar}
                         src={x.url}
                         alt={x.filename}
@@ -107,7 +108,7 @@ const AttachmentModal = ({ open, handleClose }) => {
                         : x.filename}
                     </Typography>
                   </Stack>
-                  <Tooltip title="Delete">
+                  <Tooltip arrow title="Delete">
                     <IconButton
                       disabled={deleting}
                       onClick={() => handleDeleteAttachment(x)}

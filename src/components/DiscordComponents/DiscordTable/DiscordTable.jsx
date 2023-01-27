@@ -46,7 +46,7 @@ export default function DiscordTable() {
     },
   ];
   const { state: messageState, setSelected } = useContext(MessageContext);
-  const { filteredMessages, messages, filters, selectedMessages, threads } =
+  const { filteredMessages, messages, filters, selectedMessages } =
     messageState;
   const displayRows =
     filterOpen && filters.length ? filteredMessages : messages;
@@ -151,10 +151,6 @@ export default function DiscordTable() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   const isItemSelected = isSelected(row.id);
-                  const foundThread = threads.find(
-                    (thread) =>
-                      thread.id === row.id || thread.id === row.channel_id
-                  );
 
                   return (
                     <TableRow
@@ -168,7 +164,6 @@ export default function DiscordTable() {
                     >
                       <DiscordTableMessage
                         row={row}
-                        foundThread={foundThread}
                         openAttachmentModal={() => setAttachmentModalOpen(true)}
                         openEmbedModal={() => setEmbedModalOpen(true)}
                       />

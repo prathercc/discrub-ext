@@ -10,8 +10,8 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Tooltip,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
@@ -90,13 +90,18 @@ function DirectMessages() {
                 >
                   {dms.map((directMessage) => {
                     return (
-                      <MenuItem key={directMessage.id} value={directMessage.id}>
+                      <MenuItem
+                        dense
+                        key={directMessage.id}
+                        value={directMessage.id}
+                      >
                         {directMessage.name}
                       </MenuItem>
                     );
                   })}
                 </TextField>
                 <Tooltip
+                  arrow
                   title="Filtering by username is optional"
                   placement="top"
                 >
@@ -111,12 +116,12 @@ function DirectMessages() {
                     select
                     label="Filter By Username"
                   >
-                    <MenuItem value={null} key={-1}>
+                    <MenuItem dense value={null} key={-1}>
                       <strong>Reset Selection</strong>
                     </MenuItem>
                     {preFilterUserIds.map((user) => {
                       return (
-                        <MenuItem key={user.id} value={user.id}>
+                        <MenuItem dense key={user.id} value={user.id}>
                           {user.name}
                         </MenuItem>
                       );

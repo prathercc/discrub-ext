@@ -86,12 +86,12 @@ const FilterComponent = () => {
             select
             label="Threads"
           >
-            <MenuItem value={null} key={-1}>
+            <MenuItem dense value={null} key={-1}>
               <strong>Reset Selection</strong>
             </MenuItem>
             {threads.map((thread) => {
               return (
-                <MenuItem value={thread.id} key={thread.id}>
+                <MenuItem dense value={thread.id} key={thread.id}>
                   {thread.name}
                 </MenuItem>
               );
