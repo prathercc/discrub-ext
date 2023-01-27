@@ -13,6 +13,7 @@ const AboutStyles = makeStyles(() => ({
   },
   accordianTitle: {
     cursor: "pointer !important",
+    userSelect: "none !important",
   },
   cryptoImg: {
     width: "130px",

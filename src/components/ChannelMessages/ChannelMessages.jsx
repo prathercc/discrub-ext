@@ -10,8 +10,8 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Tooltip,
 } from "@mui/material";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
@@ -105,7 +105,7 @@ function ChannelMessages({ closeAnnouncement }) {
                 >
                   {guilds.map((guild) => {
                     return (
-                      <MenuItem key={guild.id} value={guild.id}>
+                      <MenuItem dense key={guild.id} value={guild.id}>
                         {guild.name}
                       </MenuItem>
                     );
@@ -127,12 +127,12 @@ function ChannelMessages({ closeAnnouncement }) {
                   select
                   label="Channels"
                 >
-                  <MenuItem value={null} key={-1}>
+                  <MenuItem dense value={null} key={-1}>
                     <strong>Reset Selection</strong>
                   </MenuItem>
                   {channels.map((channel) => {
                     return (
-                      <MenuItem key={channel.id} value={channel.id}>
+                      <MenuItem dense key={channel.id} value={channel.id}>
                         {channel.name}
                       </MenuItem>
                     );
@@ -140,8 +140,10 @@ function ChannelMessages({ closeAnnouncement }) {
                 </TextField>
 
                 <Tooltip
+                  arrow
                   title="Filtering by username is optional"
-                  placement="top"
+                  description="Due to API limitations, Channel Messages can only be pre-filtered by your username"
+                  placement="left"
                 >
                   <TextField
                     className={classes.purgeHidden}
@@ -154,12 +156,12 @@ function ChannelMessages({ closeAnnouncement }) {
                     select
                     label="Filter By Username"
                   >
-                    <MenuItem value={null} key={-1}>
+                    <MenuItem dense value={null} key={-1}>
                       <strong>Reset Selection</strong>
                     </MenuItem>
                     {preFilterUserIds.map((user) => {
                       return (
-                        <MenuItem key={user.id} value={user.id}>
+                        <MenuItem dense key={user.id} value={user.id}>
                           {user.name}
                         </MenuItem>
                       );

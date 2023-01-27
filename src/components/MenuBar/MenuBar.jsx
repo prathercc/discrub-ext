@@ -4,7 +4,7 @@ import Tab from "@mui/material/Tab";
 import InfoIcon from "@mui/icons-material/Info";
 import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
-import Tooltip from "@mui/material/Tooltip";
+import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import MenuBarStyles from "./MenuBar.styles";
 // import SickIcon from "@mui/icons-material/Sick";
 
@@ -18,16 +18,16 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   return (
     <>
       <Tabs className={classes.tabs} value={menuIndex} onChange={handleChange}>
-        <Tooltip title="Channel Messages">
+        <Tooltip arrow title="Channel Messages">
           <Tab icon={<ChatIcon />} />
         </Tooltip>
-        <Tooltip title="Direct Messages">
+        <Tooltip arrow title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
         {/* <Tooltip title="Nuke Account">
           <Tab disabled icon={<SickIcon />} />
         </Tooltip> */}
-        <Tooltip title="General Information">
+        <Tooltip arrow title="General Information">
           <Tab icon={<InfoIcon />} />
         </Tooltip>
       </Tabs>

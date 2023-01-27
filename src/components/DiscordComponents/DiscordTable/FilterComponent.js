@@ -6,6 +6,7 @@ import { MessageContext } from "../../../context/message/MessageContext";
 import FilterComponentStyles from "./FilterComponent.styles";
 import { MenuItem } from "@mui/material";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
+import { debounce } from "debounce";
 
 const FilterComponent = () => {
   const classes = FilterComponentStyles();
@@ -13,6 +14,11 @@ const FilterComponent = () => {
   const { state: channelState } = useContext(ChannelContext);
   const { threads } = messageState;
   const { selectedChannel } = channelState;
+
+  const handleFilterUpdate = debounce(
+    (name, e, type) => updateFilters(name, e, type),
+    600
+  );
 
   return (
     <Stack zIndex={1} className={classes.stack} spacing={2}>
@@ -23,11 +29,11 @@ const FilterComponent = () => {
         spacing={2}
       >
         <DiscordDateTimePicker
-          onChange={(e) => updateFilters("startTime", e, "date")}
+          onChange={(e) => handleFilterUpdate("startTime", e, "date")}
           label="Start Time"
         />
         <DiscordDateTimePicker
-          onChange={(e) => updateFilters("endTime", e, "date")}
+          onChange={(e) => handleFilterUpdate("endTime", e, "date")}
           label="End Time"
         />
       </Stack>
@@ -42,13 +48,17 @@ const FilterComponent = () => {
           fullWidth
           variant="filled"
           label="Username"
-          onChange={(e) => updateFilters("username", e.target.value, "text")}
+          onChange={(e) =>
+            handleFilterUpdate("username", e.target.value, "text")
+          }
         />
         <TextField
           size="small"
           fullWidth
           variant="filled"
-          onChange={(e) => updateFilters("content", e.target.value, "text")}
+          onChange={(e) =>
+            handleFilterUpdate("content", e.target.value, "text")
+          }
           label="Message"
         />
       </Stack>
@@ -63,7 +73,7 @@ const FilterComponent = () => {
           fullWidth
           variant="filled"
           onChange={(e) =>
-            updateFilters("attachmentName", e.target.value, "text")
+            handleFilterUpdate("attachmentName", e.target.value, "text")
           }
           label="Attachment Name"
         />
@@ -72,16 +82,16 @@ const FilterComponent = () => {
             size="small"
             fullWidth
             variant="filled"
-            onChange={(e) => updateFilters(null, e.target.value, "thread")}
+            onChange={(e) => handleFilterUpdate(null, e.target.value, "thread")}
             select
             label="Threads"
           >
-            <MenuItem value={null} key={-1}>
+            <MenuItem dense value={null} key={-1}>
               <strong>Reset Selection</strong>
             </MenuItem>
             {threads.map((thread) => {
               return (
-                <MenuItem value={thread.id} key={thread.id}>
+                <MenuItem dense value={thread.id} key={thread.id}>
                   {thread.name}
                 </MenuItem>
               );

@@ -28,6 +28,8 @@ const DiscordTableStyles = makeStyles(() => ({
     textAlign: "left",
     verticalAlign: "middle",
     borderBottom: "1px solid rgba(79,84,92,0.48)",
+    paddingTop: "5px",
+    paddingLeft: "5px",
   },
   tdAttachment: {
     textAlign: "center",
@@ -49,9 +51,6 @@ const DiscordTableStyles = makeStyles(() => ({
   },
   typography: {
     userSelect: "none",
-  },
-  toolbar: {
-    minHeight: "116px",
   },
   threadText: {
     opacity: 0.85,

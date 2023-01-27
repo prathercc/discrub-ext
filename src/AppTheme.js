@@ -129,6 +129,48 @@ const theme = createTheme({
         },
       },
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltipArrow: {
+          padding: "7px",
+          background: "18191c",
+          fontWeight: 600,
+          fontSize: "0.8rem",
+        },
+        tooltip: {
+          padding: "7px",
+          background: "#18191c",
+          fontWeight: 600,
+          fontSize: "0.8rem",
+          "& .MuiTypography-caption": {
+            color: "#919498",
+            lineHeight: 1.1,
+            fontWeight: 550,
+          },
+          "& .MuiBox-root": {
+            display: "flex",
+            flexDirection: "column",
+          },
+        },
+        arrow: {
+          color: "#18191c",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          userSelect: "none !important",
+        },
+      },
+    },
+    MuiListItemText: {
+      styleOverrides: {
+        primary: {
+          userSelect: "none !important",
+        },
+      },
+    },
   },
 });
 
