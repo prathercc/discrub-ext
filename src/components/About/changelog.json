@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.8.4",
+    "changes": ["Small graphical adjustments.", "Redesign tooltip component."]
+  },
+  {
     "version": "1.8.3",
     "changes": ["Improve message filter performance."]
   },

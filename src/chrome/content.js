@@ -23,6 +23,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           modal.id = "injected_dialog";
           modal.innerHTML =
             "<style>::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:#f1f1f1;}::-webkit-scrollbar-track{background:#888;}</style>";
+          modal.style.boxShadow = "17px 18px 5px -9px rgba(0,0,0,0.41)";
           modal.style.padding = 0;
           modal.style.border = "none";
           modal.style.backgroundColor = "transparent";
