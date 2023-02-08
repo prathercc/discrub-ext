@@ -21,8 +21,13 @@ const EnhancedTableToolbar = ({
 }) => {
   const classes = DiscordTableStyles();
 
-  const { state: messageState } = useContext(MessageContext);
+  const { state: messageState, resetFilters } = useContext(MessageContext);
   const { selectedMessages } = messageState;
+
+  const handleFilterToggle = () => {
+    if (filterOpen) resetFilters();
+    setFilterOpen(!filterOpen);
+  };
 
   return (
     <Toolbar
@@ -58,7 +63,7 @@ const EnhancedTableToolbar = ({
               placement="right"
               title={`${filterOpen ? "Close" : "Open"} message filters`}
             >
-              <IconButton onClick={() => setFilterOpen(!filterOpen)}>
+              <IconButton onClick={handleFilterToggle}>
                 <FilterListIcon className={classes.icon} />
               </IconButton>
             </Tooltip>
