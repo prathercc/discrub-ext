@@ -16,8 +16,8 @@ import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
-import PurgeGuild from "../ChannelMessages/PurgeGuild";
-import ExportGuild from "../ChannelMessages/ExportGuild";
+import BulkExportButton from "../Buttons/BulkExportButton/BulkExportButton";
+import PurgeButton from "../Buttons/PurgeButton";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -136,14 +136,14 @@ function DirectMessages() {
                 justifyContent="flex-end"
               >
                 <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <ExportGuild
+                  <BulkExportButton
                     dialogOpen={exportDialogOpen}
                     setDialogOpen={setExportDialogOpen}
                     isDm
                   />
                 </span>
                 <span className={exportDialogOpen && classes.purgeHidden}>
-                  <PurgeGuild
+                  <PurgeButton
                     dialogOpen={purgeDialogOpen}
                     setDialogOpen={setPurgeDialogOpen}
                     isDm

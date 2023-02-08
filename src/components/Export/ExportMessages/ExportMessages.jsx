@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import { Box, Stack } from "@mui/material";
-import { MessageContext } from "../../context/message/MessageContext";
-import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
+import { MessageContext } from "../../../context/message/MessageContext";
+import ExportMessagesStyles from "./ExportMessages.styles";
 import MessageMock from "./MessageMock";
 import MessageTitleMock from "./MessageTitleMock";
 
 const ExportMessages = ({ componentRef, exporting }) => {
-  const classes = ExportButtonGroupStyles();
+  const classes = ExportMessagesStyles();
 
   const { state: messageState } = useContext(MessageContext);
   const { messages, filters, filteredMessages, threads } = messageState;

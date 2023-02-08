@@ -95,7 +95,15 @@ function InjectedDialog() {
       )}
 
       <Box className={classes.box}>
-        <Typography variant="h6">1.8.4</Typography>
+        <Stack
+          direction="row"
+          alignContent="center"
+          justifyContent="center"
+          spacing={1}
+        >
+          <img alt="Discrub Logo" className={classes.logo} src="discrub2.png" />
+          <Typography variant="h6">1.8.5</Typography>
+        </Stack>
       </Box>
       <CloseWindowButton />
     </Box>

@@ -9,7 +9,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import EditIcon from "@mui/icons-material/Edit";
 import { MessageContext } from "../../../context/message/MessageContext";
-import ExportButtonGroup from "../../Export/ExportButtonGroup";
+import ExportButtonGroup from "../../Export/ExportButtonGroup/ExportButtonGroup";
 import FilterComponent from "./FilterComponent";
 import DiscordTableStyles from "./DiscordTable.styles";
 

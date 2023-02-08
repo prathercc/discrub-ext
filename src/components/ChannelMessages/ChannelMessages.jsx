@@ -17,8 +17,8 @@ import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
-import PurgeGuild from "./PurgeGuild";
-import ExportGuild from "./ExportGuild";
+import PurgeButton from "../Buttons/PurgeButton";
+import BulkExportButton from "../Buttons/BulkExportButton/BulkExportButton";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -177,13 +177,13 @@ function ChannelMessages({ closeAnnouncement }) {
                 justifyContent="flex-end"
               >
                 <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <ExportGuild
+                  <BulkExportButton
                     dialogOpen={exportDialogOpen}
                     setDialogOpen={setExportDialogOpen}
                   />
                 </span>
                 <span className={exportDialogOpen && classes.purgeHidden}>
-                  <PurgeGuild
+                  <PurgeButton
                     dialogOpen={purgeDialogOpen}
                     setDialogOpen={setPurgeDialogOpen}
                   />

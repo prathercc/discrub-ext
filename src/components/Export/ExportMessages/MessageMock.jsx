@@ -1,14 +1,14 @@
 import React, { useContext } from "react";
 import { Stack, Typography } from "@mui/material";
-import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
+import ExportMessagesStyles from "./ExportMessages.styles";
 import AttachmentMock from "./Attachment/AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
-import { MessageContext } from "../../context/message/MessageContext";
+import { MessageContext } from "../../../context/message/MessageContext";
 
 const MessageMock = ({ row, index, hideAttachments = false }) => {
   const { state: messageState } = useContext(MessageContext);
   const { threads } = messageState;
-  const classes = ExportButtonGroupStyles();
+  const classes = ExportMessagesStyles();
   const messageDate = new Date(Date.parse(row.timestamp));
   const foundThread = threads?.find(
     (thread) => thread.id === row.id || thread.id === row.channel_id

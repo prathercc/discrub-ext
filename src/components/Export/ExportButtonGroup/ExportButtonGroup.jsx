@@ -12,9 +12,9 @@ import {
   ButtonGroup,
   ClickAwayListener,
 } from "@mui/material";
-import { MessageContext } from "../../context/message/MessageContext";
-import ExportUtils from "./ExportUtils";
-import ExportMessages from "./ExportMessages";
+import { MessageContext } from "../../../context/message/MessageContext";
+import ExportUtils from "../ExportUtils";
+import ExportMessages from "../ExportMessages/ExportMessages";
 
 const options = ["HTML", "JSON"];
 

@@ -1,6 +1,6 @@
 import { makeStyles } from "@mui/styles";
 
-const ExportButtonGroupStyles = makeStyles(() => ({
+const ExportMessagesStyles = makeStyles(() => ({
   boxContainer: {
     display: "none",
     margin: 0,
@@ -70,4 +70,4 @@ const ExportButtonGroupStyles = makeStyles(() => ({
   },
 }));
 
-export default ExportButtonGroupStyles;
+export default ExportMessagesStyles;

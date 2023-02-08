@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
 import {
   Button,
   Menu,
@@ -20,18 +20,21 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
 import DeselectIcon from "@mui/icons-material/Deselect";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { ChannelContext } from "../../context/channel/ChannelContext";
-import { GuildContext } from "../../context/guild/GuildContext";
-import { MessageContext } from "../../context/message/MessageContext";
-import ExportUtils from "../Export/ExportUtils";
-import ExportMessages from "../Export/ExportMessages";
-import { DmContext } from "../../context/dm/DmContext";
+import { ChannelContext } from "../../../context/channel/ChannelContext";
+import { GuildContext } from "../../../context/guild/GuildContext";
+import { MessageContext } from "../../../context/message/MessageContext";
+import ExportUtils from "../../Export/ExportUtils";
+import ExportMessages from "../../Export/ExportMessages/ExportMessages";
+import { DmContext } from "../../../context/dm/DmContext";
+import ImageToggle from "./ImageToggle";
+import BulkExportButtonStyles from "./BulkExportButton.styles";
 
-const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+  const classes = BulkExportButtonStyles();
   const exportType = isDm ? "DM" : "Guild";
   const {
     state: messageState,
@@ -66,6 +69,12 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   exportingActiveRef.current = exporting?.active;
   const [generatingHTML, setGeneratingHTML] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [downloadImages, setDownloadImages] = useState(true);
+  useEffect(() => {
+    if (dialogOpen) {
+      setDownloadImages(true);
+    }
+  }, [dialogOpen]);
   const {
     addToZip,
     generateZip,
@@ -103,6 +112,8 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     else setSelectedExportChannels([...selectedExportChannels, id]);
   };
 
+  const isExportCancelled = () => !exportingActiveRef.current;
+
   const handleExportSelected = async (format = "json") => {
     handleClose();
     const selectedChannels = isDm
@@ -121,39 +132,45 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       const updatedMessages = [];
       for (let c1 = 0; c1 < messages.length; c1 += 1) {
         let updatedMessage = { ...messages[c1] };
-        for (let c2 = 0; c2 < messages[c1].attachments.length; c2 += 1) {
-          try {
-            const attachment = messages[c1].attachments[c2];
-            setDebugText(
-              `Downloading ${attachment.filename.slice(0, 20)}${
-                attachment.filename.length > 20 ? "..." : ""
-              }`
-            );
-            const blob = await fetch(attachment.proxy_url).then((r) =>
-              r.blob()
-            );
-            if (blob.size) {
-              if (!attachmentFolder)
-                attachmentFolder = createZipFolder(attachmentFolderName);
-              const cleanFileName = addToFolder(
-                attachmentFolder,
-                blob,
-                attachment.filename
+        if (downloadImages) {
+          for (let c2 = 0; c2 < messages[c1].attachments.length; c2 += 1) {
+            try {
+              const attachment = messages[c1].attachments[c2];
+              setDebugText(
+                `Downloading ${attachment.filename.slice(0, 20)}${
+                  attachment.filename.length > 20 ? "..." : ""
+                }`
               );
-              updatedMessage.attachments[c2] = {
-                ...updatedMessage.attachments[c2],
-                local_url: `${attachmentFolderName}/${cleanFileName}`,
-              };
+              const blob = await fetch(attachment.proxy_url).then((r) =>
+                r.blob()
+              );
+              if (blob.size) {
+                if (!attachmentFolder)
+                  attachmentFolder = createZipFolder(attachmentFolderName);
+                const cleanFileName = addToFolder(
+                  attachmentFolder,
+                  blob,
+                  attachment.filename
+                );
+                updatedMessage.attachments[c2] = {
+                  ...updatedMessage.attachments[c2],
+                  local_url: `${attachmentFolderName}/${cleanFileName}`,
+                };
+              }
+            } catch (e) {
+              console.error(e);
+            } finally {
+              if (isExportCancelled()) break;
             }
-          } catch (e) {
-            console.error(e);
           }
         }
+        if (isExportCancelled()) break;
         updatedMessages.push(updatedMessage);
         setDebugText(null);
       }
 
       if (updatedMessages.length > 0) {
+        if (isExportCancelled()) break;
         setDebugText("Adding data to archive");
         if (format === "json")
           addToZip(
@@ -167,12 +184,14 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       }
 
       count += 1;
-      if (!exportingActiveRef.current) break;
+      if (isExportCancelled()) break;
     }
-    setDebugText("Generating archive");
-    await generateZip();
-    await resetChannel();
-    await resetMessageData();
+    if (!isExportCancelled()) {
+      setDebugText("Generating archive");
+      await generateZip();
+      await resetChannel();
+      await resetMessageData();
+    }
     setExporting({ active: false, name: null });
     resetZip();
     setDebugText(null);
@@ -193,10 +212,14 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         onClick={() => setDialogOpen(true)}
         variant="contained"
       >
-        Export
+        Export {exportType}
       </Button>
       <ExportMessages componentRef={contentRef} exporting={generatingHTML} />
-      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+      <Dialog
+        PaperProps={{ className: classes.dialogPaper }}
+        open={dialogOpen}
+        onClose={handleDialogClose}
+      >
         <DialogTitle>Export {exportType}</DialogTitle>
         <DialogContent>
           {!exporting.active && !isDm && (
@@ -208,13 +231,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                 alignItems="center"
                 spacing={3}
               >
-                <Box
-                  sx={{
-                    width: 350,
-                    height: 200,
-                    overflow: "auto",
-                  }}
-                >
+                <Box className={classes.dialogChannelsBox}>
                   <List disablePadding dense>
                     {channels.map((channel) => (
                       <ListItem key={channel.id} value={channel.id} dense>
@@ -241,9 +258,9 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   </List>
                 </Box>
                 <Stack
-                  sx={{ width: "100%" }}
+                  className={classes.dialogBtnStack}
                   direction="row"
-                  justifyContent="flex-start"
+                  justifyContent="space-between"
                   alignItems="flex-start"
                 >
                   <Tooltip
@@ -273,7 +290,31 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                       )}
                     </IconButton>
                   </Tooltip>
+                  <ImageToggle
+                    downloadImages={downloadImages}
+                    setDownloadImages={setDownloadImages}
+                    exportingActiveRef={exportingActiveRef}
+                  />
                 </Stack>
+              </Stack>
+            </>
+          )}
+          {isDm && (
+            <>
+              <DialogContentText>
+                Exporting messages from <strong>@{selectedDm?.name}</strong>
+              </DialogContentText>
+              <Stack
+                className={classes.dialogBtnStack}
+                direction="row"
+                justifyContent="flex-end"
+                alignItems="center"
+              >
+                <ImageToggle
+                  downloadImages={downloadImages}
+                  setDownloadImages={setDownloadImages}
+                  exportingActiveRef={exportingActiveRef}
+                />
               </Stack>
             </>
           )}
@@ -283,7 +324,7 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               justifyContent="center"
               alignItems="center"
               spacing={2}
-              sx={{ minWidth: 300 }}
+              className={classes.dialogStatusStack}
             >
               <Typography>{exporting.name}</Typography>
               <CircularProgress />
@@ -329,4 +370,4 @@ const ExportGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   );
 };
 
-export default ExportGuild;
+export default BulkExportButton;

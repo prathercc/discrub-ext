@@ -1,7 +1,11 @@
 [
   {
+    "version": "1.8.5",
+    "changes": ["Add ability to toggle image downloading when exporting."]
+  },
+  {
     "version": "1.8.4",
-    "changes": ["Small graphical adjustments.", "Redesign tooltip component."]
+    "changes": ["Small graphical adjustments."]
   },
   {
     "version": "1.8.3",
