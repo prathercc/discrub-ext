@@ -38,6 +38,7 @@ function DirectMessages() {
     state: messageState,
     resetMessageData,
     getMessageData,
+    resetFilters,
   } = useContext(MessageContext);
 
   const { selectedDm, dms, preFilterUserId, preFilterUserIds } = dmState;
@@ -52,6 +53,13 @@ function DirectMessages() {
     await resetMessageData();
     await getMessageData(selectedDm.id);
     setSearchTouched(true);
+  };
+
+  const handleChangeDm = async (e) => {
+    setDm(e.target.value);
+    await resetFilters();
+    await resetMessageData();
+    setSearchTouched(false);
   };
 
   useEffect(() => {
@@ -84,7 +92,7 @@ function DirectMessages() {
                   variant="filled"
                   disabled={messagesLoading || purgeDialogOpen}
                   value={selectedDm.id}
-                  onChange={(e) => setDm(e.target.value)}
+                  onChange={handleChangeDm}
                   select
                   label="Direct Messages"
                 >
