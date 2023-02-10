@@ -1,14 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import NoImageIcon from "@mui/icons-material/NoPhotography";
 import ImageIcon from "@mui/icons-material/PhotoCamera";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import { ExportContext } from "../../../context/export/ExportContext";
 
-const ImageToggle = ({
-  downloadImages,
-  setDownloadImages,
-  exportingActiveRef,
-}) => {
+const ImageToggle = () => {
+  const { state: exportState, setDownloadImages } = useContext(ExportContext);
+  const { downloadImages, isExporting } = exportState;
   return (
     <Tooltip
       arrow
@@ -17,8 +16,8 @@ const ImageToggle = ({
       description="Exports can be performed more quickly when not downloading images"
     >
       <IconButton
-        disabled={exportingActiveRef.current}
-        onClick={() => setDownloadImages(!downloadImages)}
+        disabled={isExporting}
+        onClick={async () => await setDownloadImages(!downloadImages)}
         color={downloadImages ? "primary" : "secondary"}
       >
         {downloadImages ? <ImageIcon /> : <NoImageIcon />}

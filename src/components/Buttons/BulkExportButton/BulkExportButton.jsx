@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef, useEffect } from "react";
+import React, { useState, useContext, useRef } from "react";
 import {
   Button,
   Menu,
@@ -32,9 +32,20 @@ import ExportMessages from "../../Export/ExportMessages/ExportMessages";
 import { DmContext } from "../../../context/dm/DmContext";
 import ImageToggle from "./ImageToggle";
 import BulkExportButtonStyles from "./BulkExportButton.styles";
+import { ExportContext } from "../../../context/export/ExportContext";
 
 const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const classes = BulkExportButtonStyles();
+
+  const {
+    state: exportState,
+    setName,
+    setIsExporting,
+    setDownloadImages,
+    setStatusText,
+  } = useContext(ExportContext);
+  const { downloadImages, isExporting, name, statusText } = exportState;
+
   const exportType = isDm ? "DM" : "Guild";
   const {
     state: messageState,
@@ -59,22 +70,11 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     channelState;
   const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
   const { selectedGuild } = guildState;
-  const [exporting, setExporting] = useState({
-    active: false,
-    name: null,
-  });
-  const [debugText, setDebugText] = useState(null);
   const exportingActiveRef = useRef();
   const contentRef = useRef();
-  exportingActiveRef.current = exporting?.active;
+  exportingActiveRef.current = isExporting;
   const [generatingHTML, setGeneratingHTML] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [downloadImages, setDownloadImages] = useState(true);
-  useEffect(() => {
-    if (dialogOpen) {
-      setDownloadImages(true);
-    }
-  }, [dialogOpen]);
   const {
     addToZip,
     generateZip,
@@ -100,7 +100,8 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     setSelectedExportChannels([]);
     resetChannel();
     resetMessageData();
-    setExporting({ active: false, name: null });
+    setName("");
+    setIsExporting(false);
   };
 
   const handleChannelSelect = (id) => {
@@ -124,7 +125,8 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     let count = 0;
     while (count < selectedChannels.length) {
       const entity = selectedChannels[count];
-      setExporting({ active: true, name: entity.name });
+      await setIsExporting(true);
+      await setName(entity.name);
       !isDm && (await setChannel(entity.id));
       const { messages } = await getMessageData();
       const attachmentFolderName = `${entity.name}_images`;
@@ -136,7 +138,7 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           for (let c2 = 0; c2 < messages[c1].attachments.length; c2 += 1) {
             try {
               const attachment = messages[c1].attachments[c2];
-              setDebugText(
+              setStatusText(
                 `Downloading ${attachment.filename.slice(0, 20)}${
                   attachment.filename.length > 20 ? "..." : ""
                 }`
@@ -166,12 +168,12 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         }
         if (isExportCancelled()) break;
         updatedMessages.push(updatedMessage);
-        setDebugText(null);
+        setStatusText(null);
       }
 
       if (updatedMessages.length > 0) {
         if (isExportCancelled()) break;
-        setDebugText("Adding data to archive");
+        setStatusText("Adding data to archive");
         if (format === "json")
           addToZip(
             new Blob([JSON.stringify(updatedMessages)], { type: "text/plain" }),
@@ -187,14 +189,15 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       if (isExportCancelled()) break;
     }
     if (!isExportCancelled()) {
-      setDebugText("Generating archive");
+      setStatusText("Generating archive");
       await generateZip();
       await resetChannel();
       await resetMessageData();
     }
-    setExporting({ active: false, name: null });
+    await setIsExporting(false);
+    await setName("");
     resetZip();
-    setDebugText(null);
+    setStatusText(null);
   };
 
   return (
@@ -209,7 +212,10 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           !!preFilterUserId ||
           dialogOpen
         }
-        onClick={() => setDialogOpen(true)}
+        onClick={async () => {
+          await setDownloadImages(true);
+          setDialogOpen(true);
+        }}
         variant="contained"
       >
         Export {exportType}
@@ -222,7 +228,7 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       >
         <DialogTitle>Export {exportType}</DialogTitle>
         <DialogContent>
-          {!exporting.active && !isDm && (
+          {!isExporting && !isDm && (
             <>
               <DialogContentText>Select Channel(s) to export</DialogContentText>
               <Stack
@@ -290,11 +296,7 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                       )}
                     </IconButton>
                   </Tooltip>
-                  <ImageToggle
-                    downloadImages={downloadImages}
-                    setDownloadImages={setDownloadImages}
-                    exportingActiveRef={exportingActiveRef}
-                  />
+                  <ImageToggle />
                 </Stack>
               </Stack>
             </>
@@ -310,15 +312,11 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                 justifyContent="flex-end"
                 alignItems="center"
               >
-                <ImageToggle
-                  downloadImages={downloadImages}
-                  setDownloadImages={setDownloadImages}
-                  exportingActiveRef={exportingActiveRef}
-                />
+                <ImageToggle />
               </Stack>
             </>
           )}
-          {exporting.active && (
+          {isExporting && (
             <Stack
               direction="column"
               justifyContent="center"
@@ -326,11 +324,14 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               spacing={2}
               className={classes.dialogStatusStack}
             >
-              <Typography>{exporting.name}</Typography>
+              <Typography>{name}</Typography>
               <CircularProgress />
               <Typography variant="caption">
-                {debugText || (
-                  <>{fetchedMessageLength || "No"} Messages Found</>
+                {statusText || (
+                  <>
+                    {`${fetchedMessageLength} Messages Found` ||
+                      "Processing Data"}
+                  </>
                 )}
               </Typography>
             </Stack>
@@ -346,7 +347,7 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           </Button>
           <Button
             disabled={
-              exporting.active || (!isDm && selectedExportChannels.length === 0)
+              isExporting || (!isDm && selectedExportChannels.length === 0)
             }
             variant="contained"
             disableElevation
