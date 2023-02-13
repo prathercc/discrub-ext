@@ -31,11 +31,11 @@ import ExportUtils from "../../Export/ExportUtils";
 import ExportMessages from "../../Export/ExportMessages/ExportMessages";
 import { DmContext } from "../../../context/dm/DmContext";
 import ImageToggle from "./ImageToggle";
-import BulkExportButtonStyles from "./BulkExportButton.styles";
+import ExportButtonStyles from "./ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
 
-const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
-  const classes = BulkExportButtonStyles();
+const ExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+  const classes = ExportButtonStyles();
 
   const {
     state: exportState,
@@ -371,4 +371,4 @@ const BulkExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   );
 };
 
-export default BulkExportButton;
+export default ExportButton;

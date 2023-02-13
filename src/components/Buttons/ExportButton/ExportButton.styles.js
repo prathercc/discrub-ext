@@ -1,6 +1,6 @@
 import { makeStyles } from "@mui/styles";
 
-const BulkExportButtonStyles = makeStyles(() => ({
+const ExportButtonStyles = makeStyles(() => ({
   dialogPaper: {
     minWidth: "398px",
   },
@@ -17,4 +17,4 @@ const BulkExportButtonStyles = makeStyles(() => ({
   },
 }));
 
-export default BulkExportButtonStyles;
+export default ExportButtonStyles;

@@ -16,7 +16,7 @@ import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
-import BulkExportButton from "../Buttons/BulkExportButton/BulkExportButton";
+import ExportButton from "../Buttons/ExportButton/ExportButton";
 import PurgeButton from "../Buttons/PurgeButton";
 
 function DirectMessages() {
@@ -144,7 +144,7 @@ function DirectMessages() {
                 justifyContent="flex-end"
               >
                 <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <BulkExportButton
+                  <ExportButton
                     dialogOpen={exportDialogOpen}
                     setDialogOpen={setExportDialogOpen}
                     isDm
