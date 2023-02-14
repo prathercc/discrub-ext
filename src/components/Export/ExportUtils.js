@@ -18,10 +18,8 @@ export default class ExportUtils {
 
   generateHTML = async () => {
     this.html = null;
-    this.callback(true);
     this._generateHTMLHelperFunc();
     while (!this.html) await this._delay(2000);
-    this.callback(false);
     return new Blob([this.html], { type: "text/html" });
   };
 

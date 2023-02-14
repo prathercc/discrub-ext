@@ -44,7 +44,7 @@ const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
     generateHTML,
   } = new ExportUtils(
     contentRef,
-    setIsExporting,
+    () => {},
     `message-data-${messages.length - 1}`
   );
   const open = !!anchorEl;
