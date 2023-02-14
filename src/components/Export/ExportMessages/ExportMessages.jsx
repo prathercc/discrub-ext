@@ -4,10 +4,13 @@ import { MessageContext } from "../../../context/message/MessageContext";
 import ExportMessagesStyles from "./ExportMessages.styles";
 import MessageMock from "./MessageMock";
 import MessageTitleMock from "./MessageTitleMock";
+import { ExportContext } from "../../../context/export/ExportContext";
 
-const ExportMessages = ({ componentRef, exporting }) => {
+const ExportMessages = ({ componentRef }) => {
   const classes = ExportMessagesStyles();
 
+  const { state: exportState } = useContext(ExportContext);
+  const { isExporting } = exportState;
   const { state: messageState } = useContext(MessageContext);
   const { messages, filters, filteredMessages, threads } = messageState;
   const exportMessages = filters.length > 0 ? filteredMessages : messages;
@@ -29,7 +32,7 @@ const ExportMessages = ({ componentRef, exporting }) => {
           spacing={1}
           className={classes.messagesStack}
         >
-          {exporting &&
+          {isExporting &&
             exportMessages.map((row, index) => {
               return <MessageMock row={row} index={index} threads={threads} />;
             })}
