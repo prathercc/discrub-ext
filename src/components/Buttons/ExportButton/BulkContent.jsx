@@ -149,7 +149,9 @@ const BulkContent = ({ isDm = false }) => {
           <Typography variant="caption">
             {statusText || (
               <>
-                {`${fetchedMessageLength} Messages Found` || "Processing Data"}
+                {fetchedMessageLength
+                  ? `${fetchedMessageLength} Messages Found`
+                  : "Processing Data"}
               </>
             )}
           </Typography>
