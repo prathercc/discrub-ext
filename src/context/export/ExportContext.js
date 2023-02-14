@@ -34,7 +34,7 @@ const ExportContextProvider = (props) => {
   };
 
   const setStatusText = async (val) => {
-    return dispatch({ type: SET_STATUS_TEXT, payload: { statusText: "" } });
+    return dispatch({ type: SET_STATUS_TEXT, payload: { statusText: val } });
   };
 
   return (
