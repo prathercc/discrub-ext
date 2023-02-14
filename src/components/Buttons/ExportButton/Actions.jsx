@@ -7,7 +7,7 @@ import ExportUtils from "../../Export/ExportUtils";
 import { DmContext } from "../../../context/dm/DmContext";
 import { ExportContext } from "../../../context/export/ExportContext";
 
-const Actions = ({ setDialogOpen, isDm = false }) => {
+const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
   const {
     state: exportState,
     setName,
@@ -33,7 +33,6 @@ const Actions = ({ setDialogOpen, isDm = false }) => {
   const { channels, selectedExportChannels } = channelState;
   const { selectedDm } = dmState;
   const exportingActiveRef = useRef();
-  const contentRef = useRef();
   exportingActiveRef.current = isExporting;
   const [anchorEl, setAnchorEl] = useState(null);
   const {

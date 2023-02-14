@@ -76,7 +76,11 @@ const ExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       >
         <DialogTitle>Export {exportType}</DialogTitle>
         <BulkContent isDm={isDm} />
-        <Actions setDialogOpen={setDialogOpen} isDm={isDm} />
+        <Actions
+          contentRef={contentRef}
+          setDialogOpen={setDialogOpen}
+          isDm={isDm}
+        />
       </Dialog>
     </>
   );
