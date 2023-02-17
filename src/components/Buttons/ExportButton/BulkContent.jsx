@@ -11,31 +11,26 @@ import {
   ListItemIcon,
   Checkbox,
   Box,
-  CircularProgress,
-  Typography,
 } from "@mui/material";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
 import DeselectIcon from "@mui/icons-material/Deselect";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import { DmContext } from "../../../context/dm/DmContext";
 import ImageToggle from "./ImageToggle";
 import ExportButtonStyles from "./ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
+import Progress from "./Progress";
 
 const BulkContent = ({ isDm = false }) => {
   const classes = ExportButtonStyles();
 
   const { state: exportState } = useContext(ExportContext);
-  const { isExporting, name, statusText } = exportState;
-
-  const { state: messageState } = useContext(MessageContext);
+  const { isExporting } = exportState;
 
   const { state: dmState } = useContext(DmContext);
   const { state: channelState, setSelectedExportChannels } =
     useContext(ChannelContext);
-  const { fetchedMessageLength } = messageState;
   const { channels, selectedExportChannels } = channelState;
   const { selectedDm } = dmState;
 
@@ -136,27 +131,7 @@ const BulkContent = ({ isDm = false }) => {
           </Stack>
         </>
       )}
-      {isExporting && (
-        <Stack
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-          spacing={2}
-          className={classes.dialogStatusStack}
-        >
-          <Typography>{name}</Typography>
-          <CircularProgress />
-          <Typography variant="caption">
-            {statusText || (
-              <>
-                {fetchedMessageLength
-                  ? `${fetchedMessageLength} Messages Found`
-                  : "Processing Data"}
-              </>
-            )}
-          </Typography>
-        </Stack>
-      )}
+      {isExporting && <Progress />}
     </DialogContent>
   );
 };

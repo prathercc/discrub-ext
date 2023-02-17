@@ -145,6 +145,7 @@ function DirectMessages() {
               >
                 <span className={purgeDialogOpen && classes.purgeHidden}>
                   <ExportButton
+                    bulk
                     dialogOpen={exportDialogOpen}
                     setDialogOpen={setExportDialogOpen}
                     isDm

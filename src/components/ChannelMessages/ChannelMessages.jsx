@@ -182,6 +182,7 @@ function ChannelMessages({ closeAnnouncement }) {
               >
                 <span className={purgeDialogOpen && classes.purgeHidden}>
                   <ExportButton
+                    bulk
                     dialogOpen={exportDialogOpen}
                     setDialogOpen={setExportDialogOpen}
                   />

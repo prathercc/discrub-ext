@@ -41,7 +41,7 @@ export const MessageReducer = (state, action) => {
         threads: [],
       };
     case RESET_FILTERS_COMPLETE:
-      return { ...state, filters: [] };
+      return { ...state, filters: [], filteredMessages: [] };
     case FILTER_MESSAGE_COMPLETE:
       return {
         ...state,

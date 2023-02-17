@@ -9,8 +9,14 @@ import ExportButtonStyles from "./ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
 import BulkContent from "./BulkContent";
 import Actions from "./Actions";
+import DefaultContent from "./DefaultContent";
 
-const ExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+const ExportButton = ({
+  dialogOpen,
+  setDialogOpen,
+  isDm = false,
+  bulk = false,
+}) => {
   const classes = ExportButtonStyles();
 
   const {
@@ -48,25 +54,26 @@ const ExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     setIsExporting(false);
   };
 
+  const bulkDisabled =
+    (isDm ? selectedDm.id === null : selectedGuild.id === null) ||
+    messagesLoading ||
+    selectedChannel.id !== null ||
+    messages.length > 0 ||
+    !!dmPreFilterUserId ||
+    !!preFilterUserId ||
+    dialogOpen;
+
   return (
     <>
       <Button
-        disabled={
-          (isDm ? selectedDm.id === null : selectedGuild.id === null) ||
-          messagesLoading ||
-          selectedChannel.id !== null ||
-          messages.length > 0 ||
-          !!dmPreFilterUserId ||
-          !!preFilterUserId ||
-          dialogOpen
-        }
+        disabled={bulk && bulkDisabled}
         onClick={async () => {
           await setDownloadImages(true);
           setDialogOpen(true);
         }}
         variant="contained"
       >
-        Export {exportType}
+        Export {bulk ? exportType : "Messages"}
       </Button>
       <ExportMessages componentRef={contentRef} />
       <Dialog
@@ -74,12 +81,13 @@ const ExportButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         open={dialogOpen}
         onClose={handleDialogClose}
       >
-        <DialogTitle>Export {exportType}</DialogTitle>
-        <BulkContent isDm={isDm} />
+        <DialogTitle>Export {bulk ? exportType : "Messages"}</DialogTitle>
+        {bulk ? <BulkContent isDm={isDm} /> : <DefaultContent />}
         <Actions
           contentRef={contentRef}
           setDialogOpen={setDialogOpen}
           isDm={isDm}
+          bulk={bulk}
         />
       </Dialog>
     </>

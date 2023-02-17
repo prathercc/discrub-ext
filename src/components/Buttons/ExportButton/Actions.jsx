@@ -7,7 +7,7 @@ import ExportUtils from "../../Export/ExportUtils";
 import { DmContext } from "../../../context/dm/DmContext";
 import { ExportContext } from "../../../context/export/ExportContext";
 
-const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
+const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const {
     state: exportState,
     setName,
@@ -29,8 +29,8 @@ const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
     setChannel,
     resetChannel,
   } = useContext(ChannelContext);
-  const { messages } = messageState;
-  const { channels, selectedExportChannels } = channelState;
+  const { messages: contextMessages, filteredMessages } = messageState;
+  const { channels, selectedExportChannels, selectedChannel } = channelState;
   const { selectedDm } = dmState;
   const exportingActiveRef = useRef();
   exportingActiveRef.current = isExporting;
@@ -45,7 +45,7 @@ const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
   } = new ExportUtils(
     contentRef,
     () => {},
-    `message-data-${messages.length - 1}`
+    `message-data-${contextMessages.length - 1}`
   );
   const open = !!anchorEl;
   const handleClick = (event) => {
@@ -57,9 +57,11 @@ const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
 
   const handleDialogClose = () => {
     setDialogOpen(false);
-    setSelectedExportChannels([]);
-    resetChannel();
-    resetMessageData();
+    if (bulk) {
+      setSelectedExportChannels([]);
+      resetChannel();
+      resetMessageData();
+    }
     setName("");
     setIsExporting(false);
   };
@@ -70,16 +72,22 @@ const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
     handleClose();
     const selectedChannels = isDm
       ? [selectedDm]
-      : channels.filter((c) =>
-          selectedExportChannels.some((id) => id === c.id)
-        );
+      : bulk
+      ? channels.filter((c) => selectedExportChannels.some((id) => id === c.id))
+      : [selectedChannel];
     let count = 0;
     while (count < selectedChannels.length) {
       const entity = selectedChannels[count];
       await setIsExporting(true);
       await setName(entity.name);
-      !isDm && (await setChannel(entity.id));
-      const { messages } = await getMessageData();
+      if (bulk) !isDm && (await setChannel(entity.id));
+      const { messages } = bulk
+        ? await getMessageData()
+        : {
+            messages: filteredMessages.length
+              ? filteredMessages
+              : contextMessages,
+          };
       const attachmentFolderName = `${entity.name}_images`;
       let attachmentFolder = null;
       const updatedMessages = [];
@@ -142,8 +150,8 @@ const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
     if (!isExportCancelled()) {
       setStatusText("Generating archive");
       await generateZip();
-      await resetChannel();
-      await resetMessageData();
+      if (bulk) await resetChannel();
+      if (bulk) await resetMessageData();
     }
     await setIsExporting(false);
     await setName("");
@@ -157,7 +165,9 @@ const Actions = ({ setDialogOpen, isDm = false, contentRef }) => {
         Cancel
       </Button>
       <Button
-        disabled={isExporting || (!isDm && selectedExportChannels.length === 0)}
+        disabled={
+          isExporting || (bulk && !isDm && selectedExportChannels.length === 0)
+        }
         variant="contained"
         disableElevation
         onClick={handleClick}

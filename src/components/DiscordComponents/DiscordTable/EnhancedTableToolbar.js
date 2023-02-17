@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -9,9 +9,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import EditIcon from "@mui/icons-material/Edit";
 import { MessageContext } from "../../../context/message/MessageContext";
-import ExportButtonGroup from "../../Export/ExportButtonGroup/ExportButtonGroup";
 import FilterComponent from "./FilterComponent";
 import DiscordTableStyles from "./DiscordTable.styles";
+import ExportButton from "../../Buttons/ExportButton/ExportButton";
+import { DmContext } from "../../../context/dm/DmContext";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -21,8 +22,12 @@ const EnhancedTableToolbar = ({
 }) => {
   const classes = DiscordTableStyles();
 
+  const { state: dmState } = useContext(DmContext);
+  const { selectedDm } = dmState;
   const { state: messageState, resetFilters } = useContext(MessageContext);
   const { selectedMessages } = messageState;
+
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleFilterToggle = () => {
     if (filterOpen) resetFilters();
@@ -68,7 +73,11 @@ const EnhancedTableToolbar = ({
               </IconButton>
             </Tooltip>
             <IconButton>
-              <ExportButtonGroup />
+              <ExportButton
+                setDialogOpen={setDialogOpen}
+                dialogOpen={dialogOpen}
+                isDm={!!selectedDm.id}
+              />
             </IconButton>
           </Stack>
           {filterOpen && <FilterComponent />}
