@@ -14,15 +14,9 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setIsExporting,
     setStatusText,
     processMessages,
-    incrementProcessingTime,
   } = useContext(ExportContext);
-  const {
-    downloadImages,
-    isExporting,
-    isProcessing,
-    processedMessages,
-    processingTime,
-  } = exportState;
+  const { downloadImages, isExporting, isProcessing, processedMessages } =
+    exportState;
 
   const {
     state: messageState,
@@ -43,11 +37,9 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const exportingActiveRef = useRef();
   const processedMessagesRef = useRef();
   const isProcessingRef = useRef();
-  const processingTimeRef = useRef();
   isProcessingRef.current = isProcessing;
   processedMessagesRef.current = processedMessages;
   exportingActiveRef.current = isExporting;
-  processingTimeRef.current = processingTime;
   const [anchorEl, setAnchorEl] = useState(null);
   const {
     addToZip,
@@ -108,12 +100,6 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
       processMessages(addToFolder, messages, attachmentFolder);
       while (isProcessingRef.current) {
-        incrementProcessingTime();
-        setStatusText(
-          `Elapsed Processing Time: ${processingTimeRef.current} second${
-            processedMessagesRef.current === 1 ? "" : "s"
-          }`
-        );
         await new Promise((resolve) =>
           setTimeout(() => {
             resolve();

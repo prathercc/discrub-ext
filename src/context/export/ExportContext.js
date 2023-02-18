@@ -1,4 +1,4 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useReducer, useRef } from "react";
 import { DmReducer } from "./ExportReducer";
 import {
   SET_IS_EXPORTING,
@@ -22,9 +22,11 @@ const ExportContextProvider = (props) => {
       statusText: "",
       processedMessages: [],
       isProcessing: false,
-      processingTime: 1,
     })
   );
+  const exportingRef = useRef();
+  exportingRef.current = state.isExporting;
+
   const setIsExporting = async (val) => {
     return dispatch({ type: SET_IS_EXPORTING, payload: { isExporting: val } });
   };
@@ -48,6 +50,7 @@ const ExportContextProvider = (props) => {
       let updatedMessage = { ...message };
       if (attachmentFolder) {
         for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
+          if (!exportingRef.current) break;
           try {
             const attachment = updatedMessage.attachments[c2];
             const blob = await fetch(attachment.proxy_url).then((r) =>
@@ -75,20 +78,35 @@ const ExportContextProvider = (props) => {
       type: START_PROCESSING_MESSAGES,
       payload: { processedMessages: [], isProcessing: true },
     });
-    const retArr = await Promise.all(messages.map((m) => _processMessage(m)));
+    const retArr = [];
+    for (let c1 = 0; c1 < messages.length; c1 += 1) {
+      if (!exportingRef.current) break;
+      retArr.push(await _processMessage(messages[c1]));
+      // Process 20 messages per second
+      if (c1 % 20 === 0) {
+        const statusText = `Processing Messages: ${
+          ((c1 / messages.length) * 100).toString().split(".")[0]
+        }%`;
+        console.info(statusText);
+        dispatch({
+          type: INCREMENT_PROCESSING_TIME,
+          payload: {
+            statusText: statusText,
+          },
+        });
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve();
+          }, 1000)
+        );
+      }
+    }
     return dispatch({
       type: PROCESSING_MESSAGES_COMPLETE,
       payload: {
         processedMessages: retArr,
         isProcessing: false,
-        processingTime: 1,
       },
-    });
-  };
-
-  const incrementProcessingTime = () => {
-    return dispatch({
-      type: INCREMENT_PROCESSING_TIME,
     });
   };
 
@@ -102,7 +120,6 @@ const ExportContextProvider = (props) => {
         setName,
         setStatusText,
         processMessages,
-        incrementProcessingTime,
       }}
     >
       {props.children}
