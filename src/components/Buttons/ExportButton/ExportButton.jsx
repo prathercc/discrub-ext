@@ -47,9 +47,11 @@ const ExportButton = ({
 
   const handleDialogClose = () => {
     setDialogOpen(false);
-    setSelectedExportChannels([]);
-    resetChannel();
-    resetMessageData();
+    if (bulk) {
+      setSelectedExportChannels([]);
+      resetChannel();
+      resetMessageData();
+    }
     setName("");
     setIsExporting(false);
   };
