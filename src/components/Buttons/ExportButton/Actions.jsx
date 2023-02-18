@@ -13,8 +13,16 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setName,
     setIsExporting,
     setStatusText,
+    processMessages,
+    incrementProcessingTime,
   } = useContext(ExportContext);
-  const { downloadImages, isExporting } = exportState;
+  const {
+    downloadImages,
+    isExporting,
+    isProcessing,
+    processedMessages,
+    processingTime,
+  } = exportState;
 
   const {
     state: messageState,
@@ -33,7 +41,13 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const { channels, selectedExportChannels, selectedChannel } = channelState;
   const { selectedDm } = dmState;
   const exportingActiveRef = useRef();
+  const processedMessagesRef = useRef();
+  const isProcessingRef = useRef();
+  const processingTimeRef = useRef();
+  isProcessingRef.current = isProcessing;
+  processedMessagesRef.current = processedMessages;
   exportingActiveRef.current = isExporting;
+  processingTimeRef.current = processingTime;
   const [anchorEl, setAnchorEl] = useState(null);
   const {
     addToZip,
@@ -88,54 +102,34 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               ? filteredMessages
               : contextMessages,
           };
-      const attachmentFolderName = `${entity.name}_images`;
-      let attachmentFolder = null;
-      const updatedMessages = [];
-      for (let c1 = 0; c1 < messages.length; c1 += 1) {
-        let updatedMessage = { ...messages[c1] };
-        if (downloadImages) {
-          for (let c2 = 0; c2 < messages[c1].attachments.length; c2 += 1) {
-            try {
-              const attachment = messages[c1].attachments[c2];
-              setStatusText(
-                `Downloading ${attachment.filename.slice(0, 20)}${
-                  attachment.filename.length > 20 ? "..." : ""
-                }`
-              );
-              const blob = await fetch(attachment.proxy_url).then((r) =>
-                r.blob()
-              );
-              if (blob.size) {
-                if (!attachmentFolder)
-                  attachmentFolder = createZipFolder(attachmentFolderName);
-                const cleanFileName = addToFolder(
-                  attachmentFolder,
-                  blob,
-                  attachment.filename
-                );
-                updatedMessage.attachments[c2] = {
-                  ...updatedMessage.attachments[c2],
-                  local_url: `${attachmentFolderName}/${cleanFileName}`,
-                };
-              }
-            } catch (e) {
-              console.error(e);
-            } finally {
-              if (isExportCancelled()) break;
-            }
-          }
-        }
-        if (isExportCancelled()) break;
-        updatedMessages.push(updatedMessage);
-        setStatusText(null);
+      const attachmentFolder = downloadImages
+        ? createZipFolder(`${entity.name}_images`)
+        : null;
+
+      processMessages(addToFolder, messages, attachmentFolder);
+      while (isProcessingRef.current) {
+        incrementProcessingTime();
+        setStatusText(
+          `Elapsed Processing Time: ${processingTimeRef.current} second${
+            processedMessagesRef.current === 1 ? "" : "s"
+          }`
+        );
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve();
+          }, 1000)
+        );
       }
+      const updatedMessages = processedMessagesRef.current;
 
       if (updatedMessages.length > 0) {
         if (isExportCancelled()) break;
         setStatusText("Adding data to archive");
         if (format === "json")
           addToZip(
-            new Blob([JSON.stringify(updatedMessages)], { type: "text/plain" }),
+            new Blob([JSON.stringify(updatedMessages)], {
+              type: "text/plain",
+            }),
             entity.name
           );
         else {

@@ -5,6 +5,9 @@ import {
   SET_DOWNLOAD_IMAGES,
   SET_NAME,
   SET_STATUS_TEXT,
+  INCREMENT_PROCESSING_TIME,
+  PROCESSING_MESSAGES_COMPLETE,
+  START_PROCESSING_MESSAGES,
 } from "./ExportContextConstants";
 
 export const ExportContext = createContext();
@@ -17,6 +20,9 @@ const ExportContextProvider = (props) => {
       downloadImages: true,
       name: "",
       statusText: "",
+      processedMessages: [],
+      isProcessing: false,
+      processingTime: 1,
     })
   );
   const setIsExporting = async (val) => {
@@ -37,6 +43,55 @@ const ExportContextProvider = (props) => {
     return dispatch({ type: SET_STATUS_TEXT, payload: { statusText: val } });
   };
 
+  const processMessages = async (addToFolder, messages, attachmentFolder) => {
+    const _processMessage = async (message) => {
+      let updatedMessage = { ...message };
+      if (attachmentFolder) {
+        for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
+          try {
+            const attachment = updatedMessage.attachments[c2];
+            const blob = await fetch(attachment.proxy_url).then((r) =>
+              r.blob()
+            );
+            if (blob.size) {
+              const cleanFileName = addToFolder(
+                attachmentFolder,
+                blob,
+                attachment.filename
+              );
+              updatedMessage.attachments[c2] = {
+                ...updatedMessage.attachments[c2],
+                local_url: `${attachmentFolder.name}/${cleanFileName}`,
+              };
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+      return updatedMessage;
+    };
+    dispatch({
+      type: START_PROCESSING_MESSAGES,
+      payload: { processedMessages: [], isProcessing: true },
+    });
+    const retArr = await Promise.all(messages.map((m) => _processMessage(m)));
+    return dispatch({
+      type: PROCESSING_MESSAGES_COMPLETE,
+      payload: {
+        processedMessages: retArr,
+        isProcessing: false,
+        processingTime: 1,
+      },
+    });
+  };
+
+  const incrementProcessingTime = () => {
+    return dispatch({
+      type: INCREMENT_PROCESSING_TIME,
+    });
+  };
+
   return (
     <ExportContext.Provider
       value={{
@@ -46,6 +101,8 @@ const ExportContextProvider = (props) => {
         setDownloadImages,
         setName,
         setStatusText,
+        processMessages,
+        incrementProcessingTime,
       }}
     >
       {props.children}
