@@ -11,7 +11,7 @@ import { ChannelContext } from "../channel/ChannelContext";
 import { DmContext } from "../dm/DmContext";
 import Typography from "@mui/material/Typography";
 // import { GuildContext } from "../guild/GuildContext";
-import ExportButtonGroupStyles from "../../components/Export/ExportButtonGroup.styles";
+import ExportMessagesStyles from "../../components/Export/ExportMessages/ExportMessages.styles";
 import { Stack } from "@mui/material";
 import {
   DELETE_MESSAGE_SUCCESS,
@@ -39,7 +39,7 @@ import {
 export const MessageContext = createContext();
 
 const MessageContextProvider = (props) => {
-  const classes = ExportButtonGroupStyles();
+  const classes = ExportMessagesStyles();
 
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
@@ -196,6 +196,7 @@ const MessageContextProvider = (props) => {
         : selectedDm.id
         ? selectedDmIdRef
         : null;
+      const originalChannelId = convoIdRef?.current?.slice();
       const isDM =
         !!convoIdRef && convoIdRef.current === selectedDmIdRef.current;
 
@@ -250,7 +251,7 @@ const MessageContextProvider = (props) => {
 
       dispatch({
         type: GET_MESSAGE_DATA_COMPLETE,
-        payload,
+        payload: originalChannelId !== convoIdRef.current ? {} : payload,
       });
 
       return payload;

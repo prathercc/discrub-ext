@@ -27,6 +27,11 @@ const InjectedDialogStyles = makeStyles(() => ({
     left: "5px",
     width: "767px",
   },
+  logo: {
+    width: "24px",
+    height: "24px",
+    margin: "auto",
+  },
 }));
 
 export default InjectedDialogStyles;
