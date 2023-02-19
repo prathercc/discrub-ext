@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.8.6",
+    "changes": ["Messages that are sorted are now also sorted when exported."]
+  },
+  {
     "version": "1.8.5",
     "changes": [
       "Add ability to toggle image downloading when exporting.",

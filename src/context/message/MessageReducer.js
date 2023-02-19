@@ -12,10 +12,29 @@ import {
   SET_ATTACHMENT_MESSAGE_COMPLETE,
   RESET_FILTERS_COMPLETE,
   SET_EMBED_MESSAGE_COMPLETE,
+  SET_ORDER,
 } from "./MessageContextConstants";
 export const MessageReducer = (state, action) => {
   const { type, payload } = action;
+  const _descendingComparator = (a, b, orderBy) => {
+    return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
+  };
   switch (type) {
+    case SET_ORDER:
+      return {
+        ...state,
+        ...payload,
+        messages: state.messages.sort(
+          payload.order === "desc"
+            ? (a, b) => _descendingComparator(a, b, payload.orderBy)
+            : (a, b) => -_descendingComparator(a, b, payload.orderBy)
+        ),
+        filteredMessages: state.filteredMessages.sort(
+          payload.order === "desc"
+            ? (a, b) => _descendingComparator(a, b, payload.orderBy)
+            : (a, b) => -_descendingComparator(a, b, payload.orderBy)
+        ),
+      };
     case SET_ATTACHMENT_MESSAGE_COMPLETE:
       return { ...state, attachmentMessage: payload };
     case SET_EMBED_MESSAGE_COMPLETE:
