@@ -109,6 +109,18 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       }
       if (isExportCancelled()) break;
       retArr.push(await processMessage(messages[c1]));
+      if (c1 % 100 === 0) {
+        setStatusText(
+          `Processing - ${
+            ((c1 / messages.length) * 100).toString().split(".")[0]
+          }%`
+        );
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve();
+          }, 100)
+        );
+      }
     }
 
     return retArr;
@@ -118,6 +130,11 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       `Compressing${
         updatedMessages.length > 2000 ? " - This may take a few minutes" : ""
       }`
+    );
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        resolve();
+      }, 5000)
     );
     if (format === "json")
       return addToZip(
