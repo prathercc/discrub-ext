@@ -204,7 +204,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         <MenuItem dense onClick={() => handleExportSelected("html")}>
           HTML
         </MenuItem>
-        <MenuItem dense onClick={handleExportSelected}>
+        <MenuItem dense onClick={() => handleExportSelected("json")}>
           JSON
         </MenuItem>
       </Menu>
