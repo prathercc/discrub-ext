@@ -18,19 +18,22 @@ const DefaultContent = () => {
 
   return (
     <DialogContent>
-      <DialogContentText>
-        <strong>{filteredMessages.length || messages.length}</strong> messages
-        are available to export
-      </DialogContentText>
-      <Stack
-        className={classes.dialogBtnStack}
-        direction="row"
-        justifyContent="flex-end"
-        alignItems="center"
-      >
-        <ImageToggle />
-      </Stack>
-
+      {!isExporting && (
+        <>
+          <DialogContentText>
+            <strong>{filteredMessages.length || messages.length}</strong>{" "}
+            messages are available to export
+          </DialogContentText>
+          <Stack
+            className={classes.dialogBtnStack}
+            direction="row"
+            justifyContent="flex-end"
+            alignItems="center"
+          >
+            <ImageToggle />
+          </Stack>
+        </>
+      )}
       {isExporting && <Progress />}
     </DialogContent>
   );

@@ -116,7 +116,7 @@ const BulkContent = ({ isDm = false }) => {
           </Stack>
         </>
       )}
-      {isDm && (
+      {!isExporting && isDm && (
         <>
           <DialogContentText>
             Exporting messages from <strong>@{selectedDm?.name}</strong>
