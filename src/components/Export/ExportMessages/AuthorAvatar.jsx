@@ -3,8 +3,8 @@ import { Avatar, Box } from "@mui/material";
 import ExportMessagesStyles from "./ExportMessages.styles";
 import PersonIcon from "@mui/icons-material/Person";
 
-const AuthorAvatar = ({ author }) => {
-  const classes = ExportMessagesStyles();
+const AuthorAvatar = ({ author, reply }) => {
+  const classes = ExportMessagesStyles({ reply });
 
   return (
     <Box className={classes.avatarBox}>

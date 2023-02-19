@@ -62,11 +62,33 @@ const ExportMessagesStyles = makeStyles(() => ({
   },
   avatarBox: {
     position: "relative",
-    width: "40px",
-    minWidth: "40px",
+    width: ({ reply }) => (reply ? "15px !important" : "40px"),
+    height: ({ reply }) => (reply ? "15px !important" : "40px"),
+    minWidth: ({ reply }) => (reply ? "15px !important" : "40px"),
   },
   avatarMain: {
     position: "absolute !important",
+    width: ({ reply }) => (reply ? "15px !important" : "40px"),
+    height: ({ reply }) => (reply ? "15px !important" : "40px"),
+    minWidth: ({ reply }) => (reply ? "15px !important" : "40px"),
+  },
+  replyMessageText: {
+    color: "#b8b9bf !important",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+  },
+  replyMessageName: {
+    color: "#a0a1a4 !important",
+    whiteSpace: "nowrap",
+  },
+  replyDiv: {
+    marginLeft: 20,
+    marginTop: 8,
+    height: 7,
+    width: 25,
+    borderLeft: "2px solid #4e5058",
+    borderTop: "2px solid #4e5058",
+    borderTopLeftRadius: "5px",
   },
 }));
 
