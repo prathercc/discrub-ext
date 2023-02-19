@@ -22,6 +22,8 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
       direction="column"
       alignItems="flex-start"
       justifyContent="flex-start"
+      id={row.id}
+      className={classes.mockStack}
     >
       {repliedToMsg && (
         <Stack
@@ -43,7 +45,11 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
               <strong>{repliedToMsg.username}</strong>
             </Typography>
             <Typography className={classes.replyMessageText} variant="caption">
-              {repliedToMsg.content}
+              {hideAttachments ? (
+                repliedToMsg.content
+              ) : (
+                <a href={`#${repliedToMsg.id}`}>{repliedToMsg.content}</a>
+              )}
             </Typography>
           </Stack>
         </Stack>

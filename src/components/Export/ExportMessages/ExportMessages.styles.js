@@ -76,6 +76,10 @@ const ExportMessagesStyles = makeStyles(() => ({
     color: "#b8b9bf !important",
     overflow: "hidden",
     whiteSpace: "nowrap",
+    "& a": {
+      color: "inherit",
+      textDecoration: "inherit",
+    },
   },
   replyMessageName: {
     color: "#a0a1a4 !important",
@@ -89,6 +93,13 @@ const ExportMessagesStyles = makeStyles(() => ({
     borderLeft: "2px solid #4e5058",
     borderTop: "2px solid #4e5058",
     borderTopLeftRadius: "5px",
+  },
+  mockStack: {
+    "&:target": {
+      background: "rgb(92, 107, 192, 0.25)",
+      padding: "5px",
+      width: "calc(100% - 10px)",
+    },
   },
 }));
 
