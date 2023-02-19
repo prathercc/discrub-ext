@@ -1,10 +1,10 @@
 import React from "react";
 import { Avatar, Box } from "@mui/material";
-import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
+import ExportMessagesStyles from "./ExportMessages.styles";
 import PersonIcon from "@mui/icons-material/Person";
 
 const AuthorAvatar = ({ author }) => {
-  const classes = ExportButtonGroupStyles();
+  const classes = ExportMessagesStyles();
 
   return (
     <Box className={classes.avatarBox}>

@@ -1,12 +1,12 @@
 import React from "react";
 import { IconButton, Stack, Typography } from "@mui/material";
-import ExportButtonGroupStyles from "../ExportButtonGroup.styles";
+import ExportMessagesStyles from "../ExportMessages.styles";
 import DownloadIcon from "@mui/icons-material/Download";
 import bytes from "bytes";
 import AttachmentFilePreview from "./AttachmentFilePreview";
 
 const AttachmentMock = ({ attachment }) => {
-  const classes = ExportButtonGroupStyles();
+  const classes = ExportMessagesStyles();
   return (
     <Stack
       className={classes.messageAttachmentStack}

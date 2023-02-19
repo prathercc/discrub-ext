@@ -8,6 +8,10 @@ if (!chrome.runtime.onMessage.hasListeners())
           document.querySelector('[aria-label="Inbox"]')?.parentElement ||
           document.querySelector('[aria-label="Help"]')?.parentElement;
         if (!document.getElementById("injected_iframe_button") && element) {
+          element.style.display = "flex";
+          element.style.flexDirection = "row-reverse";
+          element.style.alignItems = "center";
+          element.style.justifyContent = "center";
           const iframe = document.createElement("iframe");
           iframe.id = "injected_iframe_button";
           iframe.src = chrome.runtime.getURL("injected_button.html");

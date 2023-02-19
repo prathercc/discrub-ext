@@ -1,9 +1,9 @@
 import React from "react";
 import { Stack, Typography } from "@mui/material";
-import ExportButtonGroupStyles from "./ExportButtonGroup.styles";
+import ExportMessagesStyles from "./ExportMessages.styles";
 
 const PoweredBy = () => {
-  const classes = ExportButtonGroupStyles();
+  const classes = ExportMessagesStyles();
 
   return (
     <Stack

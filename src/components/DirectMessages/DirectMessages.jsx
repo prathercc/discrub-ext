@@ -16,8 +16,8 @@ import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
-import PurgeGuild from "../ChannelMessages/PurgeGuild";
-import ExportGuild from "../ChannelMessages/ExportGuild";
+import ExportButton from "../Buttons/ExportButton/ExportButton";
+import PurgeButton from "../Buttons/PurgeButton";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -38,6 +38,7 @@ function DirectMessages() {
     state: messageState,
     resetMessageData,
     getMessageData,
+    resetFilters,
   } = useContext(MessageContext);
 
   const { selectedDm, dms, preFilterUserId, preFilterUserIds } = dmState;
@@ -52,6 +53,13 @@ function DirectMessages() {
     await resetMessageData();
     await getMessageData(selectedDm.id);
     setSearchTouched(true);
+  };
+
+  const handleChangeDm = async (e) => {
+    setDm(e.target.value);
+    await resetFilters();
+    await resetMessageData();
+    setSearchTouched(false);
   };
 
   useEffect(() => {
@@ -84,7 +92,7 @@ function DirectMessages() {
                   variant="filled"
                   disabled={messagesLoading || purgeDialogOpen}
                   value={selectedDm.id}
-                  onChange={(e) => setDm(e.target.value)}
+                  onChange={handleChangeDm}
                   select
                   label="Direct Messages"
                 >
@@ -136,14 +144,15 @@ function DirectMessages() {
                 justifyContent="flex-end"
               >
                 <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <ExportGuild
+                  <ExportButton
+                    bulk
                     dialogOpen={exportDialogOpen}
                     setDialogOpen={setExportDialogOpen}
                     isDm
                   />
                 </span>
                 <span className={exportDialogOpen && classes.purgeHidden}>
-                  <PurgeGuild
+                  <PurgeButton
                     dialogOpen={purgeDialogOpen}
                     setDialogOpen={setPurgeDialogOpen}
                     isDm

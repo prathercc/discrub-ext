@@ -18,13 +18,13 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import ModalDebugMessage from "../Modals/Utility/ModalDebugMessage";
-import ChannelMessagesStyles from "./ChannelMessages.styles";
+import ChannelMessagesStyles from "../ChannelMessages/ChannelMessages.styles";
 import MessageChip from "../Chips/MessageChip";
 import { toggleDebugPause } from "../Modals/Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 
-const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const classes = ChannelMessagesStyles();
   const [deleting, setDeleting] = useState(false);
   const [deleteObj, setDeleteObj] = useState(null);
@@ -242,4 +242,4 @@ const PurgeGuild = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   );
 };
 
-export default PurgeGuild;
+export default PurgeButton;

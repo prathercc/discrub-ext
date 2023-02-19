@@ -29,7 +29,6 @@ export const MessageReducer = (state, action) => {
         ...payload,
         isLoading: false,
         fetchedMessageLength: 0,
-        threads: payload.threads,
       };
     case RESET_MESSAGE_DATA_COMPLETE:
       return {
@@ -41,7 +40,7 @@ export const MessageReducer = (state, action) => {
         threads: [],
       };
     case RESET_FILTERS_COMPLETE:
-      return { ...state, filters: [] };
+      return { ...state, filters: [], filteredMessages: [] };
     case FILTER_MESSAGE_COMPLETE:
       return {
         ...state,

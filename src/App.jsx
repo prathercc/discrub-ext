@@ -7,6 +7,7 @@ import GuildContextProvider from "./context/guild/GuildContext";
 import MessageContextProvider from "./context/message/MessageContext";
 import UserContextProvider from "./context/user/UserContext";
 import GlobalStyles from "@mui/material/GlobalStyles";
+import ExportContextProvider from "./context/export/ExportContext";
 
 function App() {
   return (
@@ -25,17 +26,19 @@ function App() {
         }}
       />
       <AppTheme>
-        <UserContextProvider>
-          <GuildContextProvider>
-            <ChannelContextProvider>
-              <DmContextProvider>
-                <MessageContextProvider>
-                  <InjectedDialog />
-                </MessageContextProvider>
-              </DmContextProvider>
-            </ChannelContextProvider>
-          </GuildContextProvider>
-        </UserContextProvider>
+        <ExportContextProvider>
+          <UserContextProvider>
+            <GuildContextProvider>
+              <ChannelContextProvider>
+                <DmContextProvider>
+                  <MessageContextProvider>
+                    <InjectedDialog />
+                  </MessageContextProvider>
+                </DmContextProvider>
+              </ChannelContextProvider>
+            </GuildContextProvider>
+          </UserContextProvider>
+        </ExportContextProvider>
       </AppTheme>
     </>
   );

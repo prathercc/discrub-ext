@@ -17,14 +17,15 @@ import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
-import PurgeGuild from "./PurgeGuild";
-import ExportGuild from "./ExportGuild";
+import PurgeButton from "../Buttons/PurgeButton";
+import ExportButton from "../Buttons/ExportButton/ExportButton";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
     state: messageDataState,
     getMessageData,
     resetMessageData,
+    resetFilters,
   } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
   const { state: guildState, getGuilds, setGuild } = useContext(GuildContext);
@@ -57,15 +58,22 @@ function ChannelMessages({ closeAnnouncement }) {
     setSearchTouched(true);
   };
 
-  useEffect(() => {
-    const fetchGuildChannels = async () => {
-      await resetChannel();
-      await resetMessageData();
-      await getChannels(selectedGuild.id);
-    };
-    if (selectedGuild.id) fetchGuildChannels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGuild.id]);
+  const handleGuildChange = async (e) => {
+    setGuild(e.target.value);
+    await resetChannel();
+    await resetFilters();
+    await resetMessageData();
+    await getChannels(e.target.value);
+    setSearchTouched(false);
+  };
+
+  const handleChannelChange = async (e) => {
+    if (!e.target.value) setPreFilterUserId(null);
+    await resetFilters();
+    await resetMessageData();
+    setSearchTouched(false);
+    setChannel(e.target.value);
+  };
 
   useEffect(() => {
     if (token) getGuilds();
@@ -98,7 +106,7 @@ function ChannelMessages({ closeAnnouncement }) {
                   variant="filled"
                   disabled={messagesLoading || purgeDialogOpen}
                   value={selectedGuild.id}
-                  onChange={(e) => setGuild(e.target.value)}
+                  onChange={handleGuildChange}
                   select
                   label="Guilds"
                   onFocus={closeAnnouncement}
@@ -119,11 +127,7 @@ function ChannelMessages({ closeAnnouncement }) {
                   variant="filled"
                   disabled={selectedGuild.id === null || messagesLoading}
                   value={selectedChannel.id}
-                  onChange={(e) => {
-                    if (!e.target.value) setPreFilterUserId(null);
-                    setSearchTouched(false);
-                    setChannel(e.target.value);
-                  }}
+                  onChange={handleChannelChange}
                   select
                   label="Channels"
                 >
@@ -177,13 +181,14 @@ function ChannelMessages({ closeAnnouncement }) {
                 justifyContent="flex-end"
               >
                 <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <ExportGuild
+                  <ExportButton
+                    bulk
                     dialogOpen={exportDialogOpen}
                     setDialogOpen={setExportDialogOpen}
                   />
                 </span>
                 <span className={exportDialogOpen && classes.purgeHidden}>
-                  <PurgeGuild
+                  <PurgeButton
                     dialogOpen={purgeDialogOpen}
                     setDialogOpen={setPurgeDialogOpen}
                   />
