@@ -196,6 +196,7 @@ const MessageContextProvider = (props) => {
         : selectedDm.id
         ? selectedDmIdRef
         : null;
+      const originalChannelId = convoIdRef?.current?.slice();
       const isDM =
         !!convoIdRef && convoIdRef.current === selectedDmIdRef.current;
 
@@ -250,7 +251,7 @@ const MessageContextProvider = (props) => {
 
       dispatch({
         type: GET_MESSAGE_DATA_COMPLETE,
-        payload,
+        payload: originalChannelId !== convoIdRef.current ? {} : payload,
       });
 
       return payload;
