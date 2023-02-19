@@ -44,7 +44,6 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
             </Typography>
             <Typography className={classes.replyMessageText} variant="caption">
               {repliedToMsg.content}
-              {/* {repliedToMsg.content.length > 25 ? "..." : ""} */}
             </Typography>
           </Stack>
         </Stack>
