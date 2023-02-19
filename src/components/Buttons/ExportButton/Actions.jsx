@@ -13,10 +13,9 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setName,
     setIsExporting,
     setStatusText,
-    processMessages,
+    setIsGenerating,
   } = useContext(ExportContext);
-  const { downloadImages, isExporting, isProcessing, processedMessages } =
-    exportState;
+  const { downloadImages, isExporting } = exportState;
 
   const {
     state: messageState,
@@ -35,10 +34,6 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const { channels, selectedExportChannels, selectedChannel } = channelState;
   const { selectedDm } = dmState;
   const exportingActiveRef = useRef();
-  const processedMessagesRef = useRef();
-  const isProcessingRef = useRef();
-  isProcessingRef.current = isProcessing;
-  processedMessagesRef.current = processedMessages;
   exportingActiveRef.current = isExporting;
   const [anchorEl, setAnchorEl] = useState(null);
   const {
@@ -50,7 +45,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     generateHTML,
   } = new ExportUtils(
     contentRef,
-    () => {},
+    setIsGenerating,
     `message-data-${contextMessages.length - 1}`
   );
   const open = !!anchorEl;
@@ -73,6 +68,69 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   };
 
   const isExportCancelled = () => !exportingActiveRef.current;
+
+  const _processMessages = async (addToFolder, messages, attachmentFolder) => {
+    const processMessage = async (message) => {
+      let updatedMessage = message;
+      if (attachmentFolder) {
+        for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
+          if (isExportCancelled()) break;
+          try {
+            const attachment = updatedMessage.attachments[c2];
+            const blob = await fetch(attachment.proxy_url).then((r) =>
+              r.blob()
+            );
+            if (blob.size) {
+              const cleanFileName = addToFolder(
+                attachmentFolder,
+                blob,
+                attachment.filename
+              );
+              updatedMessage.attachments[c2] = {
+                ...updatedMessage.attachments[c2],
+                local_url: `${attachmentFolder.name}/${cleanFileName}`,
+              };
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+      return updatedMessage;
+    };
+    const retArr = [];
+    for (let c1 = 0; c1 < messages.length; c1 += 1) {
+      if (c1 === 0) {
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve();
+          }, 5000)
+        );
+      }
+      if (isExportCancelled()) break;
+      retArr.push(await processMessage(messages[c1]));
+    }
+
+    return retArr;
+  };
+  const _compressMessages = async (updatedMessages, format, entityName) => {
+    setStatusText(
+      `Compressing${
+        updatedMessages.length > 2000 ? " - This may take a few minutes" : ""
+      }`
+    );
+    if (format === "json")
+      return addToZip(
+        new Blob([JSON.stringify(updatedMessages)], {
+          type: "text/plain",
+        }),
+        entityName
+      );
+    else {
+      const htmlBlob = await generateHTML();
+      return addToZip(htmlBlob, entityName, "html");
+    }
+  };
 
   const handleExportSelected = async (format = "json") => {
     handleClose();
@@ -98,43 +156,29 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         ? createZipFolder(`${entity.name}_images`)
         : null;
 
-      processMessages(addToFolder, messages, attachmentFolder);
-      while (isProcessingRef.current) {
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            resolve();
-          }, 1000)
-        );
-      }
-      const updatedMessages = processedMessagesRef.current;
+      const updatedMessages = await _processMessages(
+        addToFolder,
+        messages,
+        attachmentFolder
+      );
 
       if (updatedMessages.length > 0) {
         if (isExportCancelled()) break;
-        setStatusText("Adding data to archive");
-        if (format === "json")
-          addToZip(
-            new Blob([JSON.stringify(updatedMessages)], {
-              type: "text/plain",
-            }),
-            entity.name
-          );
-        else {
-          const htmlBlob = await generateHTML();
-          addToZip(htmlBlob, entity.name, "html");
-        }
+        await _compressMessages(updatedMessages, format, entity.name);
       }
 
       count += 1;
       if (isExportCancelled()) break;
     }
     if (!isExportCancelled()) {
-      setStatusText("Generating archive");
+      setStatusText("Preparing Archive");
       await generateZip();
       if (bulk) await resetChannel();
       if (bulk) await resetMessageData();
     }
-    await setIsExporting(false);
-    await setName("");
+    setIsGenerating(false);
+    setIsExporting(false);
+    setName("");
     resetZip();
     setStatusText(null);
   };

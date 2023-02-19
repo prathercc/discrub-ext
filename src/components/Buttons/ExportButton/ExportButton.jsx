@@ -25,7 +25,7 @@ const ExportButton = ({
     setIsExporting,
     setDownloadImages,
   } = useContext(ExportContext);
-  const { isExporting } = exportState;
+  const { isExporting, isGenerating } = exportState;
 
   const exportType = isDm ? "DM" : "Guild";
   const { state: messageState, resetMessageData } = useContext(MessageContext);
@@ -77,7 +77,7 @@ const ExportButton = ({
       >
         Export {bulk ? exportType : "Messages"}
       </Button>
-      <ExportMessages componentRef={contentRef} />
+      {isGenerating && <ExportMessages componentRef={contentRef} />}
       <Dialog
         PaperProps={{ className: classes.dialogPaper }}
         open={dialogOpen}

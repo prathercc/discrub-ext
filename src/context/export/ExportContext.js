@@ -5,9 +5,7 @@ import {
   SET_DOWNLOAD_IMAGES,
   SET_NAME,
   SET_STATUS_TEXT,
-  INCREMENT_PROCESSING_TIME,
-  PROCESSING_MESSAGES_COMPLETE,
-  START_PROCESSING_MESSAGES,
+  SET_IS_GENERATING,
 } from "./ExportContextConstants";
 
 export const ExportContext = createContext();
@@ -20,12 +18,18 @@ const ExportContextProvider = (props) => {
       downloadImages: true,
       name: "",
       statusText: "",
-      processedMessages: [],
-      isProcessing: false,
+      isGenerating: false,
     })
   );
   const exportingRef = useRef();
   exportingRef.current = state.isExporting;
+
+  const setIsGenerating = async (val) => {
+    return dispatch({
+      type: SET_IS_GENERATING,
+      payload: { isGenerating: val },
+    });
+  };
 
   const setIsExporting = async (val) => {
     return dispatch({ type: SET_IS_EXPORTING, payload: { isExporting: val } });
@@ -45,71 +49,6 @@ const ExportContextProvider = (props) => {
     return dispatch({ type: SET_STATUS_TEXT, payload: { statusText: val } });
   };
 
-  const processMessages = async (addToFolder, messages, attachmentFolder) => {
-    const _processMessage = async (message) => {
-      let updatedMessage = { ...message };
-      if (attachmentFolder) {
-        for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
-          if (!exportingRef.current) break;
-          try {
-            const attachment = updatedMessage.attachments[c2];
-            const blob = await fetch(attachment.proxy_url).then((r) =>
-              r.blob()
-            );
-            if (blob.size) {
-              const cleanFileName = addToFolder(
-                attachmentFolder,
-                blob,
-                attachment.filename
-              );
-              updatedMessage.attachments[c2] = {
-                ...updatedMessage.attachments[c2],
-                local_url: `${attachmentFolder.name}/${cleanFileName}`,
-              };
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        }
-      }
-      return updatedMessage;
-    };
-    dispatch({
-      type: START_PROCESSING_MESSAGES,
-      payload: { processedMessages: [], isProcessing: true },
-    });
-    const retArr = [];
-    for (let c1 = 0; c1 < messages.length; c1 += 1) {
-      if (!exportingRef.current) break;
-      retArr.push(await _processMessage(messages[c1]));
-      // Process 20 messages per second
-      if (c1 % 20 === 0) {
-        const statusText = `Processing Messages: ${
-          ((c1 / messages.length) * 100).toString().split(".")[0]
-        }%`;
-        console.info(statusText);
-        dispatch({
-          type: INCREMENT_PROCESSING_TIME,
-          payload: {
-            statusText: statusText,
-          },
-        });
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            resolve();
-          }, 1000)
-        );
-      }
-    }
-    return dispatch({
-      type: PROCESSING_MESSAGES_COMPLETE,
-      payload: {
-        processedMessages: retArr,
-        isProcessing: false,
-      },
-    });
-  };
-
   return (
     <ExportContext.Provider
       value={{
@@ -119,7 +58,7 @@ const ExportContextProvider = (props) => {
         setDownloadImages,
         setName,
         setStatusText,
-        processMessages,
+        setIsGenerating,
       }}
     >
       {props.children}

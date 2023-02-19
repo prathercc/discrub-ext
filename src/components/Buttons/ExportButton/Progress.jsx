@@ -27,7 +27,7 @@ const Progress = () => {
           <>
             {fetchedMessageLength
               ? `${fetchedMessageLength} Messages Found`
-              : "Processing Data"}
+              : "Processing Messages"}
           </>
         )}
       </Typography>
