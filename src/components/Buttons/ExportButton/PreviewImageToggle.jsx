@@ -11,7 +11,7 @@ const PreviewImageToggle = () => {
   return (
     <Tooltip
       arrow
-      placement="left"
+      placement="top"
       title={`${!previewImages ? "Not " : ""}Previewing Images`}
       description="Previewing Images on a large number of messages can negatively affect the speed of the export."
     >
