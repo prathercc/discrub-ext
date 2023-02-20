@@ -6,6 +6,7 @@ import {
   SET_NAME,
   SET_STATUS_TEXT,
   SET_IS_GENERATING,
+  SET_PREVIEW_IMAGES,
 } from "./ExportContextConstants";
 
 export const ExportContext = createContext();
@@ -16,6 +17,7 @@ const ExportContextProvider = (props) => {
     Object.freeze({
       isExporting: false,
       downloadImages: true,
+      previewImages: false,
       name: "",
       statusText: "",
       isGenerating: false,
@@ -33,6 +35,13 @@ const ExportContextProvider = (props) => {
 
   const setIsExporting = async (val) => {
     return dispatch({ type: SET_IS_EXPORTING, payload: { isExporting: val } });
+  };
+
+  const setPreviewImages = async (val) => {
+    return dispatch({
+      type: SET_PREVIEW_IMAGES,
+      payload: { previewImages: val },
+    });
   };
 
   const setDownloadImages = async (val) => {
@@ -59,6 +68,7 @@ const ExportContextProvider = (props) => {
         setName,
         setStatusText,
         setIsGenerating,
+        setPreviewImages,
       }}
     >
       {props.children}

@@ -21,6 +21,7 @@ import ImageToggle from "./ImageToggle";
 import ExportButtonStyles from "./ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
 import Progress from "./Progress";
+import PreviewImageToggle from "./PreviewImageToggle";
 
 const BulkContent = ({ isDm = false }) => {
   const classes = ExportButtonStyles();
@@ -111,7 +112,16 @@ const BulkContent = ({ isDm = false }) => {
                   )}
                 </IconButton>
               </Tooltip>
-              <ImageToggle />
+              <Stack
+                className={classes.dialogBtnStack}
+                direction="row"
+                justifyContent="flex-end"
+                alignItems="center"
+                spacing={1}
+              >
+                <PreviewImageToggle />
+                <ImageToggle />
+              </Stack>
             </Stack>
           </Stack>
         </>
@@ -126,7 +136,9 @@ const BulkContent = ({ isDm = false }) => {
             direction="row"
             justifyContent="flex-end"
             alignItems="center"
+            spacing={1}
           >
+            <PreviewImageToggle />
             <ImageToggle />
           </Stack>
         </>
