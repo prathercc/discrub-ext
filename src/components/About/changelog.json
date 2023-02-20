@@ -3,8 +3,9 @@
     "version": "1.8.6",
     "changes": [
       "Messages that are sorted are now also sorted when exported.",
-      "Add support for replied to messages",
-      "Add ability to jump to replied to messages in an export file."
+      "Add support for replied to messages.",
+      "Add ability to jump to replied to messages in an export file.",
+      "Make previewing images optional for exports."
     ]
   },
   {
