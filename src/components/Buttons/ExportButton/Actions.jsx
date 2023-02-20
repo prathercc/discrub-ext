@@ -128,7 +128,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const _compressMessages = async (updatedMessages, format, entityName) => {
     setStatusText(
       `Compressing${
-        updatedMessages.length > 2000 ? " - This may take a few minutes" : ""
+        updatedMessages.length > 2000 ? " - This may take a while..." : ""
       }`
     );
     await new Promise((resolve) =>
