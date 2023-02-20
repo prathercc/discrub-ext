@@ -13,7 +13,7 @@ const ImageToggle = () => {
       arrow
       placement="top"
       title={`${!downloadImages ? "Not " : ""}Downloading Images`}
-      description="Exports can be performed more slowly when downloading images"
+      description="Exports may be performed more slowly when downloading images"
     >
       <IconButton
         disabled={isExporting}

@@ -12,7 +12,7 @@ const ShowAvatarsToggle = () => {
     <Tooltip
       arrow
       placement="top"
-      title={`${!showAvatars ? "Not " : ""}Display Avatars`}
+      title={`${!showAvatars ? "Not " : ""}Displaying Avatars`}
       description="Displaying Avatars on a large number of messages can negatively affect the speed of the export."
     >
       <IconButton

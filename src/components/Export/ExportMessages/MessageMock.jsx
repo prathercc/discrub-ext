@@ -61,7 +61,7 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
         spacing={1}
         className={classes.messageMockMainStack}
       >
-        <AuthorAvatar author={row.author} />
+        <AuthorAvatar hideAttachments={hideAttachments} author={row.author} />
         <Stack
           direction="column"
           alignItems="flex-start"
