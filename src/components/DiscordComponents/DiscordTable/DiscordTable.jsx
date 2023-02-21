@@ -19,8 +19,6 @@ import EmbedModal from "../../Modals/EmbedModal";
 
 export default function DiscordTable() {
   const classes = DiscordTableStyles();
-  const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -45,9 +43,19 @@ export default function DiscordTable() {
       label: "Message",
     },
   ];
-  const { state: messageState, setSelected } = useContext(MessageContext);
-  const { filteredMessages, messages, filters, selectedMessages } =
-    messageState;
+  const {
+    state: messageState,
+    setSelected,
+    setOrder,
+  } = useContext(MessageContext);
+  const {
+    filteredMessages,
+    messages,
+    filters,
+    selectedMessages,
+    order,
+    orderBy,
+  } = messageState;
   const displayRows =
     filterOpen && filters.length ? filteredMessages : messages;
 
@@ -57,8 +65,7 @@ export default function DiscordTable() {
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+    setOrder(isAsc ? "desc" : "asc", property);
   };
 
   const handleSelectAllClick = (event) => {
@@ -94,10 +101,6 @@ export default function DiscordTable() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const descendingComparator = (a, b, orderBy) => {
-    return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
   };
 
   const isSelected = (name) => selectedMessages.indexOf(name) !== -1;
@@ -142,12 +145,6 @@ export default function DiscordTable() {
             />
             <TableBody>
               {displayRows
-                .slice()
-                .sort(
-                  order === "desc"
-                    ? (a, b) => descendingComparator(a, b, orderBy)
-                    : (a, b) => -descendingComparator(a, b, orderBy)
-                )
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   const isItemSelected = isSelected(row.id);

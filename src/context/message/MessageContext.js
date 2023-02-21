@@ -27,6 +27,7 @@ import {
   UPDATE_FILTERS_COMPLETE,
   UPDATE_MESSAGE_SUCCESS,
   SET_EMBED_MESSAGE_COMPLETE,
+  SET_ORDER,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -43,7 +44,6 @@ const MessageContextProvider = (props) => {
 
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
-  // const { state: guildState } = useContext(GuildContext);
   const { state: dmState } = useContext(DmContext);
 
   const selectedChannelIdRef = useRef();
@@ -73,6 +73,8 @@ const MessageContextProvider = (props) => {
       attachmentMessage: null, // The selected message for deleting attachments.
       embedMessage: null, // The selected message for viewing embeds.
       threads: [], // The list of threads for a given messages arr
+      order: "asc",
+      orderBy: "",
     })
   );
 
@@ -149,6 +151,13 @@ const MessageContextProvider = (props) => {
 
   const setSelected = async (messageIds) => {
     return dispatch({ type: SET_SELECTED, payload: messageIds });
+  };
+
+  const setOrder = async (order, orderBy) => {
+    return dispatch({
+      type: SET_ORDER,
+      payload: { order: order, orderBy: orderBy },
+    });
   };
 
   const updateMessage = async (message) => {
@@ -324,6 +333,7 @@ const MessageContextProvider = (props) => {
         getExportTitle,
         resetFilters,
         setEmbedMessage,
+        setOrder,
       }}
     >
       {props.children}

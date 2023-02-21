@@ -6,6 +6,8 @@ import {
   SET_NAME,
   SET_STATUS_TEXT,
   SET_IS_GENERATING,
+  SET_PREVIEW_IMAGES,
+  SET_SHOW_AVATARS,
 } from "./ExportContextConstants";
 
 export const ExportContext = createContext();
@@ -15,7 +17,9 @@ const ExportContextProvider = (props) => {
     DmReducer,
     Object.freeze({
       isExporting: false,
-      downloadImages: true,
+      downloadImages: false,
+      previewImages: false,
+      showAvatars: false,
       name: "",
       statusText: "",
       isGenerating: false,
@@ -33,6 +37,20 @@ const ExportContextProvider = (props) => {
 
   const setIsExporting = async (val) => {
     return dispatch({ type: SET_IS_EXPORTING, payload: { isExporting: val } });
+  };
+
+  const setShowAvatars = async (val) => {
+    return dispatch({
+      type: SET_SHOW_AVATARS,
+      payload: { showAvatars: val },
+    });
+  };
+
+  const setPreviewImages = async (val) => {
+    return dispatch({
+      type: SET_PREVIEW_IMAGES,
+      payload: { previewImages: val },
+    });
   };
 
   const setDownloadImages = async (val) => {
@@ -59,6 +77,8 @@ const ExportContextProvider = (props) => {
         setName,
         setStatusText,
         setIsGenerating,
+        setPreviewImages,
+        setShowAvatars,
       }}
     >
       {props.children}

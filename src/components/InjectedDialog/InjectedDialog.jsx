@@ -102,7 +102,7 @@ function InjectedDialog() {
           spacing={1}
         >
           <img alt="Discrub Logo" className={classes.logo} src="discrub2.png" />
-          <Typography variant="h6">1.8.5</Typography>
+          <Typography variant="h6">1.8.6</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />
