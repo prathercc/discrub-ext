@@ -24,6 +24,8 @@ const ExportButton = ({
     setName,
     setIsExporting,
     setDownloadImages,
+    setShowAvatars,
+    setPreviewImages,
   } = useContext(ExportContext);
   const { isExporting, isGenerating } = exportState;
 
@@ -70,7 +72,9 @@ const ExportButton = ({
       <Button
         disabled={bulk && bulkDisabled}
         onClick={async () => {
-          await setDownloadImages(true);
+          await setDownloadImages(false);
+          await setShowAvatars(false);
+          await setPreviewImages(false);
           setDialogOpen(true);
         }}
         variant="contained"

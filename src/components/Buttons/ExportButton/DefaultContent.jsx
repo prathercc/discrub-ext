@@ -5,6 +5,8 @@ import ImageToggle from "./ImageToggle";
 import ExportButtonStyles from "./ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
 import Progress from "./Progress";
+import PreviewImageToggle from "./PreviewImageToggle";
+import ShowAvatarsToggle from "./ShowAvatarsToggle";
 
 const DefaultContent = () => {
   const classes = ExportButtonStyles();
@@ -29,7 +31,10 @@ const DefaultContent = () => {
             direction="row"
             justifyContent="flex-end"
             alignItems="center"
+            spacing={1}
           >
+            <ShowAvatarsToggle />
+            <PreviewImageToggle />
             <ImageToggle />
           </Stack>
         </>
