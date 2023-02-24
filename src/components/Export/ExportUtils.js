@@ -35,6 +35,7 @@ export default class ExportUtils {
       bodyElementStyle.backgroundColor = "#36393f";
       this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
     },
+    removeAfterPrint: true,
   });
 
   createZipFolder = (folderName) => {

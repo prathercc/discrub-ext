@@ -26,6 +26,7 @@ const ExportButton = ({
     setDownloadImages,
     setShowAvatars,
     setPreviewImages,
+    setMessagesPerPage,
   } = useContext(ExportContext);
   const { isExporting, isGenerating } = exportState;
 
@@ -75,6 +76,7 @@ const ExportButton = ({
           await setDownloadImages(false);
           await setShowAvatars(false);
           await setPreviewImages(false);
+          await setMessagesPerPage(1000);
           setDialogOpen(true);
         }}
         variant="contained"

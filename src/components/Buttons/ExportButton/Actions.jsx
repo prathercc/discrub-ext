@@ -14,8 +14,11 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setIsExporting,
     setStatusText,
     setIsGenerating,
+    setCurrentPage,
+    setMessagesPerPage,
   } = useContext(ExportContext);
-  const { downloadImages, isExporting } = exportState;
+  const { downloadImages, isExporting, currentPage, messagesPerPage } =
+    exportState;
 
   const {
     state: messageState,
@@ -33,6 +36,8 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const { messages: contextMessages, filteredMessages } = messageState;
   const { channels, selectedExportChannels, selectedChannel } = channelState;
   const { selectedDm } = dmState;
+  const currentPageRef = useRef();
+  currentPageRef.current = currentPage;
   const exportingActiveRef = useRef();
   exportingActiveRef.current = isExporting;
   const [anchorEl, setAnchorEl] = useState(null);
@@ -43,11 +48,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     addToFolder,
     createZipFolder,
     generateHTML,
-  } = new ExportUtils(
-    contentRef,
-    setIsGenerating,
-    `message-data-${contextMessages.length - 1}`
-  );
+  } = new ExportUtils(contentRef, setIsGenerating);
   const open = !!anchorEl;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -144,8 +145,28 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         entityName
       );
     else {
-      const htmlBlob = await generateHTML();
-      return addToZip(htmlBlob, entityName, "html");
+      const totalPages =
+        updatedMessages.length > messagesPerPage
+          ? Math.ceil(updatedMessages.length / messagesPerPage)
+          : 1;
+      while (currentPageRef.current <= totalPages) {
+        setStatusText(
+          `Compressing - Page ${currentPageRef.current} of ${totalPages}`
+        );
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve();
+          }, 2000)
+        );
+        const htmlBlob = await generateHTML();
+        addToZip(
+          htmlBlob,
+          entityName + "_page_" + currentPageRef.current,
+          "html"
+        );
+        await setCurrentPage(currentPageRef.current + 1);
+      }
+      return setCurrentPage(1);
     }
   };
 
@@ -179,6 +200,9 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         attachmentFolder
       );
 
+      if (messagesPerPage === null || messagesPerPage === 0)
+        await setMessagesPerPage(updatedMessages.length);
+
       if (updatedMessages.length > 0) {
         if (isExportCancelled()) break;
         await _compressMessages(updatedMessages, format, entity.name);
@@ -198,6 +222,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setName("");
     resetZip();
     setStatusText(null);
+    setCurrentPage(1);
   };
 
   return (
