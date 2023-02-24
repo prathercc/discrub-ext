@@ -7,6 +7,7 @@ import { ExportContext } from "../../../context/export/ExportContext";
 import Progress from "./Progress";
 import PreviewImageToggle from "./PreviewImageToggle";
 import ShowAvatarsToggle from "./ShowAvatarsToggle";
+import PerPage from "./PerPage";
 
 const DefaultContent = () => {
   const classes = ExportButtonStyles();
@@ -36,6 +37,9 @@ const DefaultContent = () => {
             <ShowAvatarsToggle />
             <PreviewImageToggle />
             <ImageToggle />
+          </Stack>
+          <Stack direction="row" justifyContent="flex-end" alignItems="center">
+            <PerPage />
           </Stack>
         </>
       )}

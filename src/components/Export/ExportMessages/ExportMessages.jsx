@@ -10,10 +10,12 @@ const ExportMessages = ({ componentRef }) => {
   const classes = ExportMessagesStyles();
 
   const { state: exportState } = useContext(ExportContext);
-  const { isExporting } = exportState;
+  const { isExporting, currentPage, messagesPerPage } = exportState;
   const { state: messageState } = useContext(MessageContext);
   const { messages, filters, filteredMessages, threads } = messageState;
   const exportMessages = filters.length > 0 ? filteredMessages : messages;
+  const startIndex =
+    currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
 
   return (
     <Box className={classes.boxContainer}>
@@ -33,9 +35,13 @@ const ExportMessages = ({ componentRef }) => {
           className={classes.messagesStack}
         >
           {isExporting &&
-            exportMessages.map((row, index) => {
-              return <MessageMock row={row} index={index} threads={threads} />;
-            })}
+            exportMessages
+              .slice(startIndex, startIndex + messagesPerPage)
+              .map((row, index) => {
+                return (
+                  <MessageMock row={row} index={index} threads={threads} />
+                );
+              })}
         </Stack>
       </Stack>
     </Box>

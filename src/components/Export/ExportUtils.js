@@ -2,10 +2,9 @@ import { useReactToPrint } from "react-to-print";
 import JSZip from "jszip";
 import { v4 as uuidv4 } from "uuid";
 export default class ExportUtils {
-  constructor(contentRef, callback, lastElementId) {
+  constructor(contentRef, callback) {
     this.contentRef = contentRef;
     this.callback = callback;
-    this.lastElementId = lastElementId;
     this.zip = new JSZip();
   }
   _delay(ms) {
@@ -36,6 +35,7 @@ export default class ExportUtils {
       bodyElementStyle.backgroundColor = "#36393f";
       this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
     },
+    removeAfterPrint: true,
   });
 
   createZipFolder = (folderName) => {
@@ -103,16 +103,4 @@ export default class ExportUtils {
     },
     removeAfterPrint: true,
   });
-
-  loadAllContent = async () => {
-    let lastElement = null;
-    let attempts = 0;
-    // Attempt for an hour max
-    while (!lastElement && attempts < 720) {
-      await this._delay(1000);
-      attempts += 1;
-      lastElement = document.getElementById(this.lastElementId);
-    }
-    return !!lastElement;
-  };
 }

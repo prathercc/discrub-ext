@@ -8,6 +8,8 @@ import {
   SET_IS_GENERATING,
   SET_PREVIEW_IMAGES,
   SET_SHOW_AVATARS,
+  SET_CURRENT_PAGE,
+  SET_MESSAGES_PER_PAGE,
 } from "./ExportContextConstants";
 
 export const ExportContext = createContext();
@@ -23,10 +25,26 @@ const ExportContextProvider = (props) => {
       name: "",
       statusText: "",
       isGenerating: false,
+      currentPage: 1,
+      messagesPerPage: 1000,
     })
   );
   const exportingRef = useRef();
   exportingRef.current = state.isExporting;
+
+  const setMessagesPerPage = async (val) => {
+    return dispatch({
+      type: SET_MESSAGES_PER_PAGE,
+      payload: { messagesPerPage: val },
+    });
+  };
+
+  const setCurrentPage = async (val) => {
+    return dispatch({
+      type: SET_CURRENT_PAGE,
+      payload: { currentPage: val },
+    });
+  };
 
   const setIsGenerating = async (val) => {
     return dispatch({
@@ -79,6 +97,8 @@ const ExportContextProvider = (props) => {
         setIsGenerating,
         setPreviewImages,
         setShowAvatars,
+        setCurrentPage,
+        setMessagesPerPage,
       }}
     >
       {props.children}

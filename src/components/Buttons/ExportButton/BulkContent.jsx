@@ -23,6 +23,7 @@ import { ExportContext } from "../../../context/export/ExportContext";
 import Progress from "./Progress";
 import PreviewImageToggle from "./PreviewImageToggle";
 import ShowAvatarsToggle from "./ShowAvatarsToggle";
+import PerPage from "./PerPage";
 
 const BulkContent = ({ isDm = false }) => {
   const classes = ExportButtonStyles();
@@ -125,6 +126,14 @@ const BulkContent = ({ isDm = false }) => {
                 <ImageToggle />
               </Stack>
             </Stack>
+            <Stack
+              className={classes.dialogBtnStack}
+              direction="row"
+              justifyContent="flex-end"
+              alignItems="center"
+            >
+              <PerPage />
+            </Stack>
           </Stack>
         </>
       )}
@@ -143,6 +152,9 @@ const BulkContent = ({ isDm = false }) => {
             <ShowAvatarsToggle />
             <PreviewImageToggle />
             <ImageToggle />
+          </Stack>
+          <Stack direction="row" justifyContent="flex-end" alignItems="center">
+            <PerPage />
           </Stack>
         </>
       )}

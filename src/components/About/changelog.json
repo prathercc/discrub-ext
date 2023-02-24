@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.8.7",
+    "changes": [
+      "Fix replied to message avatar bug.",
+      "Add ability to specifiy messages per page when exporting."
+    ]
+  },
+  {
     "version": "1.8.6",
     "changes": [
       "Messages that are sorted are now also sorted when exported.",
