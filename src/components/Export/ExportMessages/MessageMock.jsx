@@ -40,7 +40,11 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
             spacing={1}
             sx={{ maxWidth: 600 }}
           >
-            <AuthorAvatar author={repliedToMsg.author} reply />
+            <AuthorAvatar
+              hideAttachments={hideAttachments}
+              author={repliedToMsg.author}
+              reply
+            />
             <Typography className={classes.replyMessageName} variant="caption">
               <strong>{repliedToMsg.username}</strong>
             </Typography>
