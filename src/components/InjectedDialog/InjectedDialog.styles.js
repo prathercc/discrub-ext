@@ -19,7 +19,7 @@ const InjectedDialogStyles = makeStyles(() => ({
     position: "fixed",
     top: "10px",
     right: "55px",
-    opacity: 0.1,
+    opacity: 0.25,
   },
   alertBox: {
     position: "fixed",

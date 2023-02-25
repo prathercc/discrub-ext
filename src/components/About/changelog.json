@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.8.8",
+    "changes": ["Patch fix for image previews not working correctly."]
+  },
+  {
     "version": "1.8.7",
     "changes": [
       "Fix replied to message avatar bug.",
