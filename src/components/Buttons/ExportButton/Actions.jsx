@@ -89,13 +89,20 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               );
               updatedMessage.attachments[c2] = {
                 ...updatedMessage.attachments[c2],
-                local_url: `${attachmentFolder.name}/${cleanFileName}`,
+                local_url: `${attachmentFolder.root?.replace(
+                  "/",
+                  ""
+                )}/${cleanFileName}`,
               };
             }
           } catch (e) {
             console.error(e);
           }
         }
+      } else {
+        updatedMessage.attachments = updatedMessage.attachments?.map(
+          (attachment) => ({ ...attachment, local_url: null })
+        );
       }
       return updatedMessage;
     };
@@ -179,6 +186,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       : [selectedChannel];
     let count = 0;
     while (count < selectedChannels.length) {
+      await setStatusText(null);
       const entity = selectedChannels[count];
       await setIsExporting(true);
       await setName(entity.name);
