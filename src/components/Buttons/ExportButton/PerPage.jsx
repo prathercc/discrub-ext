@@ -10,7 +10,7 @@ const PerPage = () => {
   return (
     <Tooltip
       arrow
-      placement="left"
+      placement="top"
       title={"Messages Per Page"}
       description="Consider keeping this value low, export times can be completed many times faster if messages are broken up into pages."
     >
