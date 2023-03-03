@@ -4,7 +4,7 @@
     "changes": [
       "Show page number on export title.",
       "Fix infinite loop bug when export is cancelled during compression step.",
-      "Update criteria for images to eligibe for preview."
+      "Update criteria for images to eligible for preview."
     ]
   },
   {
