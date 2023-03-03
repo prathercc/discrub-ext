@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.8.9",
+    "changes": [
+      "Show page number on export title.",
+      "Fix infinite loop bug when export is cancelled during compression step.",
+      "Update criteria for images to eligibe for preview."
+    ]
+  },
+  {
     "version": "1.8.8",
     "changes": ["Patch fix for image previews not working correctly."]
   },
