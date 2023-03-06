@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.8.10",
+    "changes": ["Updates to menu tabs."]
+  },
+  {
     "version": "1.8.9",
     "changes": [
       "Show page number on export title.",
