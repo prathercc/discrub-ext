@@ -32,7 +32,7 @@ import {
 import {
   editMessage,
   deleteMessage as delMsg,
-  fetchUserMessageData,
+  fetchSearchMessageData,
   fetchThreads,
   fetchMessageData,
 } from "../../discordService";
@@ -75,6 +75,8 @@ const MessageContextProvider = (props) => {
       threads: [], // The list of threads for a given messages arr
       order: "asc",
       orderBy: "",
+      searchBeforeDate: null,
+      searchAfterDate: null,
     })
   );
 
@@ -224,11 +226,15 @@ const MessageContextProvider = (props) => {
 
       let retArr = [],
         retThreads = [];
-      if (preFilterUserId) {
-        ({ retArr, retThreads } = await _getUserMessages(
+      if (preFilterUserId || state.searchBeforeDate || state.searchAfterDate) {
+        ({ retArr, retThreads } = await _getSearchMessages(
           convoIdRef,
           token,
-          preFilterUserId,
+          {
+            preFilterUserId,
+            searchBeforeDate: state.searchBeforeDate,
+            searchAfterDate: state.searchAfterDate,
+          },
           dispatch
         ));
       } else {
@@ -531,10 +537,10 @@ const _getMessages = async (
   }
 };
 
-const _getUserMessages = async (
+const _getSearchMessages = async (
   channelIdRef,
   token,
-  preFilterUserId,
+  searchCriteria,
   dispatch
 ) => {
   const originalChannelId = channelIdRef?.current?.slice();
@@ -545,11 +551,11 @@ const _getUserMessages = async (
     let reachedEnd = false;
     while (!reachedEnd) {
       if (channelIdRef.current !== originalChannelId) break;
-      const data = await fetchUserMessageData(
+      const data = await fetchSearchMessageData(
         token,
         offset,
         originalChannelId,
-        preFilterUserId
+        searchCriteria
       );
 
       if (data.retry_after) {

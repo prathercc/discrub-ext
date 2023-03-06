@@ -86,14 +86,29 @@ export const fetchMessageData = (authorization, lastId, channelId) => {
   ).then((resp) => resp.json());
 };
 
-export const fetchUserMessageData = (
+export const fetchSearchMessageData = (
   authorization,
   offset,
   channelId,
-  authorId
+  searchCriteria
 ) => {
+  const { preFilterUserId, searchAfterDate, searchBeforeDate } = searchCriteria;
+  const urlSearchParams = new URLSearchParams({
+    author_id: preFilterUserId,
+    after: searchAfterDate,
+    before: searchBeforeDate,
+  });
+  const nullKeys = [];
+  urlSearchParams.forEach((value, key) => {
+    if (value === "null") {
+      nullKeys.push(key);
+    }
+  });
+  nullKeys.forEach((key) => {
+    urlSearchParams.delete(key);
+  });
   return fetch(
-    `${discordChannelsUrl}/${channelId}/messages/search?author_id=${authorId}${
+    `${discordChannelsUrl}/${channelId}/messages/search?${urlSearchParams.toString()}${
       offset > 0 ? `&offset=${offset}` : ""
     }`,
     {
