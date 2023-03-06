@@ -14,11 +14,9 @@ import {
   DialogContentText,
   Button,
 } from "@mui/material";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import AboutStyles from "./About.styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
-import PaidIcon from "@mui/icons-material/Paid";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import changelog from "./changelog.json";
 import RedditIcon from "@mui/icons-material/Reddit";
@@ -127,72 +125,6 @@ function About() {
               </Stack>
             </AccordionDetails>
           </Accordion>
-
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Stack
-                direction="row"
-                justifyContent="flex-start"
-                alignItems="center"
-                spacing={1}
-              >
-                <PaidIcon />
-                <Typography className={classes.accordianTitle}>
-                  Donate
-                </Typography>
-              </Stack>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Stack
-                spacing={2}
-                alignItems="center"
-                justifyContent="space-around"
-                direction="row"
-              >
-                <Stack alignItems="center">
-                  <Typography variant="caption">Bitcoin</Typography>
-                  <Tooltip
-                    arrow
-                    leaveDelay={3000}
-                    title="3A7JHbygZeHMawz3vwckuYhP84hdkPTQNm"
-                  >
-                    <img
-                      alt="Donate BTC"
-                      className={classes.cryptoImg}
-                      src="bitcoin.png"
-                    />
-                  </Tooltip>
-                </Stack>
-
-                <Stack alignItems="center">
-                  <a href="https://ko-fi.com/W7W4AAIBR">
-                    <img
-                      className={classes.kofiImg}
-                      src="https://cdn.ko-fi.com/cdn/kofi2.png?v=3"
-                      border="0"
-                      alt="Buy Me a Coffee at ko-fi.com"
-                    />
-                  </a>
-                </Stack>
-
-                <Stack alignItems="center">
-                  <Typography variant="caption">Ethereum</Typography>
-                  <Tooltip
-                    arrow
-                    leaveDelay={3000}
-                    title="0x01aC5D8C7B814eC70Ff5E402297f5b78Ef81137C"
-                  >
-                    <img
-                      alt="Donate ETH"
-                      className={classes.cryptoImg}
-                      src="ethereum.png"
-                    />
-                  </Tooltip>
-                </Stack>
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Stack

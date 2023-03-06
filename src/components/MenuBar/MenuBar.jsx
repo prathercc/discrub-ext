@@ -6,13 +6,13 @@ import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import MenuBarStyles from "./MenuBar.styles";
-// import SickIcon from "@mui/icons-material/Sick";
+import DonationDialog from "./DonationDialog";
 
 const MenuBar = ({ menuIndex, setMenuIndex }) => {
   const classes = MenuBarStyles();
 
   const handleChange = (event, newValue) => {
-    setMenuIndex(newValue);
+    if (newValue !== 2) setMenuIndex(newValue);
   };
 
   return (
@@ -24,9 +24,7 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
         <Tooltip arrow title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
-        {/* <Tooltip title="Nuke Account">
-          <Tab disabled icon={<SickIcon />} />
-        </Tooltip> */}
+        <DonationDialog />
         <Tooltip arrow title="General Information">
           <Tab icon={<InfoIcon />} />
         </Tooltip>

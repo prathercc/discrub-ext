@@ -65,7 +65,7 @@ function InjectedDialog() {
         <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
       )}
       {menuIndex === 1 && <DirectMessages />}
-      {menuIndex === 2 && <About />}
+      {menuIndex === 3 && <About />}
       {announcement && (
         <Box className={classes.alertBox}>
           {!alertOpen && (
@@ -102,7 +102,7 @@ function InjectedDialog() {
           spacing={1}
         >
           <img alt="Discrub Logo" className={classes.logo} src="discrub2.png" />
-          <Typography variant="h6">1.8.9</Typography>
+          <Typography variant="h6">1.8.10</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />
