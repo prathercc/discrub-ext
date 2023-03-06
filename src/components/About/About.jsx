@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styled, { keyframes } from "styled-components";
 import GitHubButton from "react-github-btn";
 import {
@@ -7,27 +7,15 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-  Button,
 } from "@mui/material";
 import AboutStyles from "./About.styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import changelog from "./changelog.json";
-import RedditIcon from "@mui/icons-material/Reddit";
-import LinkIcon from "@mui/icons-material/Link";
 
 function About() {
   const classes = AboutStyles();
-  const [subredditOpen, setSubredditOpen] = useState(false);
-  const handleSubredditClose = () => {
-    setSubredditOpen(false);
-  };
 
   return (
     <Stack spacing={3} className={classes.boxContainer}>
@@ -36,55 +24,6 @@ function About() {
       </Stack>
       <Stack className={classes.paper}>
         <Stack padding={3} spacing={2}>
-          <Dialog open={subredditOpen} onClose={handleSubredditClose}>
-            <DialogTitle>Subreddit - r/discrub</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Opening new tab to external link:{" "}
-                <strong>https://www.reddit.com/r/discrub/</strong>
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                color="secondary"
-                variant="contained"
-                onClick={handleSubredditClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                disableElevation
-                onClick={() =>
-                  window.open("https://www.reddit.com/r/discrub/", "_blank")
-                }
-              >
-                Continue
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Accordion
-            expanded={false}
-            onClick={(e) => {
-              e.stopPropagation();
-              setSubredditOpen(true);
-            }}
-          >
-            <AccordionSummary expandIcon={<LinkIcon />}>
-              <Stack
-                direction="row"
-                justifyContent="flex-start"
-                alignItems="center"
-                spacing={1}
-              >
-                <RedditIcon />
-                <Typography className={classes.accordianTitle}>
-                  r/discrub
-                </Typography>
-              </Stack>
-            </AccordionSummary>
-          </Accordion>
-
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Stack
