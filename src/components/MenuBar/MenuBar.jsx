@@ -28,7 +28,7 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
         </Tooltip>
         <DonationDialog />
         <RedditDialog />
-        <Tooltip arrow title="Development Info">
+        <Tooltip arrow title="Change Log">
           <Tab icon={<DataObjectIcon />} />
         </Tooltip>
       </Tabs>
