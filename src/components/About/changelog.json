@@ -1,7 +1,10 @@
 [
   {
     "version": "1.8.10",
-    "changes": ["Updates to menu tabs."]
+    "changes": [
+      "Add ability to search messages before and after a given date.",
+      "Updates to menu tabs."
+    ]
   },
   {
     "version": "1.8.9",
