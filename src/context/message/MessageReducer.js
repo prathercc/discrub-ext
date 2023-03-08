@@ -13,6 +13,8 @@ import {
   RESET_FILTERS_COMPLETE,
   SET_EMBED_MESSAGE_COMPLETE,
   SET_ORDER,
+  SET_SEARCH_AFTER_DATE_COMPLETE,
+  SET_SEARCH_BEFORE_DATE_COMPLETE,
 } from "./MessageContextConstants";
 export const MessageReducer = (state, action) => {
   const { type, payload } = action;
@@ -34,6 +36,16 @@ export const MessageReducer = (state, action) => {
             ? (a, b) => _descendingComparator(a, b, payload.orderBy)
             : (a, b) => -_descendingComparator(a, b, payload.orderBy)
         ),
+      };
+    case SET_SEARCH_AFTER_DATE_COMPLETE:
+      return {
+        ...state,
+        searchAfterDate: payload,
+      };
+    case SET_SEARCH_BEFORE_DATE_COMPLETE:
+      return {
+        ...state,
+        searchBeforeDate: payload,
       };
     case SET_ATTACHMENT_MESSAGE_COMPLETE:
       return { ...state, attachmentMessage: payload };

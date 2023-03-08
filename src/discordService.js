@@ -1,3 +1,4 @@
+/* global BigInt */
 const discordUsersUrl = "https://discord.com/api/v10/users";
 const discordGuildsUrl = "https://discord.com/api/v10/guilds";
 const discordChannelsUrl = "https://discord.com/api/v10/channels";
@@ -92,11 +93,20 @@ export const fetchSearchMessageData = (
   channelId,
   searchCriteria
 ) => {
+  const generateSnowflake = (date) => {
+    if (date === null) {
+      return null;
+    } else {
+      const timestamp = date.valueOf();
+      const result = (BigInt(timestamp) - BigInt(1420070400000)) << BigInt(22);
+      return result.toString();
+    }
+  };
   const { preFilterUserId, searchAfterDate, searchBeforeDate } = searchCriteria;
   const urlSearchParams = new URLSearchParams({
     author_id: preFilterUserId,
-    after: searchAfterDate,
-    before: searchBeforeDate,
+    min_id: generateSnowflake(searchAfterDate),
+    max_id: generateSnowflake(searchBeforeDate),
   });
   const nullKeys = [];
   urlSearchParams.forEach((value, key) => {

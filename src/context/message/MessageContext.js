@@ -28,6 +28,8 @@ import {
   UPDATE_MESSAGE_SUCCESS,
   SET_EMBED_MESSAGE_COMPLETE,
   SET_ORDER,
+  SET_SEARCH_BEFORE_DATE_COMPLETE,
+  SET_SEARCH_AFTER_DATE_COMPLETE,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -135,6 +137,20 @@ const MessageContextProvider = (props) => {
         )}
       </>
     );
+  };
+
+  const setSearchBeforeDate = async (val) => {
+    return dispatch({
+      type: SET_SEARCH_BEFORE_DATE_COMPLETE,
+      payload: val,
+    });
+  };
+
+  const setSearchAfterDate = async (val) => {
+    return dispatch({
+      type: SET_SEARCH_AFTER_DATE_COMPLETE,
+      payload: val,
+    });
   };
 
   const setEmbedMessage = async (message) => {
@@ -340,6 +356,8 @@ const MessageContextProvider = (props) => {
         resetFilters,
         setEmbedMessage,
         setOrder,
+        setSearchBeforeDate,
+        setSearchAfterDate,
       }}
     >
       {props.children}
