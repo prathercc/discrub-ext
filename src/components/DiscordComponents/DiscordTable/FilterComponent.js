@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import DiscordDateTimePicker from "../DiscordDateTimePicker/DiscordDateTimePicker";
@@ -20,6 +20,9 @@ const FilterComponent = () => {
     600
   );
 
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
+
   return (
     <Stack zIndex={1} className={classes.stack} spacing={2}>
       <Stack
@@ -29,12 +32,20 @@ const FilterComponent = () => {
         spacing={2}
       >
         <DiscordDateTimePicker
-          onChange={(e) => handleFilterUpdate("startTime", e, "date")}
+          onChange={(e) => {
+            handleFilterUpdate("startTime", e, "date");
+            setStartTime(e);
+          }}
           label="Start Time"
+          value={startTime}
         />
         <DiscordDateTimePicker
-          onChange={(e) => handleFilterUpdate("endTime", e, "date")}
+          onChange={(e) => {
+            handleFilterUpdate("endTime", e, "date");
+            setEndTime(e);
+          }}
           label="End Time"
+          value={endTime}
         />
       </Stack>
       <Stack
