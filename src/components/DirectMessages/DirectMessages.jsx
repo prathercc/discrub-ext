@@ -18,6 +18,7 @@ import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
 import ExportButton from "../Buttons/ExportButton/ExportButton";
 import PurgeButton from "../Buttons/PurgeButton";
+import BeforeAndAfterFields from "../Fields/BeforeAndAfterFields";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -39,6 +40,8 @@ function DirectMessages() {
     resetMessageData,
     getMessageData,
     resetFilters,
+    setSearchAfterDate,
+    setSearchBeforeDate,
   } = useContext(MessageContext);
 
   const { selectedDm, dms, preFilterUserId, preFilterUserIds } = dmState;
@@ -57,6 +60,8 @@ function DirectMessages() {
 
   const handleChangeDm = async (e) => {
     setDm(e.target.value);
+    await setSearchBeforeDate(null);
+    await setSearchAfterDate(null);
     await resetFilters();
     await resetMessageData();
     setSearchTouched(false);
@@ -110,7 +115,7 @@ function DirectMessages() {
                 </TextField>
                 <Tooltip
                   arrow
-                  title="Filtering by username is optional"
+                  title="Filter By Username (Optional)"
                   placement="top"
                 >
                   <TextField
@@ -137,6 +142,10 @@ function DirectMessages() {
                   </TextField>
                 </Tooltip>
               </Stack>
+              <BeforeAndAfterFields
+                disabled={selectedDm.id === null || messagesLoading}
+                className={classes.purgeHidden}
+              />
               <Stack
                 alignItems="center"
                 direction="row"

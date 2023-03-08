@@ -55,7 +55,12 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
 
-  const { messages, isLoading: messagesLoading } = messageDataState;
+  const {
+    messages,
+    isLoading: messagesLoading,
+    searchBeforeDate,
+    searchAfterDate,
+  } = messageDataState;
   const { selectedGuild } = guildState;
   const { channels, selectedChannel, preFilterUserId } = channelState;
   const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
@@ -140,6 +145,8 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           messages.length > 0 ||
           !!dmPreFilterUserId ||
           !!preFilterUserId ||
+          !!searchBeforeDate ||
+          !!searchAfterDate ||
           dialogOpen
         }
         onClick={() =>
