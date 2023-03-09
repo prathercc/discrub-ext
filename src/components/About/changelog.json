@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.8.11",
+    "changes": ["Patch fix for message timezones."]
+  },
+  {
     "version": "1.8.10",
     "changes": [
       "Force UTF-8 on generated HTML to fix issues with emojis and other languages rendering as gibberish.",

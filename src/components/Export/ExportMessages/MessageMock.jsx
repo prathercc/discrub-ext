@@ -10,6 +10,9 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
   const { threads, messages } = messageState;
   const classes = ExportMessagesStyles();
   const messageDate = new Date(Date.parse(row.timestamp));
+  const tz = messageDate
+    .toLocaleTimeString(undefined, { timeZoneName: "short" })
+    .split(" ")[2];
   const foundThread = threads?.find(
     (thread) => thread.id === row.id || thread.id === row.channel_id
   );
@@ -86,10 +89,10 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
               variant="caption"
             >
               {`${
-                messageDate.getUTCMonth() + 1
-              }/${messageDate.getUTCDate()}/${messageDate.getUTCFullYear()}`}{" "}
+                messageDate.getMonth() + 1
+              }/${messageDate.getDate()}/${messageDate.getFullYear()}`}{" "}
               at{" "}
-              {`${messageDate.getUTCHours()}:${messageDate.getUTCMinutes()}:${messageDate.getUTCSeconds()} UTC`}
+              {`${messageDate.getHours()}:${messageDate.getMinutes()}:${messageDate.getSeconds()} ${tz}`}
             </Typography>
           </Stack>
           {foundThread && (
