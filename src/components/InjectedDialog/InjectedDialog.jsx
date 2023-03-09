@@ -72,7 +72,7 @@ function InjectedDialog() {
         <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
       )}
       {menuIndex === 1 && <DirectMessages />}
-      {menuIndex === 4 && <About />}
+      {menuIndex === 2 && <About />}
       {announcement && (
         <Box className={classes.alertBox}>
           {!alertOpen && (

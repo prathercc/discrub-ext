@@ -7,9 +7,12 @@ import {
   DialogContentText,
   Button,
   Tab,
+  Stack,
 } from "@mui/material";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import GoogleIcon from "@mui/icons-material/Google";
+import CoffeeIcon from "@mui/icons-material/Coffee";
 
 function DonationDialog() {
   const [donationDialogOpen, setDonationDialogOpen] = useState(false);
@@ -20,8 +23,8 @@ function DonationDialog() {
     <>
       <Tooltip
         arrow
-        title="Ko-Fi Donations"
-        description="Support the extension's development by gifting the developer a much needed coffee ☕"
+        title="Leave a Review / Ko-Fi Donation"
+        description="Support the extension's development by leaving a review or by gifting the developer a much needed coffee ☕!"
       >
         <Tab
           onClick={(e) => {
@@ -32,23 +35,100 @@ function DonationDialog() {
       </Tooltip>
 
       <Dialog open={donationDialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>Ko-Fi Donations</DialogTitle>
+        <DialogTitle>Leave a Review / Ko-Fi Donation</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <div>
-              Thank you for taking the time to try out Discrub, while donations
-              are never expected, they are very much welcome and appreciated!
-            </div>
-            <img
-              style={{
-                width: "560px",
-                borderRadius: "10px",
-                border: "1px solid rgb(88, 101, 242)",
-                marginTop: "10px",
-              }}
-              src="ko-fi.png"
-              alt="Ko-Fi Preview"
-            />
+            <Stack
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              spacing={2}
+            >
+              <Stack
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <div>
+                  Thank you to everyone for taking the time to try out Discrub,
+                  I've been able to make so many improvements and add many new
+                  features, all from your feedback!
+                </div>
+                <div>
+                  While reviews and donations are never expected, they are
+                  greatly appreciated and help support the development of this
+                  extension ❤️
+                </div>
+              </Stack>
+
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <Stack
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <img
+                    style={{
+                      width: "260px",
+                      height: "152px",
+                      borderRadius: "10px",
+                      border: "1px solid rgb(88, 101, 242)",
+                      marginTop: "10px",
+                    }}
+                    src="googlereview.png"
+                    alt="Google Review Preview"
+                  />
+                  <Button
+                    startIcon={<GoogleIcon />}
+                    variant="contained"
+                    disableElevation
+                    onClick={() =>
+                      window.open(
+                        "https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj",
+                        "_blank"
+                      )
+                    }
+                  >
+                    Continue to Google
+                  </Button>
+                </Stack>
+                <Stack
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <img
+                    style={{
+                      width: "260px",
+                      height: "152px",
+                      borderRadius: "10px",
+                      border: "1px solid rgb(88, 101, 242)",
+                      marginTop: "10px",
+                    }}
+                    src="ko-fi.png"
+                    alt="Ko-Fi Preview"
+                  />
+                  <Button
+                    startIcon={<CoffeeIcon />}
+                    variant="contained"
+                    disableElevation
+                    onClick={() =>
+                      window.open("https://ko-fi.com//prathercc", "_blank")
+                    }
+                  >
+                    Continue to Ko-Fi
+                  </Button>
+                </Stack>
+              </Stack>
+            </Stack>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -58,15 +138,6 @@ function DonationDialog() {
             onClick={handleDialogClose}
           >
             Cancel
-          </Button>
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={() =>
-              window.open("https://ko-fi.com//prathercc", "_blank")
-            }
-          >
-            Continue to Ko-Fi
           </Button>
         </DialogActions>
       </Dialog>

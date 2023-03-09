@@ -33,6 +33,14 @@ export default class ExportUtils {
         )[0].style;
       bodyElementStyle.margin = "3px";
       bodyElementStyle.backgroundColor = "#36393f";
+
+      let meta = document.createElement("meta");
+      meta.httpEquiv = "Content-Type";
+      meta.content = "text/html; charset=utf-8";
+      iframe.contentWindow.document
+        .getElementsByTagName("head")[0]
+        .prepend(meta);
+
       this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
     },
     removeAfterPrint: true,

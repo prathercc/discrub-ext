@@ -2,8 +2,8 @@
   {
     "version": "1.8.10",
     "changes": [
-      "Add ability to search messages before and after a given date.",
-      "Updates to menu tabs."
+      "Force UTF-8 on generated HTML to fix issues with emojis and other languages rendering as gibberish.",
+      "Add ability to search messages before and after a given date."
     ]
   },
   {

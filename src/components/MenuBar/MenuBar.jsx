@@ -13,7 +13,7 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   const classes = MenuBarStyles();
 
   const handleChange = (event, newValue) => {
-    const dialogTabs = [2, 3];
+    const dialogTabs = [3, 4];
     if (!dialogTabs.some((dt) => dt === newValue)) setMenuIndex(newValue);
   };
 
@@ -26,11 +26,11 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
         <Tooltip arrow title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
-        <DonationDialog />
-        <RedditDialog />
         <Tooltip arrow title="Change Log">
           <Tab icon={<DataObjectIcon />} />
         </Tooltip>
+        <RedditDialog />
+        <DonationDialog />
       </Tabs>
     </>
   );
