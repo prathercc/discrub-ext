@@ -8,17 +8,17 @@ const AttachmentFilePreview = ({ attachment }) => {
   const attachmentClasses = AttachmentStyles();
   const { state: exportState } = useContext(ExportContext);
   const { previewImages } = exportState;
+  const supportedImgTypes = ["png", "jpg", "jpeg", "gif"];
+  const isImg =
+    attachment.content_type?.includes("image") ||
+    supportedImgTypes.some((sit) => attachment.filename.includes(sit));
 
   return (
     <Box ml="5px" className={attachmentClasses.attachmentPreviewBox}>
       <Avatar
         className={attachmentClasses.attachmentAvatar}
         variant="rounded"
-        src={
-          attachment.content_type?.includes("image") &&
-          previewImages &&
-          (attachment.local_url || attachment.url)
-        }
+        src={isImg && previewImages && (attachment.local_url || attachment.url)}
       >
         <InsertDriveFileIcon />
       </Avatar>

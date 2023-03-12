@@ -1,5 +1,24 @@
 [
   {
+    "version": "1.8.11",
+    "changes": ["Patch fix for message timezones."]
+  },
+  {
+    "version": "1.8.10",
+    "changes": [
+      "Force UTF-8 on generated HTML to fix issues with emojis and other languages rendering as gibberish.",
+      "Add ability to search messages before and after a given date."
+    ]
+  },
+  {
+    "version": "1.8.9",
+    "changes": [
+      "Show page number on export title.",
+      "Fix infinite loop bug when export is cancelled during compression step.",
+      "Update criteria for images to eligible for preview."
+    ]
+  },
+  {
     "version": "1.8.8",
     "changes": ["Patch fix for image previews not working correctly."]
   },

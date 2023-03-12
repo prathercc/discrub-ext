@@ -1,18 +1,20 @@
 import React from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import InfoIcon from "@mui/icons-material/Info";
 import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import MenuBarStyles from "./MenuBar.styles";
-// import SickIcon from "@mui/icons-material/Sick";
+import DonationDialog from "./DonationDialog";
+import RedditDialog from "./RedditDialog";
+import DataObjectIcon from "@mui/icons-material/DataObject";
 
 const MenuBar = ({ menuIndex, setMenuIndex }) => {
   const classes = MenuBarStyles();
 
   const handleChange = (event, newValue) => {
-    setMenuIndex(newValue);
+    const dialogTabs = [3, 4];
+    if (!dialogTabs.some((dt) => dt === newValue)) setMenuIndex(newValue);
   };
 
   return (
@@ -24,12 +26,11 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
         <Tooltip arrow title="Direct Messages">
           <Tab icon={<EmailIcon />} />
         </Tooltip>
-        {/* <Tooltip title="Nuke Account">
-          <Tab disabled icon={<SickIcon />} />
-        </Tooltip> */}
-        <Tooltip arrow title="General Information">
-          <Tab icon={<InfoIcon />} />
+        <Tooltip arrow title="Change Log">
+          <Tab icon={<DataObjectIcon />} />
         </Tooltip>
+        <RedditDialog />
+        <DonationDialog />
       </Tabs>
     </>
   );

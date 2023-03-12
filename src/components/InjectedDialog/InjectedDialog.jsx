@@ -28,7 +28,12 @@ function InjectedDialog() {
 
   const { getUserData } = useContext(UserContext);
   const { resetChannel } = useContext(ChannelContext);
-  const { resetMessageData, resetFilters } = useContext(MessageContext);
+  const {
+    resetMessageData,
+    resetFilters,
+    setSearchAfterDate,
+    setSearchBeforeDate,
+  } = useContext(MessageContext);
   const { resetGuild } = useContext(GuildContext);
   const { resetDm } = useContext(DmContext);
 
@@ -38,6 +43,8 @@ function InjectedDialog() {
 
   const handleChangeMenuIndex = async (index) => {
     await Promise.all([
+      setSearchBeforeDate(null),
+      setSearchAfterDate(null),
       resetMessageData(),
       resetDm(),
       resetChannel(),
@@ -102,7 +109,7 @@ function InjectedDialog() {
           spacing={1}
         >
           <img alt="Discrub Logo" className={classes.logo} src="discrub2.png" />
-          <Typography variant="h6">1.8.8</Typography>
+          <Typography variant="h6">1.8.11</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />
