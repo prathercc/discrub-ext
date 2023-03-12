@@ -40,7 +40,12 @@ const ExportButton = ({
     resetChannel,
   } = useContext(ChannelContext);
   const { state: guildState } = useContext(GuildContext);
-  const { isLoading: messagesLoading, messages } = messageState;
+  const {
+    isLoading: messagesLoading,
+    messages,
+    searchBeforeDate,
+    searchAfterDate,
+  } = messageState;
   const { preFilterUserId, selectedChannel } = channelState;
   const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
   const { selectedGuild } = guildState;
@@ -66,6 +71,8 @@ const ExportButton = ({
     messages.length > 0 ||
     !!dmPreFilterUserId ||
     !!preFilterUserId ||
+    !!searchBeforeDate ||
+    !!searchAfterDate ||
     dialogOpen;
 
   return (

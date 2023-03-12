@@ -19,6 +19,7 @@ import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
 import PurgeButton from "../Buttons/PurgeButton";
 import ExportButton from "../Buttons/ExportButton/ExportButton";
+import BeforeAndAfterFields from "../Fields/BeforeAndAfterFields";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -26,6 +27,8 @@ function ChannelMessages({ closeAnnouncement }) {
     getMessageData,
     resetMessageData,
     resetFilters,
+    setSearchBeforeDate,
+    setSearchAfterDate,
   } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
   const { state: guildState, getGuilds, setGuild } = useContext(GuildContext);
@@ -62,13 +65,19 @@ function ChannelMessages({ closeAnnouncement }) {
     setGuild(e.target.value);
     await resetChannel();
     await resetFilters();
+    await setSearchBeforeDate(null);
+    await setSearchAfterDate(null);
     await resetMessageData();
     await getChannels(e.target.value);
     setSearchTouched(false);
   };
 
   const handleChannelChange = async (e) => {
-    if (!e.target.value) setPreFilterUserId(null);
+    if (!e.target.value) {
+      await setPreFilterUserId(null);
+      await setSearchBeforeDate(null);
+      await setSearchAfterDate(null);
+    }
     await resetFilters();
     await resetMessageData();
     setSearchTouched(false);
@@ -145,7 +154,7 @@ function ChannelMessages({ closeAnnouncement }) {
 
                 <Tooltip
                   arrow
-                  title="Filtering by username is optional"
+                  title="Filter By Username (Optional)"
                   description="Due to API limitations, Channel Messages can only be pre-filtered by your username"
                   placement="left"
                 >
@@ -173,7 +182,10 @@ function ChannelMessages({ closeAnnouncement }) {
                   </TextField>
                 </Tooltip>
               </Stack>
-
+              <BeforeAndAfterFields
+                disabled={selectedChannel.id === null || messagesLoading}
+                className={classes.purgeHidden}
+              />
               <Stack
                 alignItems="center"
                 direction="row"

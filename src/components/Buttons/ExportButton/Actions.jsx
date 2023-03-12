@@ -156,7 +156,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         updatedMessages.length > messagesPerPage
           ? Math.ceil(updatedMessages.length / messagesPerPage)
           : 1;
-      while (currentPageRef.current <= totalPages) {
+      while (currentPageRef.current <= totalPages && !isExportCancelled()) {
         setStatusText(
           `Compressing - Page ${currentPageRef.current} of ${totalPages}`
         );

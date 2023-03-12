@@ -35,7 +35,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           const iframe = document.createElement("iframe");
           iframe.id = "injected_dialog_iframe";
           iframe.src = chrome.runtime.getURL("injected_dialog.html");
-          iframe.height = "662px";
+          iframe.height = "722px";
           iframe.width = "777px";
           modal.appendChild(iframe);
           document.body.appendChild(modal);

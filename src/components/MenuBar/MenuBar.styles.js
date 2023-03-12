@@ -9,6 +9,11 @@ const MenuBarStyles = makeStyles(() => ({
       color: "rgb(210, 213, 247, 1)",
       cursor: "pointer",
     },
+    "& .MuiTab-textColorInherit": {
+      color: "rgb(210, 213, 247, 1)",
+      cursor: "pointer",
+      opacity: 1,
+    },
     "& .MuiTab-root.Mui-selected": {
       color: "rgb(210, 213, 247, 1)",
     },

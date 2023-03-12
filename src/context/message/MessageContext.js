@@ -28,11 +28,13 @@ import {
   UPDATE_MESSAGE_SUCCESS,
   SET_EMBED_MESSAGE_COMPLETE,
   SET_ORDER,
+  SET_SEARCH_BEFORE_DATE_COMPLETE,
+  SET_SEARCH_AFTER_DATE_COMPLETE,
 } from "./MessageContextConstants";
 import {
   editMessage,
   deleteMessage as delMsg,
-  fetchUserMessageData,
+  fetchSearchMessageData,
   fetchThreads,
   fetchMessageData,
 } from "../../discordService";
@@ -75,6 +77,8 @@ const MessageContextProvider = (props) => {
       threads: [], // The list of threads for a given messages arr
       order: "asc",
       orderBy: "",
+      searchBeforeDate: null,
+      searchAfterDate: null,
     })
   );
 
@@ -133,6 +137,20 @@ const MessageContextProvider = (props) => {
         )}
       </>
     );
+  };
+
+  const setSearchBeforeDate = async (val) => {
+    return dispatch({
+      type: SET_SEARCH_BEFORE_DATE_COMPLETE,
+      payload: val,
+    });
+  };
+
+  const setSearchAfterDate = async (val) => {
+    return dispatch({
+      type: SET_SEARCH_AFTER_DATE_COMPLETE,
+      payload: val,
+    });
   };
 
   const setEmbedMessage = async (message) => {
@@ -224,11 +242,15 @@ const MessageContextProvider = (props) => {
 
       let retArr = [],
         retThreads = [];
-      if (preFilterUserId) {
-        ({ retArr, retThreads } = await _getUserMessages(
+      if (preFilterUserId || state.searchBeforeDate || state.searchAfterDate) {
+        ({ retArr, retThreads } = await _getSearchMessages(
           convoIdRef,
           token,
-          preFilterUserId,
+          {
+            preFilterUserId,
+            searchBeforeDate: state.searchBeforeDate,
+            searchAfterDate: state.searchAfterDate,
+          },
           dispatch
         ));
       } else {
@@ -334,6 +356,8 @@ const MessageContextProvider = (props) => {
         resetFilters,
         setEmbedMessage,
         setOrder,
+        setSearchBeforeDate,
+        setSearchAfterDate,
       }}
     >
       {props.children}
@@ -531,10 +555,10 @@ const _getMessages = async (
   }
 };
 
-const _getUserMessages = async (
+const _getSearchMessages = async (
   channelIdRef,
   token,
-  preFilterUserId,
+  searchCriteria,
   dispatch
 ) => {
   const originalChannelId = channelIdRef?.current?.slice();
@@ -545,11 +569,11 @@ const _getUserMessages = async (
     let reachedEnd = false;
     while (!reachedEnd) {
       if (channelIdRef.current !== originalChannelId) break;
-      const data = await fetchUserMessageData(
+      const data = await fetchSearchMessageData(
         token,
         offset,
         originalChannelId,
-        preFilterUserId
+        searchCriteria
       );
 
       if (data.retry_after) {
