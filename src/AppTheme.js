@@ -171,6 +171,15 @@ const theme = createTheme({
         },
       },
     },
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          maxWidth: 780,
+          maxHeight: 720,
+          margin: "auto",
+        },
+      },
+    },
   },
 });
 

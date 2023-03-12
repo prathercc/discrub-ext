@@ -14,17 +14,18 @@ const InjectedDialogStyles = makeStyles(() => ({
     wordWrap: "break-word",
     overflow: "hidden",
     borderRadius: "1px",
+    boxShadow: "17px 18px 5px -9px rgba(0,0,0,0.41)",
   },
   box: {
     position: "fixed",
-    top: "10px",
-    right: "55px",
-    opacity: 0.25,
+    top: "50px",
+    right: "295px",
+    opacity: 0.35,
   },
   alertBox: {
     position: "fixed",
-    bottom: "5px",
-    left: "5px",
+    bottom: "43px",
+    left: "242px",
     width: "767px",
   },
   logo: {

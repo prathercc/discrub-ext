@@ -27,7 +27,6 @@ if (!chrome.runtime.onMessage.hasListeners())
           modal.id = "injected_dialog";
           modal.innerHTML =
             "<style>::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-thumb{background:#f1f1f1;}::-webkit-scrollbar-track{background:#888;}</style>";
-          modal.style.boxShadow = "17px 18px 5px -9px rgba(0,0,0,0.41)";
           modal.style.padding = 0;
           modal.style.border = "none";
           modal.style.backgroundColor = "transparent";
@@ -35,8 +34,9 @@ if (!chrome.runtime.onMessage.hasListeners())
           const iframe = document.createElement("iframe");
           iframe.id = "injected_dialog_iframe";
           iframe.src = chrome.runtime.getURL("injected_dialog.html");
-          iframe.height = "722px";
-          iframe.width = "777px";
+          iframe.height = "800px";
+          iframe.width = "1250px";
+          // iframe.style.border = "1px dotted gray";
           modal.appendChild(iframe);
           document.body.appendChild(modal);
           document.getElementById("injected_dialog").showModal();
