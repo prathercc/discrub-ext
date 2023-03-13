@@ -3,7 +3,7 @@ import { makeStyles } from "@mui/styles";
 const CloseWindowButtonStyles = makeStyles(() => ({
   boxContainer: {
     position: "fixed",
-    top: "45px",
+    top: "12px",
     right: "245px",
   },
 }));
