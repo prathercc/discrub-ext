@@ -27,6 +27,16 @@ const InjectedDialogStyles = makeStyles(() => ({
     bottom: "74px",
     left: "242px",
     width: "767px",
+    "& .MuiAlert-root": {
+      backgroundColor: "#2f3136 !important",
+      color: "#d2d5f7 !important",
+    },
+    "& .MuiAlert-icon": {
+      color: "#5865f2 !important",
+    },
+    "& .MuiTypography-root": {
+      color: "#d2d5f7 !important",
+    },
   },
   logo: {
     width: "24px",
