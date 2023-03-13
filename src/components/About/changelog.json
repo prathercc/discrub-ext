@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.8.12",
+    "changes": ["Screen size and style adjustments."]
+  },
+  {
     "version": "1.8.11",
     "changes": ["Patch fix for message timezones."]
   },
