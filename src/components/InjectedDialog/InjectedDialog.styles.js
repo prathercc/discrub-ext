@@ -13,8 +13,8 @@ const InjectedDialogStyles = makeStyles(() => ({
     border: "1px solid rgb(210, 213, 247, 0.2)",
     wordWrap: "break-word",
     overflow: "hidden",
-    borderRadius: "1px",
-    boxShadow: "17px 18px 5px -9px rgba(0,0,0,0.41)",
+    borderRadius: "6px",
+    boxShadow: "10px 11px 7px -1px rgba(0,0,0,0.41)",
   },
   box: {
     position: "fixed",

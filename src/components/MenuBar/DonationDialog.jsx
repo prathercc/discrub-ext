@@ -66,9 +66,10 @@ function DonationDialog() {
 
               <Stack
                 direction="row"
-                justifyContent="center"
+                justifyContent="space-around"
                 alignItems="center"
                 spacing={2}
+                sx={{ width: "100%" }}
               >
                 <Stack
                   direction="column"
