@@ -5,6 +5,7 @@ import { ChannelContext } from "../../../context/channel/ChannelContext";
 import { MessageContext } from "../../../context/message/MessageContext";
 import ExportUtils from "../../Export/ExportUtils";
 import { DmContext } from "../../../context/dm/DmContext";
+import { GuildContext } from "../../../context/guild/GuildContext";
 import { ExportContext } from "../../../context/export/ExportContext";
 import { v4 as uuidv4 } from "uuid";
 
@@ -34,9 +35,12 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setChannel,
     resetChannel,
   } = useContext(ChannelContext);
+  const { state: guildState } = useContext(GuildContext);
   const { messages: contextMessages, filteredMessages } = messageState;
   const { channels, selectedExportChannels, selectedChannel } = channelState;
   const { selectedDm } = dmState;
+  const { selectedGuild } = guildState;
+  const zipName = `${selectedDm.name || selectedGuild.name}`;
   const currentPageRef = useRef();
   currentPageRef.current = currentPage;
   const exportingActiveRef = useRef();
@@ -44,7 +48,8 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { addToZip, generateZip, resetZip, generateHTML } = new ExportUtils(
     contentRef,
-    setIsGenerating
+    setIsGenerating,
+    zipName
   );
   const open = !!anchorEl;
   const handleClick = (event) => {
@@ -142,7 +147,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         new Blob([JSON.stringify(updatedMessages)], {
           type: "text/plain",
         }),
-        entityName
+        `${entityName}.json`
       );
     else {
       const totalPages =
@@ -159,7 +164,10 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
           }, 2000)
         );
         const htmlBlob = await generateHTML();
-        addToZip(htmlBlob, `${entityName}_page_${currentPageRef.current}.html`);
+        addToZip(
+          htmlBlob,
+          `${entityName}/${entityName}_page_${currentPageRef.current}.html`
+        );
         await setCurrentPage(currentPageRef.current + 1);
       }
       return setCurrentPage(1);
@@ -188,7 +196,9 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               : contextMessages,
           };
 
-      const folderName = downloadImages ? `${entity.name}_images` : null;
+      const folderName = downloadImages
+        ? `${entity.name}/${entity.name}_images`
+        : null;
 
       const updatedMessages = await _processMessages(messages, folderName);
 

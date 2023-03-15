@@ -2,14 +2,17 @@ import { useReactToPrint } from "react-to-print";
 import streamSaver from "streamsaver";
 import { Writer } from "@transcend-io/conflux";
 export default class ExportUtils {
-  constructor(contentRef, callback) {
+  constructor(contentRef, callback, zipName) {
     this.contentRef = contentRef;
     this.callback = callback;
     const { readable, writable } = new Writer();
     this.readable = readable;
     this.writable = writable;
     this.writer = this.writable.getWriter();
-    this.fileStream = streamSaver.createWriteStream("Export.zip");
+    this.zipName = zipName;
+    this.fileStream = streamSaver.createWriteStream(
+      `${this.zipName || "Export"}.zip`
+    );
   }
   _delay(ms) {
     return new Promise((resolve) =>
@@ -53,7 +56,7 @@ export default class ExportUtils {
   addToZip = async (blob, filename) => {
     this.writer.write({
       name: `${filename}`,
-      lastModified: new Date(0),
+      lastModified: new Date(),
       stream: () => new Response(blob).body,
     });
     if (!this.readable.locked) {
@@ -66,7 +69,13 @@ export default class ExportUtils {
   };
 
   resetZip = () => {
-    this.fileStream = streamSaver.createWriteStream("Export.zip");
-    // close and cancel?
+    this.writer.close();
+    const { readable, writable } = new Writer();
+    this.readable = readable;
+    this.writable = writable;
+    this.writer = this.writable.getWriter();
+    this.fileStream = streamSaver.createWriteStream(
+      `${this.zipName || "Export"}.zip`
+    );
   };
 }

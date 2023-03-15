@@ -1,7 +1,7 @@
 [
   {
     "version": "1.8.12",
-    "changes": ["Screen size and style adjustments."]
+    "changes": ["Fix very large exports.", "Screen size and style adjustments."]
   },
   {
     "version": "1.8.11",
