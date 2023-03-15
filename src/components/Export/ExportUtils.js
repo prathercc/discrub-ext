@@ -1,11 +1,15 @@
 import { useReactToPrint } from "react-to-print";
-import JSZip from "jszip";
-import { v4 as uuidv4 } from "uuid";
+import streamSaver from "streamsaver";
+import { Writer } from "@transcend-io/conflux";
 export default class ExportUtils {
   constructor(contentRef, callback) {
     this.contentRef = contentRef;
     this.callback = callback;
-    this.zip = new JSZip();
+    const { readable, writable } = new Writer();
+    this.readable = readable;
+    this.writable = writable;
+    this.writer = this.writable.getWriter();
+    this.fileStream = streamSaver.createWriteStream("Export.zip");
   }
   _delay(ms) {
     return new Promise((resolve) =>
@@ -46,69 +50,23 @@ export default class ExportUtils {
     removeAfterPrint: true,
   });
 
-  createZipFolder = (folderName) => {
-    return this.zip.folder(folderName.replace(/\W/g, ""));
-  };
-
-  addToFolder = (folder, data, filename) => {
-    let cleanFileName = filename.replace(/[^\w.]+/g, "");
-    if (cleanFileName.length > 0 && cleanFileName.includes(".")) {
-      const splitArr = cleanFileName.split(".");
-      cleanFileName = `${cleanFileName.replace(
-        splitArr[splitArr.length - 1],
-        ""
-      )}${uuidv4()}.${splitArr[splitArr.length - 1]}`;
-      folder.file(cleanFileName, data);
-      return cleanFileName;
+  addToZip = async (blob, filename) => {
+    this.writer.write({
+      name: `${filename}`,
+      lastModified: new Date(0),
+      stream: () => new Response(blob).body,
+    });
+    if (!this.readable.locked) {
+      this.readable.pipeTo(this.fileStream);
     }
-    return { size: 0 };
-  };
-
-  addToZip = (blob, filename, format = "json") => {
-    this.zip.file(`${filename.replace(/\W/g, "")}.${uuidv4()}.${format}`, blob);
   };
 
   generateZip = async () => {
-    await this.zip.generateAsync({ type: "blob" }).then(function (content) {
-      let link = document.createElement("a");
-      link.download = `Export.${uuidv4()}.zip`;
-      link.href = window.URL.createObjectURL(content);
-      link.click();
-    });
+    this.writer.close();
   };
 
   resetZip = () => {
-    this.zip = new JSZip();
+    this.fileStream = streamSaver.createWriteStream("Export.zip");
+    // close and cancel?
   };
-
-  downloadJSON = (exportMessages) => {
-    let json_string = JSON.stringify(exportMessages);
-    let link = document.createElement("a");
-    link.download = "Exported Messages.json";
-    let blob = new Blob([json_string], { type: "text/plain" });
-    link.href = window.URL.createObjectURL(blob);
-    link.click();
-    this.callback();
-  };
-
-  downloadHTML = useReactToPrint({
-    content: () => this.contentRef.current,
-    print: (iframe) => {
-      const bodyElementStyle =
-        iframe.contentWindow.document.lastElementChild.getElementsByTagName(
-          "body"
-        )[0].style;
-      bodyElementStyle.margin = "3px";
-      bodyElementStyle.backgroundColor = "#36393f";
-      const html = iframe.contentWindow.document.lastElementChild.outerHTML;
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-      a.download = "Exported Messages.html";
-      a.hidden = true;
-      document.body.appendChild(a);
-      a.click();
-      this.callback();
-    },
-    removeAfterPrint: true,
-  });
 }

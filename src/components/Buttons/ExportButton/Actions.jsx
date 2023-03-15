@@ -6,6 +6,7 @@ import { MessageContext } from "../../../context/message/MessageContext";
 import ExportUtils from "../../Export/ExportUtils";
 import { DmContext } from "../../../context/dm/DmContext";
 import { ExportContext } from "../../../context/export/ExportContext";
+import { v4 as uuidv4 } from "uuid";
 
 const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const {
@@ -41,14 +42,10 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const exportingActiveRef = useRef();
   exportingActiveRef.current = isExporting;
   const [anchorEl, setAnchorEl] = useState(null);
-  const {
-    addToZip,
-    generateZip,
-    resetZip,
-    addToFolder,
-    createZipFolder,
-    generateHTML,
-  } = new ExportUtils(contentRef, setIsGenerating);
+  const { addToZip, generateZip, resetZip, generateHTML } = new ExportUtils(
+    contentRef,
+    setIsGenerating
+  );
   const open = !!anchorEl;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -70,10 +67,10 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
   const isExportCancelled = () => !exportingActiveRef.current;
 
-  const _processMessages = async (addToFolder, messages, attachmentFolder) => {
+  const _processMessages = async (messages, folderName) => {
     const processMessage = async (message) => {
       let updatedMessage = message;
-      if (attachmentFolder) {
+      if (folderName) {
         for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
           if (isExportCancelled()) break;
           try {
@@ -82,17 +79,13 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               r.blob()
             );
             if (blob.size) {
-              const cleanFileName = addToFolder(
-                attachmentFolder,
-                blob,
+              const cleanFileName = `${folderName}/${uuidv4()}_${
                 attachment.filename
-              );
+              }`;
+              addToZip(blob, cleanFileName);
               updatedMessage.attachments[c2] = {
                 ...updatedMessage.attachments[c2],
-                local_url: `${attachmentFolder.root?.replace(
-                  "/",
-                  ""
-                )}/${cleanFileName}`,
+                local_url: cleanFileName,
               };
             }
           } catch (e) {
@@ -166,11 +159,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
           }, 2000)
         );
         const htmlBlob = await generateHTML();
-        addToZip(
-          htmlBlob,
-          entityName + "_page_" + currentPageRef.current,
-          "html"
-        );
+        addToZip(htmlBlob, `${entityName}_page_${currentPageRef.current}.html`);
         await setCurrentPage(currentPageRef.current + 1);
       }
       return setCurrentPage(1);
@@ -198,15 +187,10 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               ? filteredMessages
               : contextMessages,
           };
-      const attachmentFolder = downloadImages
-        ? createZipFolder(`${entity.name}_images`)
-        : null;
 
-      const updatedMessages = await _processMessages(
-        addToFolder,
-        messages,
-        attachmentFolder
-      );
+      const folderName = downloadImages ? `${entity.name}_images` : null;
+
+      const updatedMessages = await _processMessages(messages, folderName);
 
       if (messagesPerPage === null || messagesPerPage === 0)
         await setMessagesPerPage(updatedMessages.length);
