@@ -72,10 +72,10 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
   const isExportCancelled = () => !exportingActiveRef.current;
 
-  const _processMessages = async (messages, folderName) => {
+  const _processMessages = async (messages, imgPath) => {
     const processMessage = async (message) => {
       let updatedMessage = message;
-      if (folderName) {
+      if (imgPath) {
         for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
           if (isExportCancelled()) break;
           try {
@@ -84,10 +84,10 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               r.blob()
             );
             if (blob.size) {
-              const cleanFileName = `${folderName}/${uuidv4()}_${
+              const cleanFileName = `${imgPath}/${uuidv4()}_${
                 attachment.filename
               }`;
-              addToZip(blob, cleanFileName);
+              await addToZip(blob, cleanFileName);
               updatedMessage.attachments[c2] = {
                 ...updatedMessage.attachments[c2],
                 local_url: cleanFileName,
@@ -131,7 +131,12 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
     return retArr;
   };
-  const _compressMessages = async (updatedMessages, format, entityName) => {
+  const _compressMessages = async (
+    updatedMessages,
+    format,
+    entityName,
+    entityMainDirectory
+  ) => {
     setStatusText(
       `Compressing${
         updatedMessages.length > 2000 ? " - This may take a while..." : ""
@@ -143,11 +148,11 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       }, 5000)
     );
     if (format === "json")
-      return addToZip(
+      return await addToZip(
         new Blob([JSON.stringify(updatedMessages)], {
           type: "text/plain",
         }),
-        `${entityName}.json`
+        `${entityMainDirectory}/${entityName}.json`
       );
     else {
       const totalPages =
@@ -164,9 +169,9 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
           }, 2000)
         );
         const htmlBlob = await generateHTML();
-        addToZip(
+        await addToZip(
           htmlBlob,
-          `${entityName}/${entityName}_page_${currentPageRef.current}.html`
+          `${entityMainDirectory}/${entityName}_page_${currentPageRef.current}.html`
         );
         await setCurrentPage(currentPageRef.current + 1);
       }
@@ -185,6 +190,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     while (count < selectedChannels.length) {
       await setStatusText(null);
       const entity = selectedChannels[count];
+      const entityMainDirectory = `${entity.name}_${uuidv4()}`;
       await setIsExporting(true);
       await setName(entity.name);
       if (bulk) !isDm && (await setChannel(entity.id));
@@ -196,18 +202,23 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               : contextMessages,
           };
 
-      const folderName = downloadImages
-        ? `${entity.name}/${entity.name}_images`
+      const imgPath = downloadImages
+        ? `${entityMainDirectory}/${entity.name}_images`
         : null;
 
-      const updatedMessages = await _processMessages(messages, folderName);
+      const updatedMessages = await _processMessages(messages, imgPath);
 
       if (messagesPerPage === null || messagesPerPage === 0)
         await setMessagesPerPage(updatedMessages.length);
 
       if (updatedMessages.length > 0) {
         if (isExportCancelled()) break;
-        await _compressMessages(updatedMessages, format, entity.name);
+        await _compressMessages(
+          updatedMessages,
+          format,
+          entity.name,
+          entityMainDirectory
+        );
       }
 
       count += 1;
@@ -222,7 +233,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setIsGenerating(false);
     setIsExporting(false);
     setName("");
-    resetZip();
+    await resetZip();
     setStatusText(null);
     setCurrentPage(1);
   };

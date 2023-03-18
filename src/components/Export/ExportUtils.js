@@ -33,6 +33,7 @@ export default class ExportUtils {
 
   _generateHTMLHelperFunc = useReactToPrint({
     content: () => this.contentRef.current,
+    suppressErrors: true,
     print: (iframe) => {
       const bodyElementStyle =
         iframe.contentWindow.document.lastElementChild.getElementsByTagName(
@@ -54,28 +55,45 @@ export default class ExportUtils {
   });
 
   addToZip = async (blob, filename) => {
-    this.writer.write({
-      name: `${filename}`,
-      lastModified: new Date(),
-      stream: () => new Response(blob).body,
-    });
-    if (!this.readable.locked) {
-      this.readable.pipeTo(this.fileStream);
+    try {
+      await this.writer.ready;
+      this.writer.write({
+        name: `${filename}`,
+        lastModified: new Date(),
+        stream: () => new Response(blob).body,
+      });
+      if (!this.readable.locked) {
+        this.readable.pipeTo(this.fileStream);
+      }
+    } catch (e) {
+      console.error("Error adding to zip", e);
+      await this.resetZip();
     }
   };
 
   generateZip = async () => {
-    this.writer.close();
+    try {
+      await this.writer.ready;
+      await this.writer.close();
+    } catch (e) {
+      console.error("Error generating archive", e);
+    }
   };
 
-  resetZip = () => {
-    this.writer.close();
-    const { readable, writable } = new Writer();
-    this.readable = readable;
-    this.writable = writable;
-    this.writer = this.writable.getWriter();
-    this.fileStream = streamSaver.createWriteStream(
-      `${this.zipName || "Export"}.zip`
-    );
+  resetZip = async () => {
+    try {
+      await this.writer.ready;
+      await this.writer.close();
+    } catch {
+      console.warn("Redundant close request sent to archive writer.");
+    } finally {
+      const { readable, writable } = new Writer();
+      this.readable = readable;
+      this.writable = writable;
+      this.writer = this.writable.getWriter();
+      this.fileStream = streamSaver.createWriteStream(
+        `${this.zipName || "Export"}.zip`
+      );
+    }
   };
 }
