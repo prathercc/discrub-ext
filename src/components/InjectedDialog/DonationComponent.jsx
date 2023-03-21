@@ -77,6 +77,7 @@ function DonationComponent() {
                   <strong>{donation.name}</strong> bought a coffee ·{" "}
                   <i className={classes.date}>
                     {differenceInDays(new Date(), parseISO(donation.date))} days
+                    ago
                   </i>
                 </Typography>
               </Stack>
