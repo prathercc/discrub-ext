@@ -6,7 +6,8 @@
   "manifest_version": 3,
   "permissions": [],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_title": "Open Discrub"
@@ -23,7 +24,9 @@
       "resources": [
         "index.html",
         "injected_button.html",
-        "injected_dialog.html"
+        "injected_dialog.html",
+        "mitm.html",
+        "*/*.zip"
       ]
     }
   ],

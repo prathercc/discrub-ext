@@ -1,4 +1,7 @@
+/* eslint-disable no-undef */
 /*global chrome*/
+import * as module from "./sw.js";
+
 chrome.action.onClicked.addListener((tab) => {
   if (chrome && chrome.tabs) {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {

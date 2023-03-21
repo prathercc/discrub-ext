@@ -10,8 +10,8 @@ export default class ExportUtils {
     this.writable = writable;
     this.writer = this.writable.getWriter();
     this.zipName = zipName;
-    this.fileStream = streamSaver.createWriteStream(
-      `${this.zipName || "Export"}.zip`
+    streamSaver.mitm = "mitm.html";
+    this.fileStream = null;
     );
   }
   _delay(ms) {
@@ -55,6 +55,11 @@ export default class ExportUtils {
   });
 
   addToZip = async (blob, filename) => {
+    if (!this.fileStream) {
+      this.fileStream = streamSaver.createWriteStream(
+        `${this.zipName || "Export"}.zip`
+      );
+    }
     try {
       await this.writer.ready;
       this.writer.write({
@@ -91,9 +96,7 @@ export default class ExportUtils {
       this.readable = readable;
       this.writable = writable;
       this.writer = this.writable.getWriter();
-      this.fileStream = streamSaver.createWriteStream(
-        `${this.zipName || "Export"}.zip`
-      );
+      this.fileStream = null;
     }
   };
 }
