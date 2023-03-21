@@ -50,23 +50,26 @@ function DonationDialog() {
                 alignItems="center"
                 spacing={2}
               >
-                <div>
-                  Thank you to everyone for taking the time to try out Discrub,
-                  I've been able to make so many improvements and add many new
-                  features, all from your feedback!
-                </div>
-                <div>
-                  While reviews and donations are never expected, they are
-                  greatly appreciated and help support the development of this
-                  extension ❤️
-                </div>
+                <i>
+                  <div>
+                    Thank you to everyone for taking the time to try out
+                    Discrub, I've been able to make so many improvements and add
+                    many new features, all from your feedback!
+                  </div>
+                  <div>
+                    While reviews and donations are never expected, they are
+                    greatly appreciated and help support the development of this
+                    extension ❤️
+                  </div>
+                </i>
               </Stack>
 
               <Stack
                 direction="row"
-                justifyContent="center"
+                justifyContent="space-around"
                 alignItems="center"
                 spacing={2}
+                sx={{ width: "100%" }}
               >
                 <Stack
                   direction="column"

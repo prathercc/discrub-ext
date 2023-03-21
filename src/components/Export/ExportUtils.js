@@ -1,11 +1,18 @@
 import { useReactToPrint } from "react-to-print";
-import JSZip from "jszip";
-import { v4 as uuidv4 } from "uuid";
+import streamSaver from "streamsaver";
+import { Writer } from "@transcend-io/conflux";
 export default class ExportUtils {
-  constructor(contentRef, callback) {
+  constructor(contentRef, callback, zipName) {
     this.contentRef = contentRef;
     this.callback = callback;
-    this.zip = new JSZip();
+    const { readable, writable } = new Writer();
+    this.readable = readable;
+    this.writable = writable;
+    this.writer = this.writable.getWriter();
+    this.zipName = zipName;
+    streamSaver.mitm = "mitm.html";
+    this.fileStream = null;
+    this.exportMessages = [];
   }
   _delay(ms) {
     return new Promise((resolve) =>
@@ -14,6 +21,10 @@ export default class ExportUtils {
       }, ms)
     );
   }
+
+  setExportMessages = (val) => {
+    this.exportMessages = val;
+  };
 
   generateHTML = async () => {
     this.html = null;
@@ -26,89 +37,85 @@ export default class ExportUtils {
 
   _generateHTMLHelperFunc = useReactToPrint({
     content: () => this.contentRef.current,
+    suppressErrors: true,
     print: (iframe) => {
-      const bodyElementStyle =
-        iframe.contentWindow.document.lastElementChild.getElementsByTagName(
-          "body"
-        )[0].style;
-      bodyElementStyle.margin = "3px";
-      bodyElementStyle.backgroundColor = "#36393f";
+      try {
+        const bodyElementStyle =
+          iframe.contentWindow.document.lastElementChild.getElementsByTagName(
+            "body"
+          )[0].style;
+        bodyElementStyle.margin = "3px";
+        bodyElementStyle.backgroundColor = "#36393f";
 
-      let meta = document.createElement("meta");
-      meta.httpEquiv = "Content-Type";
-      meta.content = "text/html; charset=utf-8";
-      iframe.contentWindow.document
-        .getElementsByTagName("head")[0]
-        .prepend(meta);
-
-      this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
+        let meta = document.createElement("meta");
+        meta.httpEquiv = "Content-Type";
+        meta.content = "text/html; charset=utf-8";
+        iframe.contentWindow.document
+          .getElementsByTagName("head")[0]
+          .prepend(meta);
+        this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
+        return new Promise(() => {
+          console.warn("Page printed successfully");
+        });
+      } catch (e) {
+        return new Promise(() => {
+          console.error("Issue printing page - ", e);
+          this.html = `<h2>Print error</h2><strong>Please save and send this page to <a href='https://www.reddit.com/user/prathercc/'>u/prathercc</a> for support.</strong> <div><strong>Official support page - <a href='https://www.reddit.com/r/discrub/'>https://www.reddit.com/r/discrub/</a></strong></div><div>${
+            e.message
+          }</div><div>${
+            e.stack
+          }</div><div style="background-color:black;color:white;border-radius:5px;margin-top:10px;">${this.exportMessages?.map(
+            (msg) => `<div>${JSON.stringify(msg)}</div>`
+          )}</div>`;
+        });
+      }
     },
     removeAfterPrint: true,
   });
 
-  createZipFolder = (folderName) => {
-    return this.zip.folder(folderName.replace(/\W/g, ""));
-  };
-
-  addToFolder = (folder, data, filename) => {
-    let cleanFileName = filename.replace(/[^\w.]+/g, "");
-    if (cleanFileName.length > 0 && cleanFileName.includes(".")) {
-      const splitArr = cleanFileName.split(".");
-      cleanFileName = `${cleanFileName.replace(
-        splitArr[splitArr.length - 1],
-        ""
-      )}${uuidv4()}.${splitArr[splitArr.length - 1]}`;
-      folder.file(cleanFileName, data);
-      return cleanFileName;
+  addToZip = async (blob, filename) => {
+    if (!this.fileStream) {
+      this.fileStream = streamSaver.createWriteStream(
+        `${this.zipName || "Export"}.zip`
+      );
     }
-    return { size: 0 };
-  };
-
-  addToZip = (blob, filename, format = "json") => {
-    this.zip.file(`${filename.replace(/\W/g, "")}.${uuidv4()}.${format}`, blob);
+    try {
+      await this.writer.ready;
+      this.writer.write({
+        name: `${filename}`,
+        lastModified: new Date(),
+        stream: () => new Response(blob).body,
+      });
+      if (!this.readable.locked) {
+        this.readable.pipeTo(this.fileStream);
+      }
+    } catch (e) {
+      console.error("Error adding to zip", e);
+      await this.resetZip();
+    }
   };
 
   generateZip = async () => {
-    await this.zip.generateAsync({ type: "blob" }).then(function (content) {
-      let link = document.createElement("a");
-      link.download = `Export.${uuidv4()}.zip`;
-      link.href = window.URL.createObjectURL(content);
-      link.click();
-    });
+    try {
+      await this.writer.ready;
+      await this.writer.close();
+    } catch (e) {
+      console.error("Error generating archive", e);
+    }
   };
 
-  resetZip = () => {
-    this.zip = new JSZip();
+  resetZip = async () => {
+    try {
+      await this.writer.ready;
+      await this.writer.close();
+    } catch {
+      console.warn("Redundant close request sent to archive writer.");
+    } finally {
+      const { readable, writable } = new Writer();
+      this.readable = readable;
+      this.writable = writable;
+      this.writer = this.writable.getWriter();
+      this.fileStream = null;
+    }
   };
-
-  downloadJSON = (exportMessages) => {
-    let json_string = JSON.stringify(exportMessages);
-    let link = document.createElement("a");
-    link.download = "Exported Messages.json";
-    let blob = new Blob([json_string], { type: "text/plain" });
-    link.href = window.URL.createObjectURL(blob);
-    link.click();
-    this.callback();
-  };
-
-  downloadHTML = useReactToPrint({
-    content: () => this.contentRef.current,
-    print: (iframe) => {
-      const bodyElementStyle =
-        iframe.contentWindow.document.lastElementChild.getElementsByTagName(
-          "body"
-        )[0].style;
-      bodyElementStyle.margin = "3px";
-      bodyElementStyle.backgroundColor = "#36393f";
-      const html = iframe.contentWindow.document.lastElementChild.outerHTML;
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-      a.download = "Exported Messages.html";
-      a.hidden = true;
-      document.body.appendChild(a);
-      a.click();
-      this.callback();
-    },
-    removeAfterPrint: true,
-  });
 }

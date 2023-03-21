@@ -22,6 +22,7 @@ import { DmContext } from "../../context/dm/DmContext";
 import InjectedDialogStyles from "./InjectedDialog.styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { fetchAnnouncementData } from "../../announcementService";
+import DonationComponent from "./DonationComponent";
 
 function InjectedDialog() {
   const classes = InjectedDialogStyles();
@@ -67,6 +68,7 @@ function InjectedDialog() {
 
   return (
     <Box className={classes.boxContainer}>
+      <DonationComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && (
         <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
@@ -108,8 +110,7 @@ function InjectedDialog() {
           justifyContent="center"
           spacing={1}
         >
-          <img alt="Discrub Logo" className={classes.logo} src="discrub2.png" />
-          <Typography variant="h6">1.8.11</Typography>
+          <Typography variant="h6">1.8.13</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />

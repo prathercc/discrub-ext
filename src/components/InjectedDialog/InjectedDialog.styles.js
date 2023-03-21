@@ -13,19 +13,30 @@ const InjectedDialogStyles = makeStyles(() => ({
     border: "1px solid rgb(210, 213, 247, 0.2)",
     wordWrap: "break-word",
     overflow: "hidden",
-    borderRadius: "1px",
+    borderRadius: "6px",
+    boxShadow: "10px 11px 7px -1px rgba(0,0,0,0.41)",
   },
   box: {
     position: "fixed",
-    top: "10px",
-    right: "55px",
-    opacity: 0.25,
+    top: "16px",
+    right: "295px",
+    opacity: 0.35,
   },
   alertBox: {
     position: "fixed",
-    bottom: "5px",
-    left: "5px",
+    bottom: "74px",
+    left: "242px",
     width: "767px",
+    "& .MuiAlert-root": {
+      backgroundColor: "#2f3136 !important",
+      color: "#d2d5f7 !important",
+    },
+    "& .MuiAlert-icon": {
+      color: "#5865f2 !important",
+    },
+    "& .MuiTypography-root": {
+      color: "#d2d5f7 !important",
+    },
   },
   logo: {
     width: "24px",

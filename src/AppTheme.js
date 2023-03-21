@@ -171,6 +171,17 @@ const theme = createTheme({
         },
       },
     },
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          width: "783px",
+          height: "726px",
+          left: "234px",
+          top: "7px",
+          borderRadius: "5px",
+        },
+      },
+    },
   },
 });
 

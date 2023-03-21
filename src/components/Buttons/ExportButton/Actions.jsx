@@ -5,7 +5,9 @@ import { ChannelContext } from "../../../context/channel/ChannelContext";
 import { MessageContext } from "../../../context/message/MessageContext";
 import ExportUtils from "../../Export/ExportUtils";
 import { DmContext } from "../../../context/dm/DmContext";
+import { GuildContext } from "../../../context/guild/GuildContext";
 import { ExportContext } from "../../../context/export/ExportContext";
+import { v4 as uuidv4 } from "uuid";
 
 const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const {
@@ -33,22 +35,19 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setChannel,
     resetChannel,
   } = useContext(ChannelContext);
+  const { state: guildState } = useContext(GuildContext);
   const { messages: contextMessages, filteredMessages } = messageState;
   const { channels, selectedExportChannels, selectedChannel } = channelState;
   const { selectedDm } = dmState;
+  const { selectedGuild } = guildState;
+  const zipName = `${selectedDm.name || selectedGuild.name}`;
   const currentPageRef = useRef();
   currentPageRef.current = currentPage;
   const exportingActiveRef = useRef();
   exportingActiveRef.current = isExporting;
   const [anchorEl, setAnchorEl] = useState(null);
-  const {
-    addToZip,
-    generateZip,
-    resetZip,
-    addToFolder,
-    createZipFolder,
-    generateHTML,
-  } = new ExportUtils(contentRef, setIsGenerating);
+  const { addToZip, generateZip, resetZip, generateHTML, setExportMessages } =
+    new ExportUtils(contentRef, setIsGenerating, zipName);
   const open = !!anchorEl;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -70,10 +69,10 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
   const isExportCancelled = () => !exportingActiveRef.current;
 
-  const _processMessages = async (addToFolder, messages, attachmentFolder) => {
+  const _processMessages = async (messages, imgPath) => {
     const processMessage = async (message) => {
       let updatedMessage = message;
-      if (attachmentFolder) {
+      if (imgPath) {
         for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
           if (isExportCancelled()) break;
           try {
@@ -82,17 +81,11 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               r.blob()
             );
             if (blob.size) {
-              const cleanFileName = addToFolder(
-                attachmentFolder,
-                blob,
-                attachment.filename
-              );
+              const cleanFileName = `${uuidv4()}_${attachment.filename}`;
+              await addToZip(blob, `${imgPath}/${cleanFileName}`);
               updatedMessage.attachments[c2] = {
                 ...updatedMessage.attachments[c2],
-                local_url: `${attachmentFolder.root?.replace(
-                  "/",
-                  ""
-                )}/${cleanFileName}`,
+                local_url: `${imgPath.split("/")[1]}/${cleanFileName}`,
               };
             }
           } catch (e) {
@@ -133,7 +126,12 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
     return retArr;
   };
-  const _compressMessages = async (updatedMessages, format, entityName) => {
+  const _compressMessages = async (
+    updatedMessages,
+    format,
+    entityName,
+    entityMainDirectory
+  ) => {
     setStatusText(
       `Compressing${
         updatedMessages.length > 2000 ? " - This may take a while..." : ""
@@ -145,11 +143,11 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       }, 5000)
     );
     if (format === "json")
-      return addToZip(
+      return await addToZip(
         new Blob([JSON.stringify(updatedMessages)], {
           type: "text/plain",
         }),
-        entityName
+        `${entityMainDirectory}/${entityName}.json`
       );
     else {
       const totalPages =
@@ -165,11 +163,17 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
             resolve();
           }, 2000)
         );
+        const startIndex =
+          currentPageRef.current === 1
+            ? 0
+            : (currentPageRef.current - 1) * messagesPerPage;
+        setExportMessages(
+          updatedMessages?.slice(startIndex, startIndex + messagesPerPage)
+        );
         const htmlBlob = await generateHTML();
-        addToZip(
+        await addToZip(
           htmlBlob,
-          entityName + "_page_" + currentPageRef.current,
-          "html"
+          `${entityMainDirectory}/${entityName}_page_${currentPageRef.current}.html`
         );
         await setCurrentPage(currentPageRef.current + 1);
       }
@@ -188,6 +192,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     while (count < selectedChannels.length) {
       await setStatusText(null);
       const entity = selectedChannels[count];
+      const entityMainDirectory = `${entity.name}_${uuidv4()}`;
       await setIsExporting(true);
       await setName(entity.name);
       if (bulk) !isDm && (await setChannel(entity.id));
@@ -198,22 +203,24 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               ? filteredMessages
               : contextMessages,
           };
-      const attachmentFolder = downloadImages
-        ? createZipFolder(`${entity.name}_images`)
+
+      const imgPath = downloadImages
+        ? `${entityMainDirectory}/${entity.name}_images`
         : null;
 
-      const updatedMessages = await _processMessages(
-        addToFolder,
-        messages,
-        attachmentFolder
-      );
+      const updatedMessages = await _processMessages(messages, imgPath);
 
       if (messagesPerPage === null || messagesPerPage === 0)
         await setMessagesPerPage(updatedMessages.length);
 
       if (updatedMessages.length > 0) {
         if (isExportCancelled()) break;
-        await _compressMessages(updatedMessages, format, entity.name);
+        await _compressMessages(
+          updatedMessages,
+          format,
+          entity.name,
+          entityMainDirectory
+        );
       }
 
       count += 1;
@@ -228,7 +235,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setIsGenerating(false);
     setIsExporting(false);
     setName("");
-    resetZip();
+    await resetZip();
     setStatusText(null);
     setCurrentPage(1);
   };
