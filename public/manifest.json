@@ -1,12 +1,13 @@
 {
   "short_name": "Discrub",
   "name": "Discrub",
-  "version": "1.8.11",
+  "version": "1.8.13",
   "description": "A data manipulation and export tool for Discord.",
   "manifest_version": 3,
   "permissions": [],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "action": {
     "default_title": "Open Discrub"
@@ -23,7 +24,9 @@
       "resources": [
         "index.html",
         "injected_button.html",
-        "injected_dialog.html"
+        "injected_dialog.html",
+        "mitm.html",
+        "*/*.zip"
       ]
     }
   ],
