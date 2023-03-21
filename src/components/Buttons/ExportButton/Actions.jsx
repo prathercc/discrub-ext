@@ -81,13 +81,11 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               r.blob()
             );
             if (blob.size) {
-              const cleanFileName = `${imgPath}/${uuidv4()}_${
-                attachment.filename
-              }`;
-              await addToZip(blob, cleanFileName);
+              const cleanFileName = `${uuidv4()}_${attachment.filename}`;
+              await addToZip(blob, `${imgPath}/${cleanFileName}`);
               updatedMessage.attachments[c2] = {
                 ...updatedMessage.attachments[c2],
-                local_url: cleanFileName,
+                local_url: `${imgPath.split("/")[1]}/${cleanFileName}`,
               };
             }
           } catch (e) {
