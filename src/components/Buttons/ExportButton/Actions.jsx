@@ -46,11 +46,8 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const exportingActiveRef = useRef();
   exportingActiveRef.current = isExporting;
   const [anchorEl, setAnchorEl] = useState(null);
-  const { addToZip, generateZip, resetZip, generateHTML } = new ExportUtils(
-    contentRef,
-    setIsGenerating,
-    zipName
-  );
+  const { addToZip, generateZip, resetZip, generateHTML, setExportMessages } =
+    new ExportUtils(contentRef, setIsGenerating, zipName);
   const open = !!anchorEl;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -167,6 +164,13 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
           setTimeout(() => {
             resolve();
           }, 2000)
+        );
+        const startIndex =
+          currentPageRef.current === 1
+            ? 0
+            : (currentPageRef.current - 1) * messagesPerPage;
+        setExportMessages(
+          updatedMessages?.slice(startIndex, startIndex + messagesPerPage)
         );
         const htmlBlob = await generateHTML();
         await addToZip(

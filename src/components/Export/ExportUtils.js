@@ -12,7 +12,7 @@ export default class ExportUtils {
     this.zipName = zipName;
     streamSaver.mitm = "mitm.html";
     this.fileStream = null;
-    );
+    this.exportMessages = [];
   }
   _delay(ms) {
     return new Promise((resolve) =>
@@ -21,6 +21,10 @@ export default class ExportUtils {
       }, ms)
     );
   }
+
+  setExportMessages = (val) => {
+    this.exportMessages = val;
+  };
 
   generateHTML = async () => {
     this.html = null;
@@ -35,21 +39,36 @@ export default class ExportUtils {
     content: () => this.contentRef.current,
     suppressErrors: true,
     print: (iframe) => {
-      const bodyElementStyle =
-        iframe.contentWindow.document.lastElementChild.getElementsByTagName(
-          "body"
-        )[0].style;
-      bodyElementStyle.margin = "3px";
-      bodyElementStyle.backgroundColor = "#36393f";
+      try {
+        const bodyElementStyle =
+          iframe.contentWindow.document.lastElementChild.getElementsByTagName(
+            "body"
+          )[0].style;
+        bodyElementStyle.margin = "3px";
+        bodyElementStyle.backgroundColor = "#36393f";
 
-      let meta = document.createElement("meta");
-      meta.httpEquiv = "Content-Type";
-      meta.content = "text/html; charset=utf-8";
-      iframe.contentWindow.document
-        .getElementsByTagName("head")[0]
-        .prepend(meta);
-
-      this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
+        let meta = document.createElement("meta");
+        meta.httpEquiv = "Content-Type";
+        meta.content = "text/html; charset=utf-8";
+        iframe.contentWindow.document
+          .getElementsByTagName("head")[0]
+          .prepend(meta);
+        this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
+        return new Promise(() => {
+          console.warn("Page printed successfully");
+        });
+      } catch (e) {
+        return new Promise(() => {
+          console.error("Issue printing page - ", e);
+          this.html = `<h2>Print error</h2><strong>Please save and send this page to <a href='https://www.reddit.com/user/prathercc/'>u/prathercc</a> for support.</strong> <div><strong>Official support page - <a href='https://www.reddit.com/r/discrub/'>https://www.reddit.com/r/discrub/</a></strong></div><div>${
+            e.message
+          }</div><div>${
+            e.stack
+          }</div><div style="background-color:black;color:white;border-radius:5px;margin-top:10px;">${this.exportMessages?.map(
+            (msg) => `<div>${JSON.stringify(msg)}</div>`
+          )}</div>`;
+        });
+      }
     },
     removeAfterPrint: true,
   });
