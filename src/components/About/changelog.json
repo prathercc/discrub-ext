@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.8.13",
+    "changes": [
+      "Add streamSaver serviceworker to extension files.",
+      "Prevent export errors from breaking entire export and print error message and stack trace to file."
+    ]
+  },
+  {
     "version": "1.8.12",
     "changes": [
       "Fix very large exports by performing them as rolling downloads.",
