@@ -10,7 +10,6 @@ import { UserContext } from "../user/UserContext";
 import { ChannelContext } from "../channel/ChannelContext";
 import { DmContext } from "../dm/DmContext";
 import Typography from "@mui/material/Typography";
-// import { GuildContext } from "../guild/GuildContext";
 import ExportMessagesStyles from "../../components/Export/ExportMessages/ExportMessages.styles";
 import { Stack } from "@mui/material";
 import {
@@ -38,6 +37,7 @@ import {
   fetchThreads,
   fetchMessageData,
 } from "../../discordService";
+import { GuildContext } from "../guild/GuildContext";
 
 export const MessageContext = createContext();
 
@@ -47,21 +47,25 @@ const MessageContextProvider = (props) => {
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
   const { state: dmState } = useContext(DmContext);
+  const { state: guildState } = useContext(GuildContext);
 
   const selectedChannelIdRef = useRef();
   const selectedDmIdRef = useRef();
   const channelPreFilterUserIdRef = useRef();
   const dmPreFilterUserIdRef = useRef();
+  const selectedGuildIdRef = useRef();
 
   const { token } = userState;
   const { selectedChannel, preFilterUserId: channelPreFilterUserId } =
     channelState;
   const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
+  const { selectedGuild } = guildState;
 
   selectedChannelIdRef.current = selectedChannel.id; // Needed incase channelId changes and we can cancel the fetching.
   selectedDmIdRef.current = selectedDm.id;
   channelPreFilterUserIdRef.current = channelPreFilterUserId;
   dmPreFilterUserIdRef.current = dmPreFilterUserId;
+  selectedGuildIdRef.current = selectedGuild.id;
 
   const [state, dispatch] = useReducer(
     MessageReducer,
@@ -245,6 +249,7 @@ const MessageContextProvider = (props) => {
       if (preFilterUserId || state.searchBeforeDate || state.searchAfterDate) {
         ({ retArr, retThreads } = await _getSearchMessages(
           convoIdRef,
+          selectedGuildIdRef,
           token,
           {
             preFilterUserId,
@@ -557,6 +562,7 @@ const _getMessages = async (
 
 const _getSearchMessages = async (
   channelIdRef,
+  guildIdRef,
   token,
   searchCriteria,
   dispatch
@@ -573,6 +579,7 @@ const _getSearchMessages = async (
         token,
         offset,
         originalChannelId,
+        guildIdRef.current,
         searchCriteria
       );
 

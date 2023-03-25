@@ -91,6 +91,7 @@ export const fetchSearchMessageData = (
   authorization,
   offset,
   channelId,
+  guildId,
   searchCriteria
 ) => {
   const generateSnowflake = (date) => {
@@ -107,6 +108,7 @@ export const fetchSearchMessageData = (
     author_id: preFilterUserId,
     min_id: generateSnowflake(searchAfterDate),
     max_id: generateSnowflake(searchBeforeDate),
+    channel_id: guildId ? channelId : "null",
   });
   const nullKeys = [];
   urlSearchParams.forEach((value, key) => {
@@ -118,7 +120,9 @@ export const fetchSearchMessageData = (
     urlSearchParams.delete(key);
   });
   return fetch(
-    `${discordChannelsUrl}/${channelId}/messages/search?${urlSearchParams.toString()}${
+    `${guildId ? discordGuildsUrl : discordChannelsUrl}/${
+      guildId || channelId
+    }/messages/search?${urlSearchParams.toString()}${
       offset > 0 ? `&offset=${offset}` : ""
     }`,
     {
