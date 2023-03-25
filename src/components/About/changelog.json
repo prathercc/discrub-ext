@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.8.14",
+    "changes": [
+      "Resolve broken Search/Purge issues.",
+      "Prevent Channel categories from showing up in the Channel dropdown."
+    ]
+  },
+  {
     "version": "1.8.13",
     "changes": [
       "Add streamSaver serviceworker to extension files.",

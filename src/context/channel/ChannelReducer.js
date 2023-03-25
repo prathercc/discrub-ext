@@ -12,7 +12,11 @@ export const ChannelReducer = (state, action) => {
     case GET_CHANNELS:
       return { ...state, isLoading: true };
     case GET_CHANNELS_COMPLETE:
-      return { ...state, channels: [...payload], isLoading: false };
+      return {
+        ...state,
+        channels: [...payload].filter((c) => c.type !== 4),
+        isLoading: false,
+      };
     case SET_CHANNEL:
       const selectedChannel = state.channels.find(
         (channel) => channel.id === payload.id
