@@ -11,14 +11,13 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
 import ExportButton from "../Buttons/ExportButton/ExportButton";
 import PurgeButton from "../Buttons/PurgeButton";
-import BeforeAndAfterFields from "../Fields/BeforeAndAfterFields";
+import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -29,12 +28,7 @@ function DirectMessages() {
 
   const classes = DirectMessagesStyles({ purgeDialogOpen, exportDialogOpen });
 
-  const {
-    state: dmState,
-    getDms,
-    setDm,
-    setPreFilterUserId,
-  } = useContext(DmContext);
+  const { state: dmState, getDms, setDm } = useContext(DmContext);
   const {
     state: messageState,
     resetMessageData,
@@ -44,7 +38,7 @@ function DirectMessages() {
     setSearchBeforeDate,
   } = useContext(MessageContext);
 
-  const { selectedDm, dms, preFilterUserId, preFilterUserIds } = dmState;
+  const { selectedDm, dms } = dmState;
   const {
     fetchedMessageLength,
     isLoading: messagesLoading,
@@ -113,39 +107,12 @@ function DirectMessages() {
                     );
                   })}
                 </TextField>
-                <Tooltip
-                  arrow
-                  title="Filter By Username (Optional)"
-                  placement="top"
-                >
-                  <TextField
-                    className={classes.purgeHidden}
-                    size="small"
-                    fullWidth
-                    variant="filled"
-                    disabled={selectedDm.id === null || messagesLoading}
-                    value={preFilterUserId}
-                    onChange={(e) => setPreFilterUserId(e.target.value)}
-                    select
-                    label="Filter By Username"
-                  >
-                    <MenuItem dense value={null} key={-1}>
-                      <strong>Reset Selection</strong>
-                    </MenuItem>
-                    {preFilterUserIds.map((user) => {
-                      return (
-                        <MenuItem dense key={user.id} value={user.id}>
-                          {user.name}
-                        </MenuItem>
-                      );
-                    })}
-                  </TextField>
-                </Tooltip>
               </Stack>
-              <BeforeAndAfterFields
-                disabled={selectedDm.id === null || messagesLoading}
-                className={classes.purgeHidden}
-              />
+
+              <span className={classes.purgeHidden}>
+                <AdvancedFiltering isDm />
+              </span>
+
               <Stack
                 alignItems="center"
                 direction="row"
