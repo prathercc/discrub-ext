@@ -34,12 +34,12 @@ const UserContextProvider = (props) => {
 
   const getUserData = async () => {
     const chromeCallback = async (userToken) => {
-      const data = await fetchUserData(userToken);
-      if (data)
-        return dispatch({
-          type: GET_USER_DATA_COMPLETE,
-          payload: { ...data, token: userToken },
-        });
+      let data = null;
+      if (userToken) data = await fetchUserData(userToken);
+      return dispatch({
+        type: GET_USER_DATA_COMPLETE,
+        payload: { ...(data || {}), token: data ? userToken : undefined },
+      });
     };
 
     dispatch({ type: GET_USER_DATA });

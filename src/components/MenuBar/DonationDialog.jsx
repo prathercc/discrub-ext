@@ -24,7 +24,7 @@ function DonationDialog() {
       <Tooltip
         arrow
         title="Leave a Review / Ko-Fi Donation"
-        description="Support the extension's development by leaving a review or by gifting the developer a much needed coffee ☕!"
+        description="Support the extension's development by leaving a review or by gifting the developer a coffee ☕!"
       >
         <Tab
           onClick={(e) => {
@@ -35,7 +35,17 @@ function DonationDialog() {
       </Tooltip>
 
       <Dialog open={donationDialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>Leave a Review / Ko-Fi Donation</DialogTitle>
+        <DialogTitle>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-start"
+            spacing={1}
+          >
+            <VolunteerActivismIcon />
+            <span>Leave a Review / Ko-Fi Donation</span>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
             <Stack
@@ -50,18 +60,11 @@ function DonationDialog() {
                 alignItems="center"
                 spacing={2}
               >
-                <i>
-                  <div>
-                    Thank you to everyone for taking the time to try out
-                    Discrub, I've been able to make so many improvements and add
-                    many new features, all from your feedback!
-                  </div>
-                  <div>
-                    While reviews and donations are never expected, they are
-                    greatly appreciated and help support the development of this
-                    extension ❤️
-                  </div>
-                </i>
+                <div>
+                  Thanks for taking the time to try out Discrub! Reviews and
+                  donations are never expected but they are greatly appreciated
+                  and help support the development of this extension!
+                </div>
               </Stack>
 
               <Stack

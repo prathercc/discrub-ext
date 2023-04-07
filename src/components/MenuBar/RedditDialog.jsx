@@ -7,6 +7,8 @@ import {
   DialogContentText,
   Button,
   Tab,
+  Stack,
+  Typography,
 } from "@mui/material";
 import RedditIcon from "@mui/icons-material/Reddit";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
@@ -26,11 +28,23 @@ function RedditDialog() {
         <Tab onClick={() => setSubredditOpen(true)} icon={<RedditIcon />} />
       </Tooltip>
       <Dialog open={subredditOpen} onClose={handleSubredditClose}>
-        <DialogTitle>Discrub Subreddit</DialogTitle>
+        <DialogTitle>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-start"
+            spacing={1}
+          >
+            <RedditIcon />
+            <span>Discrub Subreddit</span>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Opening new tab to external link:{" "}
-            <strong>https://www.reddit.com/r/discrub/</strong>
+            Opening new tab to external link -{" "}
+            <Typography component="span" color="primary">
+              <strong>https://www.reddit.com/r/discrub/</strong>
+            </Typography>
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.9.0",
+    "changes": [
+      "Clicking extension icon outside of Discord app will now redirect to the Discord website.",
+      "Show 'Authentication Failure' message when Discrub is unable to authenticate the session.",
+      "Move optional filters to an 'Advanced Filtering' section."
+    ]
+  },
+  {
     "version": "1.8.14",
     "changes": [
       "Resolve broken Search/Purge issues.",

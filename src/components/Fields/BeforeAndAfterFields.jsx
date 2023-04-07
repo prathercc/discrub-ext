@@ -22,7 +22,7 @@ function BeforeAndAfterFields({ disabled }) {
     >
       <Tooltip
         arrow
-        title="Messages After (Optional)"
+        title="Messages After"
         description="Search messages from after the provided date"
         placement="top"
       >
@@ -35,7 +35,7 @@ function BeforeAndAfterFields({ disabled }) {
       </Tooltip>
       <Tooltip
         arrow
-        title="Messages Before (Optional)"
+        title="Messages Before"
         description="Search messages from before the provided date"
         placement="top"
       >

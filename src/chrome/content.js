@@ -2,12 +2,17 @@
 if (!chrome.runtime.onMessage.hasListeners())
   chrome.runtime.onMessage.addListener(function (request, sender, callback) {
     const { message } = request;
+    const discordOpen = window.location.href.includes("discord.com");
     switch (message) {
       case "INJECT_BUTTON":
         const element =
           document.querySelector('[aria-label="Inbox"]')?.parentElement ||
           document.querySelector('[aria-label="Help"]')?.parentElement;
-        if (!document.getElementById("injected_iframe_button") && element) {
+        if (
+          discordOpen &&
+          !document.getElementById("injected_iframe_button") &&
+          element
+        ) {
           element.style.display = "flex";
           element.style.flexDirection = "row-reverse";
           element.style.alignItems = "center";
@@ -22,7 +27,7 @@ if (!chrome.runtime.onMessage.hasListeners())
         }
         break;
       case "INJECT_DIALOG":
-        if (!document.getElementById("injected_dialog")) {
+        if (discordOpen && !document.getElementById("injected_dialog")) {
           const modal = document.createElement("dialog");
           modal.id = "injected_dialog";
           modal.innerHTML =
@@ -41,9 +46,12 @@ if (!chrome.runtime.onMessage.hasListeners())
           document.body.appendChild(modal);
           document.getElementById("injected_dialog").showModal();
         }
+        if (!discordOpen) {
+          window.open("https://discord.com", "_blank");
+        }
         break;
       case "CLOSE_INJECTED_DIALOG":
-        if (document.getElementById("injected_dialog")) {
+        if (discordOpen && document.getElementById("injected_dialog")) {
           document.getElementById("injected_dialog_iframe").remove();
           document.getElementById("injected_dialog").remove();
         }
@@ -54,6 +62,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           document.createElement("iframe")
         ).contentWindow.localStorage;
         if (storage.token) callback(JSON.parse(storage.token));
+        else callback(null);
         return true;
       default:
         break;

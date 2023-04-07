@@ -74,7 +74,9 @@ function DonationComponent() {
                   <CoffeeIcon />
                 </Avatar>
                 <Typography variant="body1">
-                  <strong>{donation.name}</strong> bought a coffee ·{" "}
+                  <strong>{donation.name}</strong> bought{" "}
+                  <strong>{donation.amount}</strong> coffee
+                  {donation.amount > 1 ? "s" : ""} ·{" "}
                   <i className={classes.date}>
                     {differenceInDays(new Date(), parseISO(donation.date))} days
                     ago

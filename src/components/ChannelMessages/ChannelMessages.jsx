@@ -11,7 +11,6 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
@@ -19,7 +18,8 @@ import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
 import PurgeButton from "../Buttons/PurgeButton";
 import ExportButton from "../Buttons/ExportButton/ExportButton";
-import BeforeAndAfterFields from "../Fields/BeforeAndAfterFields";
+import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
+import TokenNotFound from "../TokenNotFound/TokenNotFound";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -40,15 +40,19 @@ function ChannelMessages({ closeAnnouncement }) {
     setPreFilterUserId,
   } = useContext(ChannelContext);
 
+  const [showOptionalFilters, setShowOptionalFilters] = useState(false);
   const [searchTouched, setSearchTouched] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const classes = ChannelMessagesStyles({ purgeDialogOpen, exportDialogOpen });
+  const classes = ChannelMessagesStyles({
+    purgeDialogOpen,
+    exportDialogOpen,
+    showOptionalFilters,
+  });
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
-  const { channels, selectedChannel, preFilterUserIds, preFilterUserId } =
-    channelState;
+  const { channels, selectedChannel } = channelState;
   const {
     messages,
     isLoading: messagesLoading,
@@ -151,41 +155,16 @@ function ChannelMessages({ closeAnnouncement }) {
                     );
                   })}
                 </TextField>
-
-                <Tooltip
-                  arrow
-                  title="Filter By Username (Optional)"
-                  description="Due to API limitations, Channel Messages can only be pre-filtered by your username"
-                  placement="left"
-                >
-                  <TextField
-                    className={classes.purgeHidden}
-                    size="small"
-                    fullWidth
-                    variant="filled"
-                    disabled={selectedChannel.id === null || messagesLoading}
-                    value={preFilterUserId}
-                    onChange={(e) => setPreFilterUserId(e.target.value)}
-                    select
-                    label="Filter By Username"
-                  >
-                    <MenuItem dense value={null} key={-1}>
-                      <strong>Reset Selection</strong>
-                    </MenuItem>
-                    {preFilterUserIds.map((user) => {
-                      return (
-                        <MenuItem dense key={user.id} value={user.id}>
-                          {user.name}
-                        </MenuItem>
-                      );
-                    })}
-                  </TextField>
-                </Tooltip>
               </Stack>
-              <BeforeAndAfterFields
-                disabled={selectedChannel.id === null || messagesLoading}
-                className={classes.purgeHidden}
-              />
+
+              <span className={classes.purgeHidden}>
+                <AdvancedFiltering
+                  closeAnnouncement={closeAnnouncement}
+                  setShowOptionalFilters={setShowOptionalFilters}
+                  showOptionalFilters={showOptionalFilters}
+                />
+              </span>
+
               <Stack
                 alignItems="center"
                 direction="row"
@@ -244,7 +223,8 @@ function ChannelMessages({ closeAnnouncement }) {
             )}
         </Stack>
       )}
-      {(!token || !guilds.length || messagesLoading) &&
+      {token !== undefined &&
+        (token === null || !guilds.length || messagesLoading) &&
         !purgeDialogOpen &&
         !exportDialogOpen && (
           <Paper justifyContent="center" className={classes.paper}>
@@ -260,6 +240,7 @@ function ChannelMessages({ closeAnnouncement }) {
             </Box>
           </Paper>
         )}
+      <TokenNotFound />
     </Stack>
   );
 }

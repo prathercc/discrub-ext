@@ -32,5 +32,24 @@ export const fetchDonationData = () => {
       const donation = JSON.parse(gistData.files["donation.json"]?.content);
       return donation;
     })
-    .catch((e) => console.error("Error fetching donation", e));
+    .catch((e) => console.error("Error fetching donations", e));
+};
+export const fetchSponsorshipData = () => {
+  return fetch(
+    `https://api.github.com/gists/c3a48cca56afbd2915d0ba704f626360`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  )
+    .then(async (resp) => {
+      const gistData = await resp.json();
+      const sponsorships = JSON.parse(
+        gistData.files["sponsorship.json"]?.content
+      );
+      return sponsorships;
+    })
+    .catch((e) => console.error("Error fetching sponsorships", e));
 };
