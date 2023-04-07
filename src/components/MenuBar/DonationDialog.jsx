@@ -24,7 +24,7 @@ function DonationDialog() {
       <Tooltip
         arrow
         title="Leave a Review / Ko-Fi Donation"
-        description="Support the extension's development by leaving a review or by gifting the developer a much needed coffee ☕!"
+        description="Support the extension's development by leaving a review or by gifting the developer a coffee ☕!"
       >
         <Tab
           onClick={(e) => {
