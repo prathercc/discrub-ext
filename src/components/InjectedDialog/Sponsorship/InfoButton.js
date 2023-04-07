@@ -7,6 +7,7 @@ import {
   DialogContentText,
   Button,
   IconButton,
+  Stack,
 } from "@mui/material";
 import HelpIcon from "@mui/icons-material/Help";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
@@ -35,15 +36,24 @@ function InfoButton() {
       </Tooltip>
 
       <Dialog open={sponsorInfoDialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>Sponsor a Server</DialogTitle>
+        <DialogTitle>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-start"
+            spacing={1}
+          >
+            <HelpIcon />
+            <span>Sponsor a Server</span>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Have a server you want to promote while also supporting the
+            Looking to increase traffic to your server while supporting the
             development of Discrub?
           </DialogContentText>
           <DialogContentText>
-            Server sponsorships are currently available for $3 USD per month and
-            can be setup by emailing{" "}
+            Reach out to{" "}
             <a
               className={classes.email}
               href="mailto:prathercc@gmail.com"
@@ -51,7 +61,8 @@ function InfoButton() {
               rel="noreferrer"
             >
               prathercc@gmail.com
-            </a>
+            </a>{" "}
+            for more information about server sponsorships!
           </DialogContentText>
         </DialogContent>
         <DialogActions>

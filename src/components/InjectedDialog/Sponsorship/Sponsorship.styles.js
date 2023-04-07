@@ -67,7 +67,7 @@ const SponsorshipStyles = makeStyles(() => ({
     justifyContent: "center",
   },
   headerJoinButton: {
-    userSelect: "none",
+    userSelect: "none !important",
   },
   headerAvatar: {
     left: "6px",
@@ -83,7 +83,9 @@ const SponsorshipStyles = makeStyles(() => ({
   },
   infoButton: { position: "absolute !important", bottom: "0px", right: "0px" },
   email: {
-    color: "white !important",
+    color: "rgb(88, 101, 242) !important",
+    fontWeight: "bold",
+    textDecoration: "none !important",
   },
 }));
 
