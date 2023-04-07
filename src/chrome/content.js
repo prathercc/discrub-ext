@@ -62,6 +62,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           document.createElement("iframe")
         ).contentWindow.localStorage;
         if (storage.token) callback(JSON.parse(storage.token));
+        else callback(null);
         return true;
       default:
         break;

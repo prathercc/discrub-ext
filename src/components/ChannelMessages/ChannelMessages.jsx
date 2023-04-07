@@ -19,6 +19,7 @@ import ChannelMessagesStyles from "./ChannelMessages.styles";
 import PurgeButton from "../Buttons/PurgeButton";
 import ExportButton from "../Buttons/ExportButton/ExportButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
+import TokenNotFound from "../TokenNotFound/TokenNotFound";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -222,7 +223,8 @@ function ChannelMessages({ closeAnnouncement }) {
             )}
         </Stack>
       )}
-      {(!token || !guilds.length || messagesLoading) &&
+      {token !== undefined &&
+        (token === null || !guilds.length || messagesLoading) &&
         !purgeDialogOpen &&
         !exportDialogOpen && (
           <Paper justifyContent="center" className={classes.paper}>
@@ -238,6 +240,7 @@ function ChannelMessages({ closeAnnouncement }) {
             </Box>
           </Paper>
         )}
+      <TokenNotFound />
     </Stack>
   );
 }

@@ -18,6 +18,7 @@ import DirectMessagesStyles from "./DirectMessages.styles";
 import ExportButton from "../Buttons/ExportButton/ExportButton";
 import PurgeButton from "../Buttons/PurgeButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
+import TokenNotFound from "../TokenNotFound/TokenNotFound";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -158,7 +159,8 @@ function DirectMessages() {
         </Stack>
       )}
 
-      {(!token || !dms || messagesLoading) &&
+      {token !== undefined &&
+        (token === null || !dms || messagesLoading) &&
         !purgeDialogOpen &&
         !exportDialogOpen && (
           <Paper justifyContent="center" className={classes.paper}>
@@ -174,6 +176,7 @@ function DirectMessages() {
             </Box>
           </Paper>
         )}
+      <TokenNotFound />
 
       {messages?.length > 0 &&
         !messagesLoading &&
