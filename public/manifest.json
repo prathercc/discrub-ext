@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://discord.com/*"],
+      "matches": ["<all_urls>"],
       "js": ["./static/js/content.js"]
     }
   ],
