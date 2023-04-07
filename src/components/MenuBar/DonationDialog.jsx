@@ -35,7 +35,17 @@ function DonationDialog() {
       </Tooltip>
 
       <Dialog open={donationDialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>Leave a Review / Ko-Fi Donation</DialogTitle>
+        <DialogTitle>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-start"
+            spacing={1}
+          >
+            <VolunteerActivismIcon />
+            <span>Leave a Review / Ko-Fi Donation</span>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
             <Stack
