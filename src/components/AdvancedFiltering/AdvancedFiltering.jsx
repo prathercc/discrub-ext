@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import MenuItem from "@mui/material/MenuItem";
 import { Stack, TextField, Button, Collapse } from "@mui/material";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
@@ -8,14 +8,17 @@ import { DmContext } from "../../context/dm/DmContext";
 import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
 import BeforeAndAfterFields from "../Fields/BeforeAndAfterFields";
 
-function AdvancedFiltering({ closeAnnouncement = () => {}, isDm = false }) {
+function AdvancedFiltering({
+  closeAnnouncement = () => {},
+  isDm = false,
+  setShowOptionalFilters,
+  showOptionalFilters,
+}) {
   const { state: messageDataState } = useContext(MessageContext);
   const { state: channelState, setPreFilterUserId } =
     useContext(ChannelContext);
   const { state: dmState, setPreFilterUserId: setDmPrefilterUserId } =
     useContext(DmContext);
-
-  const [showOptionalFilters, setShowOptionalFilters] = useState(false);
 
   const classes = AdvancedFilteringStyles({ showOptionalFilters });
 

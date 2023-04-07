@@ -23,10 +23,15 @@ function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [showOptionalFilters, setShowOptionalFilters] = useState(false);
 
   const { state: userState } = useContext(UserContext);
 
-  const classes = DirectMessagesStyles({ purgeDialogOpen, exportDialogOpen });
+  const classes = DirectMessagesStyles({
+    purgeDialogOpen,
+    exportDialogOpen,
+    showOptionalFilters,
+  });
 
   const { state: dmState, getDms, setDm } = useContext(DmContext);
   const {
@@ -110,7 +115,11 @@ function DirectMessages() {
               </Stack>
 
               <span className={classes.purgeHidden}>
-                <AdvancedFiltering isDm />
+                <AdvancedFiltering
+                  isDm
+                  setShowOptionalFilters={setShowOptionalFilters}
+                  showOptionalFilters={showOptionalFilters}
+                />
               </span>
 
               <Stack

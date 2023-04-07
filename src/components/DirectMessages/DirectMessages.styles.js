@@ -5,7 +5,7 @@ const DirectMessagesStyles = makeStyles(() => ({
     padding: "15px",
     maxHeight: "85%",
     maxWidth: "100%",
-    overflow: "auto",
+    overflow: "hidden",
   },
   box: {
     alignItems: "center",
@@ -14,7 +14,8 @@ const DirectMessagesStyles = makeStyles(() => ({
     marginTop: "1vh",
   },
   tableBox: {
-    maxHeight: "350px",
+    maxHeight: ({ showOptionalFilters }) =>
+      `calc(360px - ${showOptionalFilters ? "50px" : "0px"})`,
     overflow: "auto",
   },
   paper: {

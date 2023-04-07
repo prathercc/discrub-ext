@@ -39,10 +39,15 @@ function ChannelMessages({ closeAnnouncement }) {
     setPreFilterUserId,
   } = useContext(ChannelContext);
 
+  const [showOptionalFilters, setShowOptionalFilters] = useState(false);
   const [searchTouched, setSearchTouched] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const classes = ChannelMessagesStyles({ purgeDialogOpen, exportDialogOpen });
+  const classes = ChannelMessagesStyles({
+    purgeDialogOpen,
+    exportDialogOpen,
+    showOptionalFilters,
+  });
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
@@ -152,7 +157,11 @@ function ChannelMessages({ closeAnnouncement }) {
               </Stack>
 
               <span className={classes.purgeHidden}>
-                <AdvancedFiltering closeAnnouncement={closeAnnouncement} />
+                <AdvancedFiltering
+                  closeAnnouncement={closeAnnouncement}
+                  setShowOptionalFilters={setShowOptionalFilters}
+                  showOptionalFilters={showOptionalFilters}
+                />
               </span>
 
               <Stack
