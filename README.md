@@ -1,134 +1,88 @@
+# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/master/public/discrub2.png"> Discrub
 
-
-
-# Discrub
-
-**Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML and JSON supported) [Discord](https://discord.com/) messages. It can be installed via the [Chrome Webstore](https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj)
+**Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML and JSON supported) Discord messages.
 
 <a href="https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj"><img src="https://img.shields.io:/chrome-web-store/users/plhdclenpaecffbcefjmpkkbdpkmhhbj?style=plastic&label=Discrub on Chrome&logo=javascript&logoColor=38bdae&color=1a1b27&labelColor=404040"></a>
 
-An instructional video can be found here - https://www.youtube.com/watch?v=s7MLK85eLJw
-
-*Users may also remove messages and attachments from other Discord users if they have the proper permissions for any given channel.*
-
-Developed using [React.js](https://reactjs.org/)
+📼 Instructional Video: https://www.youtube.com/watch?v=s7MLK85eLJw
 
 ## Select Guild/DM
 
+#### <p align="center">Channel Messages View</p>
 
-<p  align="left">
-
-#### Channel Messages View
-
- - Select a Guild and Channel, optionally select a username to pre-filter by.
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z2.png">
-
 </p>
 
-<p  align="left">
+#### <p align="center">Direct Messages View</p>
 
-#### Direct Messages View
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z3.png">
-
 </p>
 
 ## Filter Messages
 
-<p  align="left">
+#### <p align="center">Filter View</p>
 
-#### Filter View
-
- - Optionally filter messages by the following criteria: Start Time, End Time, Username, Message (content), Attachment Name, Threads.
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z4.png">
-
 </p>
 
 ## Delete/Edit Messages
- 
-<p  align="left">
 
-#### Bulk Delete
+#### <p align="center">Bulk Delete</p>
 
- - After messages have been loaded, messages can be selected and deleted in bulk.
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png">
-
 </p>
 
-<p  align="left">
+#### <p align="center">Individual Attachment Deletion</p>
 
-#### Individual Attachment Deletion
-
- - Attachments can be viewed and deleted separately.
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z7.png">
-
 </p>
 
 ## View Resources
 
-<p  align="left">
+#### <p align="center">Project Information & Links</p>
 
-#### Project Information & Links
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z8.png">
-
 </p>
 
 
 ## Purge Guild/DM
 
- - Purging will remove all of your messages from the specified Guild
-   (and all inner Channels) or the selected DM.
+#### <p align="center">Purge Guild View</p>
 
-<p  align="left">
-
-#### Purge Guild View
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z11.png">
-
 </p>
-<p  align="left">
 
-#### Purge DM View
+#### <p align="center">Purge DM View</p>
 
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z12.png">
-
 </p>
 
-<p  align="left">
+#### <p align="center">Purge Progress</p>
 
-#### Purge Progress
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png">
-
 </p>
 
 ## Export Guild/DM
 
- - Exporting will download all messages (and media attachments) from a selected Guild / DM.
+#### <p align="center">Export DM View</p>
 
-<p  align="left">
-
-#### Export DM View
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png">
-
 </p>
 
-<p  align="left">
+#### <p align="center">Export Guild View<p/>
 
-#### Export Guild View
-
- 
-
- - Any Channel belonging to the Guild can be selected for export.
-
+<p  align="center">
 <img width="500px" src="https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z5.png">
-
 </p>
 
 ## Contributing
