@@ -1,7 +1,7 @@
 {
   "short_name": "Discrub",
   "name": "Discrub",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "A data manipulation and export tool for Discord.",
   "manifest_version": 3,
   "permissions": [],
@@ -14,7 +14,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["*://discord.com/*"],
       "js": ["./static/js/content.js"]
     }
   ],

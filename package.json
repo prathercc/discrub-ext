@@ -1,6 +1,6 @@
 {
   "name": "discrub-ext",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.4.3",
