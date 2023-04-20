@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.9.1",
+    "changes": [
+      "Revert extension icon redirect changes to restore Discord only permissions."
+    ]
+  },
+  {
     "version": "1.9.0",
     "changes": [
       "Clicking extension icon outside of Discord app will now redirect to the Discord website.",
