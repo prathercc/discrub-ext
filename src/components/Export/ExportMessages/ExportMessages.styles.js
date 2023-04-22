@@ -71,6 +71,17 @@ const ExportMessagesStyles = makeStyles(() => ({
     width: ({ reply }) => (reply ? "15px !important" : "40px"),
     height: ({ reply }) => (reply ? "15px !important" : "40px"),
     minWidth: ({ reply }) => (reply ? "15px !important" : "40px"),
+    boxShadow: ({ reply }) => !reply && "rgba(0, 0, 0, 0.75) 5px 4px 1px -2px",
+    "&:hover": {
+      boxShadow: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "rgba(0, 0, 0, 0.75) 5px 4px 1px 1px",
+      width: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "42px",
+      height: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "42px",
+      cursor: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "pointer",
+    },
   },
   replyMessageText: {
     color: "#b8b9bf !important",
