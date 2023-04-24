@@ -182,6 +182,17 @@ const theme = createTheme({
         },
       },
     },
+    MuiSnackbarContent: {
+      styleOverrides: {
+        root: {
+          border: "1px solid #202225",
+          boxShadow: "4px 2px 5px 1px rgb(0 0 0 / 41%)",
+          borderRadius: "10px",
+          backgroundColor: "#2f3136",
+          color: "#d0d3f5 !important",
+        },
+      },
+    },
   },
 });
 

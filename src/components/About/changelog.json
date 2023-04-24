@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.9.2",
+    "changes": [
+      "Add ability to enter a UserId in the Username Prefilter field (Channel Messages only).",
+      "Clicking a User's avatar will now copy their UserId to your clipboard."
+    ]
+  },
+  {
     "version": "1.9.1",
     "changes": [
       "Revert extension icon redirect changes to restore Discord only permissions."
