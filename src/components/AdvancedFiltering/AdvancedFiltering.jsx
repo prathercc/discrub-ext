@@ -43,21 +43,27 @@ function AdvancedFiltering({
       >
         {showOptionalFilters ? "Hide" : "Show"} Advanced Filtering
       </Button>
-      <Collapse orientation="vertical" in={showOptionalFilters}>
-        <Stack
-          direction="row"
-          justifyContent="center"
-          alignItems="center"
-          spacing={1}
-        >
-          <PrefilterUser isDm={isDm} />
-          <BeforeAndAfterFields
-            disabled={
-              (isDm ? selectedDm : selectedChannel).id === null ||
-              messagesLoading
-            }
-          />
-        </Stack>
+      <Collapse
+        className={classes.collapse}
+        orientation="vertical"
+        in={showOptionalFilters}
+      >
+        {showOptionalFilters && (
+          <Stack
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            spacing={1}
+          >
+            <PrefilterUser isDm={isDm} />
+            <BeforeAndAfterFields
+              disabled={
+                (isDm ? selectedDm : selectedChannel).id === null ||
+                messagesLoading
+              }
+            />
+          </Stack>
+        )}
       </Collapse>
     </Stack>
   );
