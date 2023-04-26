@@ -23,6 +23,7 @@ import MessageChip from "../Chips/MessageChip";
 import { toggleDebugPause } from "../Modals/Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
+import PrefilterUser from "../AdvancedFiltering/PrefilterUser";
 
 const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const classes = ChannelMessagesStyles();
@@ -197,6 +198,7 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                 )}
               </DialogContentText>
             </Stack>
+            <PrefilterUser isDm={isDm} purge />
             {deleting && deleteObj && (
               <>
                 {deleteObj.id && (

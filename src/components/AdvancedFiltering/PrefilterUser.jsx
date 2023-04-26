@@ -7,7 +7,7 @@ import { DmContext } from "../../context/dm/DmContext";
 import ClearIcon from "@mui/icons-material/Clear";
 import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
 
-function PrefilterUser({ isDm = false }) {
+function PrefilterUser({ isDm = false, purge }) {
   const { state: messageDataState } = useContext(MessageContext);
   const { state: channelState, setPreFilterUserId } =
     useContext(ChannelContext);
@@ -28,7 +28,8 @@ function PrefilterUser({ isDm = false }) {
   const value = isDm ? dmPreFilterUserId : preFilterUserId;
   const setUserId = isDm ? setDmPrefilterUserId : setPreFilterUserId;
   const disabled =
-    (isDm ? selectedDm : selectedChannel).id === null || messagesLoading;
+    ((isDm ? selectedDm : selectedChannel).id === null && !purge) ||
+    messagesLoading;
 
   const getDisplayValue = () => {
     const foundUser = users.find((user) => user.id === value);
@@ -49,11 +50,17 @@ function PrefilterUser({ isDm = false }) {
   return (
     <Tooltip
       arrow
-      title={isDm ? "Filter By Username" : "Filter By Username Or User ID"}
+      title={
+        isDm
+          ? `${purge ? "Purge" : "Filter"} By Username`
+          : `${purge ? "Purge" : "Filter"} By Username Or User ID`
+      }
       description={
         isDm
-          ? "Select a Username to search by"
-          : "Select a Username or manually type a User's ID"
+          ? `Select a User to ${purge ? "Purge" : "search by"}`
+          : `Select a User or manually type a User's ID to ${
+              purge ? "Purge" : "search by"
+            }`
       }
       placement="top"
     >
@@ -69,7 +76,9 @@ function PrefilterUser({ isDm = false }) {
             fullWidth
             size="small"
             label={
-              isDm ? "Filter By Username" : "Filter By Username Or User ID"
+              isDm
+                ? `${purge ? "Purge" : "Filter"} By Username`
+                : `${purge ? "Purge" : "Filter"} By Username Or User ID`
             }
             className={classes.filterByUserName}
           />
