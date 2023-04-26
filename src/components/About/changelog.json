@@ -3,7 +3,8 @@
     "version": "1.9.2",
     "changes": [
       "Add ability to enter a UserId in the Username Prefilter field (Channel Messages only).",
-      "Clicking a User's avatar will now copy their UserId to your clipboard."
+      "Clicking a User's avatar will now copy their UserId to your clipboard.",
+      "Add ability to Purge Channel Messages by a specified User Id."
     ]
   },
   {
