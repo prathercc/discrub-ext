@@ -89,6 +89,12 @@ function ChannelMessages({ closeAnnouncement }) {
   };
 
   useEffect(() => {
+    if (purgeDialogOpen || exportDialogOpen) {
+      setShowOptionalFilters(false);
+    }
+  }, [purgeDialogOpen, exportDialogOpen]);
+
+  useEffect(() => {
     if (token) getGuilds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
