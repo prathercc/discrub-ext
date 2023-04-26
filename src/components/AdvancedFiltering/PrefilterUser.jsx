@@ -47,21 +47,24 @@ function PrefilterUser({ isDm = false, purge }) {
     }
   };
 
+  const toolTipTitle = isDm
+    ? "Filter By Username"
+    : `${purge ? "Purge" : "Filter"} By Username Or User ID`;
+
+  const toolTipDescription = isDm
+    ? "Select a User to search by"
+    : `Select a User or manually type a User's ID to ${
+        purge ? "Purge" : "search by"
+      }`;
+  const textfieldLabel = isDm
+    ? "Filter By Username"
+    : `${purge ? "Purge" : "Filter"} By Username Or User ID`;
+
   return (
     <Tooltip
       arrow
-      title={
-        isDm
-          ? `${purge ? "Purge" : "Filter"} By Username`
-          : `${purge ? "Purge" : "Filter"} By Username Or User ID`
-      }
-      description={
-        isDm
-          ? `Select a User to ${purge ? "Purge" : "search by"}`
-          : `Select a User or manually type a User's ID to ${
-              purge ? "Purge" : "search by"
-            }`
-      }
+      title={toolTipTitle}
+      description={toolTipDescription}
       placement="top"
     >
       <Autocomplete
@@ -75,11 +78,7 @@ function PrefilterUser({ isDm = false, purge }) {
             variant="filled"
             fullWidth
             size="small"
-            label={
-              isDm
-                ? `${purge ? "Purge" : "Filter"} By Username`
-                : `${purge ? "Purge" : "Filter"} By Username Or User ID`
-            }
+            label={textfieldLabel}
             className={classes.filterByUserName}
           />
         )}
