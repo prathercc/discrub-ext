@@ -45,7 +45,7 @@ const ChannelContextProvider = (props) => {
       const data = await fetchChannels(token, selectedGuildId);
       return dispatch({
         type: GET_CHANNELS_COMPLETE,
-        payload: [...data],
+        payload: { data, user: { name: username, id: userId } },
       });
     }
   };
@@ -53,7 +53,7 @@ const ChannelContextProvider = (props) => {
   const setChannel = async (id) => {
     return dispatch({
       type: SET_CHANNEL,
-      payload: { id, user: { name: username, id: userId } },
+      payload: { id },
     });
   };
 

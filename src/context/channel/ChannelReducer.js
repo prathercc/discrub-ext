@@ -12,10 +12,12 @@ export const ChannelReducer = (state, action) => {
     case GET_CHANNELS:
       return { ...state, isLoading: true };
     case GET_CHANNELS_COMPLETE:
+      const { data, user } = payload;
       return {
         ...state,
-        channels: [...payload].filter((c) => c.type !== 4),
+        channels: data.filter((c) => c.type !== 4),
         isLoading: false,
+        preFilterUserIds: [{ name: user.name, id: user.userId }],
       };
     case SET_CHANNEL:
       const selectedChannel = state.channels.find(
@@ -33,7 +35,6 @@ export const ChannelReducer = (state, action) => {
           position: null,
           type: null,
         },
-        preFilterUserIds: [{ name: payload.user.name, id: payload.user.id }],
       };
     case SET_PREFILTER_USERID:
       return { ...state, preFilterUserId: payload.userId };
@@ -56,7 +57,6 @@ export const ChannelReducer = (state, action) => {
           type: null,
         },
         preFilterUserId: null,
-        preFilterUserIds: [],
       };
     default:
       return { ...state, ...payload };
