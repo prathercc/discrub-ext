@@ -101,9 +101,7 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       );
       await resetMessageData();
       isDm ? await setDm(entity.id) : await setChannel(entity.id);
-      isDm
-        ? await setDmPreFilterUserId(userState.id)
-        : await setPreFilterUserId(userState.id);
+      isDm && (await setDmPreFilterUserId(userState.id));
       await getMessageData();
       let count = 0;
       const selectedMessages = [...messagesRef.current];
@@ -190,15 +188,16 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   `${deleteType} was successfully purged!`
                 ) : (
                   <span>
-                    Are you sure you want to purge this {deleteType}? All of{" "}
-                    <strong className={classes.purgeWarning}>your</strong>{" "}
+                    Are you sure you want to purge this {deleteType}? All{" "}
+                    {isDm ? " of your " : " "}
                     messages will be deleted
-                    {isDm ? "." : " for each Channel."}
+                    {!isDm && " for the selected User or User ID"}
+                    {isDm ? "." : " within each Channel."}
                   </span>
                 )}
               </DialogContentText>
             </Stack>
-            <PrefilterUser isDm={isDm} purge />
+            {!isDm && !finishedPurge && <PrefilterUser isDm={false} purge />}
             {deleting && deleteObj && (
               <>
                 {deleteObj.id && (
@@ -238,7 +237,7 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           </Button>
           {!finishedPurge && (
             <Button
-              disabled={deleting || deleteObj}
+              disabled={deleting || deleteObj || (!isDm && !preFilterUserId)}
               variant="contained"
               onClick={handleDeleteMessage}
             >
