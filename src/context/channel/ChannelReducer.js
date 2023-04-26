@@ -17,7 +17,7 @@ export const ChannelReducer = (state, action) => {
         ...state,
         channels: data.filter((c) => c.type !== 4),
         isLoading: false,
-        preFilterUserIds: [{ name: user.name, id: user.userId }],
+        preFilterUserIds: [{ name: user.name, id: user.id }],
       };
     case SET_CHANNEL:
       const selectedChannel = state.channels.find(
