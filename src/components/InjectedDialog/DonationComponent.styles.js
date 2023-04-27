@@ -2,8 +2,9 @@ import { makeStyles } from "@mui/styles";
 
 const DonationComponentStyles = makeStyles(() => ({
   box: {
-    minWidth: "290px",
-    padding: "3px",
+    padding: "0px",
+    paddingLeft: "5px",
+    paddingRight: "5px",
     backgroundColor: "#2f3136",
     border: "1px solid #202225",
     borderRadius: "10px",

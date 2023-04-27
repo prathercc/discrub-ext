@@ -23,7 +23,7 @@ function InfoButton() {
     <>
       <Tooltip
         arrow
-        title="Server Sponsoring"
+        title="Server Sponsorship"
         description="View more information about sponsoring a server"
       >
         <IconButton
@@ -44,14 +44,10 @@ function InfoButton() {
             spacing={1}
           >
             <HelpIcon />
-            <span>Sponsor a Server</span>
+            <span>Server Sponsorship</span>
           </Stack>
         </DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Looking to increase traffic to your server while supporting the
-            development of Discrub?
-          </DialogContentText>
           <DialogContentText>
             Reach out to{" "}
             <a
@@ -62,7 +58,7 @@ function InfoButton() {
             >
               prathercc@gmail.com
             </a>{" "}
-            for more information about server sponsorships!
+            for more information about server sponsorships
           </DialogContentText>
         </DialogContent>
         <DialogActions>

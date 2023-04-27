@@ -109,6 +109,7 @@ const theme = createTheme({
           width: "auto",
           height: "30px",
           cursor: "pointer",
+          userSelect: "none !important",
         },
       },
     },

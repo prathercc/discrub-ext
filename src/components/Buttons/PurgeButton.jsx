@@ -158,7 +158,7 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     "Are you sure you want to purge this DM? All of your messages will be deleted.";
 
   const guildDialogText =
-    "Are you sure you want to purge this Guild? All messages will be deleted for yourself or a given User Id within each Channel.";
+    "Are you sure you want to purge this Guild? All messages in every Channel will be deleted for yourself or a given User Id.";
 
   return (
     <>
@@ -200,8 +200,10 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               )}
               {finishedPurge && <ThumbUpIcon fontSize="large" />}
               <DialogContentText>
-                {finishedPurge && `${deleteType} was successfully purged!`}
-                {!finishedPurge && (isDm ? dmDialogText : guildDialogText)}
+                <Typography variant="body2">
+                  {finishedPurge && `${deleteType} was successfully purged!`}
+                  {!finishedPurge && (isDm ? dmDialogText : guildDialogText)}
+                </Typography>
               </DialogContentText>
             </Stack>
             {!isDm && !finishedPurge && <PrefilterUser isDm={false} purge />}

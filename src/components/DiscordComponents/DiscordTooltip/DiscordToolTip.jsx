@@ -7,6 +7,7 @@ const DiscordTooltip = (props) => {
   const { title, description } = props;
   return (
     <Tooltip
+      disableInteractive
       TransitionProps={{
         timeout: {
           appear: 1,

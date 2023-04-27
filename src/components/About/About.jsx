@@ -22,7 +22,7 @@ function About() {
       <Stack className={classes.paper}>
         <Stack padding={3} spacing={2}>
           <Accordion expanded>
-            <AccordionSummary>
+            <AccordionSummary className={classes.accordianSummary}>
               <Stack
                 direction="row"
                 justifyContent="flex-start"
@@ -40,7 +40,7 @@ function About() {
                 {changelog.map((change) => {
                   return (
                     <Stack>
-                      <Typography variant="h6">
+                      <Typography variant="body2">
                         Version {change.version}
                       </Typography>
                       <ul>
@@ -88,7 +88,7 @@ const logoAnim = keyframes`
 const CusImg = styled.img`
   user-select: none;
   border-radius: 15px;
-  width: 200px;
+  width: 120px;
   margin: auto;
   pointer-events: none;
   animation: ${logoAnim} infinite 55s both;

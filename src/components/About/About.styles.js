@@ -12,7 +12,6 @@ const AboutStyles = makeStyles(() => ({
     overflow: "auto",
   },
   accordianTitle: {
-    cursor: "pointer !important",
     userSelect: "none !important",
   },
   cryptoImg: {
@@ -24,6 +23,9 @@ const AboutStyles = makeStyles(() => ({
   },
   changelogText: {
     opacity: 0.5,
+  },
+  accordianSummary: {
+    cursor: "default !important",
   },
 }));
 

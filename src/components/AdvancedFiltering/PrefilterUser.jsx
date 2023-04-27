@@ -48,17 +48,16 @@ function PrefilterUser({ isDm = false, purge }) {
   };
 
   const toolTipTitle = isDm
-    ? "Filter By Username"
-    : `${purge ? "Purge" : "Filter"} By Username Or User ID`;
+    ? "Messages By"
+    : `${purge ? "Purge" : "Messages"} By`;
 
   const toolTipDescription = isDm
-    ? "Select a User to search by"
-    : `Select a User or manually type a User's ID to ${
-        purge ? "Purge" : "search by"
-      }`;
+    ? "Search messages by User"
+    : `${purge ? "Purge" : "Search"} messages by User or User Id`;
+
   const textfieldLabel = isDm
-    ? "Filter By Username"
-    : `${purge ? "Purge" : "Filter"} By Username Or User ID`;
+    ? "Messages By"
+    : `${purge ? "Purge" : "Messages"} By`;
 
   return (
     <Tooltip
