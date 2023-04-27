@@ -106,11 +106,7 @@ function ChannelMessages({ closeAnnouncement }) {
           <Paper className={classes.paper}>
             <Stack spacing={2}>
               <Stack>
-                <Typography variant="h5">Channel Messages</Typography>
-                <Typography variant="caption">
-                  Messages between other Discord users and yourself, within
-                  Guilds.
-                </Typography>
+                <Typography variant="body1">Channel Messages</Typography>
               </Stack>
 
               <Stack
@@ -127,7 +123,7 @@ function ChannelMessages({ closeAnnouncement }) {
                   value={selectedGuild.id}
                   onChange={handleGuildChange}
                   select
-                  label="Guilds"
+                  label="Guild"
                   onFocus={closeAnnouncement}
                 >
                   {guilds.map((guild) => {
@@ -148,7 +144,7 @@ function ChannelMessages({ closeAnnouncement }) {
                   value={selectedChannel.id}
                   onChange={handleChannelChange}
                   select
-                  label="Channels"
+                  label="Channel"
                 >
                   <MenuItem dense value={null} key={-1}>
                     <strong>Reset Selection</strong>
