@@ -94,12 +94,12 @@ function InjectedDialog() {
           <Collapse in={alertOpen}>
             <Alert severity="info" onClose={() => setAlertOpen(false)}>
               <AlertTitle sx={{ color: "rgb(1, 67, 97)" }}>
-                <strong>
+                <Typography variant="body2">
                   {announcement.title}
                   {announcement.date && ` - ${announcement.date}`}
-                </strong>
+                </Typography>
               </AlertTitle>
-              {announcement.message}
+              <Typography variant="body2">{announcement.message}</Typography>
             </Alert>
           </Collapse>
         </Box>

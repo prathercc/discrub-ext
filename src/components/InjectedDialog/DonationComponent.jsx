@@ -56,7 +56,7 @@ function DonationComponent() {
         </IconButton>
       </Box>
       {donations.slice(startIndex, startIndex + 3).map((donation) => (
-        <Tooltip description={`"${donation.message}"`}>
+        <Tooltip title={donation.name} description={donation.message}>
           <Box className={classes.box}>
             <Stack
               direction="column"
@@ -73,10 +73,9 @@ function DonationComponent() {
                 <Avatar>
                   <CoffeeIcon />
                 </Avatar>
-                <Typography variant="body1">
-                  <strong>{donation.name}</strong> bought{" "}
-                  <strong>{donation.amount}</strong> coffee
-                  {donation.amount > 1 ? "s" : ""} ·{" "}
+                <Typography variant="body2">
+                  <strong>{donation.name}</strong> donated{" "}
+                  <strong>${donation.dollars}</strong> ·{" "}
                   <i className={classes.date}>
                     {differenceInDays(new Date(), parseISO(donation.date))} days
                     ago
