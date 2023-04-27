@@ -20,18 +20,18 @@ const DonationComponentStyles = makeStyles(() => ({
   },
   stack: {
     position: "fixed",
-    bottom: "7px",
+    bottom: "2px",
     right: "27px",
     width: "1200px",
   },
   arrowBox: {
     position: "fixed",
-    bottom: "59px",
-    right: "190px",
+    bottom: "46px",
+    right: "221px",
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    width: "865px",
+    width: "803px",
     justifyContent: "space-between",
   },
 }));

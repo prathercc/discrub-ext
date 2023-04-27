@@ -175,10 +175,10 @@ const theme = createTheme({
     MuiBackdrop: {
       styleOverrides: {
         root: {
-          width: "783px",
-          height: "726px",
-          left: "234px",
-          top: "7px",
+          width: "719px",
+          height: "615px",
+          left: "266px",
+          top: "9px",
           borderRadius: "5px",
         },
       },

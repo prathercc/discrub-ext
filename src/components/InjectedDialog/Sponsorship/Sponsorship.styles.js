@@ -14,11 +14,11 @@ const SponsorshipStyles = makeStyles(() => ({
     alignItems: "flex-start !important",
   },
   sponsor0: {
-    left: "6px",
+    left: "38px",
     top: "70px",
   },
   sponsor1: {
-    left: "6px",
+    left: "38px",
     top: "330px",
   },
   headerbackground: {

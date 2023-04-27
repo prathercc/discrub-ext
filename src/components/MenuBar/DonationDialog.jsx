@@ -60,7 +60,7 @@ function DonationDialog() {
               >
                 <Typography variant="body2">
                   Thanks for using Discrub, all support is greatly appreciated
-                  and makes further development possible
+                  and makes further development possible 👨‍💻
                 </Typography>
               </Stack>
 
