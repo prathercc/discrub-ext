@@ -100,7 +100,7 @@ const ExportMessagesStyles = makeStyles(() => ({
     marginLeft: 20,
     marginTop: 8,
     height: 7,
-    width: 25,
+    width: 17,
     borderLeft: "2px solid #4e5058",
     borderTop: "2px solid #4e5058",
     borderTopLeftRadius: "5px",

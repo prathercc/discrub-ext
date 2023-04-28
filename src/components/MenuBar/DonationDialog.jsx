@@ -56,11 +56,12 @@ function DonationDialog() {
                 direction="column"
                 justifyContent="center"
                 alignItems="flex-start"
-                spacing={2}
+                spacing={1}
               >
                 <Typography variant="body2">
-                  Thanks for using Discrub, all support is greatly appreciated
-                  and makes further development possible 👨‍💻
+                  Reviews and donations are never required but are always
+                  appreciated and help ensure that Discrub's active development
+                  can continue 👨‍💻
                 </Typography>
               </Stack>
 

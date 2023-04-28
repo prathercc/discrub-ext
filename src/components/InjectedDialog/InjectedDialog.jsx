@@ -24,6 +24,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { fetchAnnouncementData } from "../../announcementService";
 import DonationComponent from "./DonationComponent";
 import Sponsorship from "./Sponsorship/Sponsorship";
+import FloatingLogo from "./FloatingLogo/FloatingLogo";
 
 function InjectedDialog() {
   const classes = InjectedDialogStyles();
@@ -94,12 +95,14 @@ function InjectedDialog() {
           <Collapse in={alertOpen}>
             <Alert severity="info" onClose={() => setAlertOpen(false)}>
               <AlertTitle sx={{ color: "rgb(1, 67, 97)" }}>
-                <Typography variant="body2">
+                <Typography className={classes.alertText} variant="body2">
                   {announcement.title}
                   {announcement.date && ` - ${announcement.date}`}
                 </Typography>
               </AlertTitle>
-              <Typography variant="body2">{announcement.message}</Typography>
+              <Typography className={classes.alertText} variant="body2">
+                {announcement.message}
+              </Typography>
             </Alert>
           </Collapse>
         </Box>
@@ -115,6 +118,7 @@ function InjectedDialog() {
           <Typography variant="body2">1.9.2</Typography>
         </Stack>
       </Box>
+      <FloatingLogo />
       <CloseWindowButton />
     </Box>
   );

@@ -18,8 +18,8 @@ const InjectedDialogStyles = makeStyles(() => ({
   },
   box: {
     position: "fixed",
-    bottom: "54px",
-    right: "268px",
+    top: "36px",
+    right: "305px",
     opacity: 0.25,
   },
   alertBox: {
@@ -32,7 +32,7 @@ const InjectedDialogStyles = makeStyles(() => ({
       color: "#d2d5f7 !important",
     },
     "& .MuiAlert-icon": {
-      color: "#5865f2 !important",
+      color: "#d0d3f5 !important",
     },
     "& .MuiTypography-root": {
       color: "#d2d5f7 !important",
@@ -42,6 +42,9 @@ const InjectedDialogStyles = makeStyles(() => ({
     width: "24px",
     height: "24px",
     margin: "auto",
+  },
+  alertText: {
+    userSelect: "none !important",
   },
 }));
 

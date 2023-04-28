@@ -36,7 +36,7 @@ export default function DiscordTableMessage({
                   await setAttachmentMessage(row);
                   openAttachmentModal();
                 }}
-                color="primary"
+                color="secondary"
               >
                 <AttachmentIcon />
               </IconButton>
@@ -50,7 +50,7 @@ export default function DiscordTableMessage({
                   await setEmbedMessage(row);
                   openEmbedModal();
                 }}
-                color="primary"
+                color="secondary"
               >
                 <SmartToyIcon />
               </IconButton>

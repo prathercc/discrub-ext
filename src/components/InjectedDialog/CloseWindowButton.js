@@ -1,5 +1,4 @@
 import React from "react";
-import CancelIcon from "@mui/icons-material/Cancel";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import { sendChromeMessage } from "../../chromeService";
 import IconButton from "@mui/material/IconButton";

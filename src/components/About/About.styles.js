@@ -2,7 +2,7 @@ import { makeStyles } from "@mui/styles";
 
 const AboutStyles = makeStyles(() => ({
   boxContainer: {
-    padding: "15px",
+    paddingTop: "5px",
     maxHeight: "85%",
     maxWidth: "100%",
     overflow: "hidden",

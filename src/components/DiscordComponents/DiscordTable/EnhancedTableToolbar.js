@@ -13,6 +13,7 @@ import FilterComponent from "./FilterComponent";
 import DiscordTableStyles from "./DiscordTable.styles";
 import ExportButton from "../../Buttons/ExportButton/ExportButton";
 import { DmContext } from "../../../context/dm/DmContext";
+import { Collapse } from "@mui/material";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -66,7 +67,7 @@ const EnhancedTableToolbar = ({
             <Tooltip
               arrow
               placement="right"
-              title={`${filterOpen ? "Close" : "Open"} message filters`}
+              title={`${filterOpen ? "Close" : "Open"} Quick Filters`}
             >
               <IconButton onClick={handleFilterToggle}>
                 <FilterListIcon className={classes.icon} />
@@ -80,7 +81,14 @@ const EnhancedTableToolbar = ({
               />
             </IconButton>
           </Stack>
-          {filterOpen && <FilterComponent />}
+
+          <Collapse
+            className={classes.collapse}
+            orientation="vertical"
+            in={filterOpen}
+          >
+            <FilterComponent />
+          </Collapse>
         </Stack>
 
         {selectedMessages.length > 0 && (

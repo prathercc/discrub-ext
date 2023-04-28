@@ -60,6 +60,9 @@ const DiscordTableStyles = makeStyles(() => ({
     opacity: 0.85,
     borderBottom: "1px dotted red",
   },
+  collapse: {
+    width: "100%",
+  },
 }));
 
 export default DiscordTableStyles;

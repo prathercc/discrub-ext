@@ -13,8 +13,8 @@ const DonationComponentStyles = makeStyles(() => ({
       userSelect: "none !important",
     },
     "& .MuiAvatar-root": {
-      color: "#2f3136 !important",
-      backgroundColor: "#5865f2 !important",
+      color: "#d0d3f5 !important",
+      backgroundColor: "transparent !important",
     },
     boxShadow: "4px 2px 5px 1px rgb(0 0 0 / 41%)",
   },
