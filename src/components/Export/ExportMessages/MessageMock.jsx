@@ -110,7 +110,7 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
           {!hideAttachments && (
             <Stack
               mt="5px"
-              direction="row"
+              direction="column"
               justifyContent="flex-start"
               alignItems="center"
               spacing={1}
