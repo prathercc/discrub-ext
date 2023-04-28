@@ -1,10 +1,10 @@
 import React from "react";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import { sendChromeMessage } from "../../chromeService";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import Box from "@mui/material/Box";
 import CloseWindowButtonStyles from "./CloseWindowButton.styles";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const CloseWindowButton = () => {
   const classes = CloseWindowButtonStyles();
@@ -15,7 +15,7 @@ const CloseWindowButton = () => {
           onClick={() => sendChromeMessage("CLOSE_INJECTED_DIALOG")}
           color="error"
         >
-          <CloseOutlinedIcon />
+          <CancelIcon />
         </IconButton>
       </Tooltip>
     </Box>
