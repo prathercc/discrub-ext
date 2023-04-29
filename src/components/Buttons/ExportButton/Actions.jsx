@@ -69,29 +69,50 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
   const isExportCancelled = () => !exportingActiveRef.current;
 
+  const _downloadCollection = async (
+    collection = [],
+    collectionName = "",
+    message = {},
+    imgPath = ""
+  ) => {
+    for (let c2 = 0; c2 < collection.length; c2 += 1) {
+      if (isExportCancelled()) break;
+      try {
+        const entity = message[collectionName][c2];
+        const proxyUrl = entity.proxy_url || entity.thumbnail.proxy_url;
+        const blob = await fetch(proxyUrl).then((r) => r.blob());
+        if (blob.size) {
+          const cleanFileName = `${uuidv4()}_${
+            entity.filename || `EMBEDDED-IMAGE-${c2}`
+          }`;
+          await addToZip(blob, `${imgPath}/${cleanFileName}`);
+          message[collectionName][c2] = {
+            ...message[collectionName][c2],
+            local_url: `${imgPath.split("/")[1]}/${cleanFileName}`,
+          };
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const _processMessages = async (messages, imgPath) => {
     const processMessage = async (message) => {
       let updatedMessage = message;
       if (imgPath) {
-        for (let c2 = 0; c2 < updatedMessage.attachments.length; c2 += 1) {
-          if (isExportCancelled()) break;
-          try {
-            const attachment = updatedMessage.attachments[c2];
-            const blob = await fetch(attachment.proxy_url).then((r) =>
-              r.blob()
-            );
-            if (blob.size) {
-              const cleanFileName = `${uuidv4()}_${attachment.filename}`;
-              await addToZip(blob, `${imgPath}/${cleanFileName}`);
-              updatedMessage.attachments[c2] = {
-                ...updatedMessage.attachments[c2],
-                local_url: `${imgPath.split("/")[1]}/${cleanFileName}`,
-              };
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        }
+        await _downloadCollection(
+          updatedMessage.attachments,
+          "attachments",
+          updatedMessage,
+          imgPath
+        );
+        await _downloadCollection(
+          updatedMessage.embeds,
+          "embeds",
+          updatedMessage,
+          imgPath
+        );
       } else {
         updatedMessage.attachments = updatedMessage.attachments?.map(
           (attachment) => ({ ...attachment, local_url: null })
@@ -105,7 +126,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         await new Promise((resolve) =>
           setTimeout(() => {
             resolve();
-          }, 5000)
+          }, 3000)
         );
       }
       if (isExportCancelled()) break;

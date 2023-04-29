@@ -6,6 +6,12 @@ const AdvancedFilteringStyles = makeStyles(() => ({
   },
   filterButton: {
     width: "100% !important",
+    userSelect: "none !important",
+  },
+  collapse: {
+    "& .MuiCollapse-wrapperInner": {
+      minHeight: "47px !important",
+    },
   },
 }));
 

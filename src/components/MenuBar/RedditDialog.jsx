@@ -41,9 +41,11 @@ function RedditDialog() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Opening new tab to external link -{" "}
-            <Typography component="span" color="primary">
-              <strong>https://www.reddit.com/r/discrub/</strong>
+            <Typography variant="body2">
+              Opening new tab to external link -{" "}
+              <Typography variant="body2" component="span" color="primary">
+                <strong>https://www.reddit.com/r/discrub/</strong>
+              </Typography>
             </Typography>
           </DialogContentText>
         </DialogContent>

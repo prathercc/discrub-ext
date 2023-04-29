@@ -11,6 +11,7 @@ import {
   ListItemIcon,
   Checkbox,
   Box,
+  Typography,
 } from "@mui/material";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
@@ -50,7 +51,9 @@ const BulkContent = ({ isDm = false }) => {
     <DialogContent>
       {!isExporting && !isDm && (
         <>
-          <DialogContentText>Select Channel(s) to export</DialogContentText>
+          <DialogContentText>
+            <Typography variant="body2">Select Channel(s) to export</Typography>
+          </DialogContentText>
           <Stack
             direction="column"
             justifyContent="center"
@@ -140,7 +143,9 @@ const BulkContent = ({ isDm = false }) => {
       {!isExporting && isDm && (
         <>
           <DialogContentText>
-            Exporting messages from <strong>@{selectedDm?.name}</strong>
+            <Typography variant="body2">
+              Exporting messages from <strong>@{selectedDm?.name}</strong>
+            </Typography>
           </DialogContentText>
           <Stack
             className={classes.dialogBtnStack}

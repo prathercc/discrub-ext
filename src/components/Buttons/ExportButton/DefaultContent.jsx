@@ -1,5 +1,10 @@
 import React, { useContext } from "react";
-import { DialogContent, DialogContentText, Stack } from "@mui/material";
+import {
+  DialogContent,
+  DialogContentText,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { MessageContext } from "../../../context/message/MessageContext";
 import ImageToggle from "./ImageToggle";
 import ExportButtonStyles from "./ExportButton.styles";
@@ -24,8 +29,10 @@ const DefaultContent = () => {
       {!isExporting && (
         <>
           <DialogContentText>
-            <strong>{filteredMessages.length || messages.length}</strong>{" "}
-            messages are available to export
+            <Typography variant="body2">
+              <strong>{filteredMessages.length || messages.length}</strong>{" "}
+              messages are available to export
+            </Typography>
           </DialogContentText>
           <Stack
             className={classes.dialogBtnStack}

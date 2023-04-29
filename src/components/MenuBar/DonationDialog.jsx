@@ -8,24 +8,23 @@ import {
   Button,
   Tab,
   Stack,
+  Typography,
 } from "@mui/material";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import GoogleIcon from "@mui/icons-material/Google";
 import CoffeeIcon from "@mui/icons-material/Coffee";
+import DonationDialogStyles from "./DonationDialog.styles";
 
 function DonationDialog() {
+  const classes = DonationDialogStyles();
   const [donationDialogOpen, setDonationDialogOpen] = useState(false);
   const handleDialogClose = () => {
     setDonationDialogOpen(false);
   };
   return (
     <>
-      <Tooltip
-        arrow
-        title="Leave a Review / Ko-Fi Donation"
-        description="Support the extension's development by leaving a review or by gifting the developer a coffee ☕!"
-      >
+      <Tooltip arrow title="Review or Donate">
         <Tab
           onClick={(e) => {
             setDonationDialogOpen(true);
@@ -42,8 +41,7 @@ function DonationDialog() {
             justifyContent="flex-start"
             spacing={1}
           >
-            <VolunteerActivismIcon />
-            <span>Leave a Review / Ko-Fi Donation</span>
+            <VolunteerActivismIcon /> <span>Review or Donate</span>
           </Stack>
         </DialogTitle>
         <DialogContent>
@@ -57,14 +55,14 @@ function DonationDialog() {
               <Stack
                 direction="column"
                 justifyContent="center"
-                alignItems="center"
-                spacing={2}
+                alignItems="flex-start"
+                spacing={1}
               >
-                <div>
-                  Thanks for taking the time to try out Discrub! Reviews and
-                  donations are never expected but they are greatly appreciated
-                  and help support the development of this extension!
-                </div>
+                <Typography variant="body2">
+                  Reviews and donations are never required but are always
+                  appreciated and help ensure that Discrub's active development
+                  can continue 👨‍💻
+                </Typography>
               </Stack>
 
               <Stack
@@ -81,13 +79,7 @@ function DonationDialog() {
                   spacing={2}
                 >
                   <img
-                    style={{
-                      width: "260px",
-                      height: "152px",
-                      borderRadius: "10px",
-                      border: "1px solid rgb(88, 101, 242)",
-                      marginTop: "10px",
-                    }}
+                    className={classes.previewImage}
                     src="googlereview.png"
                     alt="Google Review Preview"
                   />
@@ -102,7 +94,7 @@ function DonationDialog() {
                       )
                     }
                   >
-                    Continue to Google
+                    Review on Google
                   </Button>
                 </Stack>
                 <Stack
@@ -112,13 +104,7 @@ function DonationDialog() {
                   spacing={2}
                 >
                   <img
-                    style={{
-                      width: "260px",
-                      height: "152px",
-                      borderRadius: "10px",
-                      border: "1px solid rgb(88, 101, 242)",
-                      marginTop: "10px",
-                    }}
+                    className={classes.previewImage}
                     src="ko-fi.png"
                     alt="Ko-Fi Preview"
                   />
@@ -127,10 +113,10 @@ function DonationDialog() {
                     variant="contained"
                     disableElevation
                     onClick={() =>
-                      window.open("https://ko-fi.com//prathercc", "_blank")
+                      window.open("https://ko-fi.com/prathercc", "_blank")
                     }
                   >
-                    Continue to Ko-Fi
+                    Donate with Ko-Fi
                   </Button>
                 </Stack>
               </Stack>

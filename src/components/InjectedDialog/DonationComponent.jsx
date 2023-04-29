@@ -4,7 +4,7 @@ import { Avatar, Stack, Typography, IconButton } from "@mui/material";
 import DonationComponentStyles from "./DonationComponent.styles";
 import { fetchDonationData } from "../../announcementService";
 import { differenceInDays, parseISO } from "date-fns";
-import CoffeeIcon from "@mui/icons-material/Coffee";
+import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -56,7 +56,7 @@ function DonationComponent() {
         </IconButton>
       </Box>
       {donations.slice(startIndex, startIndex + 3).map((donation) => (
-        <Tooltip description={`"${donation.message}"`}>
+        <Tooltip title={donation.name} description={donation.message}>
           <Box className={classes.box}>
             <Stack
               direction="column"
@@ -71,12 +71,11 @@ function DonationComponent() {
                 spacing={1}
               >
                 <Avatar>
-                  <CoffeeIcon />
+                  <LocalCafeOutlinedIcon />
                 </Avatar>
-                <Typography variant="body1">
-                  <strong>{donation.name}</strong> bought{" "}
-                  <strong>{donation.amount}</strong> coffee
-                  {donation.amount > 1 ? "s" : ""} ·{" "}
+                <Typography variant="body2">
+                  <strong>{donation.name}</strong> donated{" "}
+                  <strong>${donation.dollars}</strong> ·{" "}
                   <i className={classes.date}>
                     {differenceInDays(new Date(), parseISO(donation.date))} days
                     ago

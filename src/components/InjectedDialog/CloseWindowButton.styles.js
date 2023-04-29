@@ -4,7 +4,7 @@ const CloseWindowButtonStyles = makeStyles(() => ({
   boxContainer: {
     position: "fixed",
     top: "12px",
-    right: "245px",
+    right: "267px",
   },
 }));
 

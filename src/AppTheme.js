@@ -109,6 +109,7 @@ const theme = createTheme({
           width: "auto",
           height: "30px",
           cursor: "pointer",
+          userSelect: "none !important",
         },
       },
     },
@@ -174,11 +175,22 @@ const theme = createTheme({
     MuiBackdrop: {
       styleOverrides: {
         root: {
-          width: "783px",
-          height: "726px",
-          left: "234px",
-          top: "7px",
+          width: "719px",
+          height: "615px",
+          left: "266px",
+          top: "9px",
           borderRadius: "5px",
+        },
+      },
+    },
+    MuiSnackbarContent: {
+      styleOverrides: {
+        root: {
+          border: "1px solid #202225",
+          boxShadow: "4px 2px 5px 1px rgb(0 0 0 / 41%)",
+          borderRadius: "10px",
+          backgroundColor: "#2f3136",
+          color: "#d0d3f5 !important",
         },
       },
     },

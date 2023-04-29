@@ -23,6 +23,7 @@ import MessageChip from "../Chips/MessageChip";
 import { toggleDebugPause } from "../Modals/Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
+import PrefilterUser from "../AdvancedFiltering/PrefilterUser";
 
 const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const classes = ChannelMessagesStyles();
@@ -79,7 +80,11 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     if (dialogOpen) {
       setDeleteObj(null);
       setDeleting(false);
+      if (!isDm) {
+        setPreFilterUserId(userState.id);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen]);
 
   const handleClose = async () => {
@@ -100,14 +105,12 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       );
       await resetMessageData();
       isDm ? await setDm(entity.id) : await setChannel(entity.id);
-      isDm
-        ? await setDmPreFilterUserId(userState.id)
-        : await setPreFilterUserId(userState.id);
+      isDm && (await setDmPreFilterUserId(userState.id));
       await getMessageData();
       let count = 0;
       const selectedMessages = [...messagesRef.current];
       if (selectedMessages.length === 0)
-        await toggleDebugPause(setDebugMessage, `Still searching..`, 1000);
+        await toggleDebugPause(setDebugMessage, `Still searching...`, 1000);
       while (count < selectedMessages.length && openRef.current) {
         let currentRow = selectedMessages[count];
         setDeleteObj(currentRow);
@@ -135,39 +138,46 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     !isDm && (await resetChannel());
   };
 
+  const disabled =
+    (selectedGuild.id === null && selectedDm.id === null) ||
+    selectedChannel.id !== null ||
+    messages.length > 0 ||
+    [
+      dmPreFilterUserId,
+      preFilterUserId,
+      searchBeforeDate,
+      searchAfterDate,
+      dialogOpen,
+      messagesLoading,
+    ].some((prop) => !!prop);
+
+  const dialogBtnDisabled =
+    deleting || deleteObj || (!isDm && !preFilterUserId);
+
+  const dmDialogText =
+    "Are you sure you want to purge this DM? All of your messages will be deleted.";
+
+  const guildDialogText =
+    "Are you sure you want to purge this Guild? All messages in every Channel will be deleted for yourself or a given User Id.";
+
   return (
     <>
       <Button
-        disabled={
-          (selectedGuild.id === null && selectedDm.id === null) ||
-          messagesLoading ||
-          selectedChannel.id !== null ||
-          messages.length > 0 ||
-          !!dmPreFilterUserId ||
-          !!preFilterUserId ||
-          !!searchBeforeDate ||
-          !!searchAfterDate ||
-          dialogOpen
-        }
-        onClick={() =>
-          (selectedGuild.id || selectedDm.id) && setDialogOpen(true)
-        }
+        disabled={disabled}
+        onClick={() => {
+          if (selectedGuild.id || selectedDm.id) {
+            setDialogOpen(true);
+          }
+        }}
         variant="contained"
       >
         Purge
       </Button>
       <Dialog open={dialogOpen} onClose={handleClose}>
         <DialogTitle>
-          {deleting && deleteObj ? (
-            `Purging ${deleteType}`
-          ) : finishedPurge ? (
-            `${deleteType} Purged`
-          ) : (
-            <>
-              <span className={classes.purgeWarning}>WARNING - </span>{" "}
-              Irreversible Action!
-            </>
-          )}
+          {deleting && deleteObj && `Purging ${deleteType}`}
+          {finishedPurge && `${deleteType} Purged`}
+          {!finishedPurge && !deleting && `Purge ${deleteType}`}
         </DialogTitle>
         <DialogContent>
           <Stack
@@ -182,21 +192,21 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               alignItems="center"
               spacing={2}
             >
-              {!finishedPurge && <WarningAmberIcon fontSize="large" />}
+              {!finishedPurge && (
+                <WarningAmberIcon
+                  className={classes.purgeWarning}
+                  fontSize="large"
+                />
+              )}
               {finishedPurge && <ThumbUpIcon fontSize="large" />}
               <DialogContentText>
-                {finishedPurge ? (
-                  `${deleteType} was successfully purged!`
-                ) : (
-                  <span>
-                    Are you sure you want to purge this {deleteType}? All of{" "}
-                    <strong className={classes.purgeWarning}>your</strong>{" "}
-                    messages will be deleted
-                    {isDm ? "." : " for each Channel."}
-                  </span>
-                )}
+                <Typography variant="body2">
+                  {finishedPurge && `${deleteType} was successfully purged!`}
+                  {!finishedPurge && (isDm ? dmDialogText : guildDialogText)}
+                </Typography>
               </DialogContentText>
             </Stack>
+            {!isDm && !finishedPurge && <PrefilterUser isDm={false} purge />}
             {deleting && deleteObj && (
               <>
                 {deleteObj.id && (
@@ -236,7 +246,7 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           </Button>
           {!finishedPurge && (
             <Button
-              disabled={deleting || deleteObj}
+              disabled={dialogBtnDisabled}
               variant="contained"
               onClick={handleDeleteMessage}
             >

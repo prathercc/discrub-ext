@@ -3,10 +3,10 @@ import { makeStyles } from "@mui/styles";
 const InjectedDialogStyles = makeStyles(() => ({
   boxContainer: {
     backgroundColor: "rgb(32, 34, 37, 1)",
-    height: "720px",
-    maxHeight: "720px",
-    maxWidth: "775px",
-    width: "775px",
+    height: "615px",
+    maxHeight: "615px",
+    maxWidth: "720px",
+    width: "720px",
     color: "rgb(210, 213, 247, 1)",
     padding: 0,
     margin: 0,
@@ -18,21 +18,22 @@ const InjectedDialogStyles = makeStyles(() => ({
   },
   box: {
     position: "fixed",
-    top: "16px",
-    right: "295px",
-    opacity: 0.35,
+    top: "23px",
+    right: "310px",
+    opacity: 0.25,
   },
   alertBox: {
     position: "fixed",
-    bottom: "74px",
-    left: "242px",
-    width: "767px",
+    bottom: "54px",
+    left: "268px",
+    width: "714px",
     "& .MuiAlert-root": {
       backgroundColor: "#2f3136 !important",
       color: "#d2d5f7 !important",
+      boxShadow: "10px 11px 7px -1px rgba(0,0,0,0.41)",
     },
     "& .MuiAlert-icon": {
-      color: "#5865f2 !important",
+      color: "#d0d3f5 !important",
     },
     "& .MuiTypography-root": {
       color: "#d2d5f7 !important",
@@ -42,6 +43,9 @@ const InjectedDialogStyles = makeStyles(() => ({
     width: "24px",
     height: "24px",
     margin: "auto",
+  },
+  alertText: {
+    userSelect: "none !important",
   },
 }));
 

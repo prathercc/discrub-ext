@@ -2,7 +2,7 @@ import { makeStyles } from "@mui/styles";
 
 const AboutStyles = makeStyles(() => ({
   boxContainer: {
-    padding: "15px",
+    paddingTop: "5px",
     maxHeight: "85%",
     maxWidth: "100%",
     overflow: "hidden",
@@ -12,7 +12,6 @@ const AboutStyles = makeStyles(() => ({
     overflow: "auto",
   },
   accordianTitle: {
-    cursor: "pointer !important",
     userSelect: "none !important",
   },
   cryptoImg: {
@@ -24,6 +23,9 @@ const AboutStyles = makeStyles(() => ({
   },
   changelogText: {
     opacity: 0.5,
+  },
+  accordianSummary: {
+    cursor: "default !important",
   },
 }));
 

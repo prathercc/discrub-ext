@@ -71,6 +71,18 @@ const ExportMessagesStyles = makeStyles(() => ({
     width: ({ reply }) => (reply ? "15px !important" : "40px"),
     height: ({ reply }) => (reply ? "15px !important" : "40px"),
     minWidth: ({ reply }) => (reply ? "15px !important" : "40px"),
+    boxShadow: ({ reply }) => !reply && "rgba(0, 0, 0, 0.75) 5px 4px 1px -2px",
+    transition: "all ease-in-out .1s",
+    "&:hover": {
+      boxShadow: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "rgba(0, 0, 0, 0.75) 5px 4px 1px 1px",
+      width: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "42px",
+      height: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "42px",
+      cursor: ({ reply, hideAttachments }) =>
+        !reply && hideAttachments && "pointer",
+    },
   },
   replyMessageText: {
     color: "#b8b9bf !important",
@@ -89,7 +101,7 @@ const ExportMessagesStyles = makeStyles(() => ({
     marginLeft: 20,
     marginTop: 8,
     height: 7,
-    width: 25,
+    width: 17,
     borderLeft: "2px solid #4e5058",
     borderTop: "2px solid #4e5058",
     borderTopLeftRadius: "5px",
@@ -100,6 +112,11 @@ const ExportMessagesStyles = makeStyles(() => ({
       padding: "5px",
       width: "calc(100% - 10px)",
     },
+  },
+  video: {
+    borderRadius: "10px",
+    border: "1px solid transparent",
+    boxShadow: "4px 5px 13px 0px rgba(0,0,0,0.75)",
   },
 }));
 
