@@ -18,6 +18,7 @@ const AttachmentStyles = makeStyles(() => ({
     transition: "all ease-in-out .5s",
     borderRadius: "5px",
     cursor: "pointer",
+    boxShadow: "4px 5px 6px 0px rgba(0,0,0,0.75)",
     "&:hover": {
       width: ({ width }) => (width > 300 ? 300 : width),
       height: ({ height }) => (height > 300 ? 300 : height),

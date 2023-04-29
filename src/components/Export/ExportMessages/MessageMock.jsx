@@ -135,6 +135,17 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
                     }}
                   />
                 ))}
+              {row.embeds
+                .filter((embed) => embed.type === "video")
+                .map((embed) => (
+                  <iframe
+                    className={classes.video}
+                    title={embed.description}
+                    width={400}
+                    height={225}
+                    src={embed.video.url}
+                  ></iframe>
+                ))}
             </Stack>
           )}
         </Stack>
