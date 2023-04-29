@@ -59,13 +59,13 @@ const AttachmentMock = ({ attachment }) => {
               className={exportClasses.typographyHash}
               variant="body2"
             >
-              {attachment.filename}
+              {attachment.filename || attachment.url}
             </Typography>
             <Typography
               className={exportClasses.messageAttachmentSize}
               variant="body2"
             >
-              {bytes(attachment.size)}
+              {attachment.size ? bytes(attachment.size) : "Unknown Size"}
             </Typography>
           </Stack>
         </Stack>

@@ -115,9 +115,26 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
               alignItems="center"
               spacing={1}
             >
-              {row.attachments.map((attachment, index) => (
+              {row.attachments.map((attachment) => (
                 <AttachmentMock attachment={attachment} />
               ))}
+              {row.embeds
+                .filter((embed) => embed.type === "image")
+                .map((embed, i) => (
+                  <AttachmentMock
+                    attachment={{
+                      content_type: "image/jpeg",
+                      filename: null,
+                      height: embed.thumbnail.height,
+                      id: `EMBEDDED-IMAGE-${i}`,
+                      proxy_url: embed.thumbnail.proxy_url,
+                      size: null,
+                      url: embed.thumbnail.url,
+                      width: embed.thumbnail.width,
+                      local_url: embed.local_url,
+                    }}
+                  />
+                ))}
             </Stack>
           )}
         </Stack>
