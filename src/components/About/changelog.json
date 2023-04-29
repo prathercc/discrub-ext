@@ -1,10 +1,13 @@
 [
   {
-    "version": "1.9.2",
+    "version": "1.10.0",
     "changes": [
       "Add ability to enter a UserId in the Username Prefilter field (Channel Messages only).",
       "Clicking a User's avatar will now copy their UserId to your clipboard.",
-      "Add ability to Purge Channel Messages by a specified User Id."
+      "Add ability to Purge Channel Messages by a specified User Id.",
+      "Include external image URL's as part of the exported images and show previews on Channel/DM exports.",
+      "Embed video links into Channel/DM exports.",
+      "Make previewed images in export files expand when hovered over."
     ]
   },
   {
