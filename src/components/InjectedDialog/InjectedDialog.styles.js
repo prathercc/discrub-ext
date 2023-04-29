@@ -18,8 +18,8 @@ const InjectedDialogStyles = makeStyles(() => ({
   },
   box: {
     position: "fixed",
-    top: "36px",
-    right: "321px",
+    top: "23px",
+    right: "310px",
     opacity: 0.25,
   },
   alertBox: {
@@ -30,6 +30,7 @@ const InjectedDialogStyles = makeStyles(() => ({
     "& .MuiAlert-root": {
       backgroundColor: "#2f3136 !important",
       color: "#d2d5f7 !important",
+      boxShadow: "10px 11px 7px -1px rgba(0,0,0,0.41)",
     },
     "& .MuiAlert-icon": {
       color: "#d0d3f5 !important",

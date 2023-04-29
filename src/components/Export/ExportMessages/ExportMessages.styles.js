@@ -72,6 +72,7 @@ const ExportMessagesStyles = makeStyles(() => ({
     height: ({ reply }) => (reply ? "15px !important" : "40px"),
     minWidth: ({ reply }) => (reply ? "15px !important" : "40px"),
     boxShadow: ({ reply }) => !reply && "rgba(0, 0, 0, 0.75) 5px 4px 1px -2px",
+    transition: "all ease-in-out .1s",
     "&:hover": {
       boxShadow: ({ reply, hideAttachments }) =>
         !reply && hideAttachments && "rgba(0, 0, 0, 0.75) 5px 4px 1px 1px",
