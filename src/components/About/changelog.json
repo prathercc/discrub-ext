@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.1",
+    "changes": [
+      "Fix search bug where search ends too soon and not all messages are found."
+    ]
+  },
+  {
     "version": "1.10.0",
     "changes": [
       "Add ability to enter a UserId in the Username Prefilter field (Channel Messages only).",
