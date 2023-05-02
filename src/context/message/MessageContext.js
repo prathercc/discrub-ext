@@ -583,18 +583,18 @@ const _getSearchMessages = async (
         searchCriteria
       );
 
-      if (data.retry_after) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, data.retry_after * 1000)
-        );
+      const { total_results, retry_after, messages, threads } = data || {};
+
+      if (retry_after) {
+        await new Promise((resolve) => setTimeout(resolve, retry_after * 1000));
         continue;
       }
-      if (!data || data?.messages?.length === 0) break;
-      if (data.threads)
-        for (const th of data.threads)
+      if (!data || messages?.length === 0) break;
+      if (threads)
+        for (const th of threads)
           if (!retThreads.find((eTh) => eTh.id === th.id)) retThreads.push(th);
-      const foundMessages = data.messages.flat();
-      if (foundMessages.length < 25) reachedEnd = true;
+      const foundMessages = messages.flat();
+      if (offset >= total_results) reachedEnd = true;
       offset += 25;
       for (const m of foundMessages)
         if (_messageTypeAllowed(m.type)) retArr.push(m);
