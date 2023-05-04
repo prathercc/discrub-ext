@@ -117,14 +117,14 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
             >
               {row.attachments
                 .filter(
-                  (attachment) => !attachment.content_type.includes("video")
+                  (attachment) => !attachment.content_type?.includes("video")
                 )
                 .map((attachment) => (
                   <AttachmentMock attachment={attachment} />
                 ))}
               {row.attachments
                 .filter((attachment) =>
-                  attachment.content_type.includes("video")
+                  attachment.content_type?.includes("video")
                 )
                 .map((attachment) => (
                   <video
