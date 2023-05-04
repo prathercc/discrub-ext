@@ -115,9 +115,27 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
               alignItems="center"
               spacing={1}
             >
-              {row.attachments.map((attachment) => (
-                <AttachmentMock attachment={attachment} />
-              ))}
+              {row.attachments
+                .filter(
+                  (attachment) => !attachment.content_type.includes("video")
+                )
+                .map((attachment) => (
+                  <AttachmentMock attachment={attachment} />
+                ))}
+              {row.attachments
+                .filter((attachment) =>
+                  attachment.content_type.includes("video")
+                )
+                .map((attachment) => (
+                  <video
+                    className={classes.video}
+                    width={attachment.width > 400 ? 400 : attachment.width}
+                    height={attachment.height > 225 ? 225 : attachment.height}
+                    src={attachment.local_url || attachment.proxy_url}
+                    controls
+                    playsinline
+                  />
+                ))}
               {row.embeds
                 .filter((embed) => embed.type === "image")
                 .map((embed, i) => (
@@ -126,7 +144,7 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
                       content_type: "image/jpeg",
                       filename: null,
                       height: embed.thumbnail.height,
-                      id: `EMBEDDED-IMAGE-${i}`,
+                      id: `EMBEDDED-MEDIA-${i}`,
                       proxy_url: embed.thumbnail.proxy_url,
                       size: null,
                       url: embed.thumbnail.url,
@@ -145,6 +163,19 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
                     height={225}
                     src={embed.video.url}
                   ></iframe>
+                ))}
+              {row.embeds
+                .filter((embed) => embed.type === "gifv")
+                .map((embed) => (
+                  <video
+                    className={classes.video}
+                    width={embed.video.width > 400 ? 400 : embed.video.width}
+                    height={embed.video.height > 225 ? 225 : embed.video.height}
+                    src={embed.local_url || embed.video.url}
+                    loop
+                    controls
+                    playsinline
+                  />
                 ))}
             </Stack>
           )}

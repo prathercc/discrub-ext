@@ -69,6 +69,19 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
   const isExportCancelled = () => !exportingActiveRef.current;
 
+  const _getDownloadUrl = (entity) => {
+    switch (entity.type) {
+      case "gifv":
+        return entity.video.proxy_url;
+      case "image":
+        return entity.thumbnail.proxy_url;
+      case "video":
+        return null; // We do not want to download video embeds
+      default:
+        return entity.proxy_url;
+    }
+  };
+
   const _downloadCollection = async (
     collection = [],
     collectionName = "",
@@ -79,17 +92,19 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       if (isExportCancelled()) break;
       try {
         const entity = message[collectionName][c2];
-        const proxyUrl = entity.proxy_url || entity.thumbnail.proxy_url;
-        const blob = await fetch(proxyUrl).then((r) => r.blob());
-        if (blob.size) {
-          const cleanFileName = `${uuidv4()}_${
-            entity.filename || `EMBEDDED-IMAGE-${c2}`
-          }`;
-          await addToZip(blob, `${imgPath}/${cleanFileName}`);
-          message[collectionName][c2] = {
-            ...message[collectionName][c2],
-            local_url: `${imgPath.split("/")[1]}/${cleanFileName}`,
-          };
+        const downloadUrl = _getDownloadUrl(entity);
+        if (downloadUrl) {
+          const blob = await fetch(downloadUrl).then((r) => r.blob());
+          if (blob.size) {
+            const cleanFileName = `${uuidv4()}_${
+              entity.filename || `EMBEDDED-MEDIA-${c2}`
+            }`;
+            await addToZip(blob, `${imgPath}/${cleanFileName}`);
+            message[collectionName][c2] = {
+              ...message[collectionName][c2],
+              local_url: `${imgPath.split("/")[1]}/${cleanFileName}`,
+            };
+          }
         }
       } catch (e) {
         console.error(e);
