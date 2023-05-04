@@ -12,8 +12,8 @@ const ImageToggle = () => {
     <Tooltip
       arrow
       placement="top"
-      title={`${!downloadImages ? "Not " : ""}Downloading Images`}
-      description="Exports may be performed more slowly when downloading images"
+      title={`${!downloadImages ? "Not " : ""}Downloading Media`}
+      description="Exports may be performed more slowly when downloading media"
     >
       <IconButton
         disabled={isExporting}
