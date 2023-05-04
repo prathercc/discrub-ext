@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.10.2",
+    "changes": [
+      "Add support for embedded gifv files.",
+      "Allow previewing of video attachments.",
+      "Adjust export toggle option verbiage."
+    ]
+  },
+  {
     "version": "1.10.1",
     "changes": [
       "Fix search bug where search ends too soon and not all messages are found."
