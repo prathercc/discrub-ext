@@ -18,6 +18,7 @@ const AttachmentMock = ({ attachment }) => {
   const isImg =
     attachment.content_type?.includes("image") ||
     supportedImgTypes.some((sit) => attachment.filename.includes(sit));
+  const isVid = attachment.content_type?.includes("video");
 
   return (
     <Stack direction="column" justifyContent="center" alignItems="flex-start">
@@ -69,6 +70,17 @@ const AttachmentMock = ({ attachment }) => {
             </Typography>
           </Stack>
         </Stack>
+      )}
+      {previewImages && isVid && (
+        <video
+          className={classes.video}
+          width={attachment.width > 400 ? 400 : attachment.width}
+          height={attachment.height > 225 ? 225 : attachment.height}
+          src={attachment.local_url || attachment.proxy_url}
+          controls
+          playsinline
+          autoPlay={false}
+        />
       )}
     </Stack>
   );
