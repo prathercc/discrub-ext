@@ -8,7 +8,7 @@ const EmbedMock = ({ embed, index }) => {
   const attachmentClasses = AttachmentStyles();
   const { state: exportState } = useContext(ExportContext);
   const { previewImages } = exportState;
-  const supportedVideoHosts = ["youtube"];
+  //   const supportedVideoHosts = ["youtube"];
 
   return (
     <>
@@ -24,20 +24,22 @@ const EmbedMock = ({ embed, index }) => {
           autoPlay={false}
         />
       )}
-      {previewImages &&
+      {/* {previewImages &&
         type === "video" &&
         supportedVideoHosts.some((host) =>
           video?.url?.toLowerCase()?.includes(host)
         ) && (
           <iframe
             className={attachmentClasses.video}
+            width="400"
+            height="225"
+            src={`${video.url}?origin=${window.location.href}`}
             title={description}
-            width={400}
-            height={225}
-            src={`${video.url}`}
-            referrerpolicy="strict-origin-when-cross-origin"
-          />
-        )}
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        )} */}
       {previewImages && type === "image" && (
         <AttachmentMock
           attachment={{
