@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.10.3",
+    "changes": [
+      "Add additional page export error fallback.",
+      "Temporarily disable video embeds in exported HTML."
+    ]
+  },
+  {
     "version": "1.10.2",
     "changes": [
       "Add support for embedded gifv files.",
