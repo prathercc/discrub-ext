@@ -3,7 +3,7 @@
     "version": "1.10.3",
     "changes": [
       "Add additional page export error fallback.",
-      "Temporarily disable video embeds in exported HTML."
+      "Temporarily disable video & gifv embeds in exported HTML."
     ]
   },
   {

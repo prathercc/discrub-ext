@@ -12,7 +12,7 @@ const EmbedMock = ({ embed, index }) => {
 
   return (
     <>
-      {previewImages && type === "gifv" && (
+      {/* {previewImages && type === "gifv" && (
         <video
           className={attachmentClasses.video}
           width={video.width > 400 ? 400 : video.width}
@@ -23,7 +23,7 @@ const EmbedMock = ({ embed, index }) => {
           playsinline
           autoPlay={false}
         />
-      )}
+      )} */}
       {/* {previewImages &&
         type === "video" &&
         supportedVideoHosts.some((host) =>
