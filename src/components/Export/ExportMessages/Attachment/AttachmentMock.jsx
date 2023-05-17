@@ -47,7 +47,7 @@ const AttachmentMock = ({ attachment }) => {
           poster={attachment.local_url ? null : "discrub2.png"}
         />
       )}
-      {!isVid && !isImg && (
+      {((!isVid && !isImg) || !previewImages) && (
         <Stack
           className={classes.altStack}
           direction="row"
