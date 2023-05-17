@@ -4,15 +4,15 @@ import AttachmentStyles from "../Attachment/Attachment.styles";
 import AttachmentMock from "../Attachment/AttachmentMock";
 
 const EmbedMock = ({ embed, index }) => {
-  const { type, video, local_url, description } = embed;
+  const { type, video, local_url, description, thumbnail } = embed;
   const attachmentClasses = AttachmentStyles();
   const { state: exportState } = useContext(ExportContext);
   const { previewImages } = exportState;
-  //   const supportedVideoHosts = ["youtube"];
+  const supportedVideoHosts = ["youtube"];
 
   return (
     <>
-      {/* {previewImages && type === "gifv" && (
+      {previewImages && type === "gifv" && (
         <video
           className={attachmentClasses.video}
           width={video.width > 400 ? 400 : video.width}
@@ -22,9 +22,10 @@ const EmbedMock = ({ embed, index }) => {
           controls
           playsinline
           autoPlay={false}
+          poster={thumbnail.proxy_url || thumbnail.url || "discrub2.png"}
         />
-      )} */}
-      {/* {previewImages &&
+      )}
+      {previewImages &&
         type === "video" &&
         supportedVideoHosts.some((host) =>
           video?.url?.toLowerCase()?.includes(host)
@@ -39,7 +40,7 @@ const EmbedMock = ({ embed, index }) => {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowfullscreen
           ></iframe>
-        )} */}
+        )}
       {previewImages && type === "image" && (
         <AttachmentMock
           attachment={{
