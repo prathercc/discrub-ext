@@ -69,7 +69,7 @@ function InjectedDialog() {
 
   return (
     <Box className={classes.boxContainer}>
-      <Sponsorship />
+      {/* <Sponsorship /> */}
       <DonationComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && (
