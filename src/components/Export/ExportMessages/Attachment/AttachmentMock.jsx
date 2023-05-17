@@ -22,7 +22,7 @@ const AttachmentMock = ({ attachment }) => {
 
   return (
     <Stack direction="column" justifyContent="center" alignItems="flex-start">
-      {isImg && previewImages && (attachment.local_url || attachment.url) ? (
+      {isImg && previewImages && (attachment.local_url || attachment.url) && (
         <a
           target="_blank"
           rel="noopener noreferrer"
@@ -34,7 +34,20 @@ const AttachmentMock = ({ attachment }) => {
             alt="attachment"
           />
         </a>
-      ) : (
+      )}
+      {previewImages && isVid && (
+        <video
+          className={classes.video}
+          width={attachment.width > 400 ? 400 : attachment.width}
+          height={attachment.height > 225 ? 225 : attachment.height}
+          src={attachment.local_url || attachment.proxy_url}
+          controls
+          playsinline
+          autoPlay={false}
+          poster={attachment.local_url ? null : "discrub2.png"}
+        />
+      )}
+      {!isVid && !isImg && (
         <Stack
           className={classes.altStack}
           direction="row"
@@ -50,7 +63,6 @@ const AttachmentMock = ({ attachment }) => {
               <DownloadIcon className={exportClasses.typographyHash} />
             </IconButton>
           </a>
-
           <Stack
             direction="column"
             justifyContent="center"
@@ -70,17 +82,6 @@ const AttachmentMock = ({ attachment }) => {
             </Typography>
           </Stack>
         </Stack>
-      )}
-      {previewImages && isVid && (
-        <video
-          className={classes.video}
-          width={attachment.width > 400 ? 400 : attachment.width}
-          height={attachment.height > 225 ? 225 : attachment.height}
-          src={attachment.local_url || attachment.proxy_url}
-          controls
-          playsinline
-          autoPlay={false}
-        />
       )}
     </Stack>
   );
