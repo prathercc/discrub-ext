@@ -79,7 +79,9 @@ function DonationComponent() {
                     <strong>{donation.name}</strong> donated{" "}
                     <strong>${donation.dollars}</strong> ·{" "}
                     <i className={classes.date}>
-                      {daysSince > 0 ? `${daysSince} Days Ago` : "Today"}
+                      {daysSince > 0
+                        ? `${daysSince} Day${daysSince === 1 ? "" : "s"} Ago`
+                        : "Today"}
                     </i>
                   </Typography>
                 </Stack>
