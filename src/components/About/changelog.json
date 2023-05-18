@@ -3,7 +3,8 @@
     "version": "1.10.4",
     "changes": [
       "Fix issue where attached videos were being displayed twice (once as generic and other as video element).",
-      "Re-enable embedded YouTube video & all gifv in exports."
+      "Re-enable embedded YouTube video & all gifv in exports.",
+      "Show additional Purge debug info when messages are allocated."
     ]
   },
   {

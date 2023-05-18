@@ -61,6 +61,8 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     isLoading: messagesLoading,
     searchBeforeDate,
     searchAfterDate,
+    fetchedMessageLength,
+    totalSearchMessages,
   } = messageDataState;
   const { selectedGuild } = guildState;
   const { channels, selectedChannel, preFilterUserId } = channelState;
@@ -160,6 +162,18 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const guildDialogText =
     "Are you sure you want to purge this Guild? All messages in every Channel will be deleted for yourself or a given User Id.";
 
+  const searchProgressText = (
+    <span>
+      Found{" "}
+      {totalSearchMessages > 0
+        ? ((fetchedMessageLength / totalSearchMessages) * 100)
+            .toString()
+            .split(".")[0]
+        : 0}
+      % of <strong>{selectedChannel?.name}</strong> messages
+    </span>
+  );
+
   return (
     <>
       <Button
@@ -226,7 +240,12 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   </Stack>
                 )}
 
-                <ModalDebugMessage debugMessage={debugMessage} />
+                <ModalDebugMessage
+                  debugMessage={
+                    messagesLoading ? searchProgressText : debugMessage
+                  }
+                />
+
                 <Stack justifyContent="center" alignItems="center">
                   <CircularProgress />
                 </Stack>

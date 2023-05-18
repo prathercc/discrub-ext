@@ -83,6 +83,7 @@ const MessageContextProvider = (props) => {
       orderBy: "",
       searchBeforeDate: null,
       searchAfterDate: null,
+      totalSearchMessages: 0,
     })
   );
 
@@ -602,6 +603,7 @@ const _getSearchMessages = async (
         type: UPDATE_FETCHED_MESSAGES,
         payload: {
           fetchedMessageLength: retArr.length,
+          totalSearchMessages: total_results,
         },
       });
     }
