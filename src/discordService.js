@@ -5,6 +5,51 @@ const discordChannelsUrl = "https://discord.com/api/v10/channels";
 const userAgent =
   "Mozilla/5.0 (X11; Linux x86_64; rv:17.0) Gecko/20121202 Firefox/17.0 Iceweasel/17.0.1";
 
+export const createDm = (authorization, recipient_id) => {
+  return fetch(`${discordUsersUrl}/@me/channels`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+    body: JSON.stringify({ recipient_id }),
+  }).then((resp) => resp.json());
+};
+export const sendFriendRequest = (
+  authorization,
+  user = { username: null, discriminator: null }
+) => {
+  return fetch(`${discordUsersUrl}/@me/relationships`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+    body: JSON.stringify(user),
+  }).then((resp) => resp.json());
+};
+export const deleteFriendRequest = (authorization, userId) => {
+  return fetch(`${discordUsersUrl}/@me/relationships/${userId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+  }).then((resp) => resp.json());
+};
+export const getRelationships = (authorization) => {
+  return fetch(`${discordUsersUrl}/@me/relationships`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+  }).then((resp) => resp.json());
+};
 export const fetchUserData = (authorization) => {
   return fetch(`${discordUsersUrl}/@me`, {
     method: "GET",

@@ -13,6 +13,10 @@ export default class ExportUtils {
     streamSaver.mitm = "mitm.html";
     this.fileStream = null;
     this.exportMessages = [];
+    this.unknownError = {
+      message: "Page HTML could not be found.",
+      stack: "No error given, please try exporting this page again.",
+    };
   }
   _delay(ms) {
     return new Promise((resolve) =>
@@ -35,6 +39,16 @@ export default class ExportUtils {
     return new Blob([this.html], { type: "text/html" });
   };
 
+  _getErrorHtml = (e) => {
+    return `<h2>Export error</h2><strong>Please save and send this page to <a href='https://www.reddit.com/user/prathercc/'>u/prathercc</a> for support.</strong> <div><strong>Official support page - <a href='https://www.reddit.com/r/discrub/'>https://www.reddit.com/r/discrub/</a></strong></div><div>${
+      e.message
+    }</div><div>${
+      e.stack
+    }</div><div style="background-color:black;color:white;border-radius:5px;margin-top:10px;">${this.exportMessages?.map(
+      (msg) => `<div>${JSON.stringify(msg)}</div>`
+    )}</div>`;
+  };
+
   _generateHTMLHelperFunc = useReactToPrint({
     content: () => this.contentRef.current,
     suppressErrors: true,
@@ -53,20 +67,23 @@ export default class ExportUtils {
         iframe.contentWindow.document
           .getElementsByTagName("head")[0]
           .prepend(meta);
-        this.html = iframe.contentWindow.document.lastElementChild.outerHTML;
+        const printedHtml =
+          iframe.contentWindow.document.lastElementChild.outerHTML;
+
+        if (!printedHtml) {
+          this.html = this._getErrorHtml(this.unknownError);
+          return new Promise(() => {
+            console.warn("Issue exporting page", this.unknownError);
+          });
+        }
+        this.html = printedHtml;
         return new Promise(() => {
-          console.warn("Page printed successfully");
+          console.warn("Page exported successfully");
         });
       } catch (e) {
         return new Promise(() => {
-          console.error("Issue printing page - ", e);
-          this.html = `<h2>Print error</h2><strong>Please save and send this page to <a href='https://www.reddit.com/user/prathercc/'>u/prathercc</a> for support.</strong> <div><strong>Official support page - <a href='https://www.reddit.com/r/discrub/'>https://www.reddit.com/r/discrub/</a></strong></div><div>${
-            e.message
-          }</div><div>${
-            e.stack
-          }</div><div style="background-color:black;color:white;border-radius:5px;margin-top:10px;">${this.exportMessages?.map(
-            (msg) => `<div>${JSON.stringify(msg)}</div>`
-          )}</div>`;
+          console.error("Issue exporting page - ", e);
+          this.html = this._getErrorHtml(e);
         });
       }
     },

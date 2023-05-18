@@ -55,37 +55,41 @@ function DonationComponent() {
           <ArrowForwardIcon />
         </IconButton>
       </Box>
-      {donations.slice(startIndex, startIndex + 3).map((donation) => (
-        <Tooltip title={donation.name} description={donation.message}>
-          <Box className={classes.box}>
-            <Stack
-              direction="column"
-              justifyContent="center"
-              alignItems="flex-start"
-              spacing={2}
-            >
+      {donations.slice(startIndex, startIndex + 3).map((donation) => {
+        const daysSince = differenceInDays(new Date(), parseISO(donation.date));
+        return (
+          <Tooltip title={donation.name} description={donation.message}>
+            <Box className={classes.box}>
               <Stack
-                direction="row"
+                direction="column"
                 justifyContent="center"
-                alignItems="center"
-                spacing={1}
+                alignItems="flex-start"
+                spacing={2}
               >
-                <Avatar>
-                  <LocalCafeOutlinedIcon />
-                </Avatar>
-                <Typography variant="body2">
-                  <strong>{donation.name}</strong> donated{" "}
-                  <strong>${donation.dollars}</strong> ·{" "}
-                  <i className={classes.date}>
-                    {differenceInDays(new Date(), parseISO(donation.date))} days
-                    ago
-                  </i>
-                </Typography>
+                <Stack
+                  direction="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  spacing={1}
+                >
+                  <Avatar>
+                    <LocalCafeOutlinedIcon />
+                  </Avatar>
+                  <Typography variant="body2">
+                    <strong>{donation.name}</strong> donated{" "}
+                    <strong>${donation.dollars}</strong> ·{" "}
+                    <i className={classes.date}>
+                      {daysSince > 0
+                        ? `${daysSince} Day${daysSince === 1 ? "" : "s"} Ago`
+                        : "Today"}
+                    </i>
+                  </Typography>
+                </Stack>
               </Stack>
-            </Stack>
-          </Box>
-        </Tooltip>
-      ))}
+            </Box>
+          </Tooltip>
+        );
+      })}
     </Stack>
   );
 }

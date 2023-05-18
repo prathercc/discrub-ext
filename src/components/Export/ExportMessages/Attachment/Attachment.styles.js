@@ -31,6 +31,11 @@ const AttachmentStyles = makeStyles(() => ({
     minWidth: "181px",
     maxWidth: "400px",
   },
+  video: {
+    borderRadius: "10px",
+    border: "1px solid transparent",
+    boxShadow: "4px 5px 13px 0px rgba(0,0,0,0.75)",
+  },
 }));
 
 export default AttachmentStyles;

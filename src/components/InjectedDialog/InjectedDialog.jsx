@@ -23,7 +23,7 @@ import InjectedDialogStyles from "./InjectedDialog.styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { fetchAnnouncementData } from "../../announcementService";
 import DonationComponent from "./DonationComponent";
-import Sponsorship from "./Sponsorship/Sponsorship";
+// import Sponsorship from "./Sponsorship/Sponsorship";
 
 function InjectedDialog() {
   const classes = InjectedDialogStyles();
@@ -69,7 +69,7 @@ function InjectedDialog() {
 
   return (
     <Box className={classes.boxContainer}>
-      <Sponsorship />
+      {/* <Sponsorship /> */}
       <DonationComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && (
@@ -116,7 +116,7 @@ function InjectedDialog() {
           justifyContent="center"
           spacing={1}
         >
-          <Typography variant="body2">1.10.2</Typography>
+          <Typography variant="body2">1.10.4</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />

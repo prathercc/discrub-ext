@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.10.4",
+    "changes": [
+      "Fix issue where attached videos were being displayed twice (once as generic and other as video element).",
+      "Re-enable embedded YouTube video & all gifv in exports.",
+      "Show additional Purge debug info when messages are allocated."
+    ]
+  },
+  {
+    "version": "1.10.3",
+    "changes": [
+      "Add additional page export error fallback.",
+      "Temporarily disable video & gifv embeds in exported HTML."
+    ]
+  },
+  {
     "version": "1.10.2",
     "changes": [
       "Add support for embedded gifv files.",

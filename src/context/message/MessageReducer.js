@@ -60,6 +60,7 @@ export const MessageReducer = (state, action) => {
         ...payload,
         isLoading: false,
         fetchedMessageLength: 0,
+        totalSearchMessages: 0,
       };
     case RESET_MESSAGE_DATA_COMPLETE:
       return {
@@ -67,6 +68,7 @@ export const MessageReducer = (state, action) => {
         messages: [],
         selectedMessages: [],
         fetchedMessageLength: 0,
+        totalSearchMessages: 0,
         isLoading: null,
         threads: [],
       };
