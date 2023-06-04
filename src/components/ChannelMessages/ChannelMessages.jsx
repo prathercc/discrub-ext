@@ -20,6 +20,7 @@ import PurgeButton from "../Buttons/PurgeButton";
 import ExportButton from "../Buttons/ExportButton/ExportButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
+import { sortByProperty } from "../../utils";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -126,13 +127,15 @@ function ChannelMessages({ closeAnnouncement }) {
                   label="Guild"
                   onFocus={closeAnnouncement}
                 >
-                  {guilds.map((guild) => {
-                    return (
-                      <MenuItem dense key={guild.id} value={guild.id}>
-                        {guild.name}
-                      </MenuItem>
-                    );
-                  })}
+                  {guilds
+                    .sort((a, b) => sortByProperty(a, b, "name"))
+                    .map((guild) => {
+                      return (
+                        <MenuItem dense key={guild.id} value={guild.id}>
+                          {guild.name}
+                        </MenuItem>
+                      );
+                    })}
                 </TextField>
 
                 <TextField
@@ -149,13 +152,15 @@ function ChannelMessages({ closeAnnouncement }) {
                   <MenuItem dense value={null} key={-1}>
                     <strong>Reset Selection</strong>
                   </MenuItem>
-                  {channels.map((channel) => {
-                    return (
-                      <MenuItem dense key={channel.id} value={channel.id}>
-                        {channel.name}
-                      </MenuItem>
-                    );
-                  })}
+                  {channels
+                    .sort((a, b) => sortByProperty(a, b, "name"))
+                    .map((channel) => {
+                      return (
+                        <MenuItem dense key={channel.id} value={channel.id}>
+                          {channel.name}
+                        </MenuItem>
+                      );
+                    })}
                 </TextField>
               </Stack>
 
