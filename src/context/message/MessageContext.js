@@ -38,6 +38,7 @@ import {
   fetchMessageData,
 } from "../../discordService";
 import { GuildContext } from "../guild/GuildContext";
+import parseISO from "date-fns/parseISO";
 
 export const MessageContext = createContext();
 
@@ -574,6 +575,8 @@ const _getSearchMessages = async (
   try {
     let offset = 0;
     let reachedEnd = false;
+    let criteria = { ...searchCriteria };
+    let totalMessages = null;
     while (!reachedEnd) {
       if (channelIdRef.current !== originalChannelId) break;
       const data = await fetchSearchMessageData(
@@ -581,10 +584,13 @@ const _getSearchMessages = async (
         offset,
         originalChannelId,
         guildIdRef.current,
-        searchCriteria
+        criteria
       );
 
       const { total_results, retry_after, messages, threads } = data || {};
+      if (!totalMessages && total_results) {
+        totalMessages = total_results;
+      }
 
       if (retry_after) {
         await new Promise((resolve) => setTimeout(resolve, retry_after * 1000));
@@ -595,15 +601,22 @@ const _getSearchMessages = async (
         for (const th of threads)
           if (!retThreads.find((eTh) => eTh.id === th.id)) retThreads.push(th);
       const foundMessages = messages.flat();
-      if (offset >= total_results) reachedEnd = true;
-      offset += 25;
+
+      // Max offset is 5000, need to reset offset and update/set searchBeforeDate
+      if (offset === 5000) {
+        const { timestamp } = foundMessages[foundMessages.length - 1];
+        criteria = { ...criteria, searchBeforeDate: parseISO(timestamp) };
+        offset = 0;
+      } else if (offset >= total_results) reachedEnd = true;
+      else offset += 25;
+
       for (const m of foundMessages)
         if (_messageTypeAllowed(m.type)) retArr.push(m);
       dispatch({
         type: UPDATE_FETCHED_MESSAGES,
         payload: {
           fetchedMessageLength: retArr.length,
-          totalSearchMessages: total_results,
+          totalSearchMessages: totalMessages,
         },
       });
     }

@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.10.5",
+    "changes": [
+      "Fix bug where Filtered Searching and Purging stopped after finding 5000 messages.",
+      "Sort Guild, Channel, and DM dropdown options in alphanumerical order."
+    ]
+  },
+  {
     "version": "1.10.4",
     "changes": [
       "Fix issue where attached videos were being displayed twice (once as generic and other as video element).",

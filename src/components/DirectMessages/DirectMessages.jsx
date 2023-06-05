@@ -19,6 +19,7 @@ import ExportButton from "../Buttons/ExportButton/ExportButton";
 import PurgeButton from "../Buttons/PurgeButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
+import { sortByProperty } from "../../utils";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -98,17 +99,19 @@ function DirectMessages() {
                   select
                   label="DM"
                 >
-                  {dms.map((directMessage) => {
-                    return (
-                      <MenuItem
-                        dense
-                        key={directMessage.id}
-                        value={directMessage.id}
-                      >
-                        {directMessage.name}
-                      </MenuItem>
-                    );
-                  })}
+                  {dms
+                    .sort((a, b) => sortByProperty(a, b, "name"))
+                    .map((directMessage) => {
+                      return (
+                        <MenuItem
+                          dense
+                          key={directMessage.id}
+                          value={directMessage.id}
+                        >
+                          {directMessage.name}
+                        </MenuItem>
+                      );
+                    })}
                 </TextField>
               </Stack>
 
