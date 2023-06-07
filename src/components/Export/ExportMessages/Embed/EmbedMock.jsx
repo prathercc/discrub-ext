@@ -12,7 +12,7 @@ const EmbedMock = ({ embed, index }) => {
 
   return (
     <>
-      {previewImages && type === "gifv" && (
+      {previewImages && type === "gifv" && video && (
         <video
           className={attachmentClasses.video}
           width={video.width > 400 ? 400 : video.width}
@@ -22,11 +22,12 @@ const EmbedMock = ({ embed, index }) => {
           controls
           playsinline
           autoPlay={false}
-          poster={thumbnail.proxy_url || thumbnail.url || "discrub2.png"}
+          poster={thumbnail?.proxy_url || thumbnail?.url || "discrub2.png"}
         />
       )}
       {previewImages &&
         type === "video" &&
+        video &&
         supportedVideoHosts.some((host) =>
           video?.url?.toLowerCase()?.includes(host)
         ) && (
@@ -41,17 +42,17 @@ const EmbedMock = ({ embed, index }) => {
             allowfullscreen
           ></iframe>
         )}
-      {previewImages && type === "image" && (
+      {previewImages && type === "image" && thumbnail && (
         <AttachmentMock
           attachment={{
             content_type: "image/jpeg",
             filename: null,
-            height: embed.thumbnail.height,
+            height: thumbnail.height,
             id: `EMBEDDED-MEDIA-${index}`,
-            proxy_url: embed.thumbnail.proxy_url,
+            proxy_url: thumbnail.proxy_url,
             size: null,
-            url: embed.thumbnail.url,
-            width: embed.thumbnail.width,
+            url: thumbnail.url,
+            width: thumbnail.width,
             local_url: embed.local_url,
           }}
         />

@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.6",
+    "changes": [
+      "Patch fix for app crash when exporting message with empty embed."
+    ]
+  },
+  {
     "version": "1.10.5",
     "changes": [
       "Fix bug where Filtered Searching and Purging stopped after finding 5000 messages.",
