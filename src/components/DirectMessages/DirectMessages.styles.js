@@ -25,6 +25,9 @@ const DirectMessagesStyles = makeStyles(() => ({
     opacity: ({ purgeDialogOpen, exportDialogOpen }) =>
       (purgeDialogOpen || exportDialogOpen) && 0,
   },
+  dmField: {
+    width: "670px !important",
+  },
 }));
 
 export default DirectMessagesStyles;
