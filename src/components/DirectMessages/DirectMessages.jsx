@@ -1,8 +1,8 @@
 import React, { useEffect, useContext, useState } from "react";
 import Box from "@mui/material/Box";
-import MenuItem from "@mui/material/MenuItem";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
   Typography,
   Paper,
@@ -10,6 +10,7 @@ import {
   CircularProgress,
   TextField,
   Button,
+  Autocomplete,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
@@ -59,8 +60,8 @@ function DirectMessages() {
     setSearchTouched(true);
   };
 
-  const handleChangeDm = async (e) => {
-    setDm(e.target.value);
+  const handleChangeDm = async (id) => {
+    setDm(id);
     await setSearchBeforeDate(null);
     await setSearchAfterDate(null);
     await resetFilters();
@@ -89,30 +90,28 @@ function DirectMessages() {
                 alignItems="center"
                 spacing={1}
               >
-                <TextField
-                  size="small"
-                  fullWidth
-                  variant="filled"
-                  disabled={messagesLoading || purgeDialogOpen}
-                  value={selectedDm.id}
-                  onChange={handleChangeDm}
-                  select
-                  label="DM"
-                >
-                  {dms
+                <Autocomplete
+                  clearIcon={<ClearIcon />}
+                  onChange={(_, val) => handleChangeDm(val)}
+                  options={dms
                     .sort((a, b) => sortByProperty(a, b, "name"))
                     .map((directMessage) => {
-                      return (
-                        <MenuItem
-                          dense
-                          key={directMessage.id}
-                          value={directMessage.id}
-                        >
-                          {directMessage.name}
-                        </MenuItem>
-                      );
+                      return directMessage.id;
                     })}
-                </TextField>
+                  getOptionLabel={(id) => dms.find((dm) => dm.id === id)?.name}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="filled"
+                      fullWidth
+                      size="small"
+                      label="DM"
+                      className={classes.dmField}
+                    />
+                  )}
+                  value={selectedDm?.id}
+                  disabled={messagesLoading || purgeDialogOpen}
+                />
               </Stack>
 
               <span className={classes.purgeHidden}>

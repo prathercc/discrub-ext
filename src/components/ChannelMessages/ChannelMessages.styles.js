@@ -31,6 +31,9 @@ const ChannelMessagesStyles = makeStyles(() => ({
   purgeWarning: {
     color: "#f44336",
   },
+  autocomplete: {
+    width: "330px !important",
+  },
 }));
 
 export default ChannelMessagesStyles;

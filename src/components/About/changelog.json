@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.7",
+    "changes": [
+      "Convert Channel Messages and Direct Message dropdown fields into autocomplete fields."
+    ]
+  },
+  {
     "version": "1.10.6",
     "changes": [
       "Patch fix for app crash when exporting message with empty embed."

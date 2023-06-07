@@ -1,8 +1,8 @@
 import React, { useEffect, useContext, useState } from "react";
 import Box from "@mui/material/Box";
-import MenuItem from "@mui/material/MenuItem";
 import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
   Stack,
   Typography,
@@ -10,6 +10,7 @@ import {
   CircularProgress,
   TextField,
   Button,
+  Autocomplete,
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
 import { GuildContext } from "../../context/guild/GuildContext";
@@ -21,6 +22,7 @@ import ExportButton from "../Buttons/ExportButton/ExportButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../utils";
+import classNames from "classnames";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -32,7 +34,12 @@ function ChannelMessages({ closeAnnouncement }) {
     setSearchAfterDate,
   } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
-  const { state: guildState, getGuilds, setGuild } = useContext(GuildContext);
+  const {
+    state: guildState,
+    getGuilds,
+    setGuild,
+    resetGuild,
+  } = useContext(GuildContext);
   const {
     state: channelState,
     getChannels,
@@ -66,19 +73,23 @@ function ChannelMessages({ closeAnnouncement }) {
     setSearchTouched(true);
   };
 
-  const handleGuildChange = async (e) => {
-    setGuild(e.target.value);
+  const handleGuildChange = async (id) => {
+    if (id) {
+      setGuild(id);
+      await getChannels(id);
+    } else {
+      resetGuild();
+    }
     await resetChannel();
     await resetFilters();
     await setSearchBeforeDate(null);
     await setSearchAfterDate(null);
     await resetMessageData();
-    await getChannels(e.target.value);
     setSearchTouched(false);
   };
 
-  const handleChannelChange = async (e) => {
-    if (!e.target.value) {
+  const handleChannelChange = async (id) => {
+    if (!id) {
       await setPreFilterUserId(null);
       await setSearchBeforeDate(null);
       await setSearchAfterDate(null);
@@ -86,7 +97,7 @@ function ChannelMessages({ closeAnnouncement }) {
     await resetFilters();
     await resetMessageData();
     setSearchTouched(false);
-    setChannel(e.target.value);
+    setChannel(id);
   };
 
   useEffect(() => {
@@ -116,52 +127,59 @@ function ChannelMessages({ closeAnnouncement }) {
                 alignItems="center"
                 spacing={1}
               >
-                <TextField
-                  size="small"
-                  fullWidth
-                  variant="filled"
-                  disabled={messagesLoading || purgeDialogOpen}
-                  value={selectedGuild.id}
-                  onChange={handleGuildChange}
-                  select
-                  label="Guild"
-                  onFocus={closeAnnouncement}
-                >
-                  {guilds
+                <Autocomplete
+                  clearIcon={<ClearIcon />}
+                  onChange={(_, val) => handleGuildChange(val)}
+                  options={guilds
                     .sort((a, b) => sortByProperty(a, b, "name"))
                     .map((guild) => {
-                      return (
-                        <MenuItem dense key={guild.id} value={guild.id}>
-                          {guild.name}
-                        </MenuItem>
-                      );
+                      return guild.id;
                     })}
-                </TextField>
+                  getOptionLabel={(id) =>
+                    guilds.find((guild) => guild.id === id)?.name
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="filled"
+                      fullWidth
+                      size="small"
+                      label="Guild"
+                      onFocus={closeAnnouncement}
+                      className={classes.autocomplete}
+                    />
+                  )}
+                  value={selectedGuild?.id}
+                  disabled={messagesLoading || purgeDialogOpen}
+                />
 
-                <TextField
-                  size="small"
-                  className={classes.purgeHidden}
-                  fullWidth
-                  variant="filled"
-                  disabled={selectedGuild.id === null || messagesLoading}
-                  value={selectedChannel.id}
-                  onChange={handleChannelChange}
-                  select
-                  label="Channel"
-                >
-                  <MenuItem dense value={null} key={-1}>
-                    <strong>Reset Selection</strong>
-                  </MenuItem>
-                  {channels
+                <Autocomplete
+                  clearIcon={<ClearIcon />}
+                  onChange={(_, val) => handleChannelChange(val)}
+                  options={channels
                     .sort((a, b) => sortByProperty(a, b, "name"))
                     .map((channel) => {
-                      return (
-                        <MenuItem dense key={channel.id} value={channel.id}>
-                          {channel.name}
-                        </MenuItem>
-                      );
+                      return channel.id;
                     })}
-                </TextField>
+                  getOptionLabel={(id) =>
+                    channels.find((channel) => channel.id === id)?.name
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="filled"
+                      fullWidth
+                      size="small"
+                      label="Channel"
+                      className={classNames(
+                        classes.autocomplete,
+                        classes.purgeHidden
+                      )}
+                    />
+                  )}
+                  value={selectedChannel?.id}
+                  disabled={selectedGuild.id === null || messagesLoading}
+                />
               </Stack>
 
               <span className={classes.purgeHidden}>
