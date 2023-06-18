@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.8",
+    "changes": [
+      "Add ability to toggle ascending/descending message sort when bulk exporting a Guild/DM."
+    ]
+  },
+  {
     "version": "1.10.7",
     "changes": [
       "Convert Channel Messages and Direct Message dropdown fields into autocomplete fields."

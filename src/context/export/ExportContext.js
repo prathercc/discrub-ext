@@ -10,6 +10,7 @@ import {
   SET_SHOW_AVATARS,
   SET_CURRENT_PAGE,
   SET_MESSAGES_PER_PAGE,
+  SET_SORT_OVERRIDE,
 } from "./ExportContextConstants";
 
 export const ExportContext = createContext();
@@ -27,10 +28,18 @@ const ExportContextProvider = (props) => {
       isGenerating: false,
       currentPage: 1,
       messagesPerPage: 1000,
+      sortOverride: "desc",
     })
   );
   const exportingRef = useRef();
   exportingRef.current = state.isExporting;
+
+  const setSortOverride = async (val) => {
+    return dispatch({
+      type: SET_SORT_OVERRIDE,
+      payload: { sortOverride: val },
+    });
+  };
 
   const setMessagesPerPage = async (val) => {
     return dispatch({
@@ -99,6 +108,7 @@ const ExportContextProvider = (props) => {
         setShowAvatars,
         setCurrentPage,
         setMessagesPerPage,
+        setSortOverride,
       }}
     >
       {props.children}

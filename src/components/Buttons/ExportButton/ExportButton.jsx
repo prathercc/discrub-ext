@@ -90,7 +90,7 @@ const ExportButton = ({
       >
         Export {bulk ? exportType : "Messages"}
       </Button>
-      {isGenerating && <ExportMessages componentRef={contentRef} />}
+      {isGenerating && <ExportMessages componentRef={contentRef} bulk={bulk} />}
       <Dialog
         PaperProps={{ className: classes.dialogPaper }}
         open={dialogOpen}

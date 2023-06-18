@@ -116,7 +116,7 @@ function InjectedDialog() {
           justifyContent="center"
           spacing={1}
         >
-          <Typography variant="body2">1.10.7</Typography>
+          <Typography variant="body2">1.10.8</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />

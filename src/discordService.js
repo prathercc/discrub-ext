@@ -1,4 +1,5 @@
-/* global BigInt */
+import generateSnowflake from "date-to-discord-snowflake";
+
 const discordUsersUrl = "https://discord.com/api/v10/users";
 const discordGuildsUrl = "https://discord.com/api/v10/guilds";
 const discordChannelsUrl = "https://discord.com/api/v10/channels";
@@ -139,20 +140,11 @@ export const fetchSearchMessageData = (
   guildId,
   searchCriteria
 ) => {
-  const generateSnowflake = (date) => {
-    if (date === null) {
-      return null;
-    } else {
-      const timestamp = date.valueOf();
-      const result = (BigInt(timestamp) - BigInt(1420070400000)) << BigInt(22);
-      return result.toString();
-    }
-  };
   const { preFilterUserId, searchAfterDate, searchBeforeDate } = searchCriteria;
   const urlSearchParams = new URLSearchParams({
     author_id: preFilterUserId,
-    min_id: generateSnowflake(searchAfterDate),
-    max_id: generateSnowflake(searchBeforeDate),
+    min_id: searchAfterDate ? generateSnowflake(searchAfterDate) : null,
+    max_id: searchBeforeDate ? generateSnowflake(searchBeforeDate) : null,
     channel_id: guildId ? channelId : "null",
   });
   const nullKeys = [];
