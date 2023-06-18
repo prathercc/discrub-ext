@@ -8,6 +8,7 @@ import { DmContext } from "../../../context/dm/DmContext";
 import { GuildContext } from "../../../context/guild/GuildContext";
 import { ExportContext } from "../../../context/export/ExportContext";
 import { v4 as uuidv4 } from "uuid";
+import { sortByProperty } from "../../../utils";
 
 const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const {
@@ -19,8 +20,13 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     setCurrentPage,
     setMessagesPerPage,
   } = useContext(ExportContext);
-  const { downloadImages, isExporting, currentPage, messagesPerPage } =
-    exportState;
+  const {
+    downloadImages,
+    isExporting,
+    currentPage,
+    messagesPerPage,
+    sortOverride,
+  } = exportState;
 
   const {
     state: messageState,
@@ -178,11 +184,28 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         resolve();
       }, 5000)
     );
+
     if (format === "json")
       return await addToZip(
-        new Blob([JSON.stringify(updatedMessages)], {
-          type: "text/plain",
-        }),
+        new Blob(
+          [
+            JSON.stringify(
+              bulk
+                ? updatedMessages.toSorted((a, b) =>
+                    sortByProperty(
+                      Object.assign(a, { date: new Date(a.timestamp) }),
+                      Object.assign(b, { date: new Date(b.timestamp) }),
+                      "date",
+                      sortOverride
+                    )
+                  )
+                : updatedMessages
+            ),
+          ],
+          {
+            type: "text/plain",
+          }
+        ),
         `${entityMainDirectory}/${entityName}.json`
       );
     else {

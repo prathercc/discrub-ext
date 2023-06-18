@@ -25,6 +25,7 @@ import Progress from "./Progress";
 import PreviewImageToggle from "./PreviewImageToggle";
 import ShowAvatarsToggle from "./ShowAvatarsToggle";
 import PerPage from "./PerPage";
+import SortDirectionToggle from "./SortDirectionToggle";
 
 const BulkContent = ({ isDm = false }) => {
   const classes = ExportButtonStyles();
@@ -124,6 +125,7 @@ const BulkContent = ({ isDm = false }) => {
                 alignItems="center"
                 spacing={1}
               >
+                <SortDirectionToggle />
                 <ShowAvatarsToggle />
                 <PreviewImageToggle />
                 <ImageToggle />
@@ -154,6 +156,7 @@ const BulkContent = ({ isDm = false }) => {
             alignItems="center"
             spacing={1}
           >
+            <SortDirectionToggle />
             <ShowAvatarsToggle />
             <PreviewImageToggle />
             <ImageToggle />
