@@ -94,7 +94,13 @@ function DirectMessages() {
                   clearIcon={<ClearIcon />}
                   onChange={(_, val) => handleChangeDm(val)}
                   options={dms
-                    .sort((a, b) => sortByProperty(a, b, "name"))
+                    .toSorted((a, b) =>
+                      sortByProperty(
+                        { name: a.name.toLowerCase() },
+                        { name: b.name.toLowerCase() },
+                        "name"
+                      )
+                    )
                     .map((directMessage) => {
                       return directMessage.id;
                     })}

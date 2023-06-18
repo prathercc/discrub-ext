@@ -131,7 +131,13 @@ function ChannelMessages({ closeAnnouncement }) {
                   clearIcon={<ClearIcon />}
                   onChange={(_, val) => handleGuildChange(val)}
                   options={guilds
-                    .sort((a, b) => sortByProperty(a, b, "name"))
+                    .toSorted((a, b) =>
+                      sortByProperty(
+                        { name: a.name.toLowerCase() },
+                        { name: b.name.toLowerCase() },
+                        "name"
+                      )
+                    )
                     .map((guild) => {
                       return guild.id;
                     })}
@@ -157,7 +163,13 @@ function ChannelMessages({ closeAnnouncement }) {
                   clearIcon={<ClearIcon />}
                   onChange={(_, val) => handleChannelChange(val)}
                   options={channels
-                    .sort((a, b) => sortByProperty(a, b, "name"))
+                    .toSorted((a, b) =>
+                      sortByProperty(
+                        { name: a.name.toLowerCase() },
+                        { name: b.name.toLowerCase() },
+                        "name"
+                      )
+                    )
                     .map((channel) => {
                       return channel.id;
                     })}
