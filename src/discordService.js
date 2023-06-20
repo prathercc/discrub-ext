@@ -146,6 +146,7 @@ export const fetchSearchMessageData = (
     min_id: searchAfterDate ? generateSnowflake(searchAfterDate) : null,
     max_id: searchBeforeDate ? generateSnowflake(searchBeforeDate) : null,
     channel_id: guildId ? channelId : "null",
+    include_nsfw: true,
   });
   const nullKeys = [];
   urlSearchParams.forEach((value, key) => {

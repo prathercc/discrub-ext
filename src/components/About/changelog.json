@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.9",
+    "changes": [
+      "Include NSFW messages when Purging and as part of searches that use Advanced Filtering."
+    ]
+  },
+  {
     "version": "1.10.8",
     "changes": [
       "Add ability to toggle ascending/descending message sort when bulk exporting a Guild/DM."
