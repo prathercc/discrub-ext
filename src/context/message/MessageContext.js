@@ -39,6 +39,7 @@ import {
 } from "../../discordService";
 import { GuildContext } from "../guild/GuildContext";
 import parseISO from "date-fns/parseISO";
+import { wait } from "../../utils";
 
 export const MessageContext = createContext();
 
@@ -593,7 +594,7 @@ const _getSearchMessages = async (
       }
 
       if (retry_after) {
-        await new Promise((resolve) => setTimeout(resolve, retry_after * 1000));
+        await wait(retry_after);
         continue;
       }
       if (!data || messages?.length === 0) break;
@@ -620,9 +621,9 @@ const _getSearchMessages = async (
         },
       });
     }
-    return { retArr, retThreads };
   } catch (e) {
     console.error("Error fetching channel messages", e);
+  } finally {
     return { retArr, retThreads };
   }
 };

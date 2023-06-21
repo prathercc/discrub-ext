@@ -1,6 +1,5 @@
 import React, { useState, useContext } from "react";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
-import { toggleDebugPause } from "./Utility/utility";
 import {
   Typography,
   Button,
@@ -17,6 +16,7 @@ import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { MessageContext } from "../../context/message/MessageContext";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ModalStyles from "./Modal.styles";
+import { wait } from "../../utils";
 
 const AttachmentModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
@@ -31,8 +31,14 @@ const AttachmentModal = ({ open, handleClose }) => {
 
   const [deleting, setDeleting] = useState(false);
   const [debugMessage, setDebugMessage] = useState("");
+  const resetDebugMessage = () => {
+    setDebugMessage("");
+  };
 
-  /* Delete a message when no content or attachment will exist for it*/
+  /**
+   * Attempt to delete provided attachment or delete a message when no content or attachment will exist following removal of attachment
+   * @param {*} attachment Attachment to delete
+   */
   const handleDeleteAttachment = async (attachment) => {
     let shouldEdit =
       (attachmentMessage.content && attachmentMessage.content.length > 0) ||
@@ -48,20 +54,18 @@ const AttachmentModal = ({ open, handleClose }) => {
       if (response === null) {
         if (attachmentMessage.attachments.length === 0) handleClose();
       } else {
-        await toggleDebugPause(
-          setDebugMessage,
-          "Entire message must be deleted to remove attachment!"
-        );
+        setDebugMessage("Entire message must be deleted to remove attachment!");
+        await wait(0.5, resetDebugMessage);
       }
     } else {
       const response = await deleteMessage(attachmentMessage);
       if (response === null) {
         handleClose();
       } else {
-        await toggleDebugPause(
-          setDebugMessage,
+        setDebugMessage(
           "You do not have permission to delete this attachment!"
         );
+        await wait(0.5, resetDebugMessage);
       }
     }
     setDeleting(false);

@@ -6,7 +6,6 @@ import MessageChip from "../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import Box from "@mui/material/Box";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
-import { toggleDebugPause } from "./Utility/utility";
 import { MessageContext } from "../../context/message/MessageContext";
 import {
   Typography,
@@ -20,6 +19,7 @@ import {
   DialogContent,
 } from "@mui/material";
 import ModalStyles from "./Modal.styles";
+import { wait } from "../../utils";
 
 const DeleteModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
@@ -38,6 +38,9 @@ const DeleteModal = ({ open, handleClose }) => {
   const [deleting, setDeleting] = useState(false);
   const [deleteObj, setDeleteObj] = useState(null);
   const [debugMessage, setDebugMessage] = useState("");
+  const resetDebugMessage = () => {
+    setDebugMessage("");
+  };
   const openRef = useRef();
   openRef.current = open;
 
@@ -45,6 +48,9 @@ const DeleteModal = ({ open, handleClose }) => {
     setDeleteConfig({ attachments: true, messages: true });
   }, [open]);
 
+  /**
+   * Attempt to delete the selected message
+   */
   const handleDeleteMessage = async () => {
     setDeleting(true);
     let count = 0;
@@ -66,16 +72,11 @@ const DeleteModal = ({ open, handleClose }) => {
         if (response === null) {
           count++;
         } else if (response > 0) {
-          await toggleDebugPause(
-            setDebugMessage,
-            `Pausing for ${response} seconds...`,
-            response * 1000
-          );
+          setDebugMessage(`Pausing for ${response} seconds...`);
+          await wait(response, resetDebugMessage);
         } else {
-          await toggleDebugPause(
-            setDebugMessage,
-            "You do not have permission to modify this message!"
-          );
+          setDebugMessage("You do not have permission to modify this message!");
+          await wait(0.5, resetDebugMessage);
           count++;
         }
       } else if (deleteConfig.attachments || deleteConfig.messages) {
@@ -87,16 +88,11 @@ const DeleteModal = ({ open, handleClose }) => {
         if (response === null) {
           count++;
         } else if (response > 0) {
-          await toggleDebugPause(
-            setDebugMessage,
-            `Pausing for ${response} seconds...`,
-            response * 1000
-          );
+          setDebugMessage(`Pausing for ${response} seconds...`);
+          await wait(response, resetDebugMessage);
         } else {
-          await toggleDebugPause(
-            setDebugMessage,
-            "You do not have permission to modify this message!"
-          );
+          setDebugMessage("You do not have permission to modify this message!");
+          await wait(0.5, resetDebugMessage);
           count++;
         }
       } else break;

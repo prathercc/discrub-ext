@@ -1,6 +1,7 @@
 import { useReactToPrint } from "react-to-print";
 import streamSaver from "streamsaver";
 import { Writer } from "@transcend-io/conflux";
+import { wait } from "../../utils";
 export default class ExportUtils {
   constructor(contentRef, callback, zipName) {
     this.contentRef = contentRef;
@@ -18,13 +19,6 @@ export default class ExportUtils {
       stack: "No error given, please try exporting this page again.",
     };
   }
-  _delay(ms) {
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve();
-      }, ms)
-    );
-  }
 
   setExportMessages = (val) => {
     this.exportMessages = val;
@@ -34,7 +28,7 @@ export default class ExportUtils {
     this.html = null;
     this.callback(true);
     this._generateHTMLHelperFunc();
-    while (!this.html) await this._delay(2000);
+    while (!this.html) await wait(2);
     this.callback(false);
     return new Blob([this.html], { type: "text/html" });
   };

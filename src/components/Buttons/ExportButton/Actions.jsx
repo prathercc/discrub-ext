@@ -8,7 +8,7 @@ import { DmContext } from "../../../context/dm/DmContext";
 import { GuildContext } from "../../../context/guild/GuildContext";
 import { ExportContext } from "../../../context/export/ExportContext";
 import { v4 as uuidv4 } from "uuid";
-import { sortByProperty } from "../../../utils";
+import { sortByProperty, wait } from "../../../utils";
 
 const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const {
@@ -144,11 +144,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     const retArr = [];
     for (let c1 = 0; c1 < messages.length; c1 += 1) {
       if (c1 === 0) {
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            resolve();
-          }, 3000)
-        );
+        await wait(3);
       }
       if (isExportCancelled()) break;
       retArr.push(await processMessage(messages[c1]));
@@ -158,11 +154,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
             ((c1 / messages.length) * 100).toString().split(".")[0]
           }%`
         );
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            resolve();
-          }, 100)
-        );
+        await wait(0.1);
       }
     }
 
@@ -179,11 +171,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         updatedMessages.length > 2000 ? " - This may take a while..." : ""
       }`
     );
-    await new Promise((resolve) =>
-      setTimeout(() => {
-        resolve();
-      }, 5000)
-    );
+    await wait(5);
 
     if (format === "json")
       return await addToZip(
@@ -217,11 +205,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         setStatusText(
           `Compressing - Page ${currentPageRef.current} of ${totalPages}`
         );
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            resolve();
-          }, 2000)
-        );
+        await wait(2);
         const startIndex =
           currentPageRef.current === 1
             ? 0

@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import MessageChip from "../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import ModalDebugMessage from "./Utility/ModalDebugMessage";
-import { toggleDebugPause } from "./Utility/utility";
 import {
   Typography,
   Button,
@@ -17,6 +16,7 @@ import {
 } from "@mui/material";
 import { MessageContext } from "../../context/message/MessageContext";
 import ModalStyles from "./Modal.styles";
+import { wait } from "../../utils";
 
 const EditModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
@@ -28,9 +28,15 @@ const EditModal = ({ open, handleClose }) => {
   const [editing, setEditing] = useState(false);
   const [editObj, setEditObj] = useState(null);
   const [debugMessage, setDebugMessage] = useState("");
+  const resetDebugMessage = () => {
+    setDebugMessage("");
+  };
   const openRef = useRef();
   openRef.current = open;
 
+  /**
+   * Attempt to edit the selected message
+   */
   const handleEditMessage = async () => {
     setEditing(true);
     let count = 0;
@@ -54,16 +60,11 @@ const EditModal = ({ open, handleClose }) => {
       if (response === null) {
         count++;
       } else if (response > 0) {
-        await toggleDebugPause(
-          setDebugMessage,
-          `Pausing for ${response} seconds...`,
-          response * 1000
-        );
+        setDebugMessage(`Pausing for ${response} seconds...`);
+        await wait(response, resetDebugMessage);
       } else {
-        await toggleDebugPause(
-          setDebugMessage,
-          "You do not have permission to modify this message!"
-        );
+        setDebugMessage("You do not have permission to modify this message!");
+        await wait(0.5, resetDebugMessage);
         count++;
       }
     }

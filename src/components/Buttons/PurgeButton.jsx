@@ -20,16 +20,19 @@ import { ChannelContext } from "../../context/channel/ChannelContext";
 import ModalDebugMessage from "../Modals/Utility/ModalDebugMessage";
 import ChannelMessagesStyles from "../ChannelMessages/ChannelMessages.styles";
 import MessageChip from "../Chips/MessageChip";
-import { toggleDebugPause } from "../Modals/Utility/utility";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import PrefilterUser from "../AdvancedFiltering/PrefilterUser";
+import { wait } from "../../utils";
 
 const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const classes = ChannelMessagesStyles();
   const [deleting, setDeleting] = useState(false);
   const [deleteObj, setDeleteObj] = useState(null);
   const [debugMessage, setDebugMessage] = useState("");
+  const resetDebugMessage = () => {
+    setDebugMessage("");
+  };
 
   const openRef = useRef();
   openRef.current = dialogOpen;
@@ -100,19 +103,20 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     setDeleting(true);
     for (const entity of isDm ? [selectedDm] : channels) {
       setDeleteObj({});
-      await toggleDebugPause(
-        setDebugMessage,
-        `Searching for messages...`,
-        1000
-      );
+      setDebugMessage("Searching for messages...");
+      await wait(1, resetDebugMessage);
       await resetMessageData();
       isDm ? await setDm(entity.id) : await setChannel(entity.id);
       isDm && (await setDmPreFilterUserId(userState.id));
       await getMessageData();
       let count = 0;
       const selectedMessages = [...messagesRef.current];
-      if (selectedMessages.length === 0)
-        await toggleDebugPause(setDebugMessage, `Still searching...`, 1000);
+
+      if (selectedMessages.length === 0) {
+        setDebugMessage("Still searching...");
+        await wait(1, resetDebugMessage);
+      }
+
       while (count < selectedMessages.length && openRef.current) {
         let currentRow = selectedMessages[count];
         setDeleteObj(currentRow);
@@ -120,16 +124,11 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         if (response === null) {
           count++;
         } else if (response > 0) {
-          await toggleDebugPause(
-            setDebugMessage,
-            `Pausing for ${response} seconds...`,
-            response * 1000
-          );
+          setDebugMessage(`Pausing for ${response} seconds`);
+          await wait(response, resetDebugMessage);
         } else {
-          await toggleDebugPause(
-            setDebugMessage,
-            "You do not have permission to modify this message!"
-          );
+          setDebugMessage("You do not have permission to modify this message!");
+          await wait(0.5, resetDebugMessage);
           count++;
         }
       }
