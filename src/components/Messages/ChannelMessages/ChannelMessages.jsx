@@ -20,7 +20,7 @@ import ChannelMessagesStyles from "./Styles/ChannelMessages.styles";
 import PurgeButton from "../../Purge/PurgeButton";
 import ExportButton from "../../Export/ExportButton/ExportButton";
 import AdvancedFiltering from "../../AdvancedFiltering/AdvancedFiltering";
-import TokenNotFound from "../../TokenNotFound/TokenNotFound";
+import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
 import classNames from "classnames";
 
