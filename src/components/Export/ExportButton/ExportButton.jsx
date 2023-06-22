@@ -5,7 +5,7 @@ import { GuildContext } from "../../../context/guild/GuildContext";
 import { MessageContext } from "../../../context/message/MessageContext";
 import ExportMessages from "../../Export/ExportMessages/ExportMessages";
 import { DmContext } from "../../../context/dm/DmContext";
-import ExportButtonStyles from "./ExportButton.styles";
+import ExportButtonStyles from "./Styles/ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
 import BulkContent from "./BulkContent";
 import Actions from "./Actions";

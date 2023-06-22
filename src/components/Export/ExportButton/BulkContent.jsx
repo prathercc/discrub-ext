@@ -19,7 +19,7 @@ import DeselectIcon from "@mui/icons-material/Deselect";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
 import { DmContext } from "../../../context/dm/DmContext";
 import ImageToggle from "./ImageToggle";
-import ExportButtonStyles from "./ExportButton.styles";
+import ExportButtonStyles from "./Styles/ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
 import Progress from "./Progress";
 import PreviewImageToggle from "./PreviewImageToggle";

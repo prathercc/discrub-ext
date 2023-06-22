@@ -16,7 +16,7 @@ import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import DirectMessagesStyles from "./DirectMessages.styles";
-import ExportButton from "../Buttons/ExportButton/ExportButton";
+import ExportButton from "../Export/ExportButton/ExportButton";
 import PurgeButton from "../Buttons/PurgeButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";

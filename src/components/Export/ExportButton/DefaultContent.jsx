@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { MessageContext } from "../../../context/message/MessageContext";
 import ImageToggle from "./ImageToggle";
-import ExportButtonStyles from "./ExportButton.styles";
+import ExportButtonStyles from "./Styles/ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
 import Progress from "./Progress";
 import PreviewImageToggle from "./PreviewImageToggle";

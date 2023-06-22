@@ -11,7 +11,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { MessageContext } from "../../../context/message/MessageContext";
 import FilterComponent from "./FilterComponent";
 import DiscordTableStyles from "./DiscordTable.styles";
-import ExportButton from "../../Buttons/ExportButton/ExportButton";
+import ExportButton from "../../Export/ExportButton/ExportButton";
 import { DmContext } from "../../../context/dm/DmContext";
 import { Collapse } from "@mui/material";
 
