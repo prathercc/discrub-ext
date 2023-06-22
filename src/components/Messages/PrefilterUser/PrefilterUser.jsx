@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { Autocomplete, TextField } from "@mui/material";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ChannelContext } from "../../context/channel/ChannelContext";
-import { MessageContext } from "../../context/message/MessageContext";
-import { DmContext } from "../../context/dm/DmContext";
+import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import { ChannelContext } from "../../../context/channel/ChannelContext";
+import { MessageContext } from "../../../context/message/MessageContext";
+import { DmContext } from "../../../context/dm/DmContext";
 import ClearIcon from "@mui/icons-material/Clear";
-import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
+import AdvancedFilteringStyles from "../AdvancedFiltering/AdvancedFiltering.styles";
 
 function PrefilterUser({ isDm = false, purge }) {
   const { state: messageDataState } = useContext(MessageContext);

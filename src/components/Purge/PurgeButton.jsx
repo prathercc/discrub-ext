@@ -22,7 +22,7 @@ import ChannelMessagesStyles from "../Messages/ChannelMessages/Styles/ChannelMes
 import MessageChip from "../Chips/MessageChip";
 import { UserContext } from "../../context/user/UserContext";
 import { DmContext } from "../../context/dm/DmContext";
-import PrefilterUser from "../AdvancedFiltering/PrefilterUser";
+import PrefilterUser from "../Messages/PrefilterUser/PrefilterUser";
 import { wait } from "../../utils";
 
 const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {

@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import { Stack, Button, Collapse } from "@mui/material";
-import { ChannelContext } from "../../context/channel/ChannelContext";
-import { MessageContext } from "../../context/message/MessageContext";
-import { DmContext } from "../../context/dm/DmContext";
+import { ChannelContext } from "../../../context/channel/ChannelContext";
+import { MessageContext } from "../../../context/message/MessageContext";
+import { DmContext } from "../../../context/dm/DmContext";
 import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
-import BeforeAndAfterFields from "../Fields/BeforeAndAfterFields";
-import PrefilterUser from "./PrefilterUser";
+import BeforeAndAfterFields from "../BeforeAndAfterFields/BeforeAndAfterFields";
+import PrefilterUser from "../PrefilterUser/PrefilterUser";
 
 function AdvancedFiltering({
   closeAnnouncement = () => {},

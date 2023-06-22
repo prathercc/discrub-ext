@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { Stack } from "@mui/material";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { MessageContext } from "../../context/message/MessageContext";
-import DiscordDateTimePicker from "../DiscordComponents/DiscordDateTimePicker/DiscordDateTimePicker";
+import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import { MessageContext } from "../../../context/message/MessageContext";
+import DiscordDateTimePicker from "../../DiscordComponents/DiscordDateTimePicker/DiscordDateTimePicker";
 
 function BeforeAndAfterFields({ disabled }) {
   const {
