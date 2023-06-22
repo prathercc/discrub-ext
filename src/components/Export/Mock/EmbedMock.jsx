@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import { ExportContext } from "../../../../context/export/ExportContext";
-import AttachmentStyles from "../Attachment/Attachment.styles";
-import AttachmentMock from "../Attachment/AttachmentMock";
+import { ExportContext } from "../../../context/export/ExportContext";
+import AttachmentStyles from "./Styles/Attachment.styles";
+import AttachmentMock from "./AttachmentMock";
 
 const EmbedMock = ({ embed, index }) => {
   const { type, video, local_url, description, thumbnail } = embed;

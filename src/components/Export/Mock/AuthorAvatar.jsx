@@ -1,12 +1,12 @@
 import React, { useContext, useState } from "react";
 import { Avatar, Box, Snackbar } from "@mui/material";
-import ExportMessagesStyles from "./ExportMessages.styles";
+import ExportStyles from "../Styles/Export.styles";
 import PersonIcon from "@mui/icons-material/Person";
 import { ExportContext } from "../../../context/export/ExportContext";
 import copy from "copy-to-clipboard";
 
 const AuthorAvatar = ({ author, reply, hideAttachments }) => {
-  const classes = ExportMessagesStyles({ reply, hideAttachments });
+  const classes = ExportStyles({ reply, hideAttachments });
   const { state: exportState } = useContext(ExportContext);
   const [textCopied, setTextCopied] = useState(false);
   const { showAvatars } = exportState;

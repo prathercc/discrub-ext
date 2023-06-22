@@ -6,7 +6,7 @@ import AttachmentIcon from "@mui/icons-material/Attachment";
 import { MessageContext } from "../../../context/message/MessageContext";
 import DiscordTableStyles from "./DiscordTable.styles";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
-import MessageMock from "../../Export/ExportMessages/MessageMock";
+import MessageMock from "../../Export/Mock/MessageMock";
 
 export default function DiscordTableMessage({
   row,

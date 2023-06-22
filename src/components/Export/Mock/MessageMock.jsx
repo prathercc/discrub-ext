@@ -1,15 +1,15 @@
 import React, { useContext } from "react";
 import { Stack, Typography } from "@mui/material";
-import ExportMessagesStyles from "./ExportMessages.styles";
-import AttachmentMock from "./Attachment/AttachmentMock";
+import ExportStyles from "../Styles/Export.styles";
+import AttachmentMock from "./AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
 import { MessageContext } from "../../../context/message/MessageContext";
-import EmbedMock from "./Embed/EmbedMock";
+import EmbedMock from "./EmbedMock";
 
 const MessageMock = ({ row, index, hideAttachments = false }) => {
   const { state: messageState } = useContext(MessageContext);
   const { threads, messages } = messageState;
-  const classes = ExportMessagesStyles();
+  const classes = ExportStyles();
   const messageDate = new Date(Date.parse(row.timestamp));
   const tz = messageDate
     .toLocaleTimeString(undefined, { timeZoneName: "short" })

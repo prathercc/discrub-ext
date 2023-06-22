@@ -1,6 +1,6 @@
 import { makeStyles } from "@mui/styles";
 
-const ExportMessagesStyles = makeStyles(() => ({
+const ExportStyles = makeStyles(() => ({
   boxContainer: {
     display: "none",
     margin: 0,
@@ -13,33 +13,6 @@ const ExportMessagesStyles = makeStyles(() => ({
   },
   typographyMessageText: {
     color: "#DCDDDE !important",
-  },
-  exportTitleStack: {
-    width: "100%",
-    zIndex: 5000,
-    borderBottom: "0.5px solid #202225",
-    padding: "5px",
-    position: "fixed",
-    top: 0,
-    backgroundColor: "#36393f",
-    "& h4": {
-      userSelect: "none !important",
-      cursor: "default !important",
-    },
-    "& h6": {
-      userSelect: "none !important",
-      cursor: "default !important",
-    },
-  },
-  poweredByStack: {
-    borderRadius: "5px",
-    padding: "5px",
-    userSelect: "none !important",
-    cursor: "default !important",
-    "& span": {
-      userSelect: "none !important",
-      cursor: "default !important",
-    },
   },
   messagesStack: {
     marginTop: "55px",
@@ -115,4 +88,4 @@ const ExportMessagesStyles = makeStyles(() => ({
   },
 }));
 
-export default ExportMessagesStyles;
+export default ExportStyles;

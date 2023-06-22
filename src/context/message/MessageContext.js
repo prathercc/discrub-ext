@@ -10,7 +10,7 @@ import { UserContext } from "../user/UserContext";
 import { ChannelContext } from "../channel/ChannelContext";
 import { DmContext } from "../dm/DmContext";
 import Typography from "@mui/material/Typography";
-import ExportMessagesStyles from "../../components/Export/ExportMessages/ExportMessages.styles";
+import ExportMessagesStyles from "../../components/Export/Styles/Export.styles";
 import { Stack } from "@mui/material";
 import {
   DELETE_MESSAGE_SUCCESS,

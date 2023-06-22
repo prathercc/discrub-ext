@@ -1,13 +1,13 @@
 import React, { useContext } from "react";
 import { IconButton, Stack, Typography } from "@mui/material";
-import ExportMessagesStyles from "../ExportMessages.styles";
-import AttachmentStyles from "./Attachment.styles";
+import ExportStyles from "../Styles/Export.styles";
+import AttachmentStyles from "./Styles/Attachment.styles";
 import DownloadIcon from "@mui/icons-material/Download";
 import bytes from "bytes";
-import { ExportContext } from "../../../../context/export/ExportContext";
+import { ExportContext } from "../../../context/export/ExportContext";
 
 const AttachmentMock = ({ attachment }) => {
-  const exportClasses = ExportMessagesStyles();
+  const exportClasses = ExportStyles();
   const classes = AttachmentStyles({
     height: attachment?.height,
     width: attachment?.width,
