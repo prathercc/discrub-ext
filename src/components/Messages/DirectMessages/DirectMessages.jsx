@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from "react";
 import Box from "@mui/material/Box";
-import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
+import DiscordTable from "../../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
@@ -12,15 +12,15 @@ import {
   Button,
   Autocomplete,
 } from "@mui/material";
-import { UserContext } from "../../context/user/UserContext";
-import { DmContext } from "../../context/dm/DmContext";
-import { MessageContext } from "../../context/message/MessageContext";
-import DirectMessagesStyles from "./DirectMessages.styles";
-import ExportButton from "../Export/ExportButton/ExportButton";
-import PurgeButton from "../Purge/PurgeButton";
-import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
-import TokenNotFound from "../TokenNotFound/TokenNotFound";
-import { sortByProperty } from "../../utils";
+import { UserContext } from "../../../context/user/UserContext";
+import { DmContext } from "../../../context/dm/DmContext";
+import { MessageContext } from "../../../context/message/MessageContext";
+import DirectMessagesStyles from "./Styles/DirectMessages.styles";
+import ExportButton from "../../Export/ExportButton/ExportButton";
+import PurgeButton from "../../Purge/PurgeButton";
+import AdvancedFiltering from "../../AdvancedFiltering/AdvancedFiltering";
+import TokenNotFound from "../../TokenNotFound/TokenNotFound";
+import { sortByProperty } from "../../../utils";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);

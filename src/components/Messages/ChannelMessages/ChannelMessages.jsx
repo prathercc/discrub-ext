@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from "react";
 import Box from "@mui/material/Box";
-import DiscordTable from "../DiscordComponents/DiscordTable/DiscordTable";
+import DiscordTable from "../../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
@@ -12,16 +12,16 @@ import {
   Button,
   Autocomplete,
 } from "@mui/material";
-import { UserContext } from "../../context/user/UserContext";
-import { GuildContext } from "../../context/guild/GuildContext";
-import { ChannelContext } from "../../context/channel/ChannelContext";
-import { MessageContext } from "../../context/message/MessageContext";
-import ChannelMessagesStyles from "./ChannelMessages.styles";
-import PurgeButton from "../Purge/PurgeButton";
-import ExportButton from "../Export/ExportButton/ExportButton";
-import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
-import TokenNotFound from "../TokenNotFound/TokenNotFound";
-import { sortByProperty } from "../../utils";
+import { UserContext } from "../../../context/user/UserContext";
+import { GuildContext } from "../../../context/guild/GuildContext";
+import { ChannelContext } from "../../../context/channel/ChannelContext";
+import { MessageContext } from "../../../context/message/MessageContext";
+import ChannelMessagesStyles from "./Styles/ChannelMessages.styles";
+import PurgeButton from "../../Purge/PurgeButton";
+import ExportButton from "../../Export/ExportButton/ExportButton";
+import AdvancedFiltering from "../../AdvancedFiltering/AdvancedFiltering";
+import TokenNotFound from "../../TokenNotFound/TokenNotFound";
+import { sortByProperty } from "../../../utils";
 import classNames from "classnames";
 
 function ChannelMessages({ closeAnnouncement }) {

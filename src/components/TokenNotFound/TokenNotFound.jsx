@@ -1,6 +1,6 @@
 import React from "react";
 import { Stack, Typography, Paper } from "@mui/material";
-import ChannelMessagesStyles from "../ChannelMessages/ChannelMessages.styles";
+import ChannelMessagesStyles from "../Messages/ChannelMessages/Styles/ChannelMessages.styles";
 import NoEncryptionGmailerrorredIcon from "@mui/icons-material/NoEncryptionGmailerrorred";
 
 function TokenNotFound() {
