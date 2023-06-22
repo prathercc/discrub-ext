@@ -17,7 +17,7 @@ import { GuildContext } from "../../context/guild/GuildContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { MessageContext } from "../../context/message/MessageContext";
 import ChannelMessagesStyles from "./ChannelMessages.styles";
-import PurgeButton from "../Buttons/PurgeButton";
+import PurgeButton from "../Purge/PurgeButton";
 import ExportButton from "../Export/ExportButton/ExportButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
