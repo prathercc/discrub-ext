@@ -232,52 +232,43 @@ function ChannelMessages({ closeAnnouncement }) {
               </Stack>
             </Stack>
           </Paper>
-
-          {messages.length > 0 &&
-            !messagesLoading &&
-            !purgeDialogOpen &&
-            !exportDialogOpen && (
-              <Box className={classes.tableBox}>
-                <DiscordTable />
-              </Box>
-            )}
-          {messages.length === 0 &&
-            !messagesLoading &&
-            selectedChannel.id &&
-            searchTouched &&
-            !purgeDialogOpen &&
-            !exportDialogOpen && (
-              <Paper className={classes.paper}>
-                <Box className={classes.box}>
-                  <Typography>No Messages to Display</Typography>
+        </Stack>
+      )}
+      {!purgeDialogOpen && !exportDialogOpen && (
+        <>
+          {!messagesLoading && (
+            <>
+              {messages.length > 0 && (
+                <Box className={classes.tableBox}>
+                  <DiscordTable />
                 </Box>
-                <Box className={classes.box}>
-                  <Typography>
+              )}
+              {messages.length === 0 && selectedChannel.id && searchTouched && (
+                <Paper className={classes.paper}>
+                  <Box className={classes.box}>
                     <SentimentDissatisfiedIcon />
+                    <Typography>No Messages to Display</Typography>
+                  </Box>
+                </Paper>
+              )}
+            </>
+          )}
+          {token !== undefined &&
+            (token === null || !guilds.length || messagesLoading) && (
+              <Paper justifyContent="center" className={classes.paper}>
+                <Box className={classes.box}>
+                  <CircularProgress />
+                  <Typography variant="caption">
+                    {fetchedMessageLength > 0
+                      ? `Fetched ${fetchedMessageLength} Messages`
+                      : "Fetching Data"}
                   </Typography>
                 </Box>
               </Paper>
             )}
-        </Stack>
+          {token === undefined && <TokenNotFound />}
+        </>
       )}
-      {token !== undefined &&
-        (token === null || !guilds.length || messagesLoading) &&
-        !purgeDialogOpen &&
-        !exportDialogOpen && (
-          <Paper justifyContent="center" className={classes.paper}>
-            <Stack justifyContent="center" alignItems="center">
-              <CircularProgress />
-            </Stack>
-            <Box className={classes.box}>
-              <Typography variant="caption">
-                {fetchedMessageLength > 0
-                  ? `Fetched ${fetchedMessageLength} Messages`
-                  : "Fetching Data"}
-              </Typography>
-            </Box>
-          </Paper>
-        )}
-      <TokenNotFound />
     </Stack>
   );
 }

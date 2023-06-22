@@ -12,6 +12,7 @@ const DirectMessagesStyles = makeStyles(() => ({
     justifyContent: "center",
     display: "flex",
     marginTop: "1vh",
+    flexDirection: "column",
   },
   tableBox: {
     maxHeight: ({ showOptionalFilters }) =>
