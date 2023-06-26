@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import RedditIcon from "@mui/icons-material/Reddit";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 
 function RedditDialog() {
   const [subredditOpen, setSubredditOpen] = useState(false);

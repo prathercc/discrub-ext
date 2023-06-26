@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import MenuBar from "../MenuBar/MenuBar";
+import MenuBar from "./MenuBar/MenuBar";
 import ChannelMessages from "../Messages/ChannelMessages/ChannelMessages";
 import DirectMessages from "../Messages/DirectMessages/DirectMessages";
 import Box from "@mui/material/Box";

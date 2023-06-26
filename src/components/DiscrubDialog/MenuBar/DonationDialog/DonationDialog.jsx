@@ -11,10 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import GoogleIcon from "@mui/icons-material/Google";
 import CoffeeIcon from "@mui/icons-material/Coffee";
-import DonationDialogStyles from "./DonationDialog.styles";
+import DonationDialogStyles from "../Styles/DonationDialog.styles";
 
 function DonationDialog() {
   const classes = DonationDialogStyles();
