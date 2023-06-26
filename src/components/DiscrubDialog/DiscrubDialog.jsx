@@ -5,7 +5,7 @@ import DirectMessages from "../Messages/DirectMessages/DirectMessages";
 import Box from "@mui/material/Box";
 import About from "../About/About";
 import { UserContext } from "../../context/user/UserContext";
-import CloseWindowButton from "./CloseWindowButton";
+import CloseWindowButton from "./CloseWindowButton/CloseWindowButton";
 import { MessageContext } from "../../context/message/MessageContext";
 import { ChannelContext } from "../../context/channel/ChannelContext";
 import { GuildContext } from "../../context/guild/GuildContext";
@@ -19,10 +19,10 @@ import {
 } from "@mui/material";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { DmContext } from "../../context/dm/DmContext";
-import InjectedDialogStyles from "./InjectedDialog.styles";
+import InjectedDialogStyles from "./Styles/DiscrubDialog.styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { fetchAnnouncementData } from "../../announcementService";
-import DonationComponent from "./DonationComponent";
+import DonationComponent from "./DonationComponent/DonationComponent";
 // import Sponsorship from "./Sponsorship/Sponsorship";
 
 function InjectedDialog() {

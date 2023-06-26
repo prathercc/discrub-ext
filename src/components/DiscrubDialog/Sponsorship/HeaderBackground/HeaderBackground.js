@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/material";
 import SponsorshipStyles from "./Sponsorship.styles";
-import HeaderLogo from "./HeaderLogo";
+import HeaderLogo from "../HeaderLogo/HeaderLogo";
 
 function HeaderBackground({ logoImage, backgroundImage }) {
   const classes = SponsorshipStyles();

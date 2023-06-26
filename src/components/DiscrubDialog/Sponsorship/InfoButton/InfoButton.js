@@ -10,7 +10,7 @@ import {
   Stack,
 } from "@mui/material";
 import HelpIcon from "@mui/icons-material/Help";
-import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import SponsorshipStyles from "./Sponsorship.styles";
 
 function InfoButton() {

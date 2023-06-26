@@ -1,6 +1,6 @@
 import React from "react";
 import AppTheme from "./AppTheme";
-import InjectedDialog from "./components/InjectedDialog/InjectedDialog";
+import InjectedDialog from "./components/DiscrubDialog/DiscrubDialog";
 import ChannelContextProvider from "./context/channel/ChannelContext";
 import DmContextProvider from "./context/dm/DmContext";
 import GuildContextProvider from "./context/guild/GuildContext";

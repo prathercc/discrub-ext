@@ -1,9 +1,9 @@
 import React from "react";
-import { sendChromeMessage } from "../../chromeService";
+import { sendChromeMessage } from "../../../chromeService";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import Box from "@mui/material/Box";
-import CloseWindowButtonStyles from "./CloseWindowButton.styles";
+import CloseWindowButtonStyles from "../Styles/CloseWindowButton.styles";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 
 const CloseWindowButton = () => {
