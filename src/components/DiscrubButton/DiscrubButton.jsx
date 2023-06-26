@@ -1,23 +1,26 @@
 import React from "react";
-import { IconButton } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { sendChromeMessage } from "../../chromeService";
+import DiscrubButtonStyles from "./DiscrubButton.styles";
 
-function InjectedButton() {
+function DiscrubButton() {
+  const classes = DiscrubButtonStyles();
+
   return (
-    <div style={{ backgroundColor: "#36393f" }}>
+    <Box className={classes.buttonParent}>
       <IconButton
         size="small"
         variant="contained"
         onClick={() => sendChromeMessage("INJECT_DIALOG")}
       >
         <img
-          style={{ width: "24px", height: "24px" }}
+          className={classes.buttonLogo}
           src="discrub2.png"
           alt="Discrub Logo"
         />
       </IconButton>
-    </div>
+    </Box>
   );
 }
 
-export default InjectedButton;
+export default DiscrubButton;
