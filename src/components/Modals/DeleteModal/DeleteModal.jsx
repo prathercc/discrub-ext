@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import MessageChip from "../../Chips/MessageChip";
+import MessageChip from "../MessageChip/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import Box from "@mui/material/Box";
 import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";

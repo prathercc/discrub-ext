@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import Box from "@mui/material/Box";
-import MessageChip from "../../Chips/MessageChip";
+import MessageChip from "../MessageChip/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
 import {

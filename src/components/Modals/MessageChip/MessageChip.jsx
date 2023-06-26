@@ -1,7 +1,7 @@
 import React from "react";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 
 const MessageChip = (props) => {
   return (
