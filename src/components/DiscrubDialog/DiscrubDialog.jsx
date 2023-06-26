@@ -3,7 +3,7 @@ import MenuBar from "./MenuBar/MenuBar";
 import ChannelMessages from "../Messages/ChannelMessages/ChannelMessages";
 import DirectMessages from "../Messages/DirectMessages/DirectMessages";
 import Box from "@mui/material/Box";
-import About from "../About/About";
+import About from "./About/About";
 import { UserContext } from "../../context/user/UserContext";
 import CloseWindowButton from "./CloseWindowButton/CloseWindowButton";
 import { MessageContext } from "../../context/message/MessageContext";
