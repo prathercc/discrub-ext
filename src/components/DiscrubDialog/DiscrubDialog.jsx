@@ -19,14 +19,14 @@ import {
 } from "@mui/material";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { DmContext } from "../../context/dm/DmContext";
-import InjectedDialogStyles from "./Styles/DiscrubDialog.styles";
+import DiscrubDialogStyles from "./Styles/DiscrubDialog.styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { fetchAnnouncementData } from "../../announcementService";
 import DonationComponent from "./DonationComponent/DonationComponent";
 // import Sponsorship from "./Sponsorship/Sponsorship";
 
-function InjectedDialog() {
-  const classes = InjectedDialogStyles();
+function DiscrubDialog() {
+  const classes = DiscrubDialogStyles();
 
   const { getUserData } = useContext(UserContext);
   const { resetChannel } = useContext(ChannelContext);
@@ -124,4 +124,4 @@ function InjectedDialog() {
   );
 }
 
-export default InjectedDialog;
+export default DiscrubDialog;

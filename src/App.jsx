@@ -1,6 +1,6 @@
 import React from "react";
 import AppTheme from "./AppTheme";
-import InjectedDialog from "./components/DiscrubDialog/DiscrubDialog";
+import DiscrubDialog from "./components/DiscrubDialog/DiscrubDialog";
 import ChannelContextProvider from "./context/channel/ChannelContext";
 import DmContextProvider from "./context/dm/DmContext";
 import GuildContextProvider from "./context/guild/GuildContext";
@@ -34,7 +34,7 @@ function App() {
                 <ChannelContextProvider>
                   <DmContextProvider>
                     <MessageContextProvider>
-                      <InjectedDialog />
+                      <DiscrubDialog />
                     </MessageContextProvider>
                   </DmContextProvider>
                 </ChannelContextProvider>

@@ -1,6 +1,6 @@
 import { makeStyles } from "@mui/styles";
 
-const InjectedDialogStyles = makeStyles(() => ({
+const DiscrubDialogStyles = makeStyles(() => ({
   boxContainer: {
     backgroundColor: "rgb(32, 34, 37, 1)",
     height: "615px",
@@ -49,4 +49,4 @@ const InjectedDialogStyles = makeStyles(() => ({
   },
 }));
 
-export default InjectedDialogStyles;
+export default DiscrubDialogStyles;
