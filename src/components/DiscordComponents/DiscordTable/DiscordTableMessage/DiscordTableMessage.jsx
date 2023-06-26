@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
-import Tooltip from "../DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../DiscordTooltip/DiscordToolTip";
 import AttachmentIcon from "@mui/icons-material/Attachment";
-import { MessageContext } from "../../../context/message/MessageContext";
-import DiscordTableStyles from "./DiscordTable.styles";
+import { MessageContext } from "../../../../context/message/MessageContext";
+import DiscordTableStyles from "../Styles/DiscordTable.styles";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
-import MessageMock from "../../Export/Mock/MessageMock";
+import MessageMock from "../../../Export/Mock/MessageMock";
 
 export default function DiscordTableMessage({
   row,

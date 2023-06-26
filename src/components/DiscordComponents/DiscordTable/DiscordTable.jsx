@@ -10,11 +10,11 @@ import Paper from "@mui/material/Paper";
 import DeleteModal from "../../Modals/DeleteModal/DeleteModal";
 import EditModal from "../../Modals/EditModal/EditModal";
 import AttachmentModal from "../../Modals/AttachmentModal/AttachmentModal";
-import EnhancedTableHead from "./EnhancedTableHead";
-import EnhancedTableToolbar from "./EnhancedTableToolbar";
+import EnhancedTableHead from "./EnhancedTableHead/EnhancedTableHead";
+import EnhancedTableToolbar from "./EnhancedTableToolbar/EnhancedTableToolbar";
 import { MessageContext } from "../../../context/message/MessageContext";
-import DiscordTableStyles from "./DiscordTable.styles";
-import DiscordTableMessage from "./DiscordTableMessage";
+import DiscordTableStyles from "./Styles/DiscordTable.styles";
+import DiscordTableMessage from "./DiscordTableMessage/DiscordTableMessage";
 import EmbedModal from "../../Modals/EmbedModal/EmbedModal";
 
 export default function DiscordTable() {

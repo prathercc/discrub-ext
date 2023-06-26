@@ -1,11 +1,11 @@
 import React, { useContext, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
-import DiscordDateTimePicker from "../DiscordDateTimePicker/DiscordDateTimePicker";
-import { MessageContext } from "../../../context/message/MessageContext";
-import FilterComponentStyles from "./FilterComponent.styles";
+import DiscordDateTimePicker from "../../DiscordDateTimePicker/DiscordDateTimePicker";
+import { MessageContext } from "../../../../context/message/MessageContext";
+import FilterComponentStyles from "../Styles/FilterComponent.styles";
 import { MenuItem } from "@mui/material";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
+import { ChannelContext } from "../../../../context/channel/ChannelContext";
 import { debounce } from "debounce";
 
 const FilterComponent = () => {

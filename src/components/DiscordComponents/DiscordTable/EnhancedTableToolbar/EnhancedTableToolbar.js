@@ -3,16 +3,16 @@ import { alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "../DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../DiscordTooltip/DiscordToolTip";
 import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import EditIcon from "@mui/icons-material/Edit";
-import { MessageContext } from "../../../context/message/MessageContext";
-import FilterComponent from "./FilterComponent";
-import DiscordTableStyles from "./DiscordTable.styles";
-import ExportButton from "../../Export/ExportButton/ExportButton";
-import { DmContext } from "../../../context/dm/DmContext";
+import { MessageContext } from "../../../../context/message/MessageContext";
+import FilterComponent from "../FilterComponent/FilterComponent";
+import DiscordTableStyles from "../Styles/DiscordTable.styles";
+import ExportButton from "../../../Export/ExportButton/ExportButton";
+import { DmContext } from "../../../../context/dm/DmContext";
 import { Collapse } from "@mui/material";
 
 const EnhancedTableToolbar = ({

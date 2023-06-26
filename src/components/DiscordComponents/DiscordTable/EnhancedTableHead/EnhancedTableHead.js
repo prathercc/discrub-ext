@@ -6,8 +6,8 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { visuallyHidden } from "@mui/utils";
-import { MessageContext } from "../../../context/message/MessageContext";
-import DiscordTableStyles from "./DiscordTable.styles";
+import { MessageContext } from "../../../../context/message/MessageContext";
+import DiscordTableStyles from "../Styles/DiscordTable.styles";
 
 const EnhancedTableHead = ({
   onSelectAllClick,
