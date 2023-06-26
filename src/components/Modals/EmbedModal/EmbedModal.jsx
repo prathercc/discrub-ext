@@ -10,8 +10,8 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Divider from "@mui/material/Divider";
-import { MessageContext } from "../../context/message/MessageContext";
-import ModalStyles from "./Modal.styles";
+import { MessageContext } from "../../../context/message/MessageContext";
+import ModalStyles from "../Styles/Modal.styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const EmbedModal = ({ open, handleClose }) => {

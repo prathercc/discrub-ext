@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import Box from "@mui/material/Box";
-import MessageChip from "../Chips/MessageChip";
+import MessageChip from "../../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
-import ModalDebugMessage from "./Utility/ModalDebugMessage";
+import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
 import {
   Typography,
   Button,
@@ -14,9 +14,9 @@ import {
   DialogContent,
   TextField,
 } from "@mui/material";
-import { MessageContext } from "../../context/message/MessageContext";
-import ModalStyles from "./Modal.styles";
-import { wait } from "../../utils";
+import { MessageContext } from "../../../context/message/MessageContext";
+import ModalStyles from "../Styles/Modal.styles";
+import { wait } from "../../../utils";
 
 const EditModal = ({ open, handleClose }) => {
   const classes = ModalStyles();

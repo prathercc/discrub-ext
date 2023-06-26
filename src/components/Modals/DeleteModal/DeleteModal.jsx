@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import MessageChip from "../Chips/MessageChip";
+import MessageChip from "../../Chips/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import Box from "@mui/material/Box";
-import ModalDebugMessage from "./Utility/ModalDebugMessage";
-import { MessageContext } from "../../context/message/MessageContext";
+import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
+import { MessageContext } from "../../../context/message/MessageContext";
 import {
   Typography,
   Button,
@@ -18,8 +18,8 @@ import {
   DialogActions,
   DialogContent,
 } from "@mui/material";
-import ModalStyles from "./Modal.styles";
-import { wait } from "../../utils";
+import ModalStyles from "../Styles/Modal.styles";
+import { wait } from "../../../utils";
 
 const DeleteModal = ({ open, handleClose }) => {
   const classes = ModalStyles();

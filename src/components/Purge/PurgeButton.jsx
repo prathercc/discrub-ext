@@ -17,7 +17,7 @@ import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { ChannelContext } from "../../context/channel/ChannelContext";
-import ModalDebugMessage from "../Modals/Utility/ModalDebugMessage";
+import ModalDebugMessage from "../Modals/ModalDebugMessage/ModalDebugMessage";
 import ChannelMessagesStyles from "../Messages/ChannelMessages/Styles/ChannelMessages.styles";
 import MessageChip from "../Chips/MessageChip";
 import { UserContext } from "../../context/user/UserContext";

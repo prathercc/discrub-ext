@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import ModalDebugMessage from "./Utility/ModalDebugMessage";
+import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
 import {
   Typography,
   Button,
@@ -12,11 +12,11 @@ import {
   Avatar,
   IconButton,
 } from "@mui/material";
-import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { MessageContext } from "../../context/message/MessageContext";
+import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import { MessageContext } from "../../../context/message/MessageContext";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import ModalStyles from "./Modal.styles";
-import { wait } from "../../utils";
+import ModalStyles from "../Styles/Modal.styles";
+import { wait } from "../../../utils";
 
 const AttachmentModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
