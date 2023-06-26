@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, IconButton } from "@mui/material";
 import { sendChromeMessage } from "../../chromeService";
-import DiscrubButtonStyles from "./DiscrubButton.styles";
+import DiscrubButtonStyles from "./Styles/DiscrubButton.styles";
 
 function DiscrubButton() {
   const classes = DiscrubButtonStyles();
