@@ -13,25 +13,17 @@ const ExportModal = ({
   setDialogOpen,
   isDm = false,
   bulk = false,
+  contentRef,
 }) => {
   const classes = ExportButtonStyles();
 
-  const {
-    state: exportState,
-    setName,
-    setIsExporting,
-  } = useContext(ExportContext);
-  const { isExporting } = exportState;
+  const { setName, setIsExporting } = useContext(ExportContext);
 
   const exportType = isDm ? "DM" : "Guild";
   const { resetMessageData } = useContext(MessageContext);
 
   const { setSelectedExportChannels, resetChannel } =
     useContext(ChannelContext);
-
-  const exportingActiveRef = useRef();
-  const contentRef = useRef();
-  exportingActiveRef.current = isExporting;
 
   const handleDialogClose = () => {
     setDialogOpen(false);

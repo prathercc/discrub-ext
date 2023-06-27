@@ -21,7 +21,7 @@ const ExportButton = ({
     setPreviewImages,
     setMessagesPerPage,
   } = useContext(ExportContext);
-  const { isExporting, isGenerating } = exportState;
+  const { isGenerating } = exportState;
 
   const exportType = isDm ? "DM" : "Guild";
   const { state: messageState } = useContext(MessageContext);
@@ -38,9 +38,7 @@ const ExportButton = ({
   const { preFilterUserId, selectedChannel } = channelState;
   const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
   const { selectedGuild } = guildState;
-  const exportingActiveRef = useRef();
   const contentRef = useRef();
-  exportingActiveRef.current = isExporting;
 
   const bulkDisabled =
     (isDm ? selectedDm.id === null : selectedGuild.id === null) ||
@@ -74,6 +72,7 @@ const ExportButton = ({
         setDialogOpen={setDialogOpen}
         bulk={bulk}
         isDm={isDm}
+        contentRef={contentRef}
       />
     </>
   );
