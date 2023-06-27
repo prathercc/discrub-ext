@@ -1,14 +1,14 @@
 import React, { useState, useContext, useRef } from "react";
 import { Button, Menu, MenuItem, DialogActions } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { MessageContext } from "../../../context/message/MessageContext";
-import ExportUtils from "../../Export/ExportUtils";
-import { DmContext } from "../../../context/dm/DmContext";
-import { GuildContext } from "../../../context/guild/GuildContext";
-import { ExportContext } from "../../../context/export/ExportContext";
+import { ChannelContext } from "../../../../context/channel/ChannelContext";
+import { MessageContext } from "../../../../context/message/MessageContext";
+import ExportUtils from "../../ExportUtils";
+import { DmContext } from "../../../../context/dm/DmContext";
+import { GuildContext } from "../../../../context/guild/GuildContext";
+import { ExportContext } from "../../../../context/export/ExportContext";
 import { v4 as uuidv4 } from "uuid";
-import { sortByProperty, wait } from "../../../utils";
+import { sortByProperty, wait } from "../../../../utils";
 
 const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   const {

@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
-import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ExportContext } from "../../../context/export/ExportContext";
+import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import { ExportContext } from "../../../../context/export/ExportContext";
 import TextField from "@mui/material/TextField";
 
 const PerPage = () => {

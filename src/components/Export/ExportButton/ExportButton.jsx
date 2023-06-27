@@ -7,9 +7,9 @@ import ExportMessages from "../../Export/ExportMessages/ExportMessages";
 import { DmContext } from "../../../context/dm/DmContext";
 import ExportButtonStyles from "./Styles/ExportButton.styles";
 import { ExportContext } from "../../../context/export/ExportContext";
-import BulkContent from "./BulkContent";
-import Actions from "./Actions";
-import DefaultContent from "./DefaultContent";
+import BulkContent from "./BulkContent/BulkContent";
+import Actions from "./Actions/Actions";
+import DefaultContent from "./DefaultContent/DefaultContent";
 
 const ExportButton = ({
   dialogOpen,

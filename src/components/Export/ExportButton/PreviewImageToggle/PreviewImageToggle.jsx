@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ExportContext } from "../../../context/export/ExportContext";
+import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import { ExportContext } from "../../../../context/export/ExportContext";
 import ImageIcon from "@mui/icons-material/Image";
 import HideImageIcon from "@mui/icons-material/HideImage";
 

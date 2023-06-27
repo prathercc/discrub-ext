@@ -5,14 +5,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
-import ImageToggle from "./ImageToggle";
-import ExportButtonStyles from "./Styles/ExportButton.styles";
-import { ExportContext } from "../../../context/export/ExportContext";
-import Progress from "./Progress";
-import PreviewImageToggle from "./PreviewImageToggle";
-import ShowAvatarsToggle from "./ShowAvatarsToggle";
-import PerPage from "./PerPage";
+import { MessageContext } from "../../../../context/message/MessageContext";
+import ImageToggle from "../ImageToggle/ImageToggle";
+import ExportButtonStyles from "../Styles/ExportButton.styles";
+import { ExportContext } from "../../../../context/export/ExportContext";
+import Progress from "../Progress/Progress";
+import PreviewImageToggle from "../PreviewImageToggle/PreviewImageToggle";
+import ShowAvatarsToggle from "../ShowAvatarsToggle/ShowAvatarsToggle";
+import PerPage from "../PerPage/PerPage";
 
 const DefaultContent = () => {
   const classes = ExportButtonStyles();

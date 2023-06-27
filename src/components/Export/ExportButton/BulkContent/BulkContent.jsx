@@ -13,19 +13,19 @@ import {
   Box,
   Typography,
 } from "@mui/material";
-import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
 import DeselectIcon from "@mui/icons-material/Deselect";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { DmContext } from "../../../context/dm/DmContext";
-import ImageToggle from "./ImageToggle";
-import ExportButtonStyles from "./Styles/ExportButton.styles";
-import { ExportContext } from "../../../context/export/ExportContext";
-import Progress from "./Progress";
-import PreviewImageToggle from "./PreviewImageToggle";
-import ShowAvatarsToggle from "./ShowAvatarsToggle";
-import PerPage from "./PerPage";
-import SortDirectionToggle from "./SortDirectionToggle";
+import { ChannelContext } from "../../../../context/channel/ChannelContext";
+import { DmContext } from "../../../../context/dm/DmContext";
+import ImageToggle from "../ImageToggle/ImageToggle";
+import ExportButtonStyles from "../Styles/ExportButton.styles";
+import { ExportContext } from "../../../../context/export/ExportContext";
+import Progress from "../Progress/Progress";
+import PreviewImageToggle from "../PreviewImageToggle/PreviewImageToggle";
+import ShowAvatarsToggle from "../ShowAvatarsToggle/ShowAvatarsToggle";
+import PerPage from "../PerPage/PerPage";
+import SortDirectionToggle from "../SortDirectionToggle/SortDirectionToggle";
 
 const BulkContent = ({ isDm = false }) => {
   const classes = ExportButtonStyles();
