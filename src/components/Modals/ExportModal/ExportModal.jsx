@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext } from "react";
 import { Dialog, DialogTitle } from "@mui/material";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
 import { MessageContext } from "../../../context/message/MessageContext";
