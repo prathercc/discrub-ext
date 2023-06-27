@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import { Avatar, Stack, Typography, IconButton } from "@mui/material";
 import DonationComponentStyles from "../Styles/DonationComponent.styles";
-import { fetchDonationData } from "../../../announcementService";
+import { fetchDonationData } from "../../../services/announcementService";
 import { differenceInDays, parseISO } from "date-fns";
 import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";

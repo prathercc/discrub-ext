@@ -1,6 +1,6 @@
 import React, { createContext, useReducer } from "react";
-import { sendChromeMessage } from "../../chromeService";
-import { fetchUserData } from "../../discordService";
+import { sendChromeMessage } from "../../services/chromeService";
+import { fetchUserData } from "../../services/discordService";
 import { GET_USER_DATA, GET_USER_DATA_COMPLETE } from "./UserContextConstants";
 import { UserReducer } from "./UserReducer";
 export const UserContext = createContext();

@@ -36,7 +36,7 @@ import {
   fetchSearchMessageData,
   fetchThreads,
   fetchMessageData,
-} from "../../discordService";
+} from "../../services/discordService";
 import { GuildContext } from "../guild/GuildContext";
 import parseISO from "date-fns/parseISO";
 import { wait } from "../../utils";

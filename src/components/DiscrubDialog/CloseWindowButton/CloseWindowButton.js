@@ -1,5 +1,5 @@
 import React from "react";
-import { sendChromeMessage } from "../../../chromeService";
+import { sendChromeMessage } from "../../../services/chromeService";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import Box from "@mui/material/Box";

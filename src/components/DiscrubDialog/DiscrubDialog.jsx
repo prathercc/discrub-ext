@@ -21,7 +21,7 @@ import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { DmContext } from "../../context/dm/DmContext";
 import DiscrubDialogStyles from "./Styles/DiscrubDialog.styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import { fetchAnnouncementData } from "../../announcementService";
+import { fetchAnnouncementData } from "../../services/announcementService";
 import DonationComponent from "./DonationComponent/DonationComponent";
 // import Sponsorship from "./Sponsorship/Sponsorship";
 

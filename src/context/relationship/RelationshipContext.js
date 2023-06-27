@@ -16,7 +16,7 @@ import {
   sendFriendRequest,
   deleteFriendRequest,
   createDm,
-} from "../../discordService";
+} from "../../services/discordService";
 
 export const RelationshipContext = createContext();
 
