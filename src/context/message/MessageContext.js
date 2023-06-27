@@ -9,9 +9,6 @@ import { MessageReducer } from "./MessageReducer";
 import { UserContext } from "../user/UserContext";
 import { ChannelContext } from "../channel/ChannelContext";
 import { DmContext } from "../dm/DmContext";
-import Typography from "@mui/material/Typography";
-import ExportMessagesStyles from "../../components/Export/Styles/Export.styles";
-import { Stack } from "@mui/material";
 import {
   DELETE_MESSAGE_SUCCESS,
   FILTER_MESSAGE,
@@ -44,8 +41,6 @@ import { wait } from "../../utils";
 export const MessageContext = createContext();
 
 const MessageContextProvider = (props) => {
-  const classes = ExportMessagesStyles();
-
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
   const { state: dmState } = useContext(DmContext);
@@ -95,56 +90,6 @@ const MessageContextProvider = (props) => {
     };
     if (state.filters.length) filterMessages();
   }, [state.filters, state.messages]);
-
-  const getExportTitle = () => {
-    const directMessage = dmState.dms.find(
-      (directMessage) => directMessage.id === selectedDm.id
-    );
-
-    return (
-      <>
-        {directMessage ? (
-          <Stack
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center"
-            spacing={1}
-            ml="10px"
-          >
-            <Typography className={classes.typographyHash} variant="h4">
-              @
-            </Typography>
-            <Typography className={classes.typographyTitle} variant="h6">
-              {directMessage.recipients.length === 1
-                ? directMessage.recipients[0].username
-                : directMessage.name
-                ? `Group Chat - ${directMessage.name}`
-                : `Unnamed Group Chat - ${directMessage.id}`}
-            </Typography>
-          </Stack>
-        ) : (
-          <Stack
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center"
-            spacing={1}
-            ml="10px"
-          >
-            <Typography className={classes.typographyHash} variant="h4">
-              #
-            </Typography>
-            <Typography className={classes.typographyTitle} variant="h6">
-              {
-                channelState.channels.find(
-                  (channel) => channel.id === selectedChannel.id
-                )?.name
-              }
-            </Typography>
-          </Stack>
-        )}
-      </>
-    );
-  };
 
   const setSearchBeforeDate = async (val) => {
     return dispatch({
@@ -360,7 +305,6 @@ const MessageContextProvider = (props) => {
         setSelected,
         deleteMessage,
         setAttachmentMessage,
-        getExportTitle,
         resetFilters,
         setEmbedMessage,
         setOrder,

@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import { Stack, Typography } from "@mui/material";
 import { MessageContext } from "../../../context/message/MessageContext";
 import { ExportContext } from "../../../context/export/ExportContext";
+import { DmContext } from "../../../context/dm/DmContext";
+import { ChannelContext } from "../../../context/channel/ChannelContext";
 import MessageTitleMockStyles from "./Styles/MessageTitleMock.styles";
 import ExportStyles from "../Styles/Export.styles";
 
@@ -9,7 +11,16 @@ const MessageTitleMock = () => {
   const classes = MessageTitleMockStyles();
   const exportClasses = ExportStyles();
 
-  const { getExportTitle, state: messageState } = useContext(MessageContext);
+  const { state: dmState } = useContext(DmContext);
+  const { selectedDm } = dmState;
+
+  const { state: channelState } = useContext(ChannelContext);
+  const { selectedChannel } = channelState;
+
+  const entity = selectedDm.id ? selectedDm : selectedChannel;
+  const isDm = !!selectedDm.id;
+
+  const { state: messageState } = useContext(MessageContext);
   const { filteredMessages, messages } = messageState;
   const { state: exportState } = useContext(ExportContext);
   const { currentPage, messagesPerPage } = exportState;
@@ -25,7 +36,30 @@ const MessageTitleMock = () => {
       justifyContent="space-between"
       alignItems="center"
     >
-      {getExportTitle()}
+      <Stack
+        direction="row"
+        justifyContent="flex-start"
+        alignItems="center"
+        spacing={1}
+        ml="10px"
+      >
+        <Typography className={exportClasses.typographyHash} variant="h4">
+          {isDm ? "@" : "#"}
+        </Typography>
+        <Typography className={exportClasses.typographyTitle} variant="h6">
+          {isDm ? (
+            <>
+              {entity.recipients.length === 1
+                ? entity.recipients[0].username
+                : entity.name
+                ? `Group Chat - ${entity.name}`
+                : `Unnamed Group Chat - ${entity.id}`}
+            </>
+          ) : (
+            entity?.name
+          )}
+        </Typography>
+      </Stack>
       <Typography className={exportClasses.typographyTitle} variant="h6">
         {pageTitle}
       </Typography>
