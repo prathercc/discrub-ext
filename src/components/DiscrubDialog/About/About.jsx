@@ -6,7 +6,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import AboutStyles from "./Styles/About.styles";
+import AboutStyles from "../Styles/About.styles";
 import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 import changelog from "./changelog.json";
 
