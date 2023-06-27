@@ -20,6 +20,7 @@ const ExportButton = ({
     setShowAvatars,
     setPreviewImages,
     setMessagesPerPage,
+    setSortOverride,
   } = useContext(ExportContext);
   const { isGenerating } = exportState;
 
@@ -59,6 +60,7 @@ const ExportButton = ({
           await setDownloadImages(false);
           await setShowAvatars(false);
           await setPreviewImages(false);
+          await setSortOverride("desc");
           await setMessagesPerPage(1000);
           setDialogOpen(true);
         }}
