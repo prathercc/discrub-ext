@@ -7,15 +7,15 @@ import TableContainer from "@mui/material/TableContainer";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import DeleteModal from "../../Modals/DeleteModal";
-import EditModal from "../../Modals/EditModal";
-import AttachmentModal from "../../Modals/AttachmentModal";
-import EnhancedTableHead from "./EnhancedTableHead";
-import EnhancedTableToolbar from "./EnhancedTableToolbar";
+import DeleteModal from "../../Modals/DeleteModal/DeleteModal";
+import EditModal from "../../Modals/EditModal/EditModal";
+import AttachmentModal from "../../Modals/AttachmentModal/AttachmentModal";
+import EnhancedTableHead from "./EnhancedTableHead/EnhancedTableHead";
+import EnhancedTableToolbar from "./EnhancedTableToolbar/EnhancedTableToolbar";
 import { MessageContext } from "../../../context/message/MessageContext";
-import DiscordTableStyles from "./DiscordTable.styles";
-import DiscordTableMessage from "./DiscordTableMessage";
-import EmbedModal from "../../Modals/EmbedModal";
+import DiscordTableStyles from "./Styles/DiscordTable.styles";
+import DiscordTableMessage from "./DiscordTableMessage/DiscordTableMessage";
+import EmbedModal from "../../Modals/EmbedModal/EmbedModal";
 
 export default function DiscordTable() {
   const classes = DiscordTableStyles();

@@ -16,3 +16,13 @@ export const sortByProperty = (a, b, property, direction = "asc") =>
       ? 1
       : -1
     : 0;
+
+/**
+ *
+ * @param {Number} seconds Number of seconds to wait for
+ * @param {Function} callback Optional function to be used after the specified seconds have passed
+ */
+export const wait = async (seconds, callback = () => {}) => {
+  await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  return callback();
+};
