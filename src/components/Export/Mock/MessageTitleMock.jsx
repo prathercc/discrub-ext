@@ -6,10 +6,14 @@ import { DmContext } from "../../../context/dm/DmContext";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
 import MessageTitleMockStyles from "./Styles/MessageTitleMock.styles";
 import ExportStyles from "../Styles/Export.styles";
+import { GuildContext } from "../../../context/guild/GuildContext";
 
 const MessageTitleMock = () => {
   const classes = MessageTitleMockStyles();
   const exportClasses = ExportStyles();
+
+  const { state: guildState } = useContext(GuildContext);
+  const { selectedGuild } = guildState;
 
   const { state: dmState } = useContext(DmContext);
   const { selectedDm } = dmState;
@@ -17,7 +21,11 @@ const MessageTitleMock = () => {
   const { state: channelState } = useContext(ChannelContext);
   const { selectedChannel } = channelState;
 
-  const entity = selectedDm.id ? selectedDm : selectedChannel;
+  const entity = selectedDm.id
+    ? selectedDm
+    : selectedChannel.id
+    ? selectedChannel
+    : selectedGuild;
   const isDm = !!selectedDm.id;
 
   const { state: messageState } = useContext(MessageContext);
@@ -44,7 +52,7 @@ const MessageTitleMock = () => {
         ml="10px"
       >
         <Typography className={exportClasses.typographyHash} variant="h4">
-          {isDm ? "@" : "#"}
+          {isDm ? "@" : selectedChannel.id ? "#" : ""}
         </Typography>
         <Typography className={exportClasses.typographyTitle} variant="h6">
           {isDm ? (
