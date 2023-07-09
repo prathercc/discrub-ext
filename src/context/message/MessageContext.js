@@ -191,14 +191,6 @@ const MessageContextProvider = (props) => {
       const preFilterUserId =
         channelPreFilterUserIdRef.current || dmPreFilterUserIdRef.current;
 
-      const parseAts = (messageContent, uniqueRecipients) => {
-        for (let [key, value] of uniqueRecipients.entries()) {
-          messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
-          messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
-        }
-        return messageContent;
-      };
-
       dispatch({ type: GET_MESSAGE_DATA });
 
       let retArr = [],
@@ -245,14 +237,14 @@ const MessageContextProvider = (props) => {
           return {
             ...message,
             username: message.author.username,
-            content: parseAts(message.content, uniqueRecipients),
+            content: _parseAts(message.content, uniqueRecipients),
           };
         }),
       };
 
       dispatch({
         type: GET_MESSAGE_DATA_COMPLETE,
-        payload: originalChannelId !== convoIdRef.current ? {} : payload,
+        payload: originalChannelId !== convoIdRef?.current ? {} : payload,
       });
 
       return payload;
@@ -333,6 +325,14 @@ const MessageContextProvider = (props) => {
       {props.children}
     </MessageContext.Provider>
   );
+};
+
+const _parseAts = (messageContent, uniqueRecipients) => {
+  for (let [key, value] of uniqueRecipients.entries()) {
+    messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
+    messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
+  }
+  return messageContent;
 };
 
 const _filterMessages = async (filters, messages, dispatch) => {
@@ -533,6 +533,7 @@ const _getSearchMessages = async (
   dispatch
 ) => {
   const originalChannelId = channelIdRef?.current?.slice();
+  const originalGuildId = guildIdRef?.current?.slice();
   let retArr = [];
   let retThreads = [];
   try {
@@ -541,12 +542,16 @@ const _getSearchMessages = async (
     let criteria = { ...searchCriteria };
     let totalMessages = null;
     while (!reachedEnd) {
-      if (channelIdRef.current !== originalChannelId) break;
+      if (
+        channelIdRef?.current !== originalChannelId ||
+        guildIdRef.current !== originalGuildId
+      )
+        break;
       const data = await fetchSearchMessageData(
         token,
         offset,
         originalChannelId,
-        guildIdRef.current,
+        originalGuildId,
         criteria
       );
 
