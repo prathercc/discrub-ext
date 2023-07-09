@@ -15,6 +15,7 @@ import {
   SET_ORDER,
   SET_SEARCH_AFTER_DATE_COMPLETE,
   SET_SEARCH_BEFORE_DATE_COMPLETE,
+  SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
 } from "./MessageContextConstants";
 export const MessageReducer = (state, action) => {
   const { type, payload } = action;
@@ -36,6 +37,11 @@ export const MessageReducer = (state, action) => {
             ? (a, b) => _descendingComparator(a, b, payload.orderBy)
             : (a, b) => -_descendingComparator(a, b, payload.orderBy)
         ),
+      };
+    case SET_SEARCH_MESSAGE_CONTENT_COMPLETE:
+      return {
+        ...state,
+        searchMessageContent: payload,
       };
     case SET_SEARCH_AFTER_DATE_COMPLETE:
       return {

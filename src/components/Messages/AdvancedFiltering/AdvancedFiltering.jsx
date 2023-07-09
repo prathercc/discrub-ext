@@ -6,6 +6,7 @@ import { DmContext } from "../../../context/dm/DmContext";
 import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
 import BeforeAndAfterFields from "../BeforeAndAfterFields/BeforeAndAfterFields";
 import PrefilterUser from "../PrefilterUser/PrefilterUser";
+import MessageContains from "../MessageContains/MessageContains";
 
 function AdvancedFiltering({
   closeAnnouncement = () => {},
@@ -28,6 +29,9 @@ function AdvancedFiltering({
     setShowOptionalFilters(!showOptionalFilters);
   };
 
+  const disabled =
+    (isDm ? selectedDm : selectedChannel).id === null || messagesLoading;
+
   return (
     <Stack
       direction="column"
@@ -49,19 +53,19 @@ function AdvancedFiltering({
         in={showOptionalFilters}
       >
         {showOptionalFilters && (
-          <Stack
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-            spacing={1}
-          >
-            <PrefilterUser isDm={isDm} />
-            <BeforeAndAfterFields
-              disabled={
-                (isDm ? selectedDm : selectedChannel).id === null ||
-                messagesLoading
-              }
-            />
+          <Stack spacing={1}>
+            <Stack
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              spacing={1}
+            >
+              <PrefilterUser disabled={disabled} isDm={isDm} />
+              <BeforeAndAfterFields disabled={disabled} />
+            </Stack>
+            <Stack>
+              <MessageContains disabled={disabled} />
+            </Stack>
           </Stack>
         )}
       </Collapse>

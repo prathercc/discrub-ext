@@ -44,6 +44,7 @@ function DirectMessages() {
     resetFilters,
     setSearchAfterDate,
     setSearchBeforeDate,
+    setSearchMessageContent,
   } = useContext(MessageContext);
 
   const { selectedDm, dms } = dmState;
@@ -62,6 +63,7 @@ function DirectMessages() {
 
   const handleChangeDm = async (id) => {
     setDm(id);
+    await setSearchMessageContent(null);
     await setSearchBeforeDate(null);
     await setSearchAfterDate(null);
     await resetFilters();

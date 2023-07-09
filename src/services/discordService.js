@@ -140,11 +140,17 @@ export const fetchSearchMessageData = (
   guildId,
   searchCriteria
 ) => {
-  const { preFilterUserId, searchAfterDate, searchBeforeDate } = searchCriteria;
+  const {
+    preFilterUserId,
+    searchAfterDate,
+    searchBeforeDate,
+    searchMessageContent,
+  } = searchCriteria;
   const urlSearchParams = new URLSearchParams({
     author_id: preFilterUserId,
     min_id: searchAfterDate ? generateSnowflake(searchAfterDate) : null,
     max_id: searchBeforeDate ? generateSnowflake(searchBeforeDate) : null,
+    content: searchMessageContent || "null",
     channel_id: guildId ? channelId : "null",
     include_nsfw: true,
   });

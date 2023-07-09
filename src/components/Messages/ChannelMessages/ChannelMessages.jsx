@@ -32,6 +32,7 @@ function ChannelMessages({ closeAnnouncement }) {
     resetFilters,
     setSearchBeforeDate,
     setSearchAfterDate,
+    setSearchMessageContent,
   } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
   const {
@@ -84,6 +85,7 @@ function ChannelMessages({ closeAnnouncement }) {
     await resetFilters();
     await setSearchBeforeDate(null);
     await setSearchAfterDate(null);
+    await setSearchMessageContent(null);
     await resetMessageData();
     setSearchTouched(false);
   };
@@ -93,6 +95,7 @@ function ChannelMessages({ closeAnnouncement }) {
       await setPreFilterUserId(null);
       await setSearchBeforeDate(null);
       await setSearchAfterDate(null);
+      await setSearchMessageContent(null);
     }
     await resetFilters();
     await resetMessageData();

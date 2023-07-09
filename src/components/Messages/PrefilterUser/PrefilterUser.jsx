@@ -2,13 +2,11 @@ import React, { useContext } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import { DmContext } from "../../../context/dm/DmContext";
 import ClearIcon from "@mui/icons-material/Clear";
 import AdvancedFilteringStyles from "../AdvancedFiltering/AdvancedFiltering.styles";
 
-function PrefilterUser({ isDm = false, purge }) {
-  const { state: messageDataState } = useContext(MessageContext);
+function PrefilterUser({ isDm = false, purge, disabled = false }) {
   const { state: channelState, setPreFilterUserId } =
     useContext(ChannelContext);
   const { state: dmState, setPreFilterUserId: setDmPrefilterUserId } =
@@ -16,10 +14,8 @@ function PrefilterUser({ isDm = false, purge }) {
 
   const classes = AdvancedFilteringStyles();
 
-  const { selectedChannel, preFilterUserIds, preFilterUserId } = channelState;
-  const { isLoading: messagesLoading } = messageDataState;
+  const { preFilterUserIds, preFilterUserId } = channelState;
   const {
-    selectedDm,
     preFilterUserId: dmPreFilterUserId,
     preFilterUserIds: dmPreFilterUserIds,
   } = dmState;
@@ -27,9 +23,6 @@ function PrefilterUser({ isDm = false, purge }) {
   const users = isDm ? dmPreFilterUserIds : preFilterUserIds;
   const value = isDm ? dmPreFilterUserId : preFilterUserId;
   const setUserId = isDm ? setDmPrefilterUserId : setPreFilterUserId;
-  const disabled =
-    ((isDm ? selectedDm : selectedChannel).id === null && !purge) ||
-    messagesLoading;
 
   const getDisplayValue = () => {
     const foundUser = users.find((user) => user.id === value);

@@ -189,7 +189,9 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               </Typography>
             </DialogContentText>
           </Stack>
-          {!isDm && !finishedPurge && <PrefilterUser isDm={false} purge />}
+          {!isDm && !finishedPurge && (
+            <PrefilterUser isDm={false} purge disabled={messagesLoading} />
+          )}
           {deleting && deleteObj && (
             <>
               {deleteObj.id && (

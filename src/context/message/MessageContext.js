@@ -26,6 +26,7 @@ import {
   SET_ORDER,
   SET_SEARCH_BEFORE_DATE_COMPLETE,
   SET_SEARCH_AFTER_DATE_COMPLETE,
+  SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -81,6 +82,7 @@ const MessageContextProvider = (props) => {
       searchBeforeDate: null,
       searchAfterDate: null,
       totalSearchMessages: 0,
+      searchMessageContent: null,
     })
   );
 
@@ -90,6 +92,13 @@ const MessageContextProvider = (props) => {
     };
     if (state.filters.length) filterMessages();
   }, [state.filters, state.messages]);
+
+  const setSearchMessageContent = async (val) => {
+    return dispatch({
+      type: SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
+      payload: val,
+    });
+  };
 
   const setSearchBeforeDate = async (val) => {
     return dispatch({
@@ -194,7 +203,14 @@ const MessageContextProvider = (props) => {
 
       let retArr = [],
         retThreads = [];
-      if (preFilterUserId || state.searchBeforeDate || state.searchAfterDate) {
+      const criteriaExists = [
+        preFilterUserId,
+        state.searchBeforeDate,
+        state.searchAfterDate,
+        state.searchMessageContent,
+      ].some((c) => c);
+
+      if (criteriaExists) {
         ({ retArr, retThreads } = await _getSearchMessages(
           convoIdRef,
           selectedGuildIdRef,
@@ -203,6 +219,7 @@ const MessageContextProvider = (props) => {
             preFilterUserId,
             searchBeforeDate: state.searchBeforeDate,
             searchAfterDate: state.searchAfterDate,
+            searchMessageContent: state.searchMessageContent,
           },
           dispatch
         ));
@@ -310,6 +327,7 @@ const MessageContextProvider = (props) => {
         setOrder,
         setSearchBeforeDate,
         setSearchAfterDate,
+        setSearchMessageContent,
       }}
     >
       {props.children}
