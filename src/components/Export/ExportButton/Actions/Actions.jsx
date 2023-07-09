@@ -230,7 +230,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       ? [selectedDm]
       : bulk
       ? channels.filter((c) => selectedExportChannels.some((id) => id === c.id))
-      : [selectedChannel];
+      : [selectedChannel.id ? selectedChannel : selectedGuild];
     let count = 0;
     while (count < selectedChannels.length) {
       await setStatusText(null);
