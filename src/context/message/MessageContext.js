@@ -9,9 +9,6 @@ import { MessageReducer } from "./MessageReducer";
 import { UserContext } from "../user/UserContext";
 import { ChannelContext } from "../channel/ChannelContext";
 import { DmContext } from "../dm/DmContext";
-import Typography from "@mui/material/Typography";
-import ExportMessagesStyles from "../../components/Export/ExportMessages/ExportMessages.styles";
-import { Stack } from "@mui/material";
 import {
   DELETE_MESSAGE_SUCCESS,
   FILTER_MESSAGE,
@@ -29,6 +26,7 @@ import {
   SET_ORDER,
   SET_SEARCH_BEFORE_DATE_COMPLETE,
   SET_SEARCH_AFTER_DATE_COMPLETE,
+  SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -36,15 +34,14 @@ import {
   fetchSearchMessageData,
   fetchThreads,
   fetchMessageData,
-} from "../../discordService";
+} from "../../services/discordService";
 import { GuildContext } from "../guild/GuildContext";
 import parseISO from "date-fns/parseISO";
+import { wait } from "../../utils";
 
 export const MessageContext = createContext();
 
 const MessageContextProvider = (props) => {
-  const classes = ExportMessagesStyles();
-
   const { state: userState } = useContext(UserContext);
   const { state: channelState } = useContext(ChannelContext);
   const { state: dmState } = useContext(DmContext);
@@ -85,6 +82,7 @@ const MessageContextProvider = (props) => {
       searchBeforeDate: null,
       searchAfterDate: null,
       totalSearchMessages: 0,
+      searchMessageContent: null,
     })
   );
 
@@ -95,54 +93,11 @@ const MessageContextProvider = (props) => {
     if (state.filters.length) filterMessages();
   }, [state.filters, state.messages]);
 
-  const getExportTitle = () => {
-    const directMessage = dmState.dms.find(
-      (directMessage) => directMessage.id === selectedDm.id
-    );
-
-    return (
-      <>
-        {directMessage ? (
-          <Stack
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center"
-            spacing={1}
-            ml="10px"
-          >
-            <Typography className={classes.typographyHash} variant="h4">
-              @
-            </Typography>
-            <Typography className={classes.typographyTitle} variant="h6">
-              {directMessage.recipients.length === 1
-                ? directMessage.recipients[0].username
-                : directMessage.name
-                ? `Group Chat - ${directMessage.name}`
-                : `Unnamed Group Chat - ${directMessage.id}`}
-            </Typography>
-          </Stack>
-        ) : (
-          <Stack
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center"
-            spacing={1}
-            ml="10px"
-          >
-            <Typography className={classes.typographyHash} variant="h4">
-              #
-            </Typography>
-            <Typography className={classes.typographyTitle} variant="h6">
-              {
-                channelState.channels.find(
-                  (channel) => channel.id === selectedChannel.id
-                )?.name
-              }
-            </Typography>
-          </Stack>
-        )}
-      </>
-    );
+  const setSearchMessageContent = async (val) => {
+    return dispatch({
+      type: SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
+      payload: val,
+    });
   };
 
   const setSearchBeforeDate = async (val) => {
@@ -236,19 +191,18 @@ const MessageContextProvider = (props) => {
       const preFilterUserId =
         channelPreFilterUserIdRef.current || dmPreFilterUserIdRef.current;
 
-      const parseAts = (messageContent, uniqueRecipients) => {
-        for (let [key, value] of uniqueRecipients.entries()) {
-          messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
-          messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
-        }
-        return messageContent;
-      };
-
       dispatch({ type: GET_MESSAGE_DATA });
 
       let retArr = [],
         retThreads = [];
-      if (preFilterUserId || state.searchBeforeDate || state.searchAfterDate) {
+      const criteriaExists = [
+        preFilterUserId,
+        state.searchBeforeDate,
+        state.searchAfterDate,
+        state.searchMessageContent,
+      ].some((c) => c);
+
+      if (criteriaExists) {
         ({ retArr, retThreads } = await _getSearchMessages(
           convoIdRef,
           selectedGuildIdRef,
@@ -257,6 +211,7 @@ const MessageContextProvider = (props) => {
             preFilterUserId,
             searchBeforeDate: state.searchBeforeDate,
             searchAfterDate: state.searchAfterDate,
+            searchMessageContent: state.searchMessageContent,
           },
           dispatch
         ));
@@ -282,14 +237,14 @@ const MessageContextProvider = (props) => {
           return {
             ...message,
             username: message.author.username,
-            content: parseAts(message.content, uniqueRecipients),
+            content: _parseAts(message.content, uniqueRecipients),
           };
         }),
       };
 
       dispatch({
         type: GET_MESSAGE_DATA_COMPLETE,
-        payload: originalChannelId !== convoIdRef.current ? {} : payload,
+        payload: originalChannelId !== convoIdRef?.current ? {} : payload,
       });
 
       return payload;
@@ -359,17 +314,25 @@ const MessageContextProvider = (props) => {
         setSelected,
         deleteMessage,
         setAttachmentMessage,
-        getExportTitle,
         resetFilters,
         setEmbedMessage,
         setOrder,
         setSearchBeforeDate,
         setSearchAfterDate,
+        setSearchMessageContent,
       }}
     >
       {props.children}
     </MessageContext.Provider>
   );
+};
+
+const _parseAts = (messageContent, uniqueRecipients) => {
+  for (let [key, value] of uniqueRecipients.entries()) {
+    messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
+    messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
+  }
+  return messageContent;
 };
 
 const _filterMessages = async (filters, messages, dispatch) => {
@@ -570,6 +533,7 @@ const _getSearchMessages = async (
   dispatch
 ) => {
   const originalChannelId = channelIdRef?.current?.slice();
+  const originalGuildId = guildIdRef?.current?.slice();
   let retArr = [];
   let retThreads = [];
   try {
@@ -578,12 +542,16 @@ const _getSearchMessages = async (
     let criteria = { ...searchCriteria };
     let totalMessages = null;
     while (!reachedEnd) {
-      if (channelIdRef.current !== originalChannelId) break;
+      if (
+        channelIdRef?.current !== originalChannelId ||
+        guildIdRef.current !== originalGuildId
+      )
+        break;
       const data = await fetchSearchMessageData(
         token,
         offset,
         originalChannelId,
-        guildIdRef.current,
+        originalGuildId,
         criteria
       );
 
@@ -593,7 +561,7 @@ const _getSearchMessages = async (
       }
 
       if (retry_after) {
-        await new Promise((resolve) => setTimeout(resolve, retry_after * 1000));
+        await wait(retry_after);
         continue;
       }
       if (!data || messages?.length === 0) break;
@@ -620,9 +588,9 @@ const _getSearchMessages = async (
         },
       });
     }
-    return { retArr, retThreads };
   } catch (e) {
     console.error("Error fetching channel messages", e);
+  } finally {
     return { retArr, retThreads };
   }
 };

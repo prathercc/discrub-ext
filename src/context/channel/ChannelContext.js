@@ -9,7 +9,7 @@ import {
 } from "./ChannelContextConstants";
 import { ChannelReducer } from "./ChannelReducer";
 import { UserContext } from "../user/UserContext";
-import { fetchChannels } from "../../discordService";
+import { fetchChannels } from "../../services/discordService";
 
 export const ChannelContext = createContext();
 

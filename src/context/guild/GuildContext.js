@@ -7,7 +7,7 @@ import {
   SET_GUILD,
   RESET_GUILD_COMPLETE,
 } from "./GuildContextConstants";
-import { fetchGuilds } from "../../discordService";
+import { fetchGuilds } from "../../services/discordService";
 
 export const GuildContext = createContext();
 

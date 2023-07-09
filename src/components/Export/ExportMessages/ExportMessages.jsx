@@ -1,14 +1,14 @@
 import React, { useContext } from "react";
 import { Box, Stack } from "@mui/material";
 import { MessageContext } from "../../../context/message/MessageContext";
-import ExportMessagesStyles from "./ExportMessages.styles";
-import MessageMock from "./MessageMock";
-import MessageTitleMock from "./MessageTitleMock";
+import ExportStyles from "../Styles/Export.styles";
+import MessageMock from "../Mock/MessageMock";
+import MessageTitleMock from "../Mock/MessageTitleMock";
 import { ExportContext } from "../../../context/export/ExportContext";
 import { sortByProperty } from "../../../utils";
 
 const ExportMessages = ({ componentRef, bulk = false }) => {
-  const classes = ExportMessagesStyles();
+  const classes = ExportStyles();
 
   const { state: exportState } = useContext(ExportContext);
   const { isExporting, currentPage, messagesPerPage, sortOverride } =

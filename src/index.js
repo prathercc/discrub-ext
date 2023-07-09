@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
-import InjectedButton from "./components/InjectedButton/InjectedButton";
+import DiscrubButton from "./components/DiscrubButton/DiscrubButton";
 import reportWebVitals from "./reportWebVitals";
 import AppTheme from "./AppTheme";
 
@@ -10,7 +10,7 @@ const injectionButton = document.getElementById("button_injection");
 if (injectionButton) {
   ReactDOM.render(
     <AppTheme>
-      <InjectedButton />
+      <DiscrubButton />
     </AppTheme>,
     injectionButton
   );

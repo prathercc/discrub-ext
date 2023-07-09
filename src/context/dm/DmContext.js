@@ -8,7 +8,7 @@ import {
   RESET_DM_COMPLETE,
   SET_PREFILTER_USERID,
 } from "./DmContextConstants";
-import { fetchDirectMessages } from "../../discordService";
+import { fetchDirectMessages } from "../../services/discordService";
 
 export const DmContext = createContext();
 
