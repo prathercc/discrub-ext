@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import { Stack, Button, Collapse } from "@mui/material";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
 import { MessageContext } from "../../../context/message/MessageContext";
 import { DmContext } from "../../../context/dm/DmContext";
 import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
 import BeforeAndAfterFields from "../BeforeAndAfterFields/BeforeAndAfterFields";
 import PrefilterUser from "../PrefilterUser/PrefilterUser";
 import MessageContains from "../MessageContains/MessageContains";
+import { GuildContext } from "../../../context/guild/GuildContext";
 
 function AdvancedFiltering({
   closeAnnouncement = () => {},
@@ -14,13 +14,13 @@ function AdvancedFiltering({
   setShowOptionalFilters,
   showOptionalFilters,
 }) {
+  const { state: guildState } = useContext(GuildContext);
   const { state: messageDataState } = useContext(MessageContext);
-  const { state: channelState } = useContext(ChannelContext);
   const { state: dmState } = useContext(DmContext);
 
   const classes = AdvancedFilteringStyles();
 
-  const { selectedChannel } = channelState;
+  const { selectedGuild } = guildState;
   const { isLoading: messagesLoading } = messageDataState;
   const { selectedDm } = dmState;
 
@@ -30,7 +30,7 @@ function AdvancedFiltering({
   };
 
   const disabled =
-    (isDm ? selectedDm : selectedChannel).id === null || messagesLoading;
+    (isDm ? selectedDm : selectedGuild).id === null || messagesLoading;
 
   return (
     <Stack
