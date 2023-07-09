@@ -61,16 +61,19 @@ function ChannelMessages({ closeAnnouncement }) {
 
   const { token } = userState;
   const { guilds, selectedGuild } = guildState;
-  const { channels, selectedChannel } = channelState;
+  const { channels, selectedChannel, preFilterUserId } = channelState;
   const {
     messages,
     isLoading: messagesLoading,
     fetchedMessageLength,
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
   } = messageDataState;
 
   const fetchChannelData = async () => {
     await resetMessageData();
-    await getMessageData(selectedChannel.id);
+    await getMessageData();
     setSearchTouched(true);
   };
 
@@ -102,6 +105,13 @@ function ChannelMessages({ closeAnnouncement }) {
     setSearchTouched(false);
     setChannel(id);
   };
+
+  const advancedFilterActive = [
+    preFilterUserId,
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+  ].some((c) => c);
 
   useEffect(() => {
     if (purgeDialogOpen || exportDialogOpen) {
@@ -226,8 +236,12 @@ function ChannelMessages({ closeAnnouncement }) {
                 </span>
                 <Button
                   className={classes.purgeHidden}
-                  disabled={selectedChannel.id === null || messagesLoading}
-                  onClick={() => selectedChannel.id && fetchChannelData()}
+                  disabled={
+                    selectedGuild.id === null ||
+                    messagesLoading ||
+                    (!advancedFilterActive && selectedChannel.id === null)
+                  }
+                  onClick={fetchChannelData}
                   variant="contained"
                 >
                   Search
