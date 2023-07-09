@@ -8,6 +8,10 @@ const ExportStyles = makeStyles(() => ({
   typographyTitle: {
     color: "#fff !important",
   },
+  channelName: {
+    textDecoration: "underline",
+    textDecorationStyle: "dotted",
+  },
   typographyHash: {
     color: "#8e9297 !important",
   },

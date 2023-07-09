@@ -5,9 +5,16 @@ import AttachmentMock from "./AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
 import { MessageContext } from "../../../context/message/MessageContext";
 import EmbedMock from "./EmbedMock";
+import { ChannelContext } from "../../../context/channel/ChannelContext";
+import { GuildContext } from "../../../context/guild/GuildContext";
+import classNames from "classnames";
 
 const MessageMock = ({ row, index, hideAttachments = false }) => {
+  const { state: guildState } = useContext(GuildContext);
+  const { state: channelState } = useContext(ChannelContext);
   const { state: messageState } = useContext(MessageContext);
+  const { selectedGuild } = guildState;
+  const { selectedChannel, channels } = channelState;
   const { threads, messages } = messageState;
   const classes = ExportStyles();
   const messageDate = new Date(Date.parse(row.timestamp));
@@ -21,6 +28,9 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
   const repliedToMsg = isReplyMsg
     ? messages.find((msg) => msg.id === row.message_reference.message_id)
     : null;
+
+  const showChannelName = selectedGuild.id && !selectedChannel.id;
+
   return (
     <Stack
       direction="column"
@@ -95,6 +105,21 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
               at{" "}
               {`${messageDate.getHours()}:${messageDate.getMinutes()}:${messageDate.getSeconds()} ${tz}`}
             </Typography>
+            {showChannelName && (
+              <Typography
+                variant="caption"
+                mt="1px"
+                className={classNames(
+                  classes.channelName,
+                  classes.typographyTitle
+                )}
+              >
+                {
+                  channels.find((channel) => channel.id === row.channel_id)
+                    ?.name
+                }
+              </Typography>
+            )}
           </Stack>
           {foundThread && (
             <Typography variant="caption" className={classes.typographyHash}>
