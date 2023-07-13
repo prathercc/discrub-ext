@@ -260,7 +260,7 @@ function ChannelMessages({ closeAnnouncement }) {
                   <DiscordTable />
                 </Box>
               )}
-              {messages.length === 0 && selectedChannel.id && searchTouched && (
+              {messages.length === 0 && selectedGuild.id && searchTouched && (
                 <Paper className={classes.paper}>
                   <Box className={classes.box}>
                     <SentimentDissatisfiedIcon />
