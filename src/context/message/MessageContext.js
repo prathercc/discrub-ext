@@ -532,8 +532,8 @@ const _getSearchMessages = async (
   searchCriteria,
   dispatch
 ) => {
-  const originalChannelId = channelIdRef?.current?.slice();
-  const originalGuildId = guildIdRef?.current?.slice();
+  const originalChannelId = channelIdRef?.current?.slice() || null;
+  const originalGuildId = guildIdRef?.current?.slice() || null;
   let retArr = [];
   let retThreads = [];
   try {
@@ -542,11 +542,11 @@ const _getSearchMessages = async (
     let criteria = { ...searchCriteria };
     let totalMessages = null;
     while (!reachedEnd) {
-      if (
-        channelIdRef?.current !== originalChannelId ||
-        guildIdRef.current !== originalGuildId
-      )
-        break;
+      const channelChanged =
+        (channelIdRef?.current || null) !== originalChannelId;
+      const guildChanged = (guildIdRef.current || null) !== originalGuildId;
+      if (channelChanged || guildChanged) break;
+
       const data = await fetchSearchMessageData(
         token,
         offset,

@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.11",
+    "changes": [
+      "Fix Advanced Filtering bug that prevented searches on DMs & Guilds"
+    ]
+  },
+  {
     "version": "1.10.10",
     "changes": [
       "Add ability to perform searches on Guilds, without a Channel selected.",
