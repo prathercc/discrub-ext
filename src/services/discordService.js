@@ -6,6 +6,17 @@ const discordChannelsUrl = "https://discord.com/api/v10/channels";
 const userAgent =
   "Mozilla/5.0 (X11; Linux x86_64; rv:17.0) Gecko/20121202 Firefox/17.0 Iceweasel/17.0.1";
 
+export const getUser = (authorization, userId) => {
+  return fetch(`${discordUsersUrl}/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+  }).then((resp) => resp.json());
+};
+
 export const createDm = (authorization, recipient_id) => {
   return fetch(`${discordUsersUrl}/@me/channels`, {
     method: "POST",

@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.12",
+    "changes": [
+      "Fix bug where Messages found via Advanced Filtering did not properly render mentions."
+    ]
+  },
+  {
     "version": "1.10.11",
     "changes": [
       "Fix Advanced Filtering bug that prevented searches on DMs & Guilds"
