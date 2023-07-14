@@ -34,6 +34,7 @@ import {
   fetchSearchMessageData,
   fetchThreads,
   fetchMessageData,
+  getUser,
 } from "../../services/discordService";
 import { GuildContext } from "../guild/GuildContext";
 import parseISO from "date-fns/parseISO";
@@ -226,20 +227,12 @@ const MessageContextProvider = (props) => {
           isDM
         ));
       }
-      let uniqueRecipients = new Map();
-      await retArr.forEach((x) => {
-        uniqueRecipients.set(x.author.id, x.author.username);
-      });
+
+      const messagesWithMentions = await _parseMentions(token, retArr);
 
       const payload = {
         threads: retThreads,
-        messages: retArr.map((message) => {
-          return {
-            ...message,
-            username: message.author.username,
-            content: _parseAts(message.content, uniqueRecipients),
-          };
-        }),
+        messages: messagesWithMentions,
       };
 
       dispatch({
@@ -327,12 +320,61 @@ const MessageContextProvider = (props) => {
   );
 };
 
-const _parseAts = (messageContent, uniqueRecipients) => {
-  for (let [key, value] of uniqueRecipients.entries()) {
-    messageContent = messageContent.replace(`<@${key}>`, `@${value}`);
-    messageContent = messageContent.replace(`<@!${key}>`, `@${value}`);
+const _parseMentions = async (token, messages) => {
+  const userMap = {};
+  const regex = /<@[0-9]+>|<@![0-9]+>/g;
+
+  messages.forEach((msg) => {
+    msg.content
+      .match(regex)
+      ?.map((mention) =>
+        mention.replace("<@", "").replace("<@!", "").replace(">", "")
+      )
+      ?.forEach((mention) => (userMap[mention] = null));
+  });
+
+  let count = 0;
+  const keys = Object.keys(userMap);
+  while (count < keys.length) {
+    try {
+      const mentionedUserId = keys[count];
+      const { id, retry_after, username } = await getUser(
+        token,
+        mentionedUserId
+      );
+      if (!id && !retry_after) {
+        console.error("Unable to retrieve data from userId: ", mentionedUserId);
+        count++;
+      } else if (retry_after) {
+        await wait(retry_after);
+        console.warn(
+          `You are being rate limited, waiting: ${retry_after} seconds.`
+        );
+        continue;
+      } else {
+        userMap[mentionedUserId] = username;
+        count++;
+      }
+    } catch (e) {
+      console.error("Failed to fetch User", e);
+    }
   }
-  return messageContent;
+  return messages.map((msg) =>
+    Object.assign(msg, {
+      content: _getMentionContent(msg.content, userMap),
+      username: msg.author.username,
+    })
+  );
+};
+
+const _getMentionContent = (messageContent, userMap) => {
+  let retContent = messageContent;
+  Object.keys(userMap).forEach((key) => {
+    const keyValue = userMap[key];
+    retContent = retContent.replaceAll(`<@${key}>`, `@${keyValue}`);
+    retContent = retContent.replaceAll(`<@!${key}>`, `@${keyValue}`);
+  });
+  return retContent;
 };
 
 const _filterMessages = async (filters, messages, dispatch) => {
