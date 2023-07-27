@@ -21,6 +21,11 @@ const MenuBarStyles = makeStyles(() => ({
       backgroundColor: "rgb(47, 49, 54, 1)",
     },
   },
+  menuBox: {
+    marginLeft: "5px !important",
+    marginTop: "5px !important",
+    display: "flex",
+  },
 }));
 
 export default MenuBarStyles;

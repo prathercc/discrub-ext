@@ -172,6 +172,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          color: "#d0d3f5 !important",
+        },
+      },
+    },
     MuiBackdrop: {
       styleOverrides: {
         root: {
