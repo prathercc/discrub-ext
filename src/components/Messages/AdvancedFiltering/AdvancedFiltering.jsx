@@ -7,6 +7,7 @@ import BeforeAndAfterFields from "../BeforeAndAfterFields/BeforeAndAfterFields";
 import PrefilterUser from "../PrefilterUser/PrefilterUser";
 import MessageContains from "../MessageContains/MessageContains";
 import { GuildContext } from "../../../context/guild/GuildContext";
+import HasType from "../HasType/HasType";
 
 function AdvancedFiltering({
   closeAnnouncement = () => {},
@@ -63,8 +64,14 @@ function AdvancedFiltering({
               <PrefilterUser disabled={disabled} isDm={isDm} />
               <BeforeAndAfterFields disabled={disabled} />
             </Stack>
-            <Stack>
+            <Stack
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              spacing={1}
+            >
               <MessageContains disabled={disabled} />
+              <HasType disabled={disabled} />
             </Stack>
           </Stack>
         )}

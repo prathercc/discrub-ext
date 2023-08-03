@@ -33,6 +33,7 @@ function ChannelMessages({ closeAnnouncement }) {
     setSearchBeforeDate,
     setSearchAfterDate,
     setSearchMessageContent,
+    setSelectedHasTypes,
   } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
   const {
@@ -69,6 +70,7 @@ function ChannelMessages({ closeAnnouncement }) {
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
+    selectedHasTypes,
   } = messageDataState;
 
   const fetchChannelData = async () => {
@@ -89,6 +91,7 @@ function ChannelMessages({ closeAnnouncement }) {
     await setSearchBeforeDate(null);
     await setSearchAfterDate(null);
     await setSearchMessageContent(null);
+    await setSelectedHasTypes([]);
     await resetMessageData();
     setSearchTouched(false);
   };
@@ -99,6 +102,7 @@ function ChannelMessages({ closeAnnouncement }) {
       await setSearchBeforeDate(null);
       await setSearchAfterDate(null);
       await setSearchMessageContent(null);
+      await setSelectedHasTypes([]);
     }
     await resetFilters();
     await resetMessageData();
@@ -111,6 +115,7 @@ function ChannelMessages({ closeAnnouncement }) {
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
+    selectedHasTypes.length,
   ].some((c) => c);
 
   useEffect(() => {

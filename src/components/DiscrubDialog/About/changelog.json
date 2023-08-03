@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.10.14",
+    "changes": ["Add Messages Containing field to Advanced Filtering."]
+  },
+  {
     "version": "1.10.13",
     "changes": ["Redesign Menubar component."]
   },

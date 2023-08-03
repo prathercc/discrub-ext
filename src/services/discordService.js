@@ -156,6 +156,7 @@ export const fetchSearchMessageData = (
     searchAfterDate,
     searchBeforeDate,
     searchMessageContent,
+    selectedHasTypes,
   } = searchCriteria;
   const urlSearchParams = new URLSearchParams({
     author_id: preFilterUserId,
@@ -164,6 +165,9 @@ export const fetchSearchMessageData = (
     content: searchMessageContent || "null",
     channel_id: guildId && channelId ? channelId : "null",
     include_nsfw: true,
+  });
+  selectedHasTypes.forEach((type) => {
+    urlSearchParams.append("has", type);
   });
   const nullKeys = [];
   urlSearchParams.forEach((value, key) => {

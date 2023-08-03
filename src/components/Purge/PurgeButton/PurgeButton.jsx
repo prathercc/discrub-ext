@@ -23,6 +23,7 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
+    selectedHasTypes,
   } = messageDataState;
   const { selectedGuild } = guildState;
   const { selectedChannel, preFilterUserId } = channelState;
@@ -44,6 +45,7 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       searchBeforeDate,
       searchAfterDate,
       searchMessageContent,
+      selectedHasTypes.length,
       dialogOpen,
       messagesLoading,
     ].some((prop) => !!prop);
