@@ -123,6 +123,16 @@ const theme = createTheme({
         },
       },
     },
+    MuiFormControl: {
+      styleOverrides: {
+        root: {
+          "& .MuiSvgIcon-root": { color: "rgb(210, 213, 247)" },
+          "& .Mui-disabled svg": {
+            color: "rgb(210, 213, 247, 0.5) !important",
+          },
+        },
+      },
+    },
     MuiDialogContentText: {
       styleOverrides: {
         root: {

@@ -26,6 +26,7 @@ function MessageContains({ disabled }) {
       placement="top"
     >
       <TextField
+        fullWidth
         inputRef={inputRef}
         InputProps={{
           endAdornment: (
