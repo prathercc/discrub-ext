@@ -27,6 +27,7 @@ import {
   SET_SEARCH_BEFORE_DATE_COMPLETE,
   SET_SEARCH_AFTER_DATE_COMPLETE,
   SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
+  SET_SELECTED_HAS_TYPES_COMPLETE,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -84,6 +85,8 @@ const MessageContextProvider = (props) => {
       searchAfterDate: null,
       totalSearchMessages: 0,
       searchMessageContent: null,
+      hasTypes: ["embed", "file", "image", "link", "sound", "sticker", "video"],
+      selectedHasTypes: [],
     })
   );
 
@@ -93,6 +96,13 @@ const MessageContextProvider = (props) => {
     };
     if (state.filters.length) filterMessages();
   }, [state.filters, state.messages]);
+
+  const setSelectedHasTypes = async (val) => {
+    return dispatch({
+      type: SET_SELECTED_HAS_TYPES_COMPLETE,
+      payload: val,
+    });
+  };
 
   const setSearchMessageContent = async (val) => {
     return dispatch({
@@ -201,6 +211,7 @@ const MessageContextProvider = (props) => {
         state.searchBeforeDate,
         state.searchAfterDate,
         state.searchMessageContent,
+        state.selectedHasTypes,
       ].some((c) => c);
 
       if (criteriaExists) {
@@ -213,6 +224,7 @@ const MessageContextProvider = (props) => {
             searchBeforeDate: state.searchBeforeDate,
             searchAfterDate: state.searchAfterDate,
             searchMessageContent: state.searchMessageContent,
+            selectedHasTypes: state.selectedHasTypes,
           },
           dispatch
         ));
@@ -313,6 +325,7 @@ const MessageContextProvider = (props) => {
         setSearchBeforeDate,
         setSearchAfterDate,
         setSearchMessageContent,
+        setSelectedHasTypes,
       }}
     >
       {props.children}
