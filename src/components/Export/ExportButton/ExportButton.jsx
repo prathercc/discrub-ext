@@ -36,6 +36,7 @@ const ExportButton = ({
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
+    selectedHasTypes,
   } = messageState;
   const { preFilterUserId, selectedChannel } = channelState;
   const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
@@ -52,6 +53,7 @@ const ExportButton = ({
     !!searchBeforeDate ||
     !!searchAfterDate ||
     !!searchMessageContent ||
+    !!selectedHasTypes.length ||
     dialogOpen;
 
   return (

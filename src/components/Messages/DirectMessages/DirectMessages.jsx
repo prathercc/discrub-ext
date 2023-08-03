@@ -45,6 +45,7 @@ function DirectMessages() {
     setSearchAfterDate,
     setSearchBeforeDate,
     setSearchMessageContent,
+    setSelectedHasTypes,
   } = useContext(MessageContext);
 
   const { selectedDm, dms } = dmState;
@@ -66,6 +67,7 @@ function DirectMessages() {
     await setSearchMessageContent(null);
     await setSearchBeforeDate(null);
     await setSearchAfterDate(null);
+    await setSelectedHasTypes([]);
     await resetFilters();
     await resetMessageData();
     setSearchTouched(false);
