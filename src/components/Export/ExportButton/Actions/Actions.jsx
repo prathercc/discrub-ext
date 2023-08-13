@@ -106,10 +106,11 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
               entity.filename || `EMBEDDED-MEDIA-${c2}`
             }`;
             await addToZip(blob, `${imgPath}/${cleanFileName}`);
-            message[collectionName][c2] = {
-              ...message[collectionName][c2],
-              local_url: `${imgPath.split("/")[1]}/${cleanFileName}`,
-            };
+
+            message[collectionName][c2] = Object.assign(
+              message[collectionName][c2],
+              { local_url: `${imgPath.split("/")[1]}/${cleanFileName}` }
+            );
           }
         }
       } catch (e) {

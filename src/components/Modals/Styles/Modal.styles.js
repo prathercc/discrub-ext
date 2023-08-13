@@ -41,6 +41,16 @@ const ModalStyles = makeStyles(() => ({
   embedTitleTypography: {
     cursor: "pointer !important",
   },
+  ellipsisTextContainer: {
+    overflow: "hidden",
+    display: "flex",
+  },
+  ellipsisText: {
+    width: "200px",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
 }));
 
 export default ModalStyles;

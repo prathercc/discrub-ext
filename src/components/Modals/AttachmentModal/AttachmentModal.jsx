@@ -9,14 +9,11 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  Avatar,
-  IconButton,
 } from "@mui/material";
-import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import { MessageContext } from "../../../context/message/MessageContext";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ModalStyles from "../Styles/Modal.styles";
 import { wait } from "../../../utils";
+import Attachment from "./Attachment/Attachment";
 
 const AttachmentModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
@@ -82,45 +79,13 @@ const AttachmentModal = ({ open, handleClose }) => {
       <DialogContent className={classes.dialogContent}>
         <Stack className={classes.stackContainer} spacing={1}>
           {attachmentMessage &&
-            attachmentMessage.attachments.map((x, i) => {
+            attachmentMessage.attachments.map((a) => {
               return (
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  alignItems="center"
-                  justifyContent="space-between"
-                  className={classes.attachment}
-                >
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Tooltip arrow title="Open">
-                      <Avatar
-                        variant="square"
-                        className={classes.avatar}
-                        src={x.url}
-                        alt={x.filename}
-                        onClick={() => window.open(x.url, "_blank")}
-                      />
-                    </Tooltip>
-                    <Typography variant="caption">
-                      {x.filename.length > 60
-                        ? `${x.filename.slice(0, 50)}...`
-                        : x.filename}
-                    </Typography>
-                  </Stack>
-                  <Tooltip arrow title="Delete">
-                    <IconButton
-                      disabled={deleting}
-                      onClick={() => handleDeleteAttachment(x)}
-                    >
-                      <DeleteForeverIcon color="error" />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
+                <Attachment
+                  attachment={a}
+                  handleDeleteAttachment={handleDeleteAttachment}
+                  deleting={deleting}
+                />
               );
             })}
         </Stack>

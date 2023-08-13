@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.10.15",
+    "changes": [
+      "Make image preview expandable when viewing attachments in-app.",
+      "Additional small improvements to code base."
+    ]
+  },
+  {
     "version": "1.10.14",
     "changes": ["Add Messages Containing field to Advanced Filtering."]
   },

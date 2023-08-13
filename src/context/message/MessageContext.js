@@ -40,6 +40,7 @@ import {
 import { GuildContext } from "../guild/GuildContext";
 import parseISO from "date-fns/parseISO";
 import { wait } from "../../utils";
+import Message from "../../classes/Message";
 
 export const MessageContext = createContext();
 
@@ -574,7 +575,9 @@ const _getMessages = async (
       }
     }
 
-    return thread ? threadedData : { retArr, retThreads };
+    return thread
+      ? threadedData
+      : { retArr: retArr.map((m) => new Message(m)), retThreads };
   } catch (e) {
     console.error("Error fetching channel messages", e);
   }
@@ -646,7 +649,7 @@ const _getSearchMessages = async (
   } catch (e) {
     console.error("Error fetching channel messages", e);
   } finally {
-    return { retArr, retThreads };
+    return { retArr: retArr.map((m) => new Message(m)), retThreads };
   }
 };
 

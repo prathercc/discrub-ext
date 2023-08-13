@@ -20,8 +20,10 @@ const AttachmentStyles = makeStyles(() => ({
     cursor: "pointer",
     boxShadow: "4px 5px 6px 0px rgba(0,0,0,0.75)",
     "&:hover": {
-      width: ({ width }) => (width > 400 ? 400 : width),
-      height: ({ height }) => (height > 400 ? 400 : height),
+      width: ({ width, maxWidth = 400 }) =>
+        width > maxWidth ? maxWidth : width,
+      height: ({ height, maxHeight = 400 }) =>
+        height > maxHeight ? maxHeight : height,
     },
   },
   altStack: {
