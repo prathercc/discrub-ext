@@ -14,11 +14,8 @@ const AttachmentMock = ({ attachment }) => {
   });
   const { state: exportState } = useContext(ExportContext);
   const { previewImages } = exportState;
-  const supportedImgTypes = ["png", "jpg", "jpeg", "gif"];
-  const isImg =
-    attachment.content_type?.includes("image") ||
-    supportedImgTypes.some((sit) => attachment.filename.includes(sit));
-  const isVid = attachment.content_type?.includes("video");
+  const isImg = attachment.isImage();
+  const isVid = attachment.isVideo();
 
   return (
     <Stack direction="column" justifyContent="center" alignItems="flex-start">
