@@ -212,7 +212,7 @@ const MessageContextProvider = (props) => {
         state.searchBeforeDate,
         state.searchAfterDate,
         state.searchMessageContent,
-        state.selectedHasTypes,
+        state.selectedHasTypes.length,
       ].some((c) => c);
 
       if (criteriaExists) {
