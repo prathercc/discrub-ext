@@ -14,8 +14,8 @@ const AttachmentMock = ({ attachment }) => {
   });
   const { state: exportState } = useContext(ExportContext);
   const { previewImages } = exportState;
-  const isImg = attachment.isImage();
-  const isVid = attachment.isVideo();
+  const isImg = attachment?.isImage?.();
+  const isVid = attachment?.isVideo?.();
 
   return (
     <Stack direction="column" justifyContent="center" alignItems="flex-start">
