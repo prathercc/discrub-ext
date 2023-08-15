@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.10.16",
+    "changes": [
+      "Fix bug where general searches used incorrect API, resulting in longer search times.",
+      "Fix export issue."
+    ]
+  },
+  {
     "version": "1.10.15",
     "changes": [
       "Make image preview expandable when viewing attachments in-app.",
