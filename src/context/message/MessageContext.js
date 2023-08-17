@@ -336,13 +336,17 @@ const MessageContextProvider = (props) => {
 
 const _parseMentions = async (token, messages) => {
   const userMap = {};
-  const regex = /<@[0-9]+>|<@![0-9]+>/g;
+  const regex = /<@[0-9]+>|<@&[0-9]+>|<@![0-9]+>/g;
 
   messages.forEach((msg) => {
     msg.content
       .match(regex)
       ?.map((mention) =>
-        mention.replace("<@", "").replace("<@!", "").replace(">", "")
+        mention
+          .replace("<@", "")
+          .replace("<@!", "")
+          .replace("<@&", "")
+          .replace(">", "")
       )
       ?.forEach((mention) => (userMap[mention] = null));
   });
