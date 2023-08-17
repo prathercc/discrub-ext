@@ -67,6 +67,7 @@ function ChannelMessages({ closeAnnouncement }) {
     messages,
     isLoading: messagesLoading,
     fetchedMessageLength,
+    lookupUserId,
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
@@ -281,9 +282,13 @@ function ChannelMessages({ closeAnnouncement }) {
                 <Box className={classes.box}>
                   <CircularProgress />
                   <Typography variant="caption">
-                    {fetchedMessageLength > 0
-                      ? `Fetched ${fetchedMessageLength} Messages`
-                      : "Fetching Data"}
+                    {lookupUserId && `User Lookup: ${lookupUserId}`}
+                    {!lookupUserId &&
+                      fetchedMessageLength > 0 &&
+                      `Fetched ${fetchedMessageLength} Messages`}
+                    {!lookupUserId &&
+                      fetchedMessageLength <= 0 &&
+                      "Fetching Data"}
                   </Typography>
                 </Box>
               </Paper>

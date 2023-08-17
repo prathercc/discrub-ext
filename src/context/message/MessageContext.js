@@ -28,6 +28,7 @@ import {
   SET_SEARCH_AFTER_DATE_COMPLETE,
   SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
   SET_SELECTED_HAS_TYPES_COMPLETE,
+  SET_LOOKUP_USERID_COMPLETE,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -76,6 +77,7 @@ const MessageContextProvider = (props) => {
       filteredMessages: [], // Message objects
       filters: [], // Array of object filters
       fetchedMessageLength: 0, // Current length of fetched messages, used for debugging message fetch progress
+      lookupUserId: null, // The userId being looked up (during message fetch process)
       isLoading: null,
       attachmentMessage: null, // The selected message for deleting attachments.
       embedMessage: null, // The selected message for viewing embeds.
@@ -241,7 +243,11 @@ const MessageContextProvider = (props) => {
         ));
       }
 
-      const messagesWithMentions = await _parseMentions(token, retArr);
+      const messagesWithMentions = await _parseMentions(
+        token,
+        retArr,
+        dispatch
+      );
 
       const payload = {
         threads: retThreads,
@@ -334,7 +340,7 @@ const MessageContextProvider = (props) => {
   );
 };
 
-const _parseMentions = async (token, messages) => {
+const _parseMentions = async (token, messages, dispatch) => {
   const userMap = {};
   const regex = /<@[0-9]+>|<@&[0-9]+>|<@![0-9]+>/g;
 
@@ -356,6 +362,12 @@ const _parseMentions = async (token, messages) => {
   while (count < keys.length) {
     try {
       const mentionedUserId = keys[count];
+      dispatch({
+        type: SET_LOOKUP_USERID_COMPLETE,
+        payload: {
+          lookupUserId: mentionedUserId,
+        },
+      });
       const { id, retry_after, username } = await getUser(
         token,
         mentionedUserId
