@@ -107,14 +107,21 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       let count = 0;
       const selectedMessages = [...messagesRef.current];
 
-      if (selectedMessages.length === 0) {
+      const selectedCount = selectedMessages.length;
+
+      if (selectedCount === 0) {
         setDebugMessage("Still searching...");
         await wait(1, resetDebugMessage);
       }
 
-      while (count < selectedMessages.length && openRef.current) {
+      while (count < selectedCount && openRef.current) {
         let currentRow = selectedMessages[count];
-        setDeleteObj(currentRow);
+        setDeleteObj(
+          Object.assign(currentRow, {
+            _index: count + 1,
+            _total: selectedCount,
+          })
+        );
         const response = await deleteMessage(currentRow);
         if (response === null) {
           count++;
@@ -221,7 +228,9 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                 <CircularProgress />
               </Stack>
               <Typography className={classes.objIdTypography} variant="caption">
-                {deleteObj?.id}
+                {deleteObj?._index
+                  ? `Message ${deleteObj._index} of ${deleteObj._total}`
+                  : ""}
               </Typography>
             </>
           )}
