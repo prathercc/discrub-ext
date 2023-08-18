@@ -1,5 +1,14 @@
 [
   {
+    "version": "1.10.17",
+    "changes": [
+      "Add missing case to mention parse logic.",
+      "Show visual feedback when looking up mentioned User data.",
+      "Show progress when deleting or Purging messages.",
+      "Make Quick Filtering button more apparent and smooth out Advanced Filtering show/hide animation."
+    ]
+  },
+  {
     "version": "1.10.16",
     "changes": [
       "Fix bug where general searches used incorrect API, resulting in longer search times.",

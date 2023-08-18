@@ -40,5 +40,9 @@ class Message {
     this.username = username;
     this.message_reference = message_reference;
   }
+
+  isReply() {
+    return this.type === 19;
+  }
 }
 export default Message;

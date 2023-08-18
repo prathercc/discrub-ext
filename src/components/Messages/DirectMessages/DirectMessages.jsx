@@ -50,6 +50,7 @@ function DirectMessages() {
 
   const { selectedDm, dms } = dmState;
   const {
+    lookupUserId,
     fetchedMessageLength,
     isLoading: messagesLoading,
     messages,
@@ -194,9 +195,13 @@ function DirectMessages() {
                 <Box className={classes.box}>
                   <CircularProgress />
                   <Typography variant="caption">
-                    {fetchedMessageLength > 0
-                      ? `Fetched ${fetchedMessageLength} Messages`
-                      : "Fetching Data"}
+                    {lookupUserId && `User Lookup: ${lookupUserId}`}
+                    {!lookupUserId &&
+                      fetchedMessageLength > 0 &&
+                      `Fetched ${fetchedMessageLength} Messages`}
+                    {!lookupUserId &&
+                      fetchedMessageLength <= 0 &&
+                      "Fetching Data"}
                   </Typography>
                 </Box>
               </Paper>

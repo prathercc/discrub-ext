@@ -1,7 +1,7 @@
 {
   "short_name": "Discrub",
   "name": "Discrub",
-  "version": "1.10.16",
+  "version": "1.10.17",
   "description": "A data manipulation and export tool for Discord.",
   "manifest_version": 3,
   "permissions": [],

@@ -8,8 +8,9 @@ import EmbedMock from "./EmbedMock";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
 import { GuildContext } from "../../../context/guild/GuildContext";
 import classNames from "classnames";
+import { format, parseISO } from "date-fns";
 
-const MessageMock = ({ row, index, hideAttachments = false }) => {
+const MessageMock = ({ message, index, hideAttachments = false }) => {
   const { state: guildState } = useContext(GuildContext);
   const { state: channelState } = useContext(ChannelContext);
   const { state: messageState } = useContext(MessageContext);
@@ -17,16 +18,15 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
   const { selectedChannel, channels } = channelState;
   const { threads, messages } = messageState;
   const classes = ExportStyles();
-  const messageDate = new Date(Date.parse(row.timestamp));
+  const messageDate = parseISO(message.timestamp, new Date());
   const tz = messageDate
     .toLocaleTimeString(undefined, { timeZoneName: "short" })
     .split(" ")[2];
   const foundThread = threads?.find(
-    (thread) => thread.id === row.id || thread.id === row.channel_id
+    (thread) => thread.id === message.id || thread.id === message.channel_id
   );
-  const isReplyMsg = row.type === 19;
-  const repliedToMsg = isReplyMsg
-    ? messages.find((msg) => msg.id === row.message_reference.message_id)
+  const repliedToMsg = message.isReply()
+    ? messages.find((msg) => msg.id === message.message_reference.message_id)
     : null;
 
   const showChannelName = selectedGuild.id && !selectedChannel.id;
@@ -36,7 +36,7 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
       direction="column"
       alignItems="flex-start"
       justifyContent="flex-start"
-      id={row.id}
+      id={message.id}
       className={classes.mockStack}
     >
       {repliedToMsg && (
@@ -79,7 +79,10 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
         spacing={1}
         className={classes.messageMockMainStack}
       >
-        <AuthorAvatar hideAttachments={hideAttachments} author={row.author} />
+        <AuthorAvatar
+          hideAttachments={hideAttachments}
+          author={message.author}
+        />
         <Stack
           direction="column"
           alignItems="flex-start"
@@ -92,18 +95,17 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
             spacing={1}
           >
             <Typography className={classes.typographyTitle} variant="body2">
-              <strong>{row.username}</strong>
+              <strong>{message.username}</strong>
             </Typography>
             <Typography
               mt="1px"
               className={classes.typographyHash}
               variant="caption"
             >
-              {`${
-                messageDate.getMonth() + 1
-              }/${messageDate.getDate()}/${messageDate.getFullYear()}`}{" "}
-              at{" "}
-              {`${messageDate.getHours()}:${messageDate.getMinutes()}:${messageDate.getSeconds()} ${tz}`}
+              {`${format(messageDate, "MM/dd/yyyy")} at ${format(
+                messageDate,
+                "HH:mm:ss"
+              )} ${tz}`}
             </Typography>
             {showChannelName && (
               <Typography
@@ -115,7 +117,7 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
                 )}
               >
                 {
-                  channels.find((channel) => channel.id === row.channel_id)
+                  channels.find((channel) => channel.id === message.channel_id)
                     ?.name
                 }
               </Typography>
@@ -131,7 +133,7 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
             variant="body1"
             id={`message-data-${index}`}
           >
-            {row.content}
+            {message.content}
           </Typography>
           {!hideAttachments && (
             <Stack
@@ -141,10 +143,10 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
               alignItems="center"
               spacing={1}
             >
-              {row.attachments.map((attachment) => (
+              {message.attachments.map((attachment) => (
                 <AttachmentMock attachment={attachment} />
               ))}
-              {row.embeds.map((embed, index) => (
+              {message.embeds.map((embed, index) => (
                 <EmbedMock embed={embed} index={index} />
               ))}
             </Stack>

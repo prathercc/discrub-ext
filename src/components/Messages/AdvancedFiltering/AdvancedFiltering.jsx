@@ -4,6 +4,8 @@ import { MessageContext } from "../../../context/message/MessageContext";
 import { DmContext } from "../../../context/dm/DmContext";
 import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
 import BeforeAndAfterFields from "../BeforeAndAfterFields/BeforeAndAfterFields";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import PrefilterUser from "../PrefilterUser/PrefilterUser";
 import MessageContains from "../MessageContains/MessageContains";
 import { GuildContext } from "../../../context/guild/GuildContext";
@@ -45,36 +47,37 @@ function AdvancedFiltering({
         disabled={messagesLoading}
         onClick={handleFilterButtonClick}
         color="secondary"
+        startIcon={
+          showOptionalFilters ? <FilterListOffIcon /> : <FilterListIcon />
+        }
       >
-        {showOptionalFilters ? "Hide" : "Show"} Advanced Filtering
+        Advanced Filtering
       </Button>
       <Collapse
         className={classes.collapse}
         orientation="vertical"
         in={showOptionalFilters}
       >
-        {showOptionalFilters && (
-          <Stack spacing={1}>
-            <Stack
-              direction="row"
-              justifyContent="center"
-              alignItems="center"
-              spacing={1}
-            >
-              <PrefilterUser disabled={disabled} isDm={isDm} />
-              <BeforeAndAfterFields disabled={disabled} />
-            </Stack>
-            <Stack
-              direction="row"
-              justifyContent="center"
-              alignItems="center"
-              spacing={1}
-            >
-              <MessageContains disabled={disabled} />
-              <HasType disabled={disabled} />
-            </Stack>
+        <Stack spacing={1}>
+          <Stack
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            spacing={1}
+          >
+            <PrefilterUser disabled={disabled} isDm={isDm} />
+            <BeforeAndAfterFields disabled={disabled} />
           </Stack>
-        )}
+          <Stack
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            spacing={1}
+          >
+            <MessageContains disabled={disabled} />
+            <HasType disabled={disabled} />
+          </Stack>
+        </Stack>
       </Collapse>
     </Stack>
   );

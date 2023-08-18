@@ -20,7 +20,7 @@ export default function DiscordTableMessage({
   return (
     <>
       <td className={classes.tdContent} colspan={4}>
-        <MessageMock hideAttachments row={row} index={row.id} />
+        <MessageMock hideAttachments message={row} index={row.id} />
       </td>
       <td colspan={1} className={classes.tdAttachment}>
         <Stack direction="column" justifyContent="center" alignItems="center">

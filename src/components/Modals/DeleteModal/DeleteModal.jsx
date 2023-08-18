@@ -62,7 +62,12 @@ const DeleteModal = ({ open, handleClose }) => {
         // eslint-disable-next-line no-loop-func
         (x) => x.id === selectedMessages[count]
       )[0];
-      setDeleteObj(currentRow);
+      setDeleteObj(
+        Object.assign(currentRow, {
+          _index: count + 1,
+          _total: selectedRows.length,
+        })
+      );
       if (
         (deleteConfig.attachments && deleteConfig.messages) ||
         (currentRow.content.length === 0 && deleteConfig.attachments) ||
@@ -158,7 +163,7 @@ const DeleteModal = ({ open, handleClose }) => {
                 <CircularProgress />
               </Stack>
               <Typography className={classes.objIdTypography} variant="caption">
-                {deleteObj.id}
+                {`Message ${deleteObj._index} of ${deleteObj._total}`}
               </Typography>
             </>
           )}

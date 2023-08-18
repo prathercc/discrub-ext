@@ -51,7 +51,7 @@ const ExportMessages = ({ componentRef, bulk = false }) => {
               .slice(startIndex, startIndex + messagesPerPage)
               .map((row, index) => {
                 return (
-                  <MessageMock row={row} index={index} threads={threads} />
+                  <MessageMock message={row} index={index} threads={threads} />
                 );
               })}
         </Stack>
