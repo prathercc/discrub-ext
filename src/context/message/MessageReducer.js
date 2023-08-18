@@ -17,6 +17,7 @@ import {
   SET_SEARCH_BEFORE_DATE_COMPLETE,
   SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
   SET_SELECTED_HAS_TYPES_COMPLETE,
+  SET_LOOKUP_USERID_COMPLETE,
 } from "./MessageContextConstants";
 export const MessageReducer = (state, action) => {
   const { type, payload } = action;
@@ -68,6 +69,7 @@ export const MessageReducer = (state, action) => {
         ...state,
         ...payload,
         isLoading: false,
+        lookupUserId: null,
         fetchedMessageLength: 0,
         totalSearchMessages: 0,
       };
@@ -76,6 +78,7 @@ export const MessageReducer = (state, action) => {
         ...state,
         messages: [],
         selectedMessages: [],
+        lookupUserId: null,
         fetchedMessageLength: 0,
         totalSearchMessages: 0,
         isLoading: null,
@@ -130,6 +133,7 @@ export const MessageReducer = (state, action) => {
         ...state,
         selectedMessages: [...payload],
       };
+    case SET_LOOKUP_USERID_COMPLETE:
     case UPDATE_FETCHED_MESSAGES:
     default:
       return { ...state, ...payload };
