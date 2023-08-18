@@ -8,6 +8,7 @@ import EmbedMock from "./EmbedMock";
 import { ChannelContext } from "../../../context/channel/ChannelContext";
 import { GuildContext } from "../../../context/guild/GuildContext";
 import classNames from "classnames";
+import { format, parseISO } from "date-fns";
 
 const MessageMock = ({ row, index, hideAttachments = false }) => {
   const { state: guildState } = useContext(GuildContext);
@@ -17,7 +18,7 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
   const { selectedChannel, channels } = channelState;
   const { threads, messages } = messageState;
   const classes = ExportStyles();
-  const messageDate = new Date(Date.parse(row.timestamp));
+  const messageDate = parseISO(row.timestamp, new Date());
   const tz = messageDate
     .toLocaleTimeString(undefined, { timeZoneName: "short" })
     .split(" ")[2];
@@ -99,11 +100,10 @@ const MessageMock = ({ row, index, hideAttachments = false }) => {
               className={classes.typographyHash}
               variant="caption"
             >
-              {`${
-                messageDate.getMonth() + 1
-              }/${messageDate.getDate()}/${messageDate.getFullYear()}`}{" "}
-              at{" "}
-              {`${messageDate.getHours()}:${messageDate.getMinutes()}:${messageDate.getSeconds()} ${tz}`}
+              {`${format(messageDate, "MM/dd/yyyy")} at ${format(
+                messageDate,
+                "HH:mm:ss"
+              )} ${tz}`}
             </Typography>
             {showChannelName && (
               <Typography
