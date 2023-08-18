@@ -7,13 +7,14 @@ import Tooltip from "../../DiscordTooltip/DiscordToolTip";
 import Stack from "@mui/material/Stack";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import EditIcon from "@mui/icons-material/Edit";
 import { MessageContext } from "../../../../context/message/MessageContext";
 import FilterComponent from "../FilterComponent/FilterComponent";
 import DiscordTableStyles from "../Styles/DiscordTable.styles";
 import ExportButton from "../../../Export/ExportButton/ExportButton";
 import { DmContext } from "../../../../context/dm/DmContext";
-import { Collapse } from "@mui/material";
+import { Button, Collapse } from "@mui/material";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -64,22 +65,20 @@ const EnhancedTableToolbar = ({
             justifyContent="space-between"
             zIndex={2} // This ensures that the Export options show over FilterComponent
           >
-            <Tooltip
-              arrow
-              placement="right"
-              title={`${filterOpen ? "Close" : "Open"} Quick Filters`}
+            <Button
+              color="secondary"
+              startIcon={
+                filterOpen ? <FilterListOffIcon /> : <FilterListIcon />
+              }
+              onClick={handleFilterToggle}
             >
-              <IconButton onClick={handleFilterToggle}>
-                <FilterListIcon className={classes.icon} />
-              </IconButton>
-            </Tooltip>
-            <IconButton>
-              <ExportButton
-                setDialogOpen={setDialogOpen}
-                dialogOpen={dialogOpen}
-                isDm={!!selectedDm.id}
-              />
-            </IconButton>
+              Quick Filtering
+            </Button>
+            <ExportButton
+              setDialogOpen={setDialogOpen}
+              dialogOpen={dialogOpen}
+              isDm={!!selectedDm.id}
+            />
           </Stack>
 
           <Collapse
