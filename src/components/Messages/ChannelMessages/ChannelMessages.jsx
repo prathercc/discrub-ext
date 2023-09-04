@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import DiscordTable from "../../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import ClearIcon from "@mui/icons-material/Clear";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
   Stack,
   Typography,
@@ -11,6 +12,7 @@ import {
   TextField,
   Button,
   Autocomplete,
+  IconButton,
 } from "@mui/material";
 import { UserContext } from "../../../context/user/UserContext";
 import { GuildContext } from "../../../context/guild/GuildContext";
@@ -23,6 +25,7 @@ import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
 import classNames from "classnames";
+import CopyAdornment from "../CopyAdornment/CopyAdornment";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -119,6 +122,23 @@ function ChannelMessages({ closeAnnouncement }) {
     selectedHasTypes.length,
   ].some((c) => c);
 
+  const guildFieldDisabled = messagesLoading || purgeDialogOpen;
+  const channelFieldDisabled = selectedGuild.id === null || messagesLoading;
+  const sortedGuilds = guilds.toSorted((a, b) =>
+    sortByProperty(
+      { name: a.name.toLowerCase() },
+      { name: b.name.toLowerCase() },
+      "name"
+    )
+  );
+  const sortedChannels = channels.toSorted((a, b) =>
+    sortByProperty(
+      { name: a.name.toLowerCase() },
+      { name: b.name.toLowerCase() },
+      "name"
+    )
+  );
+
   useEffect(() => {
     if (purgeDialogOpen || exportDialogOpen) {
       setShowOptionalFilters(false);
@@ -149,17 +169,9 @@ function ChannelMessages({ closeAnnouncement }) {
                 <Autocomplete
                   clearIcon={<ClearIcon />}
                   onChange={(_, val) => handleGuildChange(val)}
-                  options={guilds
-                    .toSorted((a, b) =>
-                      sortByProperty(
-                        { name: a.name.toLowerCase() },
-                        { name: b.name.toLowerCase() },
-                        "name"
-                      )
-                    )
-                    .map((guild) => {
-                      return guild.id;
-                    })}
+                  options={sortedGuilds.map((guild) => {
+                    return guild.id;
+                  })}
                   getOptionLabel={(id) =>
                     guilds.find((guild) => guild.id === id)?.name
                   }
@@ -172,26 +184,30 @@ function ChannelMessages({ closeAnnouncement }) {
                       label="Guild"
                       onFocus={closeAnnouncement}
                       className={classes.autocomplete}
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <CopyAdornment
+                            copyValue={sortedGuilds
+                              .map((guild) => guild.name)
+                              .join("\r\n")}
+                            copyName="Guild List"
+                            disabled={guildFieldDisabled}
+                          />
+                        ),
+                      }}
                     />
                   )}
                   value={selectedGuild?.id}
-                  disabled={messagesLoading || purgeDialogOpen}
+                  disabled={guildFieldDisabled}
                 />
 
                 <Autocomplete
                   clearIcon={<ClearIcon />}
                   onChange={(_, val) => handleChannelChange(val)}
-                  options={channels
-                    .toSorted((a, b) =>
-                      sortByProperty(
-                        { name: a.name.toLowerCase() },
-                        { name: b.name.toLowerCase() },
-                        "name"
-                      )
-                    )
-                    .map((channel) => {
-                      return channel.id;
-                    })}
+                  options={sortedChannels.map((channel) => {
+                    return channel.id;
+                  })}
                   getOptionLabel={(id) =>
                     channels.find((channel) => channel.id === id)?.name
                   }
@@ -206,10 +222,22 @@ function ChannelMessages({ closeAnnouncement }) {
                         classes.autocomplete,
                         classes.purgeHidden
                       )}
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <CopyAdornment
+                            copyValue={sortedChannels
+                              .map((channel) => channel.name)
+                              .join("\r\n")}
+                            copyName="Channel List"
+                            disabled={channelFieldDisabled}
+                          />
+                        ),
+                      }}
                     />
                   )}
                   value={selectedChannel?.id}
-                  disabled={selectedGuild.id === null || messagesLoading}
+                  disabled={channelFieldDisabled}
                 />
               </Stack>
 

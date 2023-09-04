@@ -21,6 +21,7 @@ import PurgeButton from "../../Purge/PurgeButton/PurgeButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
+import CopyAdornment from "../CopyAdornment/CopyAdornment";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -74,6 +75,15 @@ function DirectMessages() {
     setSearchTouched(false);
   };
 
+  const dmFieldDisabled = messagesLoading || purgeDialogOpen;
+  const sortedDms = dms.toSorted((a, b) =>
+    sortByProperty(
+      { name: a.name.toLowerCase() },
+      { name: b.name.toLowerCase() },
+      "name"
+    )
+  );
+
   useEffect(() => {
     if (token) getDms();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,17 +108,9 @@ function DirectMessages() {
                 <Autocomplete
                   clearIcon={<ClearIcon />}
                   onChange={(_, val) => handleChangeDm(val)}
-                  options={dms
-                    .toSorted((a, b) =>
-                      sortByProperty(
-                        { name: a.name.toLowerCase() },
-                        { name: b.name.toLowerCase() },
-                        "name"
-                      )
-                    )
-                    .map((directMessage) => {
-                      return directMessage.id;
-                    })}
+                  options={sortedDms.map((directMessage) => {
+                    return directMessage.id;
+                  })}
                   getOptionLabel={(id) => dms.find((dm) => dm.id === id)?.name}
                   renderInput={(params) => (
                     <TextField
@@ -118,10 +120,22 @@ function DirectMessages() {
                       size="small"
                       label="DM"
                       className={classes.dmField}
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <CopyAdornment
+                            copyValue={sortedDms
+                              .map((dm) => dm.name)
+                              .join("\r\n")}
+                            copyName="DM List"
+                            disabled={dmFieldDisabled}
+                          />
+                        ),
+                      }}
                     />
                   )}
                   value={selectedDm?.id}
-                  disabled={messagesLoading || purgeDialogOpen}
+                  disabled={dmFieldDisabled}
                 />
               </Stack>
 
