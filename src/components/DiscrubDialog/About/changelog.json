@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.10.18",
+    "changes": [
+      "Add ability to copy Guild, Channel, and DM names via autocomplete field."
+    ]
+  },
+  {
     "version": "1.10.17",
     "changes": [
       "Add missing case to mention parse logic.",
