@@ -57,6 +57,7 @@ function AdvancedFiltering({
         className={classes.collapse}
         orientation="vertical"
         in={showOptionalFilters}
+        unmountOnExit
       >
         <Stack spacing={1}>
           <Stack
