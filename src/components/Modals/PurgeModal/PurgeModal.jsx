@@ -23,6 +23,7 @@ import { UserContext } from "../../../context/user/UserContext";
 import { DmContext } from "../../../context/dm/DmContext";
 import PrefilterUser from "../../Messages/PrefilterUser/PrefilterUser";
 import { wait } from "../../../utils";
+import PauseButton from "../../PauseButton/PauseButton";
 
 const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const classes = ChannelMessagesStyles();
@@ -54,6 +55,8 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     deleteMessage,
     resetMessageData,
     getMessageData,
+    setDiscrubPaused,
+    checkDiscrubPaused,
   } = useContext(MessageContext);
   const { state: userState } = useContext(UserContext);
 
@@ -92,6 +95,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     await resetMessageData();
     isDm ? await setDmPreFilterUserId(null) : await setPreFilterUserId(null);
     !isDm && (await resetChannel());
+    setDiscrubPaused(false);
   };
 
   const handleDeleteMessage = async () => {
@@ -115,6 +119,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
       }
 
       while (count < selectedCount && openRef.current) {
+        await checkDiscrubPaused();
         let currentRow = selectedMessages[count];
         setDeleteObj(
           Object.assign(currentRow, {
@@ -240,6 +245,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         <Button color="secondary" variant="contained" onClick={handleClose}>
           Cancel
         </Button>
+        <PauseButton disabled={!deleting} />
         {!finishedPurge && (
           <Button
             disabled={dialogBtnDisabled}

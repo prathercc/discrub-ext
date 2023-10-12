@@ -9,8 +9,9 @@ import { GuildContext } from "../../../../context/guild/GuildContext";
 import { ExportContext } from "../../../../context/export/ExportContext";
 import { v4 as uuidv4 } from "uuid";
 import { sortByProperty, wait } from "../../../../utils";
+import PauseButton from "../../../PauseButton/PauseButton";
 
-const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
+const Actions = ({ handleDialogClose, isDm, contentRef, bulk }) => {
   const {
     state: exportState,
     setName,
@@ -32,12 +33,12 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
     state: messageState,
     getMessageData,
     resetMessageData,
+    checkDiscrubPaused,
   } = useContext(MessageContext);
 
   const { state: dmState } = useContext(DmContext);
   const {
     state: channelState,
-    setSelectedExportChannels,
     setChannel,
     resetChannel,
   } = useContext(ChannelContext);
@@ -60,17 +61,6 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   };
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    if (bulk) {
-      setSelectedExportChannels([]);
-      resetChannel();
-      resetMessageData();
-    }
-    setName("");
-    setIsExporting(false);
   };
 
   const isExportCancelled = () => !exportingActiveRef.current;
@@ -96,15 +86,25 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
   ) => {
     for (let c2 = 0; c2 < collection.length; c2 += 1) {
       if (isExportCancelled()) break;
+      await checkDiscrubPaused();
       try {
         const entity = message[collectionName][c2];
         const downloadUrl = _getDownloadUrl(entity);
         if (downloadUrl) {
           const blob = await fetch(downloadUrl).then((r) => r.blob());
           if (blob.size) {
-            const cleanFileName = `${uuidv4()}_${
-              entity.filename || `EMBEDDED-MEDIA-${c2}`
-            }`;
+            // TODO: We really should create Embed/Attachment getFileName functions instead of doing this
+            let cleanFileName;
+            if (entity.filename) {
+              const fNameSplit = entity.filename.split(".");
+              const fileExt = fNameSplit.pop();
+              cleanFileName = `${fNameSplit.join(".")}_${uuidv4()}.${fileExt}`;
+            } else {
+              const blobType = blob.type?.split("/")?.[1];
+              cleanFileName = `${
+                entity.title ? `${entity.title}_` : ""
+              }${uuidv4()}.${blobType}`;
+            }
             await addToZip(blob, `${imgPath}/${cleanFileName}`);
 
             message[collectionName][c2] = Object.assign(
@@ -148,6 +148,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
         await wait(3);
       }
       if (isExportCancelled()) break;
+      await checkDiscrubPaused();
       retArr.push(await processMessage(messages[c1]));
       if (c1 % 100 === 0) {
         setStatusText(
@@ -203,6 +204,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
           ? Math.ceil(updatedMessages.length / messagesPerPage)
           : 1;
       while (currentPageRef.current <= totalPages && !isExportCancelled()) {
+        await checkDiscrubPaused();
         setStatusText(
           `Compressing - Page ${currentPageRef.current} of ${totalPages}`
         );
@@ -259,6 +261,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
       if (updatedMessages.length > 0) {
         if (isExportCancelled()) break;
+        await checkDiscrubPaused();
         await _compressMessages(
           updatedMessages,
           format,
@@ -269,7 +272,9 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
 
       count += 1;
       if (isExportCancelled()) break;
+      await checkDiscrubPaused();
     }
+    await checkDiscrubPaused();
     if (!isExportCancelled()) {
       setStatusText("Preparing Archive");
       await generateZip();
@@ -289,6 +294,7 @@ const Actions = ({ setDialogOpen, isDm, contentRef, bulk }) => {
       <Button color="secondary" variant="contained" onClick={handleDialogClose}>
         Cancel
       </Button>
+      <PauseButton disabled={!isExporting} />
       <Button
         disabled={
           isExporting || (bulk && !isDm && selectedExportChannels.length === 0)

@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.11.0",
+    "changes": [
+      "Add ability to pause message Search, Export, and Purge.",
+      "Include file extensions in filename for embedded media during exports.",
+      "Users who are having issues with Authorization, can now manually input an Authorization Token to use Discrub.",
+      "Fix bug where other Users ID's were unable to be entered into the Guild Purge textfield."
+    ]
+  },
+  {
+    "version": "1.10.18",
+    "changes": [
+      "Add ability to copy Guild, Channel, and DM names via autocomplete field."
+    ]
+  },
+  {
     "version": "1.10.17",
     "changes": [
       "Add missing case to mention parse logic.",

@@ -20,7 +20,7 @@ const ExportModal = ({
   const { setName, setIsExporting } = useContext(ExportContext);
 
   const exportType = isDm ? "DM" : "Guild";
-  const { resetMessageData } = useContext(MessageContext);
+  const { resetMessageData, setDiscrubPaused } = useContext(MessageContext);
 
   const { setSelectedExportChannels, resetChannel } =
     useContext(ChannelContext);
@@ -34,6 +34,7 @@ const ExportModal = ({
     }
     setName("");
     setIsExporting(false);
+    setDiscrubPaused(false);
   };
 
   return (
@@ -46,7 +47,7 @@ const ExportModal = ({
       {bulk ? <BulkContent isDm={isDm} /> : <DefaultContent />}
       <Actions
         contentRef={contentRef}
-        setDialogOpen={setDialogOpen}
+        handleDialogClose={handleDialogClose}
         isDm={isDm}
         bulk={bulk}
       />

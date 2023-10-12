@@ -46,8 +46,30 @@ const UserContextProvider = (props) => {
     return sendChromeMessage("GET_TOKEN", chromeCallback);
   };
 
+  const getUserDataManually = async (userToken) => {
+    if (userToken) {
+      dispatch({ type: GET_USER_DATA });
+      const data = await fetchUserData(userToken);
+      if (data.code === 0 || data.code || !data) {
+        await dispatch({
+          type: GET_USER_DATA_COMPLETE,
+          payload: { token: undefined },
+        });
+        return { successful: false };
+      } else {
+        await dispatch({
+          type: GET_USER_DATA_COMPLETE,
+          payload: { ...data, token: userToken },
+        });
+        return { successful: true };
+      }
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ state, dispatch, getUserData }}>
+    <UserContext.Provider
+      value={{ state, dispatch, getUserData, getUserDataManually }}
+    >
       {props.children}
     </UserContext.Provider>
   );
