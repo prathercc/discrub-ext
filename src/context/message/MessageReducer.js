@@ -18,6 +18,7 @@ import {
   SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
   SET_SELECTED_HAS_TYPES_COMPLETE,
   SET_LOOKUP_USERID_COMPLETE,
+  SET_DISCRUB_PAUSED,
 } from "./MessageContextConstants";
 export const MessageReducer = (state, action) => {
   const { type, payload } = action;
@@ -40,6 +41,8 @@ export const MessageReducer = (state, action) => {
             : (a, b) => -_descendingComparator(a, b, payload.orderBy)
         ),
       };
+    case SET_DISCRUB_PAUSED:
+      return { ...state, discrubPaused: payload };
     case SET_SELECTED_HAS_TYPES_COMPLETE:
       return { ...state, selectedHasTypes: payload };
     case SET_SEARCH_MESSAGE_CONTENT_COMPLETE:

@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import DiscordTable from "../../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import ClearIcon from "@mui/icons-material/Clear";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
   Stack,
   Typography,
@@ -12,7 +11,6 @@ import {
   TextField,
   Button,
   Autocomplete,
-  IconButton,
 } from "@mui/material";
 import { UserContext } from "../../../context/user/UserContext";
 import { GuildContext } from "../../../context/guild/GuildContext";
@@ -26,6 +24,7 @@ import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
 import classNames from "classnames";
 import CopyAdornment from "../CopyAdornment/CopyAdornment";
+import PauseButton from "../../PauseButton/PauseButton";
 
 function ChannelMessages({ closeAnnouncement }) {
   const {
@@ -267,6 +266,9 @@ function ChannelMessages({ closeAnnouncement }) {
                     dialogOpen={purgeDialogOpen}
                     setDialogOpen={setPurgeDialogOpen}
                   />
+                </span>
+                <span className={classes.purgeHidden}>
+                  <PauseButton disabled={!messagesLoading} />
                 </span>
                 <Button
                   className={classes.purgeHidden}

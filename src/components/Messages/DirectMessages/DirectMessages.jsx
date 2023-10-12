@@ -22,6 +22,7 @@ import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
 import CopyAdornment from "../CopyAdornment/CopyAdornment";
+import PauseButton from "../../PauseButton/PauseButton";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -168,7 +169,9 @@ function DirectMessages() {
                     isDm
                   />
                 </span>
-
+                <span className={classes.purgeHidden}>
+                  <PauseButton disabled={!messagesLoading} />
+                </span>
                 <Button
                   className={classes.purgeHidden}
                   disabled={selectedDm.id === null || messagesLoading}

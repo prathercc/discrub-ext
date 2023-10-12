@@ -35,6 +35,7 @@ function DiscrubDialog() {
     resetFilters,
     setSearchAfterDate,
     setSearchBeforeDate,
+    setDiscrubPaused,
   } = useContext(MessageContext);
   const { resetGuild } = useContext(GuildContext);
   const { resetDm } = useContext(DmContext);
@@ -52,6 +53,7 @@ function DiscrubDialog() {
       resetChannel(),
       resetGuild(),
       resetFilters(),
+      setDiscrubPaused(false),
     ]);
     setMenuIndex(index);
     setAlertOpen(false);

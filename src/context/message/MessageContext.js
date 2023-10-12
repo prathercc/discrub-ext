@@ -29,6 +29,7 @@ import {
   SET_SEARCH_MESSAGE_CONTENT_COMPLETE,
   SET_SELECTED_HAS_TYPES_COMPLETE,
   SET_LOOKUP_USERID_COMPLETE,
+  SET_DISCRUB_PAUSED,
 } from "./MessageContextConstants";
 import {
   editMessage,
@@ -56,6 +57,7 @@ const MessageContextProvider = (props) => {
   const channelPreFilterUserIdRef = useRef();
   const dmPreFilterUserIdRef = useRef();
   const selectedGuildIdRef = useRef();
+  const discrubPausedRef = useRef();
 
   const { token } = userState;
   const { selectedChannel, preFilterUserId: channelPreFilterUserId } =
@@ -90,8 +92,17 @@ const MessageContextProvider = (props) => {
       searchMessageContent: null,
       hasTypes: ["embed", "file", "image", "link", "sound", "sticker", "video"],
       selectedHasTypes: [],
+      discrubPaused: false, // Flag to pause Export/Purge
     })
   );
+
+  discrubPausedRef.current = state.discrubPaused;
+
+  const checkDiscrubPaused = async () => {
+    while (discrubPausedRef.current) {
+      await wait(2);
+    }
+  };
 
   useEffect(() => {
     const filterMessages = async () => {
@@ -99,6 +110,10 @@ const MessageContextProvider = (props) => {
     };
     if (state.filters.length) filterMessages();
   }, [state.filters, state.messages]);
+
+  const setDiscrubPaused = async (val) => {
+    return dispatch({ type: SET_DISCRUB_PAUSED, payload: val });
+  };
 
   const setSelectedHasTypes = async (val) => {
     return dispatch({
@@ -221,6 +236,7 @@ const MessageContextProvider = (props) => {
         ({ retArr, retThreads } = await _getSearchMessages(
           convoIdRef,
           selectedGuildIdRef,
+          checkDiscrubPaused,
           token,
           {
             preFilterUserId,
@@ -235,6 +251,7 @@ const MessageContextProvider = (props) => {
         let tempArr = [];
         ({ retArr, retThreads } = await _getMessages(
           convoIdRef,
+          checkDiscrubPaused,
           token,
           dispatch,
           tempArr,
@@ -242,21 +259,27 @@ const MessageContextProvider = (props) => {
           isDM
         ));
       }
+      const searchCancelled = originalChannelId !== convoIdRef?.current;
 
-      const messagesWithMentions = await _parseMentions(
-        token,
-        retArr,
-        dispatch
-      );
+      let payload = {};
 
-      const payload = {
-        threads: retThreads,
-        messages: messagesWithMentions,
-      };
+      if (!searchCancelled) {
+        const messagesWithMentions = await _parseMentions(
+          token,
+          retArr,
+          checkDiscrubPaused,
+          dispatch
+        );
+
+        payload = {
+          threads: retThreads,
+          messages: messagesWithMentions,
+        };
+      }
 
       dispatch({
         type: GET_MESSAGE_DATA_COMPLETE,
-        payload: originalChannelId !== convoIdRef?.current ? {} : payload,
+        payload: payload,
       });
 
       return payload;
@@ -333,6 +356,8 @@ const MessageContextProvider = (props) => {
         setSearchAfterDate,
         setSearchMessageContent,
         setSelectedHasTypes,
+        setDiscrubPaused,
+        checkDiscrubPaused,
       }}
     >
       {props.children}
@@ -340,7 +365,12 @@ const MessageContextProvider = (props) => {
   );
 };
 
-const _parseMentions = async (token, messages, dispatch) => {
+const _parseMentions = async (
+  token,
+  messages,
+  checkDiscrubPaused,
+  dispatch
+) => {
   const userMap = {};
   const regex = /<@[0-9]+>|<@&[0-9]+>|<@![0-9]+>/g;
 
@@ -360,6 +390,7 @@ const _parseMentions = async (token, messages, dispatch) => {
   let count = 0;
   const keys = Object.keys(userMap);
   while (count < keys.length) {
+    await checkDiscrubPaused();
     try {
       const mentionedUserId = keys[count];
       dispatch({
@@ -505,6 +536,7 @@ const _messageTypeAllowed = (type) => {
 
 const _getMessages = async (
   channelIdRef,
+  checkDiscrubPaused,
   token,
   dispatch,
   retArr,
@@ -519,6 +551,7 @@ const _getMessages = async (
     let threadedData = [];
     while (!reachedEnd) {
       if (channelIdRef.current !== originalChannelId) break;
+      await checkDiscrubPaused();
       const data = await fetchMessageData(token, lastId, originalChannelId);
       if (data.message && data.message.includes("Missing Access")) break;
       if (data.length < 100) reachedEnd = true;
@@ -535,6 +568,7 @@ const _getMessages = async (
               }); // Found a thread
               const foundMessages = await _getMessages(
                 channelIdRef,
+                checkDiscrubPaused,
                 token,
                 dispatch,
                 retArr,
@@ -575,6 +609,7 @@ const _getMessages = async (
         channelIdRef.current = ut?.id?.slice();
         const data = await _getMessages(
           channelIdRef,
+          checkDiscrubPaused,
           token,
           dispatch,
           retArr,
@@ -602,6 +637,7 @@ const _getMessages = async (
 const _getSearchMessages = async (
   channelIdRef,
   guildIdRef,
+  checkDiscrubPaused,
   token,
   searchCriteria,
   dispatch
@@ -616,6 +652,7 @@ const _getSearchMessages = async (
     let criteria = { ...searchCriteria };
     let totalMessages = null;
     while (!reachedEnd) {
+      await checkDiscrubPaused();
       const channelChanged =
         (channelIdRef?.current || null) !== originalChannelId;
       const guildChanged = (guildIdRef.current || null) !== originalGuildId;
