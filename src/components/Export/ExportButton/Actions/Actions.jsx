@@ -93,9 +93,18 @@ const Actions = ({ handleDialogClose, isDm, contentRef, bulk }) => {
         if (downloadUrl) {
           const blob = await fetch(downloadUrl).then((r) => r.blob());
           if (blob.size) {
-            const cleanFileName = `${uuidv4()}_${
-              entity.filename || `EMBEDDED-MEDIA-${c2}`
-            }`;
+            // TODO: We really should create Embed/Attachment getFileName functions instead of doing this
+            let cleanFileName;
+            if (entity.filename) {
+              const fNameSplit = entity.filename.split(".");
+              const fileExt = fNameSplit.pop();
+              cleanFileName = `${fNameSplit.join(".")}_${uuidv4()}.${fileExt}`;
+            } else {
+              const blobType = blob.type?.split("/")?.[1];
+              cleanFileName = `${
+                entity.title ? `${entity.title}_` : ""
+              }${uuidv4()}.${blobType}`;
+            }
             await addToZip(blob, `${imgPath}/${cleanFileName}`);
 
             message[collectionName][c2] = Object.assign(
