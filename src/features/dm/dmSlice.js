@@ -1,5 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchDirectMessages } from "../../services/discordService";
+import DM from "../../classes/DM";
+import {
+  resetAdvancedFilters,
+  resetFilters,
+  resetMessageData,
+} from "../message/messageSlice";
 
 const defaultDm = {
   id: null,
@@ -36,7 +42,7 @@ export const dmSlice = createSlice({
       ];
     },
     setDm: (state, { payload }) => {
-      const selectedDm = state.dms.find((dm) => dm.id === payload.id);
+      const selectedDm = state.dms.find((dm) => dm.id === payload);
       if (selectedDm) {
         const preFilterIds = [
           { name: payload.user.name, id: payload.user.id },
@@ -69,9 +75,21 @@ export const getDms = () => async (dispatch, getState) => {
   dispatch(setIsLoading(true));
   const data = (await fetchDirectMessages(token)) || [];
   if (data.length) {
-    dispatch(setDms(data));
+    dispatch(setDms(data.map((dm) => new DM(dm))));
   }
   dispatch(setIsLoading(false));
 };
+
+export const changeDm = (dmId) => async (dispatch, getState) => {
+  if (!dmId) {
+    dispatch(resetAdvancedFilters());
+    dispatch(setPreFilterUserId(null));
+  }
+  dispatch(resetMessageData());
+  dispatch(resetFilters());
+  dispatch(setDm(dmId));
+};
+
+export const selectDm = (state) => state.dm;
 
 export default dmSlice.reducer;

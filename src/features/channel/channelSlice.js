@@ -1,5 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchChannels } from "../../services/discordService";
+import {
+  resetAdvancedFilters,
+  resetFilters,
+  resetMessageData,
+} from "../message/messageSlice";
+import Channel from "../../classes/Channel";
 
 const defaultChannel = {
   flags: null,
@@ -67,11 +73,29 @@ export const getChannels = (guildId) => async (dispatch, getState) => {
     dispatch(setIsLoading(true));
     const data = await fetchChannels(token, guildId);
     if (data) {
-      dispatch(setChannels(data.filter((c) => c.type !== 4)));
+      dispatch(
+        setChannels(
+          data
+            .filter((c) => c.type !== 4)
+            .map((channel) => new Channel(channel))
+        )
+      );
       dispatch(setPreFilterUserIds([{ name: username, id: id }]));
     }
     dispatch(setIsLoading(false));
   }
 };
+
+export const changeChannel = (channelId) => async (dispatch, getState) => {
+  if (!channelId) {
+    dispatch(resetAdvancedFilters());
+    dispatch(setPreFilterUserId(null));
+  }
+  dispatch(resetFilters());
+  dispatch(resetMessageData());
+  dispatch(setChannel(channelId));
+};
+
+export const selectChannel = (state) => state.channel;
 
 export default channelSlice.reducer;

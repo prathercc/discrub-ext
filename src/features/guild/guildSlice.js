@@ -1,5 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchGuilds } from "../../services/discordService";
+import { getChannels, resetChannel } from "../channel/channelSlice";
+import {
+  resetAdvancedFilters,
+  resetFilters,
+  resetMessageData,
+} from "../message/messageSlice";
 
 const defaultGuild = {
   features: [],
@@ -26,9 +32,7 @@ export const guildSlice = createSlice({
       state.guilds = payload;
     },
     setGuild: (state, { payload }) => {
-      const selectedGuild = state.guilds.find(
-        (guild) => guild.id === payload.id
-      );
+      const selectedGuild = state.guilds.find((guild) => guild.id === payload);
       state.selectedGuild = selectedGuild;
     },
     resetGuild: (state, { payload }) => {
@@ -49,5 +53,20 @@ export const getGuilds = () => async (dispatch, getState) => {
   }
   dispatch(setIsLoading(false));
 };
+
+export const changeGuild = (id) => async (dispatch, getState) => {
+  if (id) {
+    dispatch(setGuild(id));
+    await dispatch(getChannels(id));
+  } else {
+    dispatch(resetGuild());
+  }
+  dispatch(resetChannel());
+  dispatch(resetFilters());
+  dispatch(resetAdvancedFilters());
+  dispatch(resetMessageData());
+};
+
+export const selectGuild = (state) => state.guild;
 
 export default guildSlice.reducer;

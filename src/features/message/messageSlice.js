@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  editMessage,
+  editMessage as editMsg,
   deleteMessage as delMsg,
   getUser,
   fetchSearchMessageData,
@@ -13,6 +13,12 @@ import Message from "../../classes/Message";
 
 const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
+};
+
+const defaultModify = {
+  active: false,
+  message: null,
+  statusText: null,
 };
 
 export const messageSlice = createSlice({
@@ -38,17 +44,36 @@ export const messageSlice = createSlice({
     selectedHasTypes: [],
     discrubPaused: false, // Flag to pause Export/Purge/Search
     discrubCancelled: false, // Flag to cancel Export/Purge/Search
+    modify: defaultModify,
   },
   reducers: {
     setIsLoading: (state, { payload }) => {
       state.isLoading = payload;
     },
+
+    setIsModifying: (state, { payload }) => {
+      state.modify.active = payload;
+    },
+    setModifyMessage: (state, { payload }) => {
+      state.modify.message = payload;
+    },
+    setModifyStatusText: (state, { payload }) => {
+      state.modify.statusText = payload;
+    },
+    resetModifyStatusText: (state, { payload }) => {
+      state.modify.statusText = "";
+    },
+    resetModify: (state, { payload }) => {
+      state.modify = defaultModify;
+    },
+
     setDiscrubPaused: (state, { payload }) => {
       state.discrubPaused = payload;
     },
     setDiscrubCancelled: (state, { payload }) => {
       state.discrubCancelled = payload;
     },
+
     setSelectedHasTypes: (state, { payload }) => {
       state.selectedHasTypes = payload;
     },
@@ -61,6 +86,7 @@ export const messageSlice = createSlice({
     setSearchAfterDate: (state, { payload }) => {
       state.searchAfterDate = payload;
     },
+
     setEmbedMessage: (state, { payload }) => {
       state.embedMessage = payload;
     },
@@ -116,8 +142,14 @@ export const messageSlice = createSlice({
       state.filters = [];
       state.filteredMessages = [];
     },
+    resetAdvancedFilters: (state, { payload }) => {
+      state.searchBeforeDate = null;
+      state.searchAfterDate = null;
+      state.searchMessageContent = null;
+      state.selectedHasTypes = [];
+    },
     updateFilters: (state, { payload }) => {
-      const { filterName, filterValue, filterType } = payload; // Ensure all 3 params comes from single object
+      const { filterName, filterValue, filterType } = payload;
       let filteredList = state.filters.filter(
         (x) => x.filterName !== filterName
       );
@@ -261,11 +293,21 @@ export const messageSlice = createSlice({
 
 export const {
   setIsLoading,
+
+  setIsModifying,
+  setModifyMessage,
+  setModifyStatusText,
+  resetModifyStatusText,
+  resetModify,
+
   setDiscrubPaused,
+  setDiscrubCancelled,
+
   setSelectedHasTypes,
   setSearchMessageContent,
   setSearchBeforeDate,
   setSearchAfterDate,
+
   setEmbedMessage,
   setAttachmentMessage,
   setSelected,
@@ -278,9 +320,12 @@ export const {
   setFetchedMessageLength,
   setTotalSearchMessages,
   resetFilters,
+  resetAdvancedFilters,
   updateFilters,
   filterMessages,
 } = messageSlice.actions;
+
+export const selectMessage = (state) => state.message;
 
 export const checkDiscrubPaused = () => async (dispatch, getState) => {
   while (getState().message.discrubPaused) await wait(2);
@@ -292,9 +337,46 @@ export const getDiscrubCancelled = () => (dispatch, getState) => {
   return getState().message.discrubCancelled;
 };
 
+export const deleteAttachment = (attachment) => async (dispatch, getState) => {
+  const { originalMessage } = getState().message.modify;
+  const shouldEdit =
+    (originalMessage.content && originalMessage.content.length > 0) ||
+    originalMessage.attachments.length > 1;
+  dispatch(setIsModifying(true));
+  if (shouldEdit) {
+    const response = await dispatch(
+      updateMessage({
+        ...originalMessage,
+        attachments: originalMessage.attachments.filter(
+          (attch) => attch.id !== attachment.id
+        ),
+      })
+    );
+    if (response !== null) {
+      dispatch(
+        setModifyStatusText(
+          "Entire message must be deleted to remove attachment!"
+        )
+      );
+      await wait(0.5, () => dispatch(resetModifyStatusText()));
+    }
+  } else {
+    const response = await dispatch(deleteMessage(originalMessage));
+    if (response !== null) {
+      dispatch(
+        setModifyStatusText(
+          "You do not have permission to delete this attachment!"
+        )
+      );
+      await wait(0.5, () => dispatch(resetModifyStatusText()));
+    }
+  }
+  dispatch(setIsModifying(false));
+};
+
 export const updateMessage = (message) => async (dispatch, getState) => {
   const { token } = getState().user;
-  const data = await editMessage(
+  const data = await editMsg(
     token,
     message.id,
     { content: message.content, attachments: message.attachments },
@@ -330,6 +412,38 @@ export const updateMessage = (message) => async (dispatch, getState) => {
   }
 };
 
+export const editMessages =
+  (messages, updateText) => async (dispatch, getState) => {
+    dispatch(setIsModifying(true));
+    let count = 0;
+    while (count < messages.length && !dispatch(getDiscrubCancelled())) {
+      const currentMessage = messages[0];
+      dispatch(setModifyMessage(currentMessage));
+
+      const response = await dispatch(
+        updateMessage({
+          ...currentMessage,
+          content: updateText,
+        })
+      );
+      if (response === null) {
+        count++;
+      } else if (response > 0) {
+        dispatch(setModifyStatusText(`Pausing for ${response} seconds...`));
+        await wait(response, () => dispatch(resetModifyStatusText()));
+      } else {
+        dispatch(
+          setModifyStatusText(
+            "You do not have permission to modify this message!"
+          )
+        );
+        await wait(0.5, () => dispatch(resetModifyStatusText()));
+        count++;
+      }
+    }
+    dispatch(resetModify());
+  };
+
 export const deleteMessage = (message) => async (dispatch, getState) => {
   const { token } = getState().user;
   const response = await delMsg(token, message.id, message.channel_id);
@@ -357,75 +471,139 @@ export const deleteMessage = (message) => async (dispatch, getState) => {
   }
 };
 
-export const getMessageData = () => async (dispatch, getState) => {
-  const { token } = getState().user;
-  const { selectedGuild } = getState().guild;
-  const { selectedChannel, preFilterUserId: channelPrefilterId } =
-    getState().channel;
-  const { selectedDm, preFilterUserId: dmPrefilterId } = getState().dm;
-  const {
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes,
-  } = getState().message;
+export const deleteMessages =
+  (
+    messages,
+    deleteConfig = {
+      attachments: true,
+      messages: true,
+    }
+  ) =>
+  async (dispatch, getState) => {
+    dispatch(setIsModifying(true));
+    let count = 0;
+    while (count < messages.length && !dispatch(getDiscrubCancelled())) {
+      const currentRow = messages[count];
+      dispatch(
+        setModifyMessage(
+          Object.assign(currentRow, {
+            _index: count + 1,
+            _total: messages.length,
+          })
+        )
+      );
+      if (
+        (deleteConfig.attachments && deleteConfig.messages) ||
+        (currentRow.content.length === 0 && deleteConfig.attachments) ||
+        (currentRow.attachments.length === 0 && deleteConfig.messages)
+      ) {
+        const response = await dispatch(deleteMessage(currentRow));
+        if (response === null) {
+          count++;
+        } else if (response > 0) {
+          dispatch(setModifyStatusText(`Pausing for ${response} seconds...`));
+          await wait(response, () => dispatch(resetModifyStatusText()));
+        } else {
+          dispatch(
+            setModifyStatusText(
+              "You do not have permission to modify this message!"
+            )
+          );
+          await wait(0.5, () => dispatch(resetModifyStatusText()));
+          count++;
+        }
+      } else if (deleteConfig.attachments || deleteConfig.messages) {
+        const response = await dispatch(
+          updateMessage(
+            deleteConfig.attachments
+              ? { ...currentRow, attachments: [] }
+              : { ...currentRow, content: "" }
+          )
+        );
+        if (response === null) {
+          count++;
+        } else if (response > 0) {
+          dispatch(setModifyStatusText(`Pausing for ${response} seconds...`));
+          await wait(response, () => dispatch(resetModifyStatusText()));
+        } else {
+          dispatch(
+            setModifyStatusText(
+              "You do not have permission to modify this message!"
+            )
+          );
+          await wait(0.5, () => dispatch(resetModifyStatusText()));
+          count++;
+        }
+      } else break;
+    }
+    dispatch(resetModify());
+  };
 
-  if (token) {
-    const channelId = selectedChannel?.id || selectedDm?.id || null;
-    const guildId = selectedGuild?.id || null;
-    const preFilterUserId = channelPrefilterId || dmPrefilterId;
-
-    dispatch(setIsLoading(true));
-
-    let retArr = [];
-    let retThreads = [];
-
-    const criteriaExists = [
-      preFilterUserId,
+// I'd like to make this take in a guildId and channelId
+export const getMessageData =
+  (guildId, channelId, preFilterUserId) => async (dispatch, getState) => {
+    dispatch(resetMessageData());
+    const { token } = getState().user;
+    const {
       searchBeforeDate,
       searchAfterDate,
       searchMessageContent,
-      selectedHasTypes.length,
-    ].some((c) => c);
+      selectedHasTypes,
+    } = getState().message;
 
-    if (criteriaExists) {
-      ({ retArr, retThreads } = await dispatch(
-        _getSearchMessages(channelId, guildId, {
-          preFilterUserId,
-          searchBeforeDate,
-          searchAfterDate,
-          searchMessageContent,
-          selectedHasTypes,
-        })
-      ));
-    } else {
-      ({ retArr, retThreads } = await dispatch(_getMessages(channelId)));
-    }
+    if (token) {
+      dispatch(setIsLoading(true));
 
-    let payload = {
-      threads: [],
-      messages: [],
-    };
+      let retArr = [];
+      let retThreads = [];
 
-    if (!dispatch(getDiscrubCancelled())) {
-      const messagesWithMentions = await dispatch(_parseMentions(retArr));
+      const criteriaExists = [
+        preFilterUserId,
+        searchBeforeDate,
+        searchAfterDate,
+        searchMessageContent,
+        selectedHasTypes.length,
+      ].some((c) => c);
 
-      payload = {
-        threads: retThreads,
-        messages: messagesWithMentions,
+      if (criteriaExists) {
+        ({ retArr, retThreads } = await dispatch(
+          _getSearchMessages(channelId, guildId, {
+            preFilterUserId,
+            searchBeforeDate,
+            searchAfterDate,
+            searchMessageContent,
+            selectedHasTypes,
+          })
+        ));
+      } else {
+        ({ retArr, retThreads } = await dispatch(_getMessages(channelId)));
+      }
+
+      let payload = {
+        threads: [],
+        messages: [],
       };
+
+      if (!dispatch(getDiscrubCancelled())) {
+        const messagesWithMentions = await dispatch(_parseMentions(retArr));
+
+        payload = {
+          threads: retThreads,
+          messages: messagesWithMentions,
+        };
+      }
+
+      dispatch(setThreads(payload.threads));
+      dispatch(setMessages(payload.messages));
+      dispatch(setIsLoading(false));
+      dispatch(setLookupUserId(null));
+      dispatch(setFetchedMessageLength(0));
+      dispatch(setTotalSearchMessages(0));
+      dispatch(setDiscrubCancelled(false));
+
+      return payload;
     }
-
-    dispatch(setThreads(payload.threads));
-    dispatch(setMessages(payload.messages));
-    dispatch(setIsLoading(false));
-    dispatch(setLookupUserId(null));
-    dispatch(setFetchedMessageLength(0));
-    dispatch(setTotalSearchMessages(0));
-
-    return payload;
-  }
-};
+  };
 
 const _parseMentions = (messages) => async (dispatch, getState) => {
   const { token } = getState().user;

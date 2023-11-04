@@ -3,8 +3,10 @@ import { wait } from "../../utils";
 import {
   checkDiscrubPaused,
   deleteMessage,
+  getDiscrubCancelled,
   getMessageData,
   resetMessageData,
+  setDiscrubCancelled,
 } from "../message/messageSlice";
 import {
   setDm,
@@ -46,17 +48,21 @@ export const purge =
   (arr = []) =>
   async (dispatch, getState) => {
     const { id: userId } = getState().user;
+    const { selectedGuild } = getState().guild;
+    const { preFilterUserId } = getState().channel;
     dispatch(setDeleting(true));
     for (const entity of arr) {
       dispatch(setDeleteObj({}));
       dispatch(setDebugMessage("Searching for messages..."));
       await wait(1, () => dispatch(resetDebugMessage()));
       dispatch(resetMessageData());
-      const isDm = entity.isDm();
-      isDm ? dispatch(setDm(entity.id)) : dispatch(setChannel(entity.id));
-      isDm && dispatch(setDmPreFilterUserId(userId));
-      await wait(1); // TODO: Verify that these waits are actually needed.
-      await dispatch(getMessageData());
+      await dispatch(
+        getMessageData(
+          selectedGuild?.id,
+          entity.id,
+          entity.isDm() ? userId : preFilterUserId // Discrub can only delete messages from the current user
+        )
+      );
       let count = 0;
       const selectedMessages = getState().message.messages;
       const selectedCount = selectedMessages.length;
@@ -64,8 +70,7 @@ export const purge =
         dispatch(setDebugMessage("Still searching..."));
         await wait(1, () => dispatch(resetDebugMessage()));
       }
-      while (count < selectedCount) {
-        // TODO: Check that we haven't cancelled task
+      while (count < selectedCount && !dispatch(getDiscrubCancelled())) {
         await dispatch(checkDiscrubPaused());
         let currentRow = selectedMessages[count];
         dispatch(
@@ -95,7 +100,7 @@ export const purge =
       }
       dispatch(setDeleting(false));
       dispatch(resetMessageData());
-      dispatch(resetChannel());
+      dispatch(setDiscrubCancelled(false));
     }
   };
 
