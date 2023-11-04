@@ -1,12 +1,13 @@
-import React, { useContext } from "react";
+import React from "react";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Tooltip from "../../DiscordTooltip/DiscordToolTip";
 import AttachmentIcon from "@mui/icons-material/Attachment";
-import { MessageContext } from "../../../../context/message/MessageContext";
 import DiscordTableStyles from "../Styles/DiscordTable.styles";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import MessageMock from "../../../Export/Mock/MessageMock";
+import { useDispatch } from "react-redux";
+import { setModifyMessage } from "../../../../features/message/messageSlice";
 
 export default function DiscordTableMessage({
   row,
@@ -14,7 +15,7 @@ export default function DiscordTableMessage({
   openEmbedModal = () => {},
 }) {
   const classes = DiscordTableStyles();
-  const { setAttachmentMessage, setEmbedMessage } = useContext(MessageContext);
+  const dispatch = useDispatch();
   const hasValidEmbed = row?.embeds?.some((embed) => embed?.type === "rich");
 
   return (
@@ -33,7 +34,7 @@ export default function DiscordTableMessage({
               <IconButton
                 onClick={async (e) => {
                   e.stopPropagation();
-                  await setAttachmentMessage(row);
+                  dispatch(setModifyMessage(row));
                   openAttachmentModal();
                 }}
                 color="secondary"
@@ -47,7 +48,7 @@ export default function DiscordTableMessage({
               <IconButton
                 onClick={async (e) => {
                   e.stopPropagation();
-                  await setEmbedMessage(row);
+                  dispatch(setModifyMessage(row));
                   openEmbedModal();
                 }}
                 color="secondary"

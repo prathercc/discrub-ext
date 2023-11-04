@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import Box from "@mui/material/Box";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
@@ -6,8 +6,9 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { visuallyHidden } from "@mui/utils";
-import { MessageContext } from "../../../../context/message/MessageContext";
 import DiscordTableStyles from "../Styles/DiscordTable.styles";
+import { useSelector } from "react-redux";
+import { selectMessage } from "../../../../features/message/messageSlice";
 
 const EnhancedTableHead = ({
   onSelectAllClick,
@@ -19,8 +20,7 @@ const EnhancedTableHead = ({
 }) => {
   const classes = DiscordTableStyles();
 
-  const { state: messageState } = useContext(MessageContext);
-  const { selectedMessages } = messageState;
+  const { selectedMessages } = useSelector(selectMessage);
 
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);

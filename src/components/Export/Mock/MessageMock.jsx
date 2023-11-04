@@ -1,22 +1,21 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Stack, Typography } from "@mui/material";
 import ExportStyles from "../Styles/Export.styles";
 import AttachmentMock from "./AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
-import { MessageContext } from "../../../context/message/MessageContext";
 import EmbedMock from "./EmbedMock";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { GuildContext } from "../../../context/guild/GuildContext";
 import classNames from "classnames";
 import { format, parseISO } from "date-fns";
+import { selectChannel } from "../../../features/channel/channelSlice";
+import { useSelector } from "react-redux";
+import { selectGuild } from "../../../features/guild/guildSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
 
 const MessageMock = ({ message, index, hideAttachments = false }) => {
-  const { state: guildState } = useContext(GuildContext);
-  const { state: channelState } = useContext(ChannelContext);
-  const { state: messageState } = useContext(MessageContext);
-  const { selectedGuild } = guildState;
-  const { selectedChannel, channels } = channelState;
-  const { threads, messages } = messageState;
+  const { selectedGuild } = useSelector(selectGuild);
+  const { selectedChannel, channels } = useSelector(selectChannel);
+  const { threads, messages } = useSelector(selectMessage);
+
   const classes = ExportStyles();
   const messageDate = parseISO(message.timestamp, new Date());
   const tz = messageDate

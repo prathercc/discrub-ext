@@ -1,13 +1,18 @@
-import React, { useContext } from "react";
+import React from "react";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ExportContext } from "../../../../context/export/ExportContext";
 import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
 import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectExport,
+  setSortOverride,
+} from "../../../../features/export/exportSlice";
 
 const SortDirectionToggle = () => {
-  const { state: exportState, setSortOverride } = useContext(ExportContext);
-  const { sortOverride, isExporting } = exportState;
+  const dispatch = useDispatch();
+  const { sortOverride, isExporting } = useSelector(selectExport);
+
   return (
     <Tooltip
       arrow
@@ -21,8 +26,8 @@ const SortDirectionToggle = () => {
     >
       <IconButton
         disabled={isExporting}
-        onClick={async () =>
-          await setSortOverride(sortOverride === "asc" ? "desc" : "asc")
+        onClick={() =>
+          dispatch(setSortOverride(sortOverride === "asc" ? "desc" : "asc"))
         }
         color={sortOverride === "asc" ? "primary" : "secondary"}
       >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -12,10 +12,15 @@ import EditModal from "../../Modals/EditModal/EditModal";
 import AttachmentModal from "../../Modals/AttachmentModal/AttachmentModal";
 import EnhancedTableHead from "./EnhancedTableHead/EnhancedTableHead";
 import EnhancedTableToolbar from "./EnhancedTableToolbar/EnhancedTableToolbar";
-import { MessageContext } from "../../../context/message/MessageContext";
 import DiscordTableStyles from "./Styles/DiscordTable.styles";
 import DiscordTableMessage from "./DiscordTableMessage/DiscordTableMessage";
 import EmbedModal from "../../Modals/EmbedModal/EmbedModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectMessage,
+  setOrder,
+  setSelected,
+} from "../../../features/message/messageSlice";
 
 export default function DiscordTable() {
   const classes = DiscordTableStyles();
@@ -43,19 +48,15 @@ export default function DiscordTable() {
       label: "Message",
     },
   ];
+  const dispatch = useDispatch();
   const {
-    state: messageState,
-    setSelected,
-    setOrder,
-  } = useContext(MessageContext);
-  const {
+    filters,
     filteredMessages,
     messages,
-    filters,
-    selectedMessages,
     order,
     orderBy,
-  } = messageState;
+    selectedMessages,
+  } = useSelector(selectMessage);
   const displayRows =
     filterOpen && filters.length ? filteredMessages : messages;
 
@@ -65,15 +66,15 @@ export default function DiscordTable() {
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc", property);
+    dispatch(setOrder({ order: isAsc ? "desc" : "asc", orderBy: property }));
   };
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      setSelected(displayRows.map((n) => n.id));
+      dispatch(setSelected(displayRows.map((n) => n.id)));
       return;
     } else {
-      setSelected([]);
+      dispatch(setSelected([]));
     }
   };
   const handleClick = (event, id) => {
@@ -91,7 +92,7 @@ export default function DiscordTable() {
         selectedMessages.slice(selectedIndex + 1)
       );
     }
-    setSelected(newSelected);
+    dispatch(setSelected(newSelected));
   };
 
   const handleChangePage = (event, newPage) => {

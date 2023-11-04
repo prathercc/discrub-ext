@@ -1,28 +1,33 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { DmContext } from "../../../context/dm/DmContext";
 import ClearIcon from "@mui/icons-material/Clear";
 import AdvancedFilteringStyles from "../AdvancedFiltering/AdvancedFiltering.styles";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectDm,
+  setPreFilterUserId as setDmPreFilterUserId,
+} from "../../../features/dm/dmSlice";
+import {
+  selectChannel,
+  setPreFilterUserId,
+} from "../../../features/channel/channelSlice";
 
 function PrefilterUser({ isDm = false, purge, disabled = false }) {
-  const { state: channelState, setPreFilterUserId } =
-    useContext(ChannelContext);
-  const { state: dmState, setPreFilterUserId: setDmPrefilterUserId } =
-    useContext(DmContext);
-
-  const classes = AdvancedFilteringStyles();
-
-  const { preFilterUserIds, preFilterUserId } = channelState;
+  const dispatch = useDispatch();
   const {
     preFilterUserId: dmPreFilterUserId,
     preFilterUserIds: dmPreFilterUserIds,
-  } = dmState;
+  } = useSelector(selectDm);
+  const { preFilterUserId, preFilterUserIds } = useSelector(selectChannel);
+
+  const classes = AdvancedFilteringStyles();
 
   const users = isDm ? dmPreFilterUserIds : preFilterUserIds;
   const value = isDm ? dmPreFilterUserId : preFilterUserId;
-  const setUserId = isDm ? setDmPrefilterUserId : setPreFilterUserId;
+  const setUserId = isDm
+    ? dispatch(setDmPreFilterUserId)
+    : dispatch(setPreFilterUserId);
 
   const getDisplayValue = () => {
     const foundUser = users.find((user) => user.id === value);

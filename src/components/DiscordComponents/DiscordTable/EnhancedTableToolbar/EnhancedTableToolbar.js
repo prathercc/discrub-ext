@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -9,12 +9,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import EditIcon from "@mui/icons-material/Edit";
-import { MessageContext } from "../../../../context/message/MessageContext";
 import FilterComponent from "../FilterComponent/FilterComponent";
 import DiscordTableStyles from "../Styles/DiscordTable.styles";
 import ExportButton from "../../../Export/ExportButton/ExportButton";
-import { DmContext } from "../../../../context/dm/DmContext";
 import { Button, Collapse } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { selectDm } from "../../../../features/dm/dmSlice";
+import {
+  resetFilters,
+  selectMessage,
+} from "../../../../features/message/messageSlice";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -24,15 +28,14 @@ const EnhancedTableToolbar = ({
 }) => {
   const classes = DiscordTableStyles();
 
-  const { state: dmState } = useContext(DmContext);
-  const { selectedDm } = dmState;
-  const { state: messageState, resetFilters } = useContext(MessageContext);
-  const { selectedMessages } = messageState;
+  const dispatch = useDispatch();
+  const { selectedDm } = useSelector(selectDm);
+  const { selectedMessages } = useSelector(selectMessage);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleFilterToggle = () => {
-    if (filterOpen) resetFilters();
+    if (filterOpen) dispatch(resetFilters());
     setFilterOpen(!filterOpen);
   };
 

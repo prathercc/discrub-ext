@@ -1,24 +1,31 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import DiscordDateTimePicker from "../../DiscordDateTimePicker/DiscordDateTimePicker";
-import { MessageContext } from "../../../../context/message/MessageContext";
 import FilterComponentStyles from "../Styles/FilterComponent.styles";
 import { MenuItem } from "@mui/material";
-import { ChannelContext } from "../../../../context/channel/ChannelContext";
 import { debounce } from "debounce";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  filterMessages,
+  selectMessage,
+  updateFilters,
+} from "../../../../features/message/messageSlice";
+import { selectChannel } from "../../../../features/channel/channelSlice";
 
 const FilterComponent = () => {
   const classes = FilterComponentStyles();
-  const { updateFilters, state: messageState } = useContext(MessageContext);
-  const { state: channelState } = useContext(ChannelContext);
-  const { threads } = messageState;
-  const { selectedChannel } = channelState;
 
-  const handleFilterUpdate = debounce(
-    (name, e, type) => updateFilters(name, e, type),
-    600
-  );
+  const dispatch = useDispatch();
+  const { threads } = useSelector(selectMessage);
+  const { selectedChannel } = useSelector(selectChannel);
+
+  const handleFilterUpdate = (name, e, type) => {
+    dispatch(
+      updateFilters({ filterName: name, filterValue: e, filterType: type })
+    );
+    debounce(() => dispatch(filterMessages()), 600);
+  };
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);

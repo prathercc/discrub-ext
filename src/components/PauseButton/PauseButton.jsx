@@ -1,14 +1,16 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Alert, Button, Snackbar } from "@mui/material";
-import { MessageContext } from "../../context/message/MessageContext";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectMessage,
+  setDiscrubPaused,
+} from "../../features/message/messageSlice";
 
 const PauseButton = ({ disabled = false }) => {
-  const { state: messageState, setDiscrubPaused } = useContext(MessageContext);
-
-  // TODO: Could we create another context for utility flags like this?
-  const { discrubPaused } = messageState;
+  const dispatch = useDispatch();
+  const { discrubPaused } = useSelector(selectMessage);
 
   return (
     <>
@@ -17,7 +19,7 @@ const PauseButton = ({ disabled = false }) => {
         disabled={disabled}
         color="secondary"
         variant="contained"
-        onClick={() => setDiscrubPaused(!discrubPaused)}
+        onClick={() => dispatch(setDiscrubPaused(!discrubPaused))}
       >
         {discrubPaused ? "Resume" : "Pause"}
       </Button>

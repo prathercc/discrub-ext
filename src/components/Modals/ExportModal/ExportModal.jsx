@@ -1,12 +1,19 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Dialog, DialogTitle } from "@mui/material";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ExportButtonStyles from "../../Export/ExportButton/Styles/ExportButton.styles";
-import { ExportContext } from "../../../context/export/ExportContext";
 import BulkContent from "../../Export/ExportButton/BulkContent/BulkContent";
 import Actions from "../../Export/ExportButton/Actions/Actions";
 import DefaultContent from "../../Export/ExportButton/DefaultContent/DefaultContent";
+import { useDispatch } from "react-redux";
+import {
+  resetChannel,
+  setSelectedExportChannels,
+} from "../../../features/channel/channelSlice";
+import {
+  resetMessageData,
+  setDiscrubPaused,
+} from "../../../features/message/messageSlice";
+import { setIsExporting, setName } from "../../../features/export/exportSlice";
 
 const ExportModal = ({
   dialogOpen,
@@ -16,25 +23,19 @@ const ExportModal = ({
   contentRef,
 }) => {
   const classes = ExportButtonStyles();
-
-  const { setName, setIsExporting } = useContext(ExportContext);
-
+  const dispatch = useDispatch();
   const exportType = isDm ? "DM" : "Guild";
-  const { resetMessageData, setDiscrubPaused } = useContext(MessageContext);
-
-  const { setSelectedExportChannels, resetChannel } =
-    useContext(ChannelContext);
 
   const handleDialogClose = () => {
     setDialogOpen(false);
     if (bulk) {
-      setSelectedExportChannels([]);
-      resetChannel();
-      resetMessageData();
+      dispatch(setSelectedExportChannels([]));
+      dispatch(resetChannel());
+      dispatch(resetMessageData());
     }
-    setName("");
-    setIsExporting(false);
-    setDiscrubPaused(false);
+    dispatch(setName(""));
+    dispatch(setIsExporting(false));
+    dispatch(setDiscrubPaused(false));
   };
 
   return (

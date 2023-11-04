@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Stack,
   Typography,
@@ -11,19 +11,24 @@ import {
 import ChannelMessagesStyles from "../ChannelMessages/Styles/ChannelMessages.styles";
 import NoEncryptionGmailerrorredIcon from "@mui/icons-material/NoEncryptionGmailerrorred";
 import CloseIcon from "@mui/icons-material/Close";
-import { UserContext } from "../../../context/user/UserContext";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  getUserDataManually,
+  selectUser,
+} from "../../../features/user/userSlice";
 
 function TokenNotFound() {
+  const { isLoading } = useSelector(selectUser);
+  const dispatch = useDispatch();
+
   const classes = ChannelMessagesStyles();
   const inputRef = useRef(null);
-  const { getUserDataManually, state: userState } = useContext(UserContext);
-  const { isLoading } = userState;
 
   const [token, setToken] = useState("");
   const [authFailed, setAuthFailed] = useState(false);
 
   const handleSubmitToken = async () => {
-    const { successful } = await getUserDataManually(token);
+    const { successful } = await dispatch(getUserDataManually(token));
     if (!successful) setAuthFailed(true);
   };
 

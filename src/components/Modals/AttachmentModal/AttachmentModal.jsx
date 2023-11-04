@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React from "react";
 import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
 import {
   Typography,
@@ -10,62 +10,24 @@ import {
   DialogActions,
   DialogContent,
 } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ModalStyles from "../Styles/Modal.styles";
-import { wait } from "../../../utils";
 import Attachment from "./Attachment/Attachment";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  deleteAttachment,
+  selectMessage,
+} from "../../../features/message/messageSlice";
 
 const AttachmentModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
 
-  const {
-    state: messageState,
-    updateMessage,
-    deleteMessage,
-  } = useContext(MessageContext);
+  const dispatch = useDispatch();
 
-  const { attachmentMessage } = messageState;
+  const { modify } = useSelector(selectMessage);
+  const { message: modifyMessage, active: deleting, statusText } = modify || {};
 
-  const [deleting, setDeleting] = useState(false);
-  const [debugMessage, setDebugMessage] = useState("");
-  const resetDebugMessage = () => {
-    setDebugMessage("");
-  };
-
-  /**
-   * Attempt to delete provided attachment or delete a message when no content or attachment will exist following removal of attachment
-   * @param {*} attachment Attachment to delete
-   */
   const handleDeleteAttachment = async (attachment) => {
-    let shouldEdit =
-      (attachmentMessage.content && attachmentMessage.content.length > 0) ||
-      attachmentMessage.attachments.length > 1;
-    setDeleting(true);
-    if (shouldEdit) {
-      const response = await updateMessage({
-        ...attachmentMessage,
-        attachments: attachmentMessage.attachments.filter(
-          (attch) => attch.id !== attachment.id
-        ),
-      });
-      if (response === null) {
-        if (attachmentMessage.attachments.length === 0) handleClose();
-      } else {
-        setDebugMessage("Entire message must be deleted to remove attachment!");
-        await wait(0.5, resetDebugMessage);
-      }
-    } else {
-      const response = await deleteMessage(attachmentMessage);
-      if (response === null) {
-        handleClose();
-      } else {
-        setDebugMessage(
-          "You do not have permission to delete this attachment!"
-        );
-        await wait(0.5, resetDebugMessage);
-      }
-    }
-    setDeleting(false);
+    dispatch(deleteAttachment(attachment));
   };
 
   return (
@@ -78,8 +40,8 @@ const AttachmentModal = ({ open, handleClose }) => {
       </DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <Stack className={classes.stackContainer} spacing={1}>
-          {attachmentMessage &&
-            attachmentMessage.attachments.map((a) => {
+          {modifyMessage &&
+            modifyMessage.attachments.map((a) => {
               return (
                 <Attachment
                   attachment={a}
@@ -89,7 +51,7 @@ const AttachmentModal = ({ open, handleClose }) => {
               );
             })}
         </Stack>
-        <ModalDebugMessage debugMessage={debugMessage} />
+        <ModalDebugMessage debugMessage={statusText} />
       </DialogContent>
       <DialogActions className={classes.dialogActions}>
         <Stack

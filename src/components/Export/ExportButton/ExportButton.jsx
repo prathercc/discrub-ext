@@ -1,12 +1,16 @@
-import React, { useContext, useRef } from "react";
+import React, { useRef } from "react";
 import { Button } from "@mui/material";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { GuildContext } from "../../../context/guild/GuildContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ExportMessages from "../../Export/ExportMessages/ExportMessages";
-import { DmContext } from "../../../context/dm/DmContext";
-import { ExportContext } from "../../../context/export/ExportContext";
 import ExportModal from "../../Modals/ExportModal/ExportModal";
+import { useDispatch, useSelector } from "react-redux";
+import { selectDm } from "../../../features/dm/dmSlice";
+import { selectChannel } from "../../../features/channel/channelSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
+import { selectGuild } from "../../../features/guild/guildSlice";
+import {
+  resetExportSettings,
+  selectExport,
+} from "../../../features/export/exportSlice";
 
 const ExportButton = ({
   dialogOpen,
@@ -14,33 +18,24 @@ const ExportButton = ({
   isDm = false,
   bulk = false,
 }) => {
-  const {
-    state: exportState,
-    setDownloadImages,
-    setShowAvatars,
-    setPreviewImages,
-    setMessagesPerPage,
-    setSortOverride,
-  } = useContext(ExportContext);
-  const { isGenerating } = exportState;
+  const dispatch = useDispatch();
+  const { preFilterUserId: dmPreFilterUserId, selectedDm } =
+    useSelector(selectDm);
+  const { preFilterUserId, selectedChannel } = useSelector(selectChannel);
+  const { isGenerating } = useSelector(selectExport);
 
-  const exportType = isDm ? "DM" : "Guild";
-  const { state: messageState } = useContext(MessageContext);
-
-  const { state: dmState } = useContext(DmContext);
-  const { state: channelState } = useContext(ChannelContext);
-  const { state: guildState } = useContext(GuildContext);
   const {
-    isLoading: messagesLoading,
-    messages,
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
     selectedHasTypes,
-  } = messageState;
-  const { preFilterUserId, selectedChannel } = channelState;
-  const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
-  const { selectedGuild } = guildState;
+    messages,
+    isLoading: messagesLoading,
+  } = useSelector(selectMessage);
+
+  const { selectedGuild } = useSelector(selectGuild);
+  const exportType = isDm ? "DM" : "Guild";
+
   const contentRef = useRef();
 
   const bulkDisabled =
@@ -61,11 +56,7 @@ const ExportButton = ({
       <Button
         disabled={bulk && bulkDisabled}
         onClick={async () => {
-          await setDownloadImages(false);
-          await setShowAvatars(false);
-          await setPreviewImages(false);
-          await setSortOverride("desc");
-          await setMessagesPerPage(1000);
+          dispatch(resetExportSettings());
           setDialogOpen(true);
         }}
         variant="contained"

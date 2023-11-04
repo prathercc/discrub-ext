@@ -1,15 +1,16 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Stack, Button, Collapse } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
-import { DmContext } from "../../../context/dm/DmContext";
 import AdvancedFilteringStyles from "./AdvancedFiltering.styles";
 import BeforeAndAfterFields from "../BeforeAndAfterFields/BeforeAndAfterFields";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import PrefilterUser from "../PrefilterUser/PrefilterUser";
 import MessageContains from "../MessageContains/MessageContains";
-import { GuildContext } from "../../../context/guild/GuildContext";
 import HasType from "../HasType/HasType";
+import { useSelector } from "react-redux";
+import { selectGuild } from "../../../features/guild/guildSlice";
+import { selectDm } from "../../../features/dm/dmSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
 
 function AdvancedFiltering({
   closeAnnouncement = () => {},
@@ -17,15 +18,11 @@ function AdvancedFiltering({
   setShowOptionalFilters,
   showOptionalFilters,
 }) {
-  const { state: guildState } = useContext(GuildContext);
-  const { state: messageDataState } = useContext(MessageContext);
-  const { state: dmState } = useContext(DmContext);
+  const { selectedGuild } = useSelector(selectGuild);
+  const { selectedDm } = useSelector(selectDm);
+  const { isLoading: messagesLoading } = useSelector(selectMessage);
 
   const classes = AdvancedFilteringStyles();
-
-  const { selectedGuild } = guildState;
-  const { isLoading: messagesLoading } = messageDataState;
-  const { selectedDm } = dmState;
 
   const handleFilterButtonClick = () => {
     closeAnnouncement();

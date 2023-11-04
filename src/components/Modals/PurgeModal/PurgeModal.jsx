@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -10,70 +10,53 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
 import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
 import ChannelMessagesStyles from "../../Messages/ChannelMessages/Styles/ChannelMessages.styles";
 import MessageChip from "../MessageChip/MessageChip";
-import { UserContext } from "../../../context/user/UserContext";
-import { DmContext } from "../../../context/dm/DmContext";
 import PrefilterUser from "../../Messages/PrefilterUser/PrefilterUser";
-import { wait } from "../../../utils";
 import PauseButton from "../../PauseButton/PauseButton";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  resetMessageData,
+  selectMessage,
+  setDiscrubCancelled,
+  setDiscrubPaused,
+} from "../../../features/message/messageSlice";
+import {
+  resetChannel,
+  selectChannel,
+  setPreFilterUserId,
+} from "../../../features/channel/channelSlice";
+import {
+  selectDm,
+  setPreFilterUserId as setDmPreFilterUserId,
+} from "../../../features/dm/dmSlice";
+import {
+  purge,
+  selectPurge,
+  setDeleteObj,
+  setDeleting,
+} from "../../../features/purge/purgeSlice";
+import { selectUser } from "../../../features/user/userSlice";
 
 const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+  const dispatch = useDispatch();
   const classes = ChannelMessagesStyles();
-  const [deleting, setDeleting] = useState(false);
-  const [deleteObj, setDeleteObj] = useState(null);
-  const [debugMessage, setDebugMessage] = useState("");
-  const resetDebugMessage = () => {
-    setDebugMessage("");
-  };
-
-  const openRef = useRef();
-  openRef.current = dialogOpen;
 
   const {
-    state: channelState,
-    setPreFilterUserId,
-    setChannel,
-    resetChannel,
-  } = useContext(ChannelContext);
-
-  const {
-    state: dmState,
-    setPreFilterUserId: setDmPreFilterUserId,
-    setDm,
-  } = useContext(DmContext);
-
-  const {
-    state: messageDataState,
-    deleteMessage,
-    resetMessageData,
-    getMessageData,
-    setDiscrubPaused,
-    checkDiscrubPaused,
-  } = useContext(MessageContext);
-  const { state: userState } = useContext(UserContext);
-
-  const {
-    messages,
     isLoading: messagesLoading,
     fetchedMessageLength,
     totalSearchMessages,
-  } = messageDataState;
-  const { channels, selectedChannel, preFilterUserId } = channelState;
-  const { selectedDm } = dmState;
-
-  const messagesRef = useRef();
-  messagesRef.current = messages;
-
-  const messagesLoadingRef = useRef();
-  messagesLoadingRef.current = messagesLoading;
+  } = useSelector(selectMessage);
+  const { channels, selectedChannel, preFilterUserId } =
+    useSelector(selectChannel);
+  const { selectedDm } = useSelector(selectDm);
+  const { deleting, deleteObj, debugMessage } = useSelector(selectPurge);
+  const { id: userId } = useSelector(selectUser);
 
   const finishedPurge = !deleting && deleteObj;
 
@@ -81,69 +64,24 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
 
   useEffect(() => {
     if (dialogOpen) {
-      setDeleteObj(null);
-      setDeleting(false);
+      dispatch(setDeleteObj(null));
+      dispatch(setDeleting(false));
       if (!isDm) {
-        setPreFilterUserId(userState.id);
+        dispatch(setPreFilterUserId(userId));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen]);
 
   const handleClose = async () => {
+    dispatch(setDiscrubCancelled(true));
     setDialogOpen(false);
-    await resetMessageData();
-    isDm ? await setDmPreFilterUserId(null) : await setPreFilterUserId(null);
-    !isDm && (await resetChannel());
-    setDiscrubPaused(false);
-  };
-
-  const handleDeleteMessage = async () => {
-    setDeleting(true);
-    for (const entity of isDm ? [selectedDm] : channels) {
-      setDeleteObj({});
-      setDebugMessage("Searching for messages...");
-      await wait(1, resetDebugMessage);
-      await resetMessageData();
-      isDm ? await setDm(entity.id) : await setChannel(entity.id);
-      isDm && (await setDmPreFilterUserId(userState.id));
-      await getMessageData();
-      let count = 0;
-      const selectedMessages = [...messagesRef.current];
-
-      const selectedCount = selectedMessages.length;
-
-      if (selectedCount === 0) {
-        setDebugMessage("Still searching...");
-        await wait(1, resetDebugMessage);
-      }
-
-      while (count < selectedCount && openRef.current) {
-        await checkDiscrubPaused();
-        let currentRow = selectedMessages[count];
-        setDeleteObj(
-          Object.assign(currentRow, {
-            _index: count + 1,
-            _total: selectedCount,
-          })
-        );
-        const response = await deleteMessage(currentRow);
-        if (response === null) {
-          count++;
-        } else if (response > 0) {
-          setDebugMessage(`Pausing for ${response} seconds`);
-          await wait(response, resetDebugMessage);
-        } else {
-          setDebugMessage("You do not have permission to modify this message!");
-          await wait(0.5, resetDebugMessage);
-          count++;
-        }
-      }
-      if (!openRef.current) break;
-    }
-    setDeleting(false);
-    await resetMessageData();
-    !isDm && (await resetChannel());
+    dispatch(resetMessageData());
+    isDm
+      ? dispatch(setDmPreFilterUserId(null))
+      : dispatch(setPreFilterUserId(null));
+    !isDm && dispatch(resetChannel());
+    dispatch(setDiscrubPaused(false));
   };
 
   const dialogBtnDisabled =
@@ -250,7 +188,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           <Button
             disabled={dialogBtnDisabled}
             variant="contained"
-            onClick={handleDeleteMessage}
+            onClick={() => dispatch(purge(isDm ? [selectedDm] : channels))}
           >
             Purge
           </Button>

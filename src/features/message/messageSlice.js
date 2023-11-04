@@ -31,8 +31,6 @@ export const messageSlice = createSlice({
     fetchedMessageLength: 0, // Current length of fetched messages, used for debugging message fetch progress
     lookupUserId: null, // The userId being looked up (during message fetch process)
     isLoading: null,
-    attachmentMessage: null, // The selected message for deleting attachments.
-    embedMessage: null, // The selected message for viewing embeds.
     threads: [], // The list of threads for a given messages arr
     order: "asc",
     orderBy: "",
@@ -87,12 +85,6 @@ export const messageSlice = createSlice({
       state.searchAfterDate = payload;
     },
 
-    setEmbedMessage: (state, { payload }) => {
-      state.embedMessage = payload;
-    },
-    setAttachmentMessage: (state, { payload }) => {
-      state.attachmentMessage = payload;
-    },
     setSelected: (state, { payload }) => {
       state.selectedMessages = payload;
     },
@@ -308,8 +300,6 @@ export const {
   setSearchBeforeDate,
   setSearchAfterDate,
 
-  setEmbedMessage,
-  setAttachmentMessage,
   setSelected,
   setOrder,
   setMessages,
@@ -383,8 +373,8 @@ export const updateMessage = (message) => async (dispatch, getState) => {
     message.channel_id
   );
   if (!data.message) {
-    const { messages, filteredMessages, attachmentMessage } =
-      getState().message;
+    const { messages, filteredMessages, modify } = getState().message;
+    const { message: modifyMessage } = modify;
     const updatedMessages = messages.map((message) =>
       message.id === data.id
         ? { ...data, username: message.username }
@@ -395,14 +385,14 @@ export const updateMessage = (message) => async (dispatch, getState) => {
         ? { ...data, username: message.username }
         : { ...message }
     );
-    const updatedAttachmentMessage =
-      attachmentMessage?.id === data.id
-        ? { ...data, username: attachmentMessage.username }
-        : attachmentMessage;
+    const updatedModifyMessage =
+      modifyMessage?.id === data.id
+        ? { ...data, username: modifyMessage.username }
+        : modifyMessage;
 
     dispatch(setMessages(updatedMessages));
     dispatch(setFilteredMessages(updatedFilterMessages));
-    dispatch(setAttachmentMessage(updatedAttachmentMessage));
+    dispatch(setModifyMessage(updatedModifyMessage));
 
     return null;
   } else if (data.retry_after) {

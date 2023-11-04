@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -10,16 +10,16 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Divider from "@mui/material/Divider";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ModalStyles from "../Styles/Modal.styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useSelector } from "react-redux";
+import { selectMessage } from "../../../features/message/messageSlice";
 
 const EmbedModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
 
-  const { state: messageState } = useContext(MessageContext);
-
-  const { embedMessage } = messageState;
+  const { modify } = useSelector(selectMessage);
+  const { message: modifyMessage } = modify || {};
 
   return (
     <Dialog fullWidth open={open} onClose={handleClose}>
@@ -31,7 +31,7 @@ const EmbedModal = ({ open, handleClose }) => {
       </DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <Stack className={classes.stackContainer} pr="25px" spacing={2}>
-          {embedMessage?.embeds
+          {modifyMessage?.embeds
             ?.filter((embed) => embed.type === "rich")
             .map((embed, i) => {
               return (

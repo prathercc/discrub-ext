@@ -1,13 +1,18 @@
-import React, { useContext } from "react";
+import React from "react";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ExportContext } from "../../../../context/export/ExportContext";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import NoAccountsIcon from "@mui/icons-material/NoAccounts";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectExport,
+  setShowAvatars,
+} from "../../../../features/export/exportSlice";
 
 const ShowAvatarsToggle = () => {
-  const { state: exportState, setShowAvatars } = useContext(ExportContext);
-  const { showAvatars, isExporting } = exportState;
+  const dispatch = useDispatch();
+  const { showAvatars, isExporting } = useSelector(selectExport);
+
   return (
     <Tooltip
       arrow
@@ -17,7 +22,7 @@ const ShowAvatarsToggle = () => {
     >
       <IconButton
         disabled={isExporting}
-        onClick={async () => await setShowAvatars(!showAvatars)}
+        onClick={() => dispatch(setShowAvatars(!showAvatars))}
         color={showAvatars ? "primary" : "secondary"}
       >
         {!showAvatars ? <NoAccountsIcon /> : <AccountCircleIcon />}

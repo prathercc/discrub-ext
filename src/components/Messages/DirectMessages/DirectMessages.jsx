@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import DiscordTable from "../../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
@@ -12,9 +12,6 @@ import {
   Button,
   Autocomplete,
 } from "@mui/material";
-import { UserContext } from "../../../context/user/UserContext";
-import { DmContext } from "../../../context/dm/DmContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import DirectMessagesStyles from "./Styles/DirectMessages.styles";
 import ExportButton from "../../Export/ExportButton/ExportButton";
 import PurgeButton from "../../Purge/PurgeButton/PurgeButton";
@@ -23,6 +20,13 @@ import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
 import CopyAdornment from "../CopyAdornment/CopyAdornment";
 import PauseButton from "../../PauseButton/PauseButton";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser } from "../../../features/user/userSlice";
+import { changeDm, getDms, selectDm } from "../../../features/dm/dmSlice";
+import {
+  getMessageData,
+  selectMessage,
+} from "../../../features/message/messageSlice";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -30,7 +34,15 @@ function DirectMessages() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [showOptionalFilters, setShowOptionalFilters] = useState(false);
 
-  const { state: userState } = useContext(UserContext);
+  const dispatch = useDispatch();
+  const { token } = useSelector(selectUser);
+  const { selectedDm, dms, preFilterUserId } = useSelector(selectDm);
+  const {
+    lookupUserId,
+    fetchedMessageLength,
+    isLoading: messagesLoading,
+    messages,
+  } = useSelector(selectMessage);
 
   const classes = DirectMessagesStyles({
     purgeDialogOpen,
@@ -38,41 +50,13 @@ function DirectMessages() {
     showOptionalFilters,
   });
 
-  const { state: dmState, getDms, setDm } = useContext(DmContext);
-  const {
-    state: messageState,
-    resetMessageData,
-    getMessageData,
-    resetFilters,
-    setSearchAfterDate,
-    setSearchBeforeDate,
-    setSearchMessageContent,
-    setSelectedHasTypes,
-  } = useContext(MessageContext);
-
-  const { selectedDm, dms } = dmState;
-  const {
-    lookupUserId,
-    fetchedMessageLength,
-    isLoading: messagesLoading,
-    messages,
-  } = messageState;
-  const { token } = userState;
-
   const fetchDmData = async () => {
-    await resetMessageData();
-    await getMessageData(selectedDm.id);
+    dispatch(getMessageData(null, selectedDm.id, preFilterUserId));
     setSearchTouched(true);
   };
 
   const handleChangeDm = async (id) => {
-    setDm(id);
-    await setSearchMessageContent(null);
-    await setSearchBeforeDate(null);
-    await setSearchAfterDate(null);
-    await setSelectedHasTypes([]);
-    await resetFilters();
-    await resetMessageData();
+    dispatch(changeDm(id));
     setSearchTouched(false);
   };
 
@@ -86,7 +70,7 @@ function DirectMessages() {
   );
 
   useEffect(() => {
-    if (token) getDms();
+    if (token) dispatch(getDms());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 

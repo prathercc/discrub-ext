@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import MessageChip from "../MessageChip/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
@@ -14,68 +14,36 @@ import {
   DialogContent,
   TextField,
 } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ModalStyles from "../Styles/Modal.styles";
-import { wait } from "../../../utils";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  editMessages,
+  resetModify,
+  selectMessage,
+} from "../../../features/message/messageSlice";
 
 const EditModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
+  const dispatch = useDispatch();
+  const { selectedMessages, modify: modifyState } = useSelector(selectMessage);
 
-  const { state: messageState, updateMessage } = useContext(MessageContext);
-  const { selectedMessages, messages } = messageState;
+  const {
+    active: editing,
+    message: editObj,
+    statusText: debugMessage,
+  } = modifyState;
 
   const [updateText, setUpdateText] = useState("");
-  const [editing, setEditing] = useState(false);
-  const [editObj, setEditObj] = useState(null);
-  const [debugMessage, setDebugMessage] = useState("");
-  const resetDebugMessage = () => {
-    setDebugMessage("");
-  };
-  const openRef = useRef();
-  openRef.current = open;
 
-  /**
-   * Attempt to edit the selected message
-   */
   const handleEditMessage = async () => {
-    setEditing(true);
-    let count = 0;
-    while (count < selectedMessages.length && openRef.current) {
-      let currentMessage = await messages.filter(
-        // eslint-disable-next-line no-loop-func
-        (x) => x.id === selectedMessages[count]
-      )[0];
-      if (currentMessage)
-        setEditObj({
-          author: currentMessage.author,
-          content: currentMessage.content,
-          username: currentMessage.username,
-          id: currentMessage.id,
-        });
-
-      const response = await updateMessage({
-        ...currentMessage,
-        content: updateText,
-      });
-      if (response === null) {
-        count++;
-      } else if (response > 0) {
-        setDebugMessage(`Pausing for ${response} seconds...`);
-        await wait(response, resetDebugMessage);
-      } else {
-        setDebugMessage("You do not have permission to modify this message!");
-        await wait(0.5, resetDebugMessage);
-        count++;
-      }
-    }
-    setEditing(false);
+    dispatch(editMessages(selectedMessages, updateText));
   };
 
   useEffect(() => {
     if (open) {
-      setUpdateText("");
-      setEditing(false);
+      dispatch(resetModify());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   return (

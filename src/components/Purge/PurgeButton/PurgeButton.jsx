@@ -1,33 +1,28 @@
-import React, { useContext, useRef } from "react";
+import React, { useRef } from "react";
 import { Button } from "@mui/material";
-import { GuildContext } from "../../../context/guild/GuildContext";
-import { MessageContext } from "../../../context/message/MessageContext";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { DmContext } from "../../../context/dm/DmContext";
 import PurgeModal from "../../Modals/PurgeModal/PurgeModal";
+import { useSelector } from "react-redux";
+import { selectGuild } from "../../../features/guild/guildSlice";
+import { selectChannel } from "../../../features/channel/channelSlice";
+import { selectDm } from "../../../features/dm/dmSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
 
 const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const openRef = useRef();
   openRef.current = dialogOpen;
 
-  const { state: guildState } = useContext(GuildContext);
-  const { state: channelState } = useContext(ChannelContext);
-
-  const { state: dmState } = useContext(DmContext);
-
-  const { state: messageDataState } = useContext(MessageContext);
-
+  const { selectedGuild } = useSelector(selectGuild);
+  const { selectedChannel, preFilterUserId } = useSelector(selectChannel);
+  const { selectedDm, preFilterUserId: dmPreFilterUserId } =
+    useSelector(selectDm);
   const {
-    messages,
     isLoading: messagesLoading,
-    searchBeforeDate,
     searchAfterDate,
+    searchBeforeDate,
     searchMessageContent,
     selectedHasTypes,
-  } = messageDataState;
-  const { selectedGuild } = guildState;
-  const { selectedChannel, preFilterUserId } = channelState;
-  const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
+    messages,
+  } = useSelector(selectMessage);
 
   const messagesRef = useRef();
   messagesRef.current = messages;

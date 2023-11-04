@@ -1,15 +1,15 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Avatar, Box, Snackbar } from "@mui/material";
 import ExportStyles from "../Styles/Export.styles";
 import PersonIcon from "@mui/icons-material/Person";
-import { ExportContext } from "../../../context/export/ExportContext";
 import copy from "copy-to-clipboard";
+import { useSelector } from "react-redux";
+import { selectExport } from "../../../features/export/exportSlice";
 
 const AuthorAvatar = ({ author, reply, hideAttachments }) => {
   const classes = ExportStyles({ reply, hideAttachments });
-  const { state: exportState } = useContext(ExportContext);
+  const { showAvatars } = useSelector(selectExport);
   const [textCopied, setTextCopied] = useState(false);
-  const { showAvatars } = exportState;
   const showAvatar =
     (hideAttachments && author.avatar) ||
     (!hideAttachments && showAvatars && author.avatar);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
@@ -6,7 +6,6 @@ import MessageChip from "../MessageChip/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import Box from "@mui/material/Box";
 import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
-import { MessageContext } from "../../../context/message/MessageContext";
 import {
   Typography,
   Button,
@@ -19,90 +18,41 @@ import {
   DialogContent,
 } from "@mui/material";
 import ModalStyles from "../Styles/Modal.styles";
-import { wait } from "../../../utils";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  deleteMessages,
+  selectMessage,
+} from "../../../features/message/messageSlice";
 
 const DeleteModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
+  const dispatch = useDispatch();
+  const {
+    selectedMessages,
+    messages,
+    modify: modifyState,
+  } = useSelector(selectMessage);
 
   const {
-    state: messageState,
-    deleteMessage,
-    updateMessage,
-  } = useContext(MessageContext);
-  const { selectedMessages, messages } = messageState;
+    active: deleting,
+    message: deleteObj,
+    statusText: debugMessage,
+  } = modifyState;
 
   const [deleteConfig, setDeleteConfig] = useState({
     attachments: true,
     messages: true,
   });
-  const [deleting, setDeleting] = useState(false);
-  const [deleteObj, setDeleteObj] = useState(null);
-  const [debugMessage, setDebugMessage] = useState("");
-  const resetDebugMessage = () => {
-    setDebugMessage("");
-  };
-  const openRef = useRef();
-  openRef.current = open;
 
   useEffect(() => {
     setDeleteConfig({ attachments: true, messages: true });
   }, [open]);
 
-  /**
-   * Attempt to delete the selected message
-   */
   const handleDeleteMessage = async () => {
-    setDeleting(true);
-    let count = 0;
-    let selectedRows = await messages.filter((x) =>
+    const selectedRows = messages.filter((x) =>
       selectedMessages.includes(x.id)
     );
-    while (count < selectedMessages.length && openRef.current) {
-      let currentRow = await selectedRows.filter(
-        // eslint-disable-next-line no-loop-func
-        (x) => x.id === selectedMessages[count]
-      )[0];
-      setDeleteObj(
-        Object.assign(currentRow, {
-          _index: count + 1,
-          _total: selectedRows.length,
-        })
-      );
-      if (
-        (deleteConfig.attachments && deleteConfig.messages) ||
-        (currentRow.content.length === 0 && deleteConfig.attachments) ||
-        (currentRow.attachments.length === 0 && deleteConfig.messages)
-      ) {
-        const response = await deleteMessage(currentRow);
-        if (response === null) {
-          count++;
-        } else if (response > 0) {
-          setDebugMessage(`Pausing for ${response} seconds...`);
-          await wait(response, resetDebugMessage);
-        } else {
-          setDebugMessage("You do not have permission to modify this message!");
-          await wait(0.5, resetDebugMessage);
-          count++;
-        }
-      } else if (deleteConfig.attachments || deleteConfig.messages) {
-        const response = await updateMessage(
-          deleteConfig.attachments
-            ? { ...currentRow, attachments: [] }
-            : { ...currentRow, content: "" }
-        );
-        if (response === null) {
-          count++;
-        } else if (response > 0) {
-          setDebugMessage(`Pausing for ${response} seconds...`);
-          await wait(response, resetDebugMessage);
-        } else {
-          setDebugMessage("You do not have permission to modify this message!");
-          await wait(0.5, resetDebugMessage);
-          count++;
-        }
-      } else break;
-    }
-    setDeleting(false);
+    dispatch(deleteMessages(selectedRows, deleteConfig));
     handleClose();
   };
   return (

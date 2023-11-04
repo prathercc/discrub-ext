@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import DiscordTable from "../../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
@@ -12,10 +12,6 @@ import {
   Button,
   Autocomplete,
 } from "@mui/material";
-import { UserContext } from "../../../context/user/UserContext";
-import { GuildContext } from "../../../context/guild/GuildContext";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ChannelMessagesStyles from "./Styles/ChannelMessages.styles";
 import PurgeButton from "../../Purge/PurgeButton/PurgeButton";
 import ExportButton from "../../Export/ExportButton/ExportButton";
@@ -25,32 +21,38 @@ import { sortByProperty } from "../../../utils";
 import classNames from "classnames";
 import CopyAdornment from "../CopyAdornment/CopyAdornment";
 import PauseButton from "../../PauseButton/PauseButton";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser } from "../../../features/user/userSlice";
+import {
+  changeGuild,
+  getGuilds,
+  selectGuild,
+} from "../../../features/guild/guildSlice";
+import {
+  changeChannel,
+  selectChannel,
+} from "../../../features/channel/channelSlice";
+import {
+  getMessageData,
+  selectMessage,
+} from "../../../features/message/messageSlice";
 
 function ChannelMessages({ closeAnnouncement }) {
+  const dispatch = useDispatch();
+  const { token } = useSelector(selectUser);
+  const { guilds, selectedGuild } = useSelector(selectGuild);
+  const { channels, selectedChannel, preFilterUserId } =
+    useSelector(selectChannel);
   const {
-    state: messageDataState,
-    getMessageData,
-    resetMessageData,
-    resetFilters,
-    setSearchBeforeDate,
-    setSearchAfterDate,
-    setSearchMessageContent,
-    setSelectedHasTypes,
-  } = useContext(MessageContext);
-  const { state: userState } = useContext(UserContext);
-  const {
-    state: guildState,
-    getGuilds,
-    setGuild,
-    resetGuild,
-  } = useContext(GuildContext);
-  const {
-    state: channelState,
-    getChannels,
-    setChannel,
-    resetChannel,
-    setPreFilterUserId,
-  } = useContext(ChannelContext);
+    messages,
+    isLoading: messagesLoading,
+    fetchedMessageLength,
+    lookupUserId,
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes,
+  } = useSelector(selectMessage);
 
   const [showOptionalFilters, setShowOptionalFilters] = useState(false);
   const [searchTouched, setSearchTouched] = useState(false);
@@ -62,55 +64,21 @@ function ChannelMessages({ closeAnnouncement }) {
     showOptionalFilters,
   });
 
-  const { token } = userState;
-  const { guilds, selectedGuild } = guildState;
-  const { channels, selectedChannel, preFilterUserId } = channelState;
-  const {
-    messages,
-    isLoading: messagesLoading,
-    fetchedMessageLength,
-    lookupUserId,
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes,
-  } = messageDataState;
-
   const fetchChannelData = async () => {
-    await resetMessageData();
-    await getMessageData();
+    dispatch(
+      getMessageData(selectedGuild.id, selectedChannel.id, preFilterUserId)
+    );
     setSearchTouched(true);
   };
 
   const handleGuildChange = async (id) => {
-    if (id) {
-      setGuild(id);
-      await getChannels(id);
-    } else {
-      resetGuild();
-    }
-    await resetChannel();
-    await resetFilters();
-    await setSearchBeforeDate(null);
-    await setSearchAfterDate(null);
-    await setSearchMessageContent(null);
-    await setSelectedHasTypes([]);
-    await resetMessageData();
+    dispatch(changeGuild(id));
     setSearchTouched(false);
   };
 
   const handleChannelChange = async (id) => {
-    if (!id) {
-      await setPreFilterUserId(null);
-      await setSearchBeforeDate(null);
-      await setSearchAfterDate(null);
-      await setSearchMessageContent(null);
-      await setSelectedHasTypes([]);
-    }
-    await resetFilters();
-    await resetMessageData();
+    dispatch(changeChannel(id));
     setSearchTouched(false);
-    setChannel(id);
   };
 
   const advancedFilterActive = [
@@ -145,7 +113,7 @@ function ChannelMessages({ closeAnnouncement }) {
   }, [purgeDialogOpen, exportDialogOpen]);
 
   useEffect(() => {
-    if (token) getGuilds();
+    if (token) dispatch(getGuilds());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 

@@ -1,16 +1,14 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Stack, CircularProgress, Typography } from "@mui/material";
-import { MessageContext } from "../../../../context/message/MessageContext";
 import ExportButtonStyles from "../Styles/ExportButton.styles";
-import { ExportContext } from "../../../../context/export/ExportContext";
+import { useSelector } from "react-redux";
+import { selectExport } from "../../../../features/export/exportSlice";
+import { selectMessage } from "../../../../features/message/messageSlice";
 
 const Progress = () => {
   const classes = ExportButtonStyles();
-
-  const { state: exportState } = useContext(ExportContext);
-  const { name, statusText } = exportState;
-  const { state: messageState } = useContext(MessageContext);
-  const { fetchedMessageLength } = messageState;
+  const { name, statusText } = useSelector(selectExport);
+  const { fetchedMessageLength } = useSelector(selectMessage);
 
   return (
     <Stack
