@@ -29,17 +29,9 @@ export const dmSlice = createSlice({
       state.isLoading = payload;
     },
     setDms: (state, { payload }) => {
-      state.dms = [
-        payload.map((dm) => ({
-          ...dm,
-          name:
-            dm.recipients.length === 1
-              ? dm.recipients[0].username
-              : dm.name
-              ? `Group Chat - ${dm.name}`
-              : `Unnamed Group Chat - ${dm.id}`,
-        })),
-      ];
+      state.dms = payload.map((dm) =>
+        Object.assign(dm, { name: _getDmName(dm) })
+      );
     },
     setDm: (state, { payload }) => {
       const selectedDm = state.dms.find((dm) => dm.id === payload);
@@ -88,6 +80,13 @@ export const changeDm = (dmId) => async (dispatch, getState) => {
   dispatch(resetMessageData());
   dispatch(resetFilters());
   dispatch(setDm(dmId));
+};
+
+const _getDmName = (dm) => {
+  const { recipients, name, id } = dm;
+  return recipients.length === 1
+    ? recipients[0].username
+    : `${name ? "" : "Unnamed "}Group Chat - ${name || id}`;
 };
 
 export const selectDm = (state) => state.dm;
