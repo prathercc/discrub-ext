@@ -105,10 +105,12 @@ const BulkContent = ({ isDm = false }) => {
               >
                 <IconButton
                   onClick={() =>
-                    setSelectedExportChannels(
-                      selectedExportChannels.length
-                        ? []
-                        : channels.map((c) => c.id)
+                    dispatch(
+                      setSelectedExportChannels(
+                        selectedExportChannels.length
+                          ? []
+                          : channels.map((c) => c.id)
+                      )
                     )
                   }
                   color={
