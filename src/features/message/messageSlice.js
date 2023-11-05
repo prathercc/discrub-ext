@@ -334,7 +334,7 @@ export const deleteAttachment = (attachment) => async (dispatch, getState) => {
     message.attachments.length > 1;
   dispatch(setIsModifying(true));
   if (shouldEdit) {
-    const updatedMessage = Object.assign(message, {
+    const updatedMessage = Object.assign(message.getSafeCopy(), {
       attachments: message.attachments.filter(
         (attch) => attch.id !== attachment.id
       ),
@@ -409,14 +409,15 @@ export const editMessages =
     dispatch(setIsModifying(true));
     let count = 0;
     while (count < messages.length && !dispatch(getDiscrubCancelled())) {
-      const currentMessage = messages[0];
+      const currentMessage = messages[count];
       dispatch(setModifyMessage(currentMessage));
 
       const response = await dispatch(
-        updateMessage({
-          ...currentMessage,
-          content: updateText,
-        })
+        updateMessage(
+          Object.assign(currentMessage.getSafeCopy(), {
+            content: updateText,
+          })
+        )
       );
       if (response === null) {
         count++;
@@ -429,7 +430,7 @@ export const editMessages =
             "You do not have permission to modify this message!"
           )
         );
-        await wait(0.5, () => dispatch(resetModifyStatusText()));
+        await wait(2, () => dispatch(resetModifyStatusText()));
         count++;
       }
     }
@@ -478,7 +479,7 @@ export const deleteMessages =
       const currentRow = messages[count];
       dispatch(
         setModifyMessage(
-          Object.assign(currentRow, {
+          Object.assign(currentRow.getSafeCopy(), {
             _index: count + 1,
             _total: messages.length,
           })
@@ -489,7 +490,9 @@ export const deleteMessages =
         (currentRow.content.length === 0 && deleteConfig.attachments) ||
         (currentRow.attachments.length === 0 && deleteConfig.messages)
       ) {
-        const response = await dispatch(deleteMessage(currentRow));
+        const response = await dispatch(
+          deleteMessage(currentRow.getSafeCopy())
+        );
         if (response === null) {
           count++;
         } else if (response > 0) {
@@ -501,15 +504,16 @@ export const deleteMessages =
               "You do not have permission to modify this message!"
             )
           );
-          await wait(0.5, () => dispatch(resetModifyStatusText()));
+          await wait(2, () => dispatch(resetModifyStatusText()));
           count++;
         }
       } else if (deleteConfig.attachments || deleteConfig.messages) {
         const response = await dispatch(
           updateMessage(
-            deleteConfig.attachments
-              ? { ...currentRow, attachments: [] }
-              : { ...currentRow, content: "" }
+            Object.assign(
+              currentRow.getSafeCopy(),
+              deleteConfig.attachments ? { attachments: [] } : { content: "" }
+            )
           )
         );
         if (response === null) {
@@ -523,7 +527,7 @@ export const deleteMessages =
               "You do not have permission to modify this message!"
             )
           );
-          await wait(0.5, () => dispatch(resetModifyStatusText()));
+          await wait(2, () => dispatch(resetModifyStatusText()));
           count++;
         }
       } else break;
@@ -531,7 +535,6 @@ export const deleteMessages =
     dispatch(resetModify());
   };
 
-// I'd like to make this take in a guildId and channelId
 export const getMessageData =
   (guildId, channelId, preFilterUserId) => async (dispatch, getState) => {
     dispatch(resetMessageData());

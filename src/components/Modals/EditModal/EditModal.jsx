@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import MessageChip from "../MessageChip/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
@@ -18,14 +18,17 @@ import ModalStyles from "../Styles/Modal.styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
   editMessages,
-  resetModify,
   selectMessage,
 } from "../../../features/message/messageSlice";
 
 const EditModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
   const dispatch = useDispatch();
-  const { selectedMessages, modify: modifyState } = useSelector(selectMessage);
+  const {
+    selectedMessages,
+    messages,
+    modify: modifyState,
+  } = useSelector(selectMessage);
 
   const {
     active: editing,
@@ -35,15 +38,17 @@ const EditModal = ({ open, handleClose }) => {
 
   const [updateText, setUpdateText] = useState("");
 
-  const handleEditMessage = async () => {
-    dispatch(editMessages(selectedMessages, updateText));
+  const handleEditMessage = () => {
+    const toEdit = messages.filter((m) =>
+      selectedMessages.some((smId) => smId === m.id)
+    );
+    dispatch(editMessages(toEdit, updateText));
   };
 
   useEffect(() => {
     if (open) {
-      dispatch(resetModify());
+      setUpdateText("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   return (

@@ -44,5 +44,9 @@ class Message {
   isReply() {
     return this.type === 19;
   }
+
+  getSafeCopy() {
+    return new Message({ ...this });
+  }
 }
 export default Message;
