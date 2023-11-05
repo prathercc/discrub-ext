@@ -9,7 +9,6 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { sortByProperty, wait } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channelSlice";
-import ExportUtils from "../../components/Export/ExportUtils";
 
 export const exportSlice = createSlice({
   name: "export",
@@ -270,15 +269,8 @@ const _compressMessages =
   };
 
 export const exportMessages =
-  (
-    selectedChannels,
-    contentRef,
-    zipName = "unnamed",
-    bulk = false,
-    format = "json"
-  ) =>
+  (selectedChannels, exportUtils, bulk = false, format = "json") =>
   async (dispatch, getState) => {
-    const exportUtils = new ExportUtils(contentRef, setIsGenerating, zipName);
     let count = 0;
     const { messages: contextMessages, filteredMessages } = getState().message;
     const { selectedGuild } = getState().guild;

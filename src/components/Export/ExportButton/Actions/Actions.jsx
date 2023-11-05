@@ -9,7 +9,9 @@ import { selectChannel } from "../../../../features/channel/channelSlice";
 import {
   exportMessages,
   selectExport,
+  setIsGenerating,
 } from "../../../../features/export/exportSlice";
+import ExportUtils from "../../ExportUtils";
 
 const Actions = ({ handleDialogClose, isDm, contentRef, bulk }) => {
   const dispatch = useDispatch();
@@ -29,6 +31,12 @@ const Actions = ({ handleDialogClose, isDm, contentRef, bulk }) => {
     setAnchorEl(null);
   };
 
+  const exportUtils = new ExportUtils(
+    contentRef,
+    (e) => dispatch(setIsGenerating(e)),
+    zipName
+  );
+
   const handleExportSelected = async (format = "json") => {
     handleClose();
     const selectedChannels = isDm
@@ -36,9 +44,7 @@ const Actions = ({ handleDialogClose, isDm, contentRef, bulk }) => {
       : bulk
       ? channels.filter((c) => selectedExportChannels.some((id) => id === c.id))
       : [selectedChannel.id ? selectedChannel : selectedGuild];
-    dispatch(
-      exportMessages(selectedChannels, contentRef, zipName, bulk, format)
-    );
+    dispatch(exportMessages(selectedChannels, exportUtils, bulk, format));
   };
 
   return (

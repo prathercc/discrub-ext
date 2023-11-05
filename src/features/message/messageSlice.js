@@ -610,9 +610,9 @@ const _parseMentions = (messages) => async (dispatch, getState) => {
       .match(regex)
       ?.map((mention) =>
         mention
-          .replace("<@", "")
           .replace("<@!", "")
           .replace("<@&", "")
+          .replace("<@", "")
           .replace(">", "")
       )
       ?.forEach((mention) => (userMap[mention] = null));
