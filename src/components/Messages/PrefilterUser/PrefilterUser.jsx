@@ -25,9 +25,10 @@ function PrefilterUser({ isDm = false, purge, disabled = false }) {
 
   const users = isDm ? dmPreFilterUserIds : preFilterUserIds;
   const value = isDm ? dmPreFilterUserId : preFilterUserId;
-  const setUserId = isDm
-    ? dispatch(setDmPreFilterUserId)
-    : dispatch(setPreFilterUserId);
+
+  const handleSetUserId = (id) => {
+    dispatch(isDm ? setDmPreFilterUserId(id) : setPreFilterUserId(id));
+  };
 
   const getDisplayValue = () => {
     const foundUser = users.find((user) => user.id === value);
@@ -36,12 +37,12 @@ function PrefilterUser({ isDm = false, purge, disabled = false }) {
 
   const handleChange = (e, newValue, reason) => {
     if (reason === "input") {
-      setUserId(newValue);
+      handleSetUserId(newValue);
     } else if (reason === "reset") {
       const foundUser = users.find((user) => user.name === newValue);
-      setUserId(foundUser ? foundUser.id : null);
+      handleSetUserId(foundUser ? foundUser.id : null);
     } else {
-      setUserId(null);
+      handleSetUserId(null);
     }
   };
 

@@ -1,5 +1,5 @@
 class Channel {
-  constructor(json) {
+  constructor(json = {}) {
     const {
       flags,
       guild_id,

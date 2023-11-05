@@ -7,19 +7,11 @@ import {
   resetMessageData,
 } from "../message/messageSlice";
 
-const defaultDm = {
-  id: null,
-  name: null,
-  type: null,
-  recipients: [],
-  owner_id: null,
-};
-
 export const dmSlice = createSlice({
   name: "dm",
   initialState: {
     dms: [],
-    selectedDm: defaultDm,
+    selectedDm: new DM(),
     isLoading: null,
     preFilterUserId: null,
     preFilterUserIds: [],
@@ -34,22 +26,22 @@ export const dmSlice = createSlice({
       );
     },
     setDm: (state, { payload }) => {
-      const selectedDm = state.dms.find((dm) => dm.id === payload);
+      const { id, preFilterUser } = payload;
+      const selectedDm = state.dms.find((dm) => dm.id === id);
       if (selectedDm) {
-        const preFilterIds = [
-          { name: payload.user.name, id: payload.user.id },
-          selectedDm.recipients.map((x) => ({
+        state.selectedDm = selectedDm;
+        state.preFilterUserIds = [
+          ...selectedDm.recipients.map((x) => ({
             name: x.username,
             id: x.id,
           })),
+          preFilterUser,
         ];
-        state.selectedDm = selectedDm;
-        state.preFilterUserIds = preFilterIds.flat();
         state.preFilterUserId = null;
       }
     },
     resetDm: (state, { payload }) => {
-      state.selectedDm = defaultDm;
+      state.selectedDm = new DM();
       state.preFilterUserId = null;
       state.preFilterUserIds = [];
     },
@@ -72,14 +64,15 @@ export const getDms = () => async (dispatch, getState) => {
   dispatch(setIsLoading(false));
 };
 
-export const changeDm = (dmId) => async (dispatch, getState) => {
+export const changeDm = (dmId) => (dispatch, getState) => {
+  const { username, id } = getState().user;
   if (!dmId) {
     dispatch(resetAdvancedFilters());
     dispatch(setPreFilterUserId(null));
   }
   dispatch(resetMessageData());
   dispatch(resetFilters());
-  dispatch(setDm(dmId));
+  dispatch(setDm({ preFilterUser: { name: username, id }, id: dmId }));
 };
 
 const _getDmName = (dm) => {

@@ -1,7 +1,7 @@
 import Channel from "./Channel";
 
 class DM extends Channel {
-  constructor(json) {
+  constructor(json = {}) {
     super(json);
     const { recipients, owner_id, icon } = json;
     this.recipients = recipients;

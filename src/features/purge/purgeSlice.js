@@ -8,11 +8,6 @@ import {
   resetMessageData,
   setDiscrubCancelled,
 } from "../message/messageSlice";
-import {
-  setDm,
-  setPreFilterUserId as setDmPreFilterUserId,
-} from "../dm/dmSlice";
-import { resetChannel, setChannel } from "../channel/channelSlice";
 
 export const purgeSlice = createSlice({
   name: "purge",
