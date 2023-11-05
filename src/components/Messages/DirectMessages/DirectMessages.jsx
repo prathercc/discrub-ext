@@ -158,7 +158,7 @@ function DirectMessages() {
                 </span>
                 <Button
                   className={classes.purgeHidden}
-                  disabled={selectedDm.id === null || messagesLoading}
+                  disabled={!selectedDm.id || messagesLoading}
                   onClick={() => selectedDm.id && fetchDmData()}
                   variant="contained"
                 >

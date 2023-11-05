@@ -241,9 +241,9 @@ function ChannelMessages({ closeAnnouncement }) {
                 <Button
                   className={classes.purgeHidden}
                   disabled={
-                    selectedGuild.id === null ||
+                    !selectedGuild.id ||
                     messagesLoading ||
-                    (!advancedFilterActive && selectedChannel.id === null)
+                    (!advancedFilterActive && !selectedChannel.id)
                   }
                   onClick={fetchChannelData}
                   variant="contained"

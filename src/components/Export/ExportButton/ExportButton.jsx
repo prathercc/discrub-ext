@@ -39,9 +39,9 @@ const ExportButton = ({
   const contentRef = useRef();
 
   const bulkDisabled =
-    (isDm ? selectedDm.id === null : selectedGuild.id === null) ||
+    (isDm ? !selectedDm.id : !selectedGuild.id) ||
     messagesLoading ||
-    selectedChannel.id !== null ||
+    selectedChannel.id ||
     messages.length > 0 ||
     !!dmPreFilterUserId ||
     !!preFilterUserId ||

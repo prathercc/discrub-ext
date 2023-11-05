@@ -31,8 +31,8 @@ const PurgeButton = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   messagesLoadingRef.current = messagesLoading;
 
   const disabled =
-    (selectedGuild.id === null && selectedDm.id === null) ||
-    selectedChannel.id !== null ||
+    (!selectedGuild.id && !selectedDm.id) ||
+    selectedChannel.id ||
     messages.length > 0 ||
     [
       dmPreFilterUserId,
