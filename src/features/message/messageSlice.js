@@ -328,20 +328,18 @@ export const getDiscrubCancelled = () => (dispatch, getState) => {
 };
 
 export const deleteAttachment = (attachment) => async (dispatch, getState) => {
-  const { originalMessage } = getState().message.modify;
+  const { message } = getState().message.modify;
   const shouldEdit =
-    (originalMessage.content && originalMessage.content.length > 0) ||
-    originalMessage.attachments.length > 1;
+    (message.content && message.content.length > 0) ||
+    message.attachments.length > 1;
   dispatch(setIsModifying(true));
   if (shouldEdit) {
-    const response = await dispatch(
-      updateMessage({
-        ...originalMessage,
-        attachments: originalMessage.attachments.filter(
-          (attch) => attch.id !== attachment.id
-        ),
-      })
-    );
+    const updatedMessage = Object.assign(message, {
+      attachments: message.attachments.filter(
+        (attch) => attch.id !== attachment.id
+      ),
+    });
+    const response = await dispatch(updateMessage(updatedMessage));
     if (response !== null) {
       dispatch(
         setModifyStatusText(
@@ -349,9 +347,11 @@ export const deleteAttachment = (attachment) => async (dispatch, getState) => {
         )
       );
       await wait(0.5, () => dispatch(resetModifyStatusText()));
+    } else {
+      dispatch(setModifyMessage(updatedMessage));
     }
   } else {
-    const response = await dispatch(deleteMessage(originalMessage));
+    const response = await dispatch(deleteMessage(message));
     if (response !== null) {
       dispatch(
         setModifyStatusText(
@@ -359,6 +359,8 @@ export const deleteAttachment = (attachment) => async (dispatch, getState) => {
         )
       );
       await wait(0.5, () => dispatch(resetModifyStatusText()));
+    } else {
+      dispatch(setModifyMessage(null));
     }
   }
   dispatch(setIsModifying(false));
@@ -377,17 +379,17 @@ export const updateMessage = (message) => async (dispatch, getState) => {
     const { message: modifyMessage } = modify;
     const updatedMessages = messages.map((message) =>
       message.id === data.id
-        ? { ...data, username: message.username }
-        : { ...message }
+        ? Object.assign(new Message(data), { username: message.username })
+        : message
     );
     const updatedFilterMessages = filteredMessages.map((message) =>
       message.id === data.id
-        ? { ...data, username: message.username }
-        : { ...message }
+        ? Object.assign(new Message(data), { username: message.username })
+        : message
     );
     const updatedModifyMessage =
       modifyMessage?.id === data.id
-        ? { ...data, username: modifyMessage.username }
+        ? Object.assign(new Message(data), { username: modifyMessage.username })
         : modifyMessage;
 
     dispatch(setMessages(updatedMessages));
@@ -440,13 +442,13 @@ export const deleteMessage = (message) => async (dispatch, getState) => {
   if (response.status === 204) {
     const { messages, filteredMessages, selectedMessages } = getState().message;
     const updatedMessages = messages.filter(
-      (message) => message.id !== response.id
+      ({ id: messageId }) => messageId !== message.id
     );
     const updatedFilterMessages = filteredMessages.filter(
-      (message) => message.id !== response.id
+      ({ id: messageId }) => messageId !== message.id
     );
     const updatedSelectMessages = selectedMessages.filter(
-      (messageId) => messageId !== response.id
+      (messageId) => messageId !== message.id
     );
 
     dispatch(setMessages(updatedMessages));

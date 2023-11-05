@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
 import {
   Typography,
@@ -29,6 +29,13 @@ const AttachmentModal = ({ open, handleClose }) => {
   const handleDeleteAttachment = async (attachment) => {
     dispatch(deleteAttachment(attachment));
   };
+
+  useEffect(() => {
+    if (!modifyMessage || modifyMessage.attachments.length === 0) {
+      handleClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modifyMessage]);
 
   return (
     <Dialog fullWidth open={open} onClose={handleClose}>
