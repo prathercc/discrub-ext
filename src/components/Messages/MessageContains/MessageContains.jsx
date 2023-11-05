@@ -45,7 +45,7 @@ function MessageContains({ disabled }) {
         label="Message Content"
         variant="filled"
         value={searchMessageContent}
-        onChange={(e) => setSearchMessageContent(e.target.value)}
+        onChange={(e) => dispatch(setSearchMessageContent(e.target.value))}
       />
     </Tooltip>
   );
