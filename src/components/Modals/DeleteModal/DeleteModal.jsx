@@ -53,8 +53,15 @@ const DeleteModal = ({ open, handleClose }) => {
       selectedMessages.includes(x.id)
     );
     dispatch(deleteMessages(selectedRows, deleteConfig));
-    handleClose();
   };
+
+  useEffect(() => {
+    if (selectedMessages.length === 0) {
+      handleClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMessages]);
+
   return (
     <Dialog fullWidth open={open} onClose={handleClose}>
       <DialogTitle>
