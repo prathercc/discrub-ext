@@ -66,13 +66,15 @@ export const getDms = () => async (dispatch, getState) => {
 
 export const changeDm = (dmId) => (dispatch, getState) => {
   const { username, id } = getState().user;
-  if (!dmId) {
-    dispatch(resetAdvancedFilters());
-    dispatch(setPreFilterUserId(null));
-  }
+  dispatch(setPreFilterUserId(null));
   dispatch(resetMessageData());
   dispatch(resetFilters());
-  dispatch(setDm({ preFilterUser: { name: username, id }, id: dmId }));
+  if (!dmId) {
+    dispatch(resetAdvancedFilters());
+    dispatch(resetDm());
+  } else {
+    dispatch(setDm({ preFilterUser: { name: username, id }, id: dmId }));
+  }
 };
 
 const _getDmName = (dm) => {
