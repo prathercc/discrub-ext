@@ -20,11 +20,13 @@ const FilterComponent = () => {
   const { threads } = useSelector(selectMessage);
   const { selectedChannel } = useSelector(selectChannel);
 
+  const handleFilterMessages = debounce(() => dispatch(filterMessages()), 600);
+
   const handleFilterUpdate = (name, e, type) => {
     dispatch(
       updateFilters({ filterName: name, filterValue: e, filterType: type })
     );
-    debounce(dispatch(filterMessages()), 600);
+    handleFilterMessages();
   };
 
   const [startTime, setStartTime] = useState(null);
