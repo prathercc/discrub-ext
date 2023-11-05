@@ -24,7 +24,7 @@ const FilterComponent = () => {
     dispatch(
       updateFilters({ filterName: name, filterValue: e, filterType: type })
     );
-    debounce(() => dispatch(filterMessages()), 600);
+    debounce(dispatch(filterMessages()), 600);
   };
 
   const [startTime, setStartTime] = useState(null);
