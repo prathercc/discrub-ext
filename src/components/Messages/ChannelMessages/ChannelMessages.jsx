@@ -39,7 +39,7 @@ import {
 
 function ChannelMessages({ closeAnnouncement }) {
   const dispatch = useDispatch();
-  const { token } = useSelector(selectUser);
+  const { token, isLoading: userLoading } = useSelector(selectUser);
   const { guilds, selectedGuild } = useSelector(selectGuild);
   const { channels, selectedChannel, preFilterUserId } =
     useSelector(selectChannel);
@@ -274,24 +274,23 @@ function ChannelMessages({ closeAnnouncement }) {
               )}
             </>
           )}
-          {token !== undefined &&
-            (token === null || !guilds.length || messagesLoading) && (
-              <Paper justifyContent="center" className={classes.paper}>
-                <Box className={classes.box}>
-                  <CircularProgress />
-                  <Typography variant="caption">
-                    {lookupUserId && `User Lookup: ${lookupUserId}`}
-                    {!lookupUserId &&
-                      fetchedMessageLength > 0 &&
-                      `Fetched ${fetchedMessageLength} Messages`}
-                    {!lookupUserId &&
-                      fetchedMessageLength <= 0 &&
-                      "Fetching Data"}
-                  </Typography>
-                </Box>
-              </Paper>
-            )}
-          {token === undefined && <TokenNotFound />}
+          {(userLoading || messagesLoading) && (
+            <Paper justifyContent="center" className={classes.paper}>
+              <Box className={classes.box}>
+                <CircularProgress />
+                <Typography variant="caption">
+                  {lookupUserId && `User Lookup: ${lookupUserId}`}
+                  {!lookupUserId &&
+                    fetchedMessageLength > 0 &&
+                    `Fetched ${fetchedMessageLength} Messages`}
+                  {!lookupUserId &&
+                    fetchedMessageLength <= 0 &&
+                    "Fetching Data"}
+                </Typography>
+              </Box>
+            </Paper>
+          )}
+          {!token && !userLoading && <TokenNotFound />}
         </>
       )}
     </Stack>

@@ -35,7 +35,7 @@ function DirectMessages() {
   const [showOptionalFilters, setShowOptionalFilters] = useState(false);
 
   const dispatch = useDispatch();
-  const { token } = useSelector(selectUser);
+  const { token, isLoading: userLoading } = useSelector(selectUser);
   const { selectedDm, dms, preFilterUserId } = useSelector(selectDm);
   const {
     lookupUserId,
@@ -190,24 +190,23 @@ function DirectMessages() {
             </>
           )}
 
-          {token !== undefined &&
-            (token === null || !dms || messagesLoading) && (
-              <Paper justifyContent="center" className={classes.paper}>
-                <Box className={classes.box}>
-                  <CircularProgress />
-                  <Typography variant="caption">
-                    {lookupUserId && `User Lookup: ${lookupUserId}`}
-                    {!lookupUserId &&
-                      fetchedMessageLength > 0 &&
-                      `Fetched ${fetchedMessageLength} Messages`}
-                    {!lookupUserId &&
-                      fetchedMessageLength <= 0 &&
-                      "Fetching Data"}
-                  </Typography>
-                </Box>
-              </Paper>
-            )}
-          {token === undefined && <TokenNotFound />}
+          {(userLoading || messagesLoading) && (
+            <Paper justifyContent="center" className={classes.paper}>
+              <Box className={classes.box}>
+                <CircularProgress />
+                <Typography variant="caption">
+                  {lookupUserId && `User Lookup: ${lookupUserId}`}
+                  {!lookupUserId &&
+                    fetchedMessageLength > 0 &&
+                    `Fetched ${fetchedMessageLength} Messages`}
+                  {!lookupUserId &&
+                    fetchedMessageLength <= 0 &&
+                    "Fetching Data"}
+                </Typography>
+              </Box>
+            </Paper>
+          )}
+          {!token && !userLoading && <TokenNotFound />}
         </>
       )}
     </Stack>
