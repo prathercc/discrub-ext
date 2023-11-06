@@ -93,10 +93,10 @@ export const purge =
           count++;
         }
       }
-      dispatch(setDeleting(false));
-      dispatch(resetMessageData());
-      dispatch(setDiscrubCancelled(false));
     }
+    dispatch(setDeleting(false));
+    dispatch(resetMessageData());
+    dispatch(setDiscrubCancelled(false));
   };
 
 export const selectPurge = (state) => state.purge;
