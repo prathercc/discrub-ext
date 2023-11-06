@@ -39,11 +39,7 @@ const ExportModal = ({
   };
 
   return (
-    <Dialog
-      PaperProps={{ className: classes.dialogPaper }}
-      open={dialogOpen}
-      onClose={handleDialogClose}
-    >
+    <Dialog PaperProps={{ className: classes.dialogPaper }} open={dialogOpen}>
       <DialogTitle>Export {bulk ? exportType : "Messages"}</DialogTitle>
       {bulk ? <BulkContent isDm={isDm} /> : <DefaultContent />}
       <Actions

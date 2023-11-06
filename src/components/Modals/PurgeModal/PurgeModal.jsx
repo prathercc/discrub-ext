@@ -106,7 +106,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   );
 
   return (
-    <Dialog open={dialogOpen} onClose={handleClose}>
+    <Dialog open={dialogOpen}>
       <DialogTitle>
         {deleting && deleteObj && `Purging ${deleteType}`}
         {finishedPurge && `${deleteType} Purged`}

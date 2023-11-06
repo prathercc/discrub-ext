@@ -47,6 +47,7 @@ export const purge =
     const { preFilterUserId } = getState().channel;
     dispatch(setDeleting(true));
     for (const entity of arr) {
+      await dispatch(checkDiscrubPaused());
       dispatch(setDeleteObj({}));
       dispatch(setDebugMessage("Searching for messages..."));
       await wait(1, () => dispatch(resetDebugMessage()));
@@ -70,7 +71,7 @@ export const purge =
         let currentRow = selectedMessages[count];
         dispatch(
           setDeleteObj(
-            Object.assign(currentRow, {
+            Object.assign(currentRow.getSafeCopy(), {
               _index: count + 1,
               _total: selectedCount,
             })
