@@ -19,7 +19,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   editMessages,
   selectMessage,
+  setDiscrubCancelled,
+  setDiscrubPaused,
 } from "../../../features/message/messageSlice";
+import PauseButton from "../../PauseButton/PauseButton";
+import CancelButton from "../../Messages/CancelButton/CancelButton";
 
 const EditModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
@@ -45,6 +49,15 @@ const EditModal = ({ open, handleClose }) => {
     dispatch(editMessages(toEdit, updateText));
   };
 
+  const handleModalClose = () => {
+    if (editing) {
+      // We are actively editing, we need to send a cancel request
+      dispatch(setDiscrubCancelled(true));
+    }
+    dispatch(setDiscrubPaused(false));
+    handleClose();
+  };
+
   useEffect(() => {
     if (open) {
       setUpdateText("");
@@ -52,7 +65,7 @@ const EditModal = ({ open, handleClose }) => {
   }, [open]);
 
   return (
-    <Dialog fullWidth open={open} onClose={handleClose}>
+    <Dialog fullWidth open={open}>
       <DialogTitle>
         <Typography variant="h5">Edit Data</Typography>
         <Typography variant="caption">
@@ -94,9 +107,8 @@ const EditModal = ({ open, handleClose }) => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={handleClose} color="secondary">
-          Close
-        </Button>
+        <CancelButton onCancel={handleModalClose} />
+        <PauseButton disabled={!editing} />
         <Button
           variant="contained"
           disabled={updateText.length === 0 || editing}

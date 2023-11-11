@@ -18,7 +18,6 @@ import ExportButton from "../../Export/ExportButton/ExportButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
-import classNames from "classnames";
 import CopyAdornment from "../CopyAdornment/CopyAdornment";
 import PauseButton from "../../PauseButton/PauseButton";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,6 +35,7 @@ import {
   getMessageData,
   selectMessage,
 } from "../../../features/message/messageSlice";
+import CancelButton from "../CancelButton/CancelButton";
 
 function ChannelMessages({ closeAnnouncement }) {
   const dispatch = useDispatch();
@@ -52,6 +52,7 @@ function ChannelMessages({ closeAnnouncement }) {
     searchAfterDate,
     searchMessageContent,
     selectedHasTypes,
+    discrubCancelled,
   } = useSelector(selectMessage);
 
   const [showOptionalFilters, setShowOptionalFilters] = useState(false);
@@ -89,8 +90,23 @@ function ChannelMessages({ closeAnnouncement }) {
     selectedHasTypes.length,
   ].some((c) => c);
 
-  const guildFieldDisabled = messagesLoading || purgeDialogOpen;
-  const channelFieldDisabled = selectedGuild.id === null || messagesLoading;
+  const pauseCancelDisabled = !messagesLoading;
+  const guildFieldDisabled = messagesLoading || discrubCancelled;
+  const channelFieldDisabled =
+    selectedGuild.id === null || messagesLoading || discrubCancelled;
+  const searchBtnDisabled =
+    !selectedGuild.id ||
+    messagesLoading ||
+    (!advancedFilterActive && !selectedChannel.id) ||
+    discrubCancelled;
+  const exportAndPurgeDisabled =
+    !selectedGuild.id ||
+    messagesLoading ||
+    selectedChannel.id ||
+    messages.length > 0 ||
+    advancedFilterActive ||
+    discrubCancelled;
+
   const sortedGuilds = guilds.toSorted((a, b) =>
     sortByProperty(
       { name: a.name.toLowerCase() },
@@ -185,10 +201,7 @@ function ChannelMessages({ closeAnnouncement }) {
                       fullWidth
                       size="small"
                       label="Channel"
-                      className={classNames(
-                        classes.autocomplete,
-                        classes.purgeHidden
-                      )}
+                      className={classes.autocomplete}
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
@@ -208,13 +221,11 @@ function ChannelMessages({ closeAnnouncement }) {
                 />
               </Stack>
 
-              <span className={classes.purgeHidden}>
-                <AdvancedFiltering
-                  closeAnnouncement={closeAnnouncement}
-                  setShowOptionalFilters={setShowOptionalFilters}
-                  showOptionalFilters={showOptionalFilters}
-                />
-              </span>
+              <AdvancedFiltering
+                closeAnnouncement={closeAnnouncement}
+                setShowOptionalFilters={setShowOptionalFilters}
+                showOptionalFilters={showOptionalFilters}
+              />
 
               <Stack
                 alignItems="center"
@@ -222,34 +233,30 @@ function ChannelMessages({ closeAnnouncement }) {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <ExportButton
-                    bulk
-                    dialogOpen={exportDialogOpen}
-                    setDialogOpen={setExportDialogOpen}
-                  />
-                </span>
-                <span className={exportDialogOpen && classes.purgeHidden}>
-                  <PurgeButton
-                    dialogOpen={purgeDialogOpen}
-                    setDialogOpen={setPurgeDialogOpen}
-                  />
-                </span>
-                <span className={classes.purgeHidden}>
-                  <PauseButton disabled={!messagesLoading} />
-                </span>
+                <ExportButton
+                  bulk
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={exportDialogOpen}
+                  setDialogOpen={setExportDialogOpen}
+                />
+
+                <PurgeButton
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={purgeDialogOpen}
+                  setDialogOpen={setPurgeDialogOpen}
+                />
+
+                <PauseButton disabled={pauseCancelDisabled} />
+
                 <Button
-                  className={classes.purgeHidden}
-                  disabled={
-                    !selectedGuild.id ||
-                    messagesLoading ||
-                    (!advancedFilterActive && !selectedChannel.id)
-                  }
+                  disabled={searchBtnDisabled}
                   onClick={fetchChannelData}
                   variant="contained"
                 >
                   Search
                 </Button>
+
+                <CancelButton disabled={pauseCancelDisabled} />
               </Stack>
             </Stack>
           </Paper>

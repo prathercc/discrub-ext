@@ -21,7 +21,6 @@ import PrefilterUser from "../../Messages/PrefilterUser/PrefilterUser";
 import PauseButton from "../../PauseButton/PauseButton";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  resetMessageData,
   selectMessage,
   setDiscrubCancelled,
   setDiscrubPaused,
@@ -42,6 +41,7 @@ import {
   setDeleting,
 } from "../../../features/purge/purgeSlice";
 import { selectUser } from "../../../features/user/userSlice";
+import CancelButton from "../../Messages/CancelButton/CancelButton";
 
 const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const dispatch = useDispatch();
@@ -74,14 +74,18 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   }, [dialogOpen]);
 
   const handleClose = async () => {
-    dispatch(setDiscrubCancelled(true));
-    setDialogOpen(false);
-    dispatch(resetMessageData());
-    isDm
-      ? dispatch(setDmPreFilterUserId(null))
-      : dispatch(setPreFilterUserId(null));
-    !isDm && dispatch(resetChannel());
+    if (!!deleteObj || deleting) {
+      // We are actively deleting, we need to send a cancel request
+      dispatch(setDiscrubCancelled(true));
+    }
+    if (isDm) {
+      dispatch(setDmPreFilterUserId(null));
+    } else {
+      dispatch(setPreFilterUserId(null));
+      dispatch(resetChannel());
+    }
     dispatch(setDiscrubPaused(false));
+    setDialogOpen(false);
   };
 
   const dialogBtnDisabled =
@@ -180,9 +184,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button color="secondary" variant="contained" onClick={handleClose}>
-          Cancel
-        </Button>
+        <CancelButton onCancel={handleClose} />
         <PauseButton disabled={!deleting} />
         {!finishedPurge && (
           <Button

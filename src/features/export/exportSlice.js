@@ -337,9 +337,16 @@ export const exportMessages =
     if (!dispatch(getDiscrubCancelled())) {
       dispatch(setStatusText("Preparing Archive"));
       await exportUtils.generateZip();
-      if (bulk) await dispatch(resetChannel());
-      if (bulk) await dispatch(resetMessageData());
     }
+
+    /*
+     * We need to ensure that the Selected Channel and Message Data gets reset if we are bulk exporting.
+     * Keep in mind, only Guilds can be bulk exported at the moment! The resetChannel call may need to moved.
+     */
+    if (bulk) dispatch(resetChannel());
+    if (bulk) dispatch(resetMessageData());
+    /* */
+
     dispatch(setIsGenerating(false));
     dispatch(setIsExporting(false));
     dispatch(setName(""));

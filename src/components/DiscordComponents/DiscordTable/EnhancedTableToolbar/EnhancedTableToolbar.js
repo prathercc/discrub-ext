@@ -30,7 +30,7 @@ const EnhancedTableToolbar = ({
 
   const dispatch = useDispatch();
   const { selectedDm } = useSelector(selectDm);
-  const { selectedMessages } = useSelector(selectMessage);
+  const { selectedMessages, discrubCancelled } = useSelector(selectMessage);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -38,6 +38,8 @@ const EnhancedTableToolbar = ({
     if (filterOpen) dispatch(resetFilters());
     setFilterOpen(!filterOpen);
   };
+
+  const editDeleteExportDisabled = discrubCancelled;
 
   return (
     <Toolbar
@@ -78,6 +80,7 @@ const EnhancedTableToolbar = ({
               Quick Filtering
             </Button>
             <ExportButton
+              disabled={editDeleteExportDisabled}
               setDialogOpen={setDialogOpen}
               dialogOpen={dialogOpen}
               isDm={!!selectedDm.id}
@@ -104,12 +107,18 @@ const EnhancedTableToolbar = ({
             </Typography>
             <Stack justifyContent="flex-end" direction="row">
               <Tooltip arrow title="Delete">
-                <IconButton onClick={() => setDeleteModalOpen(true)}>
+                <IconButton
+                  disabled={editDeleteExportDisabled}
+                  onClick={() => setDeleteModalOpen(true)}
+                >
                   <DeleteIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>
               <Tooltip arrow title="Edit">
-                <IconButton onClick={() => setEditModalOpen(true)}>
+                <IconButton
+                  disabled={editDeleteExportDisabled}
+                  onClick={() => setEditModalOpen(true)}
+                >
                   <EditIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>

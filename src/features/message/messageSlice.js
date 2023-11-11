@@ -409,16 +409,21 @@ export const editMessages =
     dispatch(setIsModifying(true));
     let count = 0;
     while (count < messages.length && !dispatch(getDiscrubCancelled())) {
+      await dispatch(checkDiscrubPaused());
       const currentMessage = messages[count];
       dispatch(setModifyMessage(currentMessage));
+      let response = null;
 
-      const response = await dispatch(
-        updateMessage(
-          Object.assign(currentMessage.getSafeCopy(), {
-            content: updateText,
-          })
-        )
-      );
+      if (!dispatch(getDiscrubCancelled())) {
+        response = await dispatch(
+          updateMessage(
+            Object.assign(currentMessage.getSafeCopy(), {
+              content: updateText,
+            })
+          )
+        );
+      }
+
       if (response === null) {
         count++;
       } else if (response > 0) {
@@ -435,6 +440,7 @@ export const editMessages =
       }
     }
     dispatch(resetModify());
+    dispatch(setDiscrubCancelled(false));
   };
 
 export const deleteMessage = (message) => async (dispatch, getState) => {
@@ -476,6 +482,7 @@ export const deleteMessages =
     dispatch(setIsModifying(true));
     let count = 0;
     while (count < messages.length && !dispatch(getDiscrubCancelled())) {
+      await dispatch(checkDiscrubPaused());
       const currentRow = messages[count];
       dispatch(
         setModifyMessage(
@@ -485,11 +492,14 @@ export const deleteMessages =
           })
         )
       );
-      if (
+
+      const shouldDelete =
         (deleteConfig.attachments && deleteConfig.messages) ||
         (currentRow.content.length === 0 && deleteConfig.attachments) ||
-        (currentRow.attachments.length === 0 && deleteConfig.messages)
-      ) {
+        (currentRow.attachments.length === 0 && deleteConfig.messages);
+      const shouldEdit = deleteConfig.attachments || deleteConfig.messages;
+
+      if (shouldDelete && !dispatch(getDiscrubCancelled())) {
         const response = await dispatch(
           deleteMessage(currentRow.getSafeCopy())
         );
@@ -507,7 +517,7 @@ export const deleteMessages =
           await wait(2, () => dispatch(resetModifyStatusText()));
           count++;
         }
-      } else if (deleteConfig.attachments || deleteConfig.messages) {
+      } else if (shouldEdit && !dispatch(getDiscrubCancelled())) {
         const response = await dispatch(
           updateMessage(
             Object.assign(
@@ -533,6 +543,7 @@ export const deleteMessages =
       } else break;
     }
     dispatch(resetModify());
+    dispatch(setDiscrubCancelled(false));
   };
 
 export const getMessageData =
@@ -594,7 +605,20 @@ export const getMessageData =
       dispatch(setLookupUserId(null));
       dispatch(setFetchedMessageLength(0));
       dispatch(setTotalSearchMessages(0));
-      dispatch(setDiscrubCancelled(false));
+
+      const { deleteObj, deleting } = getState().purge;
+      const { isGenerating, isExporting } = getState().export;
+      const purgingOrExporting = [
+        deleteObj,
+        deleting,
+        isGenerating,
+        isExporting,
+      ].some((c) => !!c);
+
+      if (!purgingOrExporting) {
+        // If we are purging or exporting, we need to allow those respective slices will handle this.
+        dispatch(setDiscrubCancelled(false));
+      }
 
       return payload;
     }
@@ -774,13 +798,14 @@ const _getMessages =
       }
       //Final check for any previously unfound threads
       let retThreads = [...trackedThreads];
-      if (!isThread && !isDM) {
+      if (!isThread && !isDM && !dispatch(getDiscrubCancelled())) {
         let unfoundedThreads = await fetchThreads(token, channelId);
         unfoundedThreads = unfoundedThreads
           .filter((ft) => !trackedThreads.find((tt) => ft.id === tt.id))
           .map((x) => ({ id: x.id, name: x.name, archived: true }));
         retThreads = retThreads.concat(unfoundedThreads);
         for (const ut of unfoundedThreads) {
+          if (dispatch(getDiscrubCancelled())) break;
           const data = await dispatch(_getMessages(ut.id, true, initialArr));
           initialArr = initialArr.concat(data);
           dispatch(setFetchedMessageLength(initialArr.length));

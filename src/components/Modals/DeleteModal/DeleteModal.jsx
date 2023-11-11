@@ -22,7 +22,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   deleteMessages,
   selectMessage,
+  setDiscrubCancelled,
+  setDiscrubPaused,
 } from "../../../features/message/messageSlice";
+import PauseButton from "../../PauseButton/PauseButton";
+import CancelButton from "../../Messages/CancelButton/CancelButton";
 
 const DeleteModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
@@ -55,6 +59,16 @@ const DeleteModal = ({ open, handleClose }) => {
     dispatch(deleteMessages(selectedRows, deleteConfig));
   };
 
+  const handleModalClose = () => {
+    if (deleting) {
+      // We are actively deleting, we need to send a cancel request
+      dispatch(setDiscrubCancelled(true));
+    }
+
+    dispatch(setDiscrubPaused(false));
+    handleClose();
+  };
+
   useEffect(() => {
     if (selectedMessages.length === 0) {
       handleClose();
@@ -63,7 +77,7 @@ const DeleteModal = ({ open, handleClose }) => {
   }, [selectedMessages]);
 
   return (
-    <Dialog fullWidth open={open} onClose={handleClose}>
+    <Dialog fullWidth open={open}>
       <DialogTitle>
         <Typography variant="h5">Delete Data</Typography>
         <Typography variant="caption">
@@ -127,9 +141,8 @@ const DeleteModal = ({ open, handleClose }) => {
         </FormGroup>
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={handleClose} color="secondary">
-          Close
-        </Button>
+        <CancelButton onCancel={handleModalClose} />
+        <PauseButton disabled={!deleting} />
         <Button
           variant="contained"
           disabled={deleting}

@@ -22,10 +22,6 @@ const DirectMessagesStyles = makeStyles(() => ({
   paper: {
     padding: "10px",
   },
-  purgeHidden: {
-    opacity: ({ purgeDialogOpen, exportDialogOpen }) =>
-      (purgeDialogOpen || exportDialogOpen) && 0,
-  },
   dmField: {
     width: "670px !important",
   },

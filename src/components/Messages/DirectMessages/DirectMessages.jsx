@@ -27,6 +27,7 @@ import {
   getMessageData,
   selectMessage,
 } from "../../../features/message/messageSlice";
+import CancelButton from "../CancelButton/CancelButton";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -42,6 +43,11 @@ function DirectMessages() {
     fetchedMessageLength,
     isLoading: messagesLoading,
     messages,
+    discrubCancelled,
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes,
   } = useSelector(selectMessage);
 
   const classes = DirectMessagesStyles({
@@ -60,7 +66,6 @@ function DirectMessages() {
     setSearchTouched(false);
   };
 
-  const dmFieldDisabled = messagesLoading || purgeDialogOpen;
   const sortedDms = dms.toSorted((a, b) =>
     sortByProperty(
       { name: a.name.toLowerCase() },
@@ -68,6 +73,24 @@ function DirectMessages() {
       "name"
     )
   );
+
+  const advancedFilterActive = [
+    preFilterUserId,
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes.length,
+  ].some((c) => c);
+
+  const dmFieldDisabled = messagesLoading || discrubCancelled;
+  const searchDisabled = !selectedDm.id || messagesLoading || discrubCancelled;
+  const pauseCancelDisabled = !messagesLoading;
+  const exportAndPurgeDisabled =
+    !selectedDm.id ||
+    messagesLoading ||
+    messages.length > 0 ||
+    advancedFilterActive ||
+    discrubCancelled;
 
   useEffect(() => {
     if (token) dispatch(getDms());
@@ -124,13 +147,11 @@ function DirectMessages() {
                 />
               </Stack>
 
-              <span className={classes.purgeHidden}>
-                <AdvancedFiltering
-                  isDm
-                  setShowOptionalFilters={setShowOptionalFilters}
-                  showOptionalFilters={showOptionalFilters}
-                />
-              </span>
+              <AdvancedFiltering
+                isDm
+                setShowOptionalFilters={setShowOptionalFilters}
+                showOptionalFilters={showOptionalFilters}
+              />
 
               <Stack
                 alignItems="center"
@@ -138,32 +159,32 @@ function DirectMessages() {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <ExportButton
-                    bulk
-                    dialogOpen={exportDialogOpen}
-                    setDialogOpen={setExportDialogOpen}
-                    isDm
-                  />
-                </span>
-                <span className={exportDialogOpen && classes.purgeHidden}>
-                  <PurgeButton
-                    dialogOpen={purgeDialogOpen}
-                    setDialogOpen={setPurgeDialogOpen}
-                    isDm
-                  />
-                </span>
-                <span className={classes.purgeHidden}>
-                  <PauseButton disabled={!messagesLoading} />
-                </span>
+                <ExportButton
+                  bulk
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={exportDialogOpen}
+                  setDialogOpen={setExportDialogOpen}
+                  isDm
+                />
+
+                <PurgeButton
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={purgeDialogOpen}
+                  setDialogOpen={setPurgeDialogOpen}
+                  isDm
+                />
+
+                <PauseButton disabled={pauseCancelDisabled} />
+
                 <Button
-                  className={classes.purgeHidden}
-                  disabled={!selectedDm.id || messagesLoading}
+                  disabled={searchDisabled}
                   onClick={() => selectedDm.id && fetchDmData()}
                   variant="contained"
                 >
                   Search
                 </Button>
+
+                <CancelButton disabled={pauseCancelDisabled} />
               </Stack>
             </Stack>
           </Paper>

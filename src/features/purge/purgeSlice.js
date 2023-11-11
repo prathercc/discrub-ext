@@ -47,6 +47,7 @@ export const purge =
     const { preFilterUserId } = getState().channel;
     dispatch(setDeleting(true));
     for (const entity of arr) {
+      if (dispatch(getDiscrubCancelled())) break;
       await dispatch(checkDiscrubPaused());
       dispatch(setDeleteObj({}));
       dispatch(setDebugMessage("Searching for messages..."));
@@ -96,6 +97,7 @@ export const purge =
       }
     }
     dispatch(setDeleting(false));
+    dispatch(setDeleteObj(null));
     dispatch(resetMessageData());
     dispatch(setDiscrubCancelled(false));
   };

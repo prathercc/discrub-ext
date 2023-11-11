@@ -8,15 +8,20 @@ import {
   setDiscrubPaused,
 } from "../../features/message/messageSlice";
 
+/**
+ *
+ * @param {boolean} disabled Boolean used to determine when the Pause Button is disabled.
+ * @returns
+ */
 const PauseButton = ({ disabled = false }) => {
   const dispatch = useDispatch();
-  const { discrubPaused } = useSelector(selectMessage);
+  const { discrubPaused, discrubCancelled } = useSelector(selectMessage);
 
   return (
     <>
       <Button
         startIcon={discrubPaused ? <PlayArrowIcon /> : <PauseIcon />}
-        disabled={disabled}
+        disabled={discrubCancelled || disabled}
         color="secondary"
         variant="contained"
         onClick={() => dispatch(setDiscrubPaused(!discrubPaused))}

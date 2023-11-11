@@ -12,6 +12,7 @@ import {
   setIsGenerating,
 } from "../../../../features/export/exportSlice";
 import ExportUtils from "../../ExportUtils";
+import CancelButton from "../../../Messages/CancelButton/CancelButton";
 
 const Actions = ({ handleDialogClose, isDm, contentRef, bulk }) => {
   const dispatch = useDispatch();
@@ -49,9 +50,7 @@ const Actions = ({ handleDialogClose, isDm, contentRef, bulk }) => {
 
   return (
     <DialogActions>
-      <Button color="secondary" variant="contained" onClick={handleDialogClose}>
-        Cancel
-      </Button>
+      <CancelButton onCancel={handleDialogClose} />
       <PauseButton disabled={!isExporting} />
       <Button
         disabled={

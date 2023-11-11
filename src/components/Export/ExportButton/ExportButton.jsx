@@ -3,10 +3,6 @@ import { Button } from "@mui/material";
 import ExportMessages from "../../Export/ExportMessages/ExportMessages";
 import ExportModal from "../../Modals/ExportModal/ExportModal";
 import { useDispatch, useSelector } from "react-redux";
-import { selectDm } from "../../../features/dm/dmSlice";
-import { selectChannel } from "../../../features/channel/channelSlice";
-import { selectMessage } from "../../../features/message/messageSlice";
-import { selectGuild } from "../../../features/guild/guildSlice";
 import {
   resetExportSettings,
   selectExport,
@@ -17,44 +13,19 @@ const ExportButton = ({
   setDialogOpen,
   isDm = false,
   bulk = false,
+  disabled = false,
 }) => {
   const dispatch = useDispatch();
-  const { preFilterUserId: dmPreFilterUserId, selectedDm } =
-    useSelector(selectDm);
-  const { preFilterUserId, selectedChannel } = useSelector(selectChannel);
   const { isGenerating } = useSelector(selectExport);
 
-  const {
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes,
-    messages,
-    isLoading: messagesLoading,
-  } = useSelector(selectMessage);
-
-  const { selectedGuild } = useSelector(selectGuild);
   const exportType = isDm ? "DM" : "Guild";
 
   const contentRef = useRef();
 
-  const bulkDisabled =
-    (isDm ? !selectedDm.id : !selectedGuild.id) ||
-    messagesLoading ||
-    selectedChannel.id ||
-    messages.length > 0 ||
-    !!dmPreFilterUserId ||
-    !!preFilterUserId ||
-    !!searchBeforeDate ||
-    !!searchAfterDate ||
-    !!searchMessageContent ||
-    !!selectedHasTypes.length ||
-    dialogOpen;
-
   return (
     <>
       <Button
-        disabled={bulk && bulkDisabled}
+        disabled={disabled}
         onClick={async () => {
           dispatch(resetExportSettings());
           setDialogOpen(true);
