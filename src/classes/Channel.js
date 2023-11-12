@@ -1,3 +1,6 @@
+import { ChannelType } from "../enum/ChannelType";
+import Thread from "./Thread";
+
 class Channel {
   constructor(json = {}) {
     const {
@@ -16,6 +19,10 @@ class Channel {
       bitrate,
       rtc_region,
       user_limit,
+      recipients,
+      owner_id,
+      icon,
+      thread,
     } = json;
     this.flags = flags;
     this.guild_id = guild_id;
@@ -32,10 +39,34 @@ class Channel {
     this.bitrate = bitrate;
     this.rtc_region = rtc_region;
     this.user_limit = user_limit;
+    this.recipients = recipients;
+    this.owner_id = owner_id;
+    this.icon = icon;
+    this.thread = thread ? new Thread(thread) : null;
+  }
+
+  getGuildId() {
+    return this.guild_id;
   }
 
   isDm() {
-    return false;
+    return [ChannelType.DM, ChannelType.GROUP_DM].some(
+      (type) => type === this.type
+    );
+  }
+
+  isGuildForum() {
+    return [ChannelType.GUILD_FORUM, ChannelType.GUILD_MEDIA].some(
+      (type) => type === this.type
+    );
+  }
+
+  isPublicThread() {
+    return this.type === ChannelType.PUBLIC_THREAD;
+  }
+
+  isPrivateThread() {
+    return this.type === ChannelType.PRIVATE_THREAD;
   }
 }
 export default Channel;

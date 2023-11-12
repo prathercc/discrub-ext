@@ -10,6 +10,8 @@ import {
 import { wait } from "../../utils";
 import parseISO from "date-fns/parseISO";
 import Message from "../../classes/Message";
+import { MessageType } from "../../enum/MessageType";
+import Thread from "../../classes/Thread";
 
 const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
@@ -739,85 +741,124 @@ const _getSearchMessages =
     } catch (e) {
       console.error("Error fetching channel messages", e);
     } finally {
-      return { retArr: retArr.map((m) => new Message(m)), retThreads };
+      return {
+        retArr: retArr.map((m) => new Message(m)),
+        retThreads: retThreads.map((rt) => new Thread(rt)),
+      };
     }
   };
 
 const _messageTypeAllowed = (type) => {
-  return [0, 6, 7, 8, 9, 10, 11, 12, 18, 19, 20, 22, 23, 24].some(
-    (t) => t === type
-  );
+  return [
+    MessageType.DEFAULT,
+    MessageType.CHANNEL_PINNED_MESSAGE,
+    MessageType.USER_JOIN,
+    MessageType.GUILD_BOOST,
+    MessageType.GUILD_BOOST_TIER_1,
+    MessageType.GUILD_BOOST_TIER_2,
+    MessageType.GUILD_BOOST_TIER_3,
+    MessageType.CHANNEL_FOLLOW_ADD,
+    MessageType.THREAD_CREATED,
+    MessageType.REPLY,
+    MessageType.CHAT_INPUT_COMMAND,
+    MessageType.GUILD_INVITE_REMINDER,
+    MessageType.CONTEXT_MENU_COMMAND,
+    MessageType.AUTO_MODERATION_ACTION,
+  ].some((t) => t === type);
 };
 
-const _getMessages =
-  (channelId, isThread = false, initialArr = []) =>
-  async (dispatch, getState) => {
+const _getMessages = (channelId) => async (dispatch, getState) => {
+  const { channels } = getState().channel;
+  const { dms } = getState().dm;
+  const channel =
+    channels.find((c) => channelId === c.id) ||
+    dms.find((d) => channelId === d.id);
+  const trackedThreads = [];
+  const messages = [];
+
+  try {
+    if (channel.isGuildForum()) {
+      const { retThreads: threads } = await dispatch(
+        _getSearchMessages(channelId, channel.getGuildId(), {})
+      );
+      threads.forEach((t) => {
+        if (!trackedThreads.some((tt) => tt.id === t.id)) {
+          trackedThreads.push(new Thread(t));
+        }
+      });
+    } else {
+      (await dispatch(_getMessagesFromChannel(channelId))).forEach((m) =>
+        messages.push(m)
+      );
+    }
+
+    if (!channel.isDm()) {
+      const threadsFromMessages = _getThreadsFromMessages(
+        messages,
+        trackedThreads
+      );
+      threadsFromMessages.forEach((ft) => trackedThreads.push(ft));
+
+      const archivedThreads = await dispatch(
+        _getArchivedThreads(channelId, trackedThreads)
+      );
+      archivedThreads.forEach((at) => trackedThreads.push(at));
+
+      for (const thread of trackedThreads) {
+        (await dispatch(_getMessagesFromChannel(thread.getId()))).forEach((m) =>
+          messages.push(m)
+        );
+      }
+    }
+  } catch (e) {
+    console.error("Error fetching channel messages", e);
+  } finally {
+    return {
+      retArr: messages.map((m) => new Message(m)),
+      retThreads: trackedThreads,
+    };
+  }
+};
+
+const _getMessagesFromChannel = (channelId) => async (dispatch, getState) => {
+  const { token } = getState().user;
+  let lastId = "";
+  let reachedEnd = false;
+  const messages = [];
+  while (!reachedEnd) {
+    if (dispatch(getDiscrubCancelled())) break;
+    await dispatch(checkDiscrubPaused());
+    const data = await fetchMessageData(token, lastId, channelId);
+    if (data.message && data.message.includes("Missing Access")) break;
+    if (data.length < 100) reachedEnd = true;
+    if (data.length > 0) lastId = data[data.length - 1].id;
+    const hasValidMessages = data && (data[0]?.content || data[0]?.attachments);
+    if (hasValidMessages) {
+      const { fetchedMessageLength } = getState().message;
+      dispatch(setFetchedMessageLength(data.length + fetchedMessageLength));
+      data
+        .filter((m) => _messageTypeAllowed(m.type))
+        .forEach((m) => messages.push(m));
+    }
+  }
+  return messages;
+};
+
+const _getArchivedThreads =
+  (channelId, knownThreads) => async (dispatch, getState) => {
     const { token } = getState().user;
-    const { selectedDm } = getState().dm;
-    const isDM = !!selectedDm.id;
-    const trackedThreads = []; // The thread ids that we found while parsing messages
-    try {
-      let lastId = "";
-      let reachedEnd = false;
-      let threadedData = [];
-      while (!reachedEnd) {
-        if (dispatch(getDiscrubCancelled())) break;
-        await dispatch(checkDiscrubPaused());
-        const data = await fetchMessageData(token, lastId, channelId);
-        if (data.message && data.message.includes("Missing Access")) break;
-        if (data.length < 100) reachedEnd = true;
-        if (data.length > 0) lastId = data[data.length - 1].id;
-        if (data && (data[0]?.content || data[0]?.attachments)) {
-          for (const m of data) {
-            if (_messageTypeAllowed(m.type)) {
-              if (m.thread && m.thread.id) {
-                trackedThreads.push({
-                  id: m.thread.id,
-                  name: m.thread.name,
-                  archived: m.thread.thread_metadata?.archived,
-                }); // Found a thread
-                const foundMessages = await dispatch(
-                  _getMessages(m.thread.id, true, initialArr)
-                );
-                threadedData = threadedData.concat(
-                  [m].concat(
-                    foundMessages.sort((a, b) => a.position - b.position)
-                  )
-                );
-              } else threadedData.push(m);
-            }
-          }
-
-          if (!isThread) {
-            initialArr = initialArr.concat(threadedData);
-            threadedData = [];
-          }
-
-          dispatch(setFetchedMessageLength(initialArr.length));
-        }
-      }
-      //Final check for any previously unfound threads
-      let retThreads = [...trackedThreads];
-      if (!isThread && !isDM && !dispatch(getDiscrubCancelled())) {
-        let unfoundedThreads = await fetchThreads(token, channelId);
-        unfoundedThreads = unfoundedThreads
-          .filter((ft) => !trackedThreads.find((tt) => ft.id === tt.id))
-          .map((x) => ({ id: x.id, name: x.name, archived: true }));
-        retThreads = retThreads.concat(unfoundedThreads);
-        for (const ut of unfoundedThreads) {
-          if (dispatch(getDiscrubCancelled())) break;
-          const data = await dispatch(_getMessages(ut.id, true, initialArr));
-          initialArr = initialArr.concat(data);
-          dispatch(setFetchedMessageLength(initialArr.length));
-        }
-      }
-
-      return isThread
-        ? threadedData
-        : { retArr: initialArr.map((m) => new Message(m)), retThreads };
-    } catch (e) {
-      console.error("Error fetching channel messages", e);
+    if (!dispatch(getDiscrubCancelled())) {
+      return (await fetchThreads(token, channelId))
+        .filter((at) => !knownThreads.some((kt) => kt.id === at.id))
+        .map((at) => new Thread(at));
     }
   };
+
+const _getThreadsFromMessages = (messages, knownThreads) => {
+  return messages
+    .filter((m) => m.thread && m.thread.id)
+    .map((m) => new Thread(m.thread))
+    .filter((t) => !knownThreads.some((kt) => kt.id === t.id));
+};
 
 export default messageSlice.reducer;

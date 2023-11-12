@@ -1,3 +1,4 @@
+import { MessageType } from "../enum/MessageType";
 import Attachment from "./Attachment";
 
 class Message {
@@ -42,7 +43,7 @@ class Message {
   }
 
   isReply() {
-    return this.type === 19;
+    return this.type === MessageType.REPLY;
   }
 
   getSafeCopy() {

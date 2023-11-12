@@ -1,17 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchDirectMessages } from "../../services/discordService";
-import DM from "../../classes/DM";
 import {
   resetAdvancedFilters,
   resetFilters,
   resetMessageData,
 } from "../message/messageSlice";
+import Channel from "../../classes/Channel";
 
 export const dmSlice = createSlice({
   name: "dm",
   initialState: {
     dms: [],
-    selectedDm: new DM(),
+    selectedDm: new Channel(),
     isLoading: null,
     preFilterUserId: null,
     preFilterUserIds: [],
@@ -41,7 +41,7 @@ export const dmSlice = createSlice({
       }
     },
     resetDm: (state, { payload }) => {
-      state.selectedDm = new DM();
+      state.selectedDm = new Channel();
       state.preFilterUserId = null;
       state.preFilterUserIds = [];
     },
@@ -59,7 +59,7 @@ export const getDms = () => async (dispatch, getState) => {
   dispatch(setIsLoading(true));
   const data = (await fetchDirectMessages(token)) || [];
   if (data.length) {
-    dispatch(setDms(data.map((dm) => new DM(dm))));
+    dispatch(setDms(data.map((dm) => new Channel(dm))));
   }
   dispatch(setIsLoading(false));
 };

@@ -159,14 +159,14 @@ export const fetchSearchMessageData = (
     selectedHasTypes,
   } = searchCriteria;
   const urlSearchParams = new URLSearchParams({
-    author_id: preFilterUserId,
+    author_id: preFilterUserId || "null",
     min_id: searchAfterDate ? generateSnowflake(searchAfterDate) : null,
     max_id: searchBeforeDate ? generateSnowflake(searchBeforeDate) : null,
     content: searchMessageContent || "null",
     channel_id: guildId && channelId ? channelId : "null",
     include_nsfw: true,
   });
-  selectedHasTypes.forEach((type) => {
+  selectedHasTypes?.forEach((type) => {
     urlSearchParams.append("has", type);
   });
   const nullKeys = [];
