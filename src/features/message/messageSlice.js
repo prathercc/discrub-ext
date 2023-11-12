@@ -7,7 +7,7 @@ import {
   fetchMessageData,
   fetchThreads,
 } from "../../services/discordService";
-import { wait } from "../../utils";
+import { sortByProperty, wait } from "../../utils";
 import parseISO from "date-fns/parseISO";
 import Message from "../../classes/Message";
 import { MessageType } from "../../enum/MessageType";
@@ -600,9 +600,16 @@ export const getMessageData =
           messages: messagesWithMentions,
         };
       }
-
+      const sortedMessages = payload.messages.toSorted((a, b) =>
+        sortByProperty(
+          Object.assign(a, { date: new Date(a.timestamp) }),
+          Object.assign(b, { date: new Date(b.timestamp) }),
+          "date",
+          "desc"
+        )
+      );
       dispatch(setThreads(payload.threads));
-      dispatch(setMessages(payload.messages));
+      dispatch(setMessages(sortedMessages));
       dispatch(setIsLoading(false));
       dispatch(setLookupUserId(null));
       dispatch(setFetchedMessageLength(0));
@@ -618,7 +625,7 @@ export const getMessageData =
       ].some((c) => !!c);
 
       if (!purgingOrExporting) {
-        // If we are purging or exporting, we need to allow those respective slices will handle this.
+        // If we are purging or exporting, we need to allow those respective slices to handle this.
         dispatch(setDiscrubCancelled(false));
       }
 
