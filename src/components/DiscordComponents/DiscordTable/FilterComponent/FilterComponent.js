@@ -3,7 +3,7 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import DiscordDateTimePicker from "../../DiscordDateTimePicker/DiscordDateTimePicker";
 import FilterComponentStyles from "../Styles/FilterComponent.styles";
-import { MenuItem } from "@mui/material";
+import { FormControlLabel, FormGroup, MenuItem, Switch } from "@mui/material";
 import { debounce } from "debounce";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -12,6 +12,7 @@ import {
   updateFilters,
 } from "../../../../features/message/messageSlice";
 import { selectChannel } from "../../../../features/channel/channelSlice";
+import DiscordTooltip from "../../DiscordTooltip/DiscordToolTip";
 
 const FilterComponent = () => {
   const classes = FilterComponentStyles();
@@ -31,6 +32,7 @@ const FilterComponent = () => {
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
+  const [inverse, setInverse] = useState(false);
 
   return (
     <Stack zIndex={1} className={classes.stack} spacing={2}>
@@ -56,6 +58,25 @@ const FilterComponent = () => {
           label="End Time"
           value={endTime}
         />
+        <DiscordTooltip
+          title="Inverse Filter"
+          description="Show messages NOT matching the other provided Quick Filters"
+        >
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={inverse}
+                  onChange={(e) => {
+                    handleFilterUpdate("inverse", e.target.checked, "toggle");
+                    setInverse(e.target.checked);
+                  }}
+                />
+              }
+              label="Inverse"
+            />
+          </FormGroup>
+        </DiscordTooltip>
       </Stack>
       <Stack
         direction="row"

@@ -91,6 +91,7 @@ const EnhancedTableToolbar = ({
             className={classes.collapse}
             orientation="vertical"
             in={filterOpen}
+            unmountOnExit
           >
             <FilterComponent />
           </Collapse>

@@ -183,99 +183,91 @@ export const messageSlice = createSlice({
           retFilters = [
             ...filteredList.filter((f) => f.filterType !== filterType),
           ];
+      } else if (filterType === "toggle") {
+        if (filterValue) {
+          // Add the toggle to filters
+          retFilters = [
+            ...filteredList,
+            {
+              filterName: filterName,
+              filterValue: filterValue,
+              filterType: filterType,
+            },
+          ];
+        } else {
+          // Remove the toggle from filters
+          retFilters = filteredList.filter(
+            (filter) => filter.filterName !== filterName
+          );
+        }
       }
-
       state.filters = retFilters;
     },
     filterMessages: (state, { payload }) => {
       let retArr = [];
-      state.messages.forEach((x) => {
-        let criteriaMet = true;
-        state.filters.forEach((param) => {
-          if (param.filterType === "text") {
-            if (param.filterName === "attachmentName") {
-              let csvAttachments = "";
-              x.attachments.forEach((attachment) => {
-                csvAttachments += attachment.filename + ",";
-              });
-              if (
-                !csvAttachments
-                  .toLowerCase()
-                  .includes(param.filterValue.toLowerCase())
-              ) {
-                criteriaMet = false;
-              }
-            } else if (param.filterName === "content") {
-              const messageContent = x[param.filterName].toLowerCase();
-              const filterValue = param.filterValue.toLowerCase();
-              const embedsContainFilter = () => {
-                if (x.embeds) {
-                  return x.embeds.some((embed) => {
-                    const {
-                      author,
-                      description,
-                      fields,
-                      footer,
-                      title,
-                      type,
-                      url,
-                    } = embed || {};
-                    return (
-                      type === "rich" &&
-                      (author?.name?.toLowerCase()?.includes(filterValue) ||
-                        author?.url?.toLowerCase()?.includes(filterValue) ||
-                        description?.toLowerCase()?.includes(filterValue) ||
-                        footer?.text?.toLowerCase()?.includes(filterValue) ||
-                        title?.toLowerCase()?.includes(filterValue) ||
-                        url?.toLowerCase()?.includes(filterValue) ||
-                        fields?.some(
-                          (field) =>
-                            field?.name?.toLowerCase()?.includes(filterValue) ||
-                            field?.value?.toLowerCase()?.includes(filterValue)
-                        ))
-                    );
-                  });
+      const inverseActive = state.filters.some(
+        (filter) => filter.filterName === "inverse"
+      );
+      const activeFilterCount = state.filters.length;
+
+      if (
+        (activeFilterCount === 1 && inverseActive) ||
+        activeFilterCount === 0
+      ) {
+        retArr = state.messages;
+      } else {
+        state.messages.forEach((x) => {
+          let criteriaMet = true;
+          state.filters.forEach((param) => {
+            if (criteriaMet) {
+              if (param.filterType === "text") {
+                if (param.filterName === "attachmentName") {
+                  criteriaMet = _filterAttachmentName(
+                    param.filterValue,
+                    x,
+                    inverseActive
+                  );
+                } else if (param.filterName === "content") {
+                  criteriaMet = _filterMessageContent(
+                    param.filterValue,
+                    x,
+                    inverseActive
+                  );
+                } else {
+                  criteriaMet = _filterText(
+                    param.filterName,
+                    param.filterValue,
+                    x,
+                    inverseActive
+                  );
                 }
-              };
-              if (
-                !messageContent.includes(filterValue) &&
-                !embedsContainFilter()
-              ) {
-                criteriaMet = false;
-              }
-            } else {
-              const rowValue = x[param.filterName].toLowerCase();
-              const filterValue = param.filterValue.toLowerCase();
-              if (!rowValue.includes(filterValue)) {
-                criteriaMet = false;
-              }
-            }
-            return criteriaMet;
-          } else if (param.filterType === "date") {
-            if (param.filterName === "startTime") {
-              const startTime = Date.parse(param.filterValue);
-              const rowTime = Date.parse(x.timestamp);
-              if (rowTime < startTime) {
-                criteriaMet = false;
-              }
-            } else if (param.filterName === "endTime") {
-              const endTime = Date.parse(param.filterValue);
-              const rowTime = Date.parse(x.timestamp);
-              if (rowTime > endTime) {
-                criteriaMet = false;
+                return criteriaMet;
+              } else if (param.filterType === "date") {
+                if (param.filterName === "startTime") {
+                  criteriaMet = _filterStartTime(
+                    param.filterValue,
+                    x,
+                    inverseActive
+                  );
+                } else if (param.filterName === "endTime") {
+                  criteriaMet = _filterEndTime(
+                    param.filterValue,
+                    x,
+                    inverseActive
+                  );
+                }
+              } else if (param.filterType === "thread") {
+                criteriaMet = _filterThread(
+                  param.filterValue,
+                  x,
+                  inverseActive
+                );
               }
             }
-          } else if (param.filterType === "thread") {
-            if (
-              x.channel_id !== param.filterValue &&
-              x.thread?.id !== param.filterValue
-            ) {
-              criteriaMet = false;
-            }
-          }
+          });
+          if (criteriaMet) retArr.push(x);
         });
-        if (criteriaMet) retArr.push(x);
-      });
+      }
 
       state.filteredMessages = retArr;
       state.selectedMessages = retArr
@@ -284,6 +276,115 @@ export const messageSlice = createSlice({
     },
   },
 });
+
+const _filterThread = (filterValue, message, inverseActive) => {
+  const { channel_id, thread } = message;
+  const isFromThread = channel_id === filterValue || thread?.id === filterValue;
+
+  const criteriaMet =
+    (!inverseActive && !isFromThread) || (inverseActive && isFromThread);
+
+  if (criteriaMet) {
+    return false;
+  }
+  return true;
+};
+
+const _filterEndTime = (filterValue, message, inverseActive) => {
+  const endTime = Date.parse(filterValue);
+  const rowTime = Date.parse(message.timestamp);
+
+  const criteriaMet =
+    (!inverseActive && rowTime > endTime) ||
+    (inverseActive && !(rowTime > endTime));
+
+  if (criteriaMet) {
+    return false;
+  }
+  return true;
+};
+
+const _filterStartTime = (filterValue, message, inverseActive) => {
+  const startTime = Date.parse(filterValue);
+  const rowTime = Date.parse(message.timestamp);
+
+  const criteriaMet =
+    (!inverseActive && rowTime < startTime) ||
+    (inverseActive && !(rowTime < startTime));
+
+  if (criteriaMet) {
+    return false;
+  }
+  return true;
+};
+
+const _filterText = (filterName, filterValue, message, inverseActive) => {
+  const textContainsValue = message[filterName]
+    ?.toLowerCase()
+    ?.includes(filterValue);
+
+  const criteriaMet =
+    (!inverseActive && !textContainsValue) ||
+    (inverseActive && textContainsValue);
+
+  if (criteriaMet) {
+    return false;
+  }
+  return true;
+};
+
+const _filterAttachmentName = (filterValue, message, inverseActive) => {
+  const csvAttachments = message.attachments.map((a) => a.filename).join();
+  const attachmentsIncludeValue = csvAttachments
+    .toLowerCase()
+    .includes(filterValue.toLowerCase());
+  const criteriaMet =
+    (inverseActive && attachmentsIncludeValue) ||
+    (!inverseActive && !attachmentsIncludeValue);
+  if (criteriaMet) {
+    return false;
+  }
+  return true;
+};
+
+const _filterMessageContent = (fv, message, inverseActive) => {
+  const filterValue = fv.toLowerCase();
+  const contentContainsValue = message.content
+    ?.toLowerCase()
+    ?.includes(filterValue);
+  const embedsContainValue =
+    message.embeds &&
+    message.embeds.some((embed) => {
+      const { author, description, fields, footer, title, type, url } = embed;
+      return (
+        type === "rich" &&
+        ([
+          author?.name,
+          author?.url,
+          description,
+          footer?.text,
+          title,
+          url,
+        ].some((prop) => prop?.toLowerCase()?.includes(filterValue)) ||
+          fields?.some((field) =>
+            [field?.name, field?.value].some((fieldProp) =>
+              fieldProp?.toLowerCase()?.includes(filterValue)
+            )
+          ))
+      );
+    });
+
+  const appliesToMessage = contentContainsValue || embedsContainValue;
+
+  const criteraMet =
+    (!inverseActive && !appliesToMessage) ||
+    (inverseActive && appliesToMessage);
+
+  if (criteraMet) {
+    return false;
+  }
+  return true;
+};
 
 export const {
   setIsLoading,
