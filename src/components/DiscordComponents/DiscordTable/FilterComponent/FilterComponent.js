@@ -3,7 +3,12 @@ import TextField from "@mui/material/TextField";
 import Stack from "@mui/material/Stack";
 import DiscordDateTimePicker from "../../DiscordDateTimePicker/DiscordDateTimePicker";
 import FilterComponentStyles from "../Styles/FilterComponent.styles";
-import { FormControlLabel, FormGroup, MenuItem, Switch } from "@mui/material";
+import {
+  Autocomplete,
+  FormControlLabel,
+  FormGroup,
+  Switch,
+} from "@mui/material";
 import { debounce } from "debounce";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,6 +18,9 @@ import {
 } from "../../../../features/message/messageSlice";
 import { selectChannel } from "../../../../features/channel/channelSlice";
 import DiscordTooltip from "../../DiscordTooltip/DiscordToolTip";
+import CopyAdornment from "../../../Messages/CopyAdornment/CopyAdornment";
+import ClearIcon from "@mui/icons-material/Clear";
+import { sortByProperty } from "../../../../utils";
 
 const FilterComponent = () => {
   const classes = FilterComponentStyles();
@@ -29,6 +37,14 @@ const FilterComponent = () => {
     );
     handleFilterMessages();
   };
+
+  const sortedThreads = threads.toSorted((a, b) =>
+    sortByProperty(
+      { name: a.name.toLowerCase() },
+      { name: b.name.toLowerCase() },
+      "name"
+    )
+  );
 
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -119,25 +135,37 @@ const FilterComponent = () => {
           label="Attachment Name"
         />
         {selectedChannel.id && (
-          <TextField
-            size="small"
-            fullWidth
-            variant="filled"
-            onChange={(e) => handleFilterUpdate(null, e.target.value, "thread")}
-            select
-            label="Threads"
-          >
-            <MenuItem dense value={null} key={-1}>
-              <strong>Reset Selection</strong>
-            </MenuItem>
-            {threads.map((thread) => {
-              return (
-                <MenuItem dense value={thread.id} key={thread.id}>
-                  {thread.name}
-                </MenuItem>
-              );
+          <Autocomplete
+            clearIcon={<ClearIcon />}
+            onChange={(_, val) => handleFilterUpdate(null, val, "thread")}
+            options={sortedThreads.map((thread) => {
+              return thread.getId();
             })}
-          </TextField>
+            getOptionLabel={(id) =>
+              threads.find((thread) => thread.id === id)?.getName()
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="filled"
+                fullWidth
+                size="small"
+                label="Threads"
+                className={classes.threadSelect}
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <CopyAdornment
+                      copyValue={threads
+                        .map((thread) => thread.getName())
+                        .join("\r\n")}
+                      copyName="Thread List"
+                    />
+                  ),
+                }}
+              />
+            )}
+          />
         )}
       </Stack>
     </Stack>

@@ -47,6 +47,10 @@ class Thread {
   getId() {
     return this.id;
   }
+
+  getName() {
+    return this.name;
+  }
 }
 
 export default Thread;
