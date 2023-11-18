@@ -790,8 +790,9 @@ const _parseMentions = (messages) => async (dispatch, getState) => {
       content: Object.keys(userMap).reduce((acc, curr) => {
         const keyValue = userMap[curr];
         return acc
-          .replaceAll(`<@${curr}`, `@${keyValue}`)
-          .replaceAll(`<@!${curr}`, `@${keyValue}`);
+          .replaceAll(`<@${curr}>`, `@${keyValue}`)
+          .replaceAll(`<@!${curr}>`, `@${keyValue}`)
+          .replaceAll(`<@&${curr}>`, `@${keyValue}`);
       }, msg.content),
       username: msg.author.username,
     })

@@ -1,7 +1,16 @@
 class Attachment {
   constructor(json) {
-    const { content_type, filename, height, id, proxy_url, size, url, width } =
-      json;
+    const {
+      content_type,
+      filename,
+      height,
+      id,
+      proxy_url,
+      size,
+      url,
+      width,
+      local_url,
+    } = json;
     this.content_type = content_type;
     this.filename = filename;
     this.height = height;
@@ -10,6 +19,7 @@ class Attachment {
     this.size = size;
     this.url = url;
     this.width = width;
+    this.local_url = local_url;
   }
 
   isImage() {
