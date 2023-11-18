@@ -49,5 +49,9 @@ class Message {
   getSafeCopy() {
     return new Message({ ...this });
   }
+
+  getChannelId() {
+    return this.channel_id;
+  }
 }
 export default Message;

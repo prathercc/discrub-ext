@@ -7,14 +7,15 @@ import { sortByProperty } from "../../../utils";
 import { useSelector } from "react-redux";
 import { selectExport } from "../../../features/export/exportSlice";
 import { selectMessage } from "../../../features/message/messageSlice";
+import { selectThread } from "../../../features/thread/threadSlice";
 
 const ExportMessages = ({ componentRef, bulk = false }) => {
   const classes = ExportStyles();
 
   const { isExporting, currentPage, messagesPerPage, sortOverride } =
     useSelector(selectExport);
-  const { messages, filters, filteredMessages, threads } =
-    useSelector(selectMessage);
+  const { threads } = useSelector(selectThread);
+  const { messages, filters, filteredMessages } = useSelector(selectMessage);
 
   let exportMessages = filters.length > 0 ? filteredMessages : messages;
   exportMessages = bulk

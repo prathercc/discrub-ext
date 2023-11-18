@@ -51,6 +51,22 @@ class Thread {
   getName() {
     return this.name;
   }
+
+  getLockedOrArchived() {
+    return (
+      this.archived ||
+      this.thread_metadata?.archived ||
+      this.thread_metadata?.locked
+    );
+  }
+
+  unarchive() {
+    this.archived = false;
+    if (this.thread_metadata) {
+      this.thread_metadata.archived = false;
+      this.thread_metadata.locked = false;
+    }
+  }
 }
 
 export default Thread;

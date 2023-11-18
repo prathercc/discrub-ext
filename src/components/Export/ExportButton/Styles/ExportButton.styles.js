@@ -15,6 +15,10 @@ const ExportButtonStyles = makeStyles(() => ({
   dialogStatusStack: {
     minWidth: 300,
   },
+  exportOptions: {
+    backgroundColor: "rgb(32, 34, 37, 0.25)",
+    borderRadius: "15px",
+  },
 }));
 
 export default ExportButtonStyles;

@@ -7,7 +7,7 @@ import DiscordTableStyles from "../Styles/DiscordTable.styles";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import MessageMock from "../../../Export/Mock/MessageMock";
 import { useDispatch } from "react-redux";
-import { setModifyMessage } from "../../../../features/message/messageSlice";
+import { setModifyEntity } from "../../../../features/app/appSlice";
 
 export default function DiscordTableMessage({
   row,
@@ -34,7 +34,7 @@ export default function DiscordTableMessage({
               <IconButton
                 onClick={async (e) => {
                   e.stopPropagation();
-                  dispatch(setModifyMessage(row));
+                  dispatch(setModifyEntity(row));
                   openAttachmentModal();
                 }}
                 color="secondary"
@@ -48,7 +48,7 @@ export default function DiscordTableMessage({
               <IconButton
                 onClick={async (e) => {
                   e.stopPropagation();
-                  dispatch(setModifyMessage(row));
+                  dispatch(setModifyEntity(row));
                   openEmbedModal();
                 }}
                 color="secondary"

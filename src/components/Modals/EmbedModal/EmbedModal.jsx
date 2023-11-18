@@ -13,13 +13,13 @@ import Divider from "@mui/material/Divider";
 import ModalStyles from "../Styles/Modal.styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useSelector } from "react-redux";
-import { selectMessage } from "../../../features/message/messageSlice";
+import { selectApp } from "../../../features/app/appSlice";
 
 const EmbedModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
 
-  const { modify } = useSelector(selectMessage);
-  const { message: modifyMessage } = modify || {};
+  const { modify } = useSelector(selectApp);
+  const { entity } = modify || {};
 
   return (
     <Dialog fullWidth open={open} onClose={handleClose}>
@@ -31,7 +31,7 @@ const EmbedModal = ({ open, handleClose }) => {
       </DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <Stack className={classes.stackContainer} pr="25px" spacing={2}>
-          {modifyMessage?.embeds
+          {entity?.embeds
             ?.filter((embed) => embed.type === "rich")
             .map((embed, i) => {
               return (

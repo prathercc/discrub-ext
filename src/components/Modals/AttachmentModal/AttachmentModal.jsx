@@ -13,29 +13,27 @@ import {
 import ModalStyles from "../Styles/Modal.styles";
 import Attachment from "./Attachment/Attachment";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteAttachment,
-  selectMessage,
-} from "../../../features/message/messageSlice";
+import { deleteAttachment } from "../../../features/message/messageSlice";
+import { selectApp } from "../../../features/app/appSlice";
 
 const AttachmentModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
 
   const dispatch = useDispatch();
 
-  const { modify } = useSelector(selectMessage);
-  const { message: modifyMessage, active: deleting, statusText } = modify || {};
+  const { modify } = useSelector(selectApp);
+  const { entity, active, statusText } = modify || {};
 
   const handleDeleteAttachment = async (attachment) => {
     dispatch(deleteAttachment(attachment));
   };
 
   useEffect(() => {
-    if (!modifyMessage || modifyMessage.attachments.length === 0) {
+    if (!entity || entity.attachments.length === 0) {
       handleClose();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modifyMessage]);
+  }, [entity]);
 
   return (
     <Dialog fullWidth open={open} onClose={handleClose}>
@@ -47,13 +45,13 @@ const AttachmentModal = ({ open, handleClose }) => {
       </DialogTitle>
       <DialogContent className={classes.dialogContent}>
         <Stack className={classes.stackContainer} spacing={1}>
-          {modifyMessage &&
-            modifyMessage.attachments.map((a) => {
+          {entity &&
+            entity.attachments.map((a) => {
               return (
                 <Attachment
                   attachment={a}
                   handleDeleteAttachment={handleDeleteAttachment}
-                  deleting={deleting}
+                  deleting={active}
                 />
               );
             })}
@@ -67,9 +65,9 @@ const AttachmentModal = ({ open, handleClose }) => {
           alignItems="center"
           spacing={2}
         >
-          {deleting && <CircularProgress />}
+          {active && <CircularProgress />}
           <Button
-            disabled={deleting}
+            disabled={active}
             variant="contained"
             onClick={handleClose}
             color="secondary"

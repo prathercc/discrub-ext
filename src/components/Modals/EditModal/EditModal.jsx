@@ -19,26 +19,22 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   editMessages,
   selectMessage,
-  setDiscrubCancelled,
-  setDiscrubPaused,
 } from "../../../features/message/messageSlice";
 import PauseButton from "../../PauseButton/PauseButton";
 import CancelButton from "../../Messages/CancelButton/CancelButton";
+import {
+  selectApp,
+  setDiscrubCancelled,
+  setDiscrubPaused,
+} from "../../../features/app/appSlice";
 
 const EditModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
   const dispatch = useDispatch();
-  const {
-    selectedMessages,
-    messages,
-    modify: modifyState,
-  } = useSelector(selectMessage);
+  const { modify } = useSelector(selectApp);
+  const { selectedMessages, messages } = useSelector(selectMessage);
 
-  const {
-    active: editing,
-    message: editObj,
-    statusText: debugMessage,
-  } = modifyState;
+  const { active, entity, statusText } = modify;
 
   const [updateText, setUpdateText] = useState("");
 
@@ -50,7 +46,7 @@ const EditModal = ({ open, handleClose }) => {
   };
 
   const handleModalClose = () => {
-    if (editing) {
+    if (active) {
       // We are actively editing, we need to send a cancel request
       dispatch(setDiscrubCancelled(true));
     }
@@ -76,42 +72,42 @@ const EditModal = ({ open, handleClose }) => {
         <TextField
           fullWidth
           variant="filled"
-          disabled={editing}
+          disabled={active}
           label="Update Text"
           value={updateText}
           onChange={(e) => setUpdateText(e.target.value)}
         />
-        {editing && editObj && (
+        {active && entity && (
           <>
             <Box my={1} className={classes.box}>
               <MessageChip
-                avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
-                username={editObj.username}
-                content={editObj.content}
+                avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
+                username={entity.username}
+                content={entity.content}
               />
               <ArrowRightAltIcon className={classes.icon} />
               <MessageChip
-                avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
-                username={editObj.username}
+                avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
+                username={entity.username}
                 content={updateText}
               />
             </Box>
-            <ModalDebugMessage debugMessage={debugMessage} />
+            <ModalDebugMessage debugMessage={statusText} />
             <Stack justifyContent="center" alignItems="center">
               <CircularProgress />
             </Stack>
             <Typography className={classes.objIdTypography} variant="caption">
-              {editObj.id}
+              {entity.id}
             </Typography>
           </>
         )}
       </DialogContent>
       <DialogActions>
         <CancelButton onCancel={handleModalClose} />
-        <PauseButton disabled={!editing} />
+        <PauseButton disabled={!active} />
         <Button
           variant="contained"
-          disabled={updateText.length === 0 || editing}
+          disabled={updateText.length === 0 || active}
           onClick={handleEditMessage}
           autoFocus
         >

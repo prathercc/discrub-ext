@@ -28,6 +28,7 @@ import {
   selectMessage,
 } from "../../../features/message/messageSlice";
 import CancelButton from "../CancelButton/CancelButton";
+import { selectApp } from "../../../features/app/appSlice";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
@@ -43,12 +44,12 @@ function DirectMessages() {
     fetchedMessageLength,
     isLoading: messagesLoading,
     messages,
-    discrubCancelled,
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
     selectedHasTypes,
   } = useSelector(selectMessage);
+  const { discrubCancelled } = useSelector(selectApp);
 
   const classes = DirectMessagesStyles({
     purgeDialogOpen,

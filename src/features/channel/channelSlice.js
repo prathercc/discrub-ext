@@ -68,21 +68,27 @@ export const {
 } = channelSlice.actions;
 
 export const getChannels = (guildId) => async (dispatch, getState) => {
-  if (guildId) {
-    const { token, username, id } = getState().user;
-    dispatch(setIsLoading(true));
-    const data = await fetchChannels(token, guildId);
-    if (data) {
-      dispatch(
-        setChannels(
-          data
-            .filter((c) => c.type !== 4)
-            .map((channel) => new Channel(channel))
-        )
-      );
-      dispatch(setPreFilterUserIds([{ name: username, id: id }]));
+  try {
+    if (guildId) {
+      const { token, username, id } = getState().user;
+      dispatch(setIsLoading(true));
+      const data = await fetchChannels(token, guildId);
+      if (data) {
+        dispatch(
+          setChannels(
+            data
+              .filter((c) => c.type !== 4)
+              .map((channel) => new Channel(channel))
+          )
+        );
+        dispatch(setPreFilterUserIds([{ name: username, id: id }]));
+      }
+      dispatch(setIsLoading(false));
     }
+  } catch (e) {
+    console.error(e);
     dispatch(setIsLoading(false));
+    dispatch(setChannels([]));
   }
 };
 

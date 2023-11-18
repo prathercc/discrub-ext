@@ -103,6 +103,18 @@ export const fetchChannels = (authorization, guildId) => {
   }).then((resp) => resp.json());
 };
 
+export const editChannel = (authorization, channelId, updateObj) => {
+  return fetch(`${discordChannelsUrl}/${channelId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+    body: JSON.stringify({ ...updateObj }),
+  }).then((resp) => resp.json());
+};
+
 export const editMessage = (authorization, messageId, updateObj, channelId) => {
   return fetch(`${discordChannelsUrl}/${channelId}/messages/${messageId}`, {
     method: "PATCH",

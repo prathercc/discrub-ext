@@ -13,7 +13,6 @@ import { debounce } from "debounce";
 import { useDispatch, useSelector } from "react-redux";
 import {
   filterMessages,
-  selectMessage,
   updateFilters,
 } from "../../../../features/message/messageSlice";
 import { selectChannel } from "../../../../features/channel/channelSlice";
@@ -21,12 +20,13 @@ import DiscordTooltip from "../../DiscordTooltip/DiscordToolTip";
 import CopyAdornment from "../../../Messages/CopyAdornment/CopyAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import { sortByProperty } from "../../../../utils";
+import { selectThread } from "../../../../features/thread/threadSlice";
 
 const FilterComponent = () => {
   const classes = FilterComponentStyles();
 
   const dispatch = useDispatch();
-  const { threads } = useSelector(selectMessage);
+  const { threads } = useSelector(selectThread);
   const { selectedChannel } = useSelector(selectChannel);
 
   const handleFilterMessages = debounce(() => dispatch(filterMessages()), 600);

@@ -36,6 +36,7 @@ import {
   selectMessage,
 } from "../../../features/message/messageSlice";
 import CancelButton from "../CancelButton/CancelButton";
+import { selectApp } from "../../../features/app/appSlice";
 
 function ChannelMessages({ closeAnnouncement }) {
   const dispatch = useDispatch();
@@ -52,8 +53,8 @@ function ChannelMessages({ closeAnnouncement }) {
     searchAfterDate,
     searchMessageContent,
     selectedHasTypes,
-    discrubCancelled,
   } = useSelector(selectMessage);
+  const { discrubCancelled } = useSelector(selectApp);
 
   const [showOptionalFilters, setShowOptionalFilters] = useState(false);
   const [searchTouched, setSearchTouched] = useState(false);

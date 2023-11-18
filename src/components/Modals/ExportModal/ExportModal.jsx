@@ -6,11 +6,11 @@ import Actions from "../../Export/ExportButton/Actions/Actions";
 import DefaultContent from "../../Export/ExportButton/DefaultContent/DefaultContent";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedExportChannels } from "../../../features/channel/channelSlice";
+import { selectExport } from "../../../features/export/exportSlice";
 import {
   setDiscrubCancelled,
   setDiscrubPaused,
-} from "../../../features/message/messageSlice";
-import { selectExport } from "../../../features/export/exportSlice";
+} from "../../../features/app/appSlice";
 
 const ExportModal = ({
   dialogOpen,

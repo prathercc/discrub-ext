@@ -44,15 +44,20 @@ export const { setIsLoading, setToken, setUserData } = userSlice.actions;
 export const getUserData = () => async (dispatch) => {
   dispatch(setIsLoading(true));
   const chromeCallback = async (userToken) => {
-    let data = null;
-    if (userToken) {
-      data = await fetchUserData(userToken);
-      if (data) {
-        dispatch(setToken(userToken));
-        dispatch(setUserData(data));
+    try {
+      let data = null;
+      if (userToken) {
+        data = await fetchUserData(userToken);
+        if (data) {
+          dispatch(setToken(userToken));
+          dispatch(setUserData(data));
+        }
       }
+      dispatch(setIsLoading(false));
+    } catch (e) {
+      console.error(e);
+      dispatch(setIsLoading(false));
     }
-    dispatch(setIsLoading(false));
   };
   return sendChromeMessage("GET_TOKEN", chromeCallback);
 };
@@ -60,18 +65,25 @@ export const getUserData = () => async (dispatch) => {
 export const getUserDataManually =
   (userToken) => async (dispatch, getState) => {
     if (userToken) {
-      dispatch(setIsLoading(true));
-      const data = await fetchUserData(userToken);
+      try {
+        dispatch(setIsLoading(true));
+        const data = await fetchUserData(userToken);
 
-      if (data.code === 0 || data.code || !data) {
+        if (data.code === 0 || data.code || !data) {
+          dispatch(setToken(undefined));
+          dispatch(setIsLoading(false));
+          return { successful: false };
+        } else {
+          dispatch(setToken(userToken));
+          dispatch(setUserData(data));
+          dispatch(setIsLoading(false));
+          return { successful: true };
+        }
+      } catch (e) {
+        console.error(e);
         dispatch(setToken(undefined));
         dispatch(setIsLoading(false));
         return { successful: false };
-      } else {
-        dispatch(setToken(userToken));
-        dispatch(setUserData(data));
-        dispatch(setIsLoading(false));
-        return { successful: true };
       }
     }
   };

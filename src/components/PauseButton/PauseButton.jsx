@@ -3,10 +3,7 @@ import { Alert, Button, Snackbar } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  selectMessage,
-  setDiscrubPaused,
-} from "../../features/message/messageSlice";
+import { selectApp, setDiscrubPaused } from "../../features/app/appSlice";
 
 /**
  *
@@ -15,7 +12,7 @@ import {
  */
 const PauseButton = ({ disabled = false }) => {
   const dispatch = useDispatch();
-  const { discrubPaused, discrubCancelled } = useSelector(selectMessage);
+  const { discrubPaused, discrubCancelled } = useSelector(selectApp);
 
   return (
     <>

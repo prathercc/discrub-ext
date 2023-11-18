@@ -7,6 +7,8 @@ import relationshipReducer from "../features/relationship/relationshipSlice";
 import messageReducer from "../features/message/messageSlice";
 import exportReducer from "../features/export/exportSlice";
 import purgeReducer from "../features/purge/purgeSlice";
+import threadReducer from "../features/thread/threadSlice";
+import appReducer from "../features/app/appSlice";
 
 export default configureStore({
   reducer: {
@@ -18,5 +20,7 @@ export default configureStore({
     message: messageReducer,
     export: exportReducer,
     purge: purgeReducer,
+    thread: threadReducer,
+    app: appReducer,
   },
 });

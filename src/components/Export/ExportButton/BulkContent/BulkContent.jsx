@@ -95,7 +95,7 @@ const BulkContent = ({ isDm = false }) => {
               className={classes.dialogBtnStack}
               direction="row"
               justifyContent="space-between"
-              alignItems="flex-start"
+              alignItems="center"
             >
               <Tooltip
                 arrow
@@ -125,16 +125,23 @@ const BulkContent = ({ isDm = false }) => {
                 </IconButton>
               </Tooltip>
               <Stack
-                className={classes.dialogBtnStack}
-                direction="row"
+                className={classes.exportOptions}
+                direction="column"
                 justifyContent="flex-end"
-                alignItems="center"
                 spacing={1}
+                alignItems="center"
               >
-                <SortDirectionToggle />
-                <ShowAvatarsToggle />
-                <PreviewImageToggle />
-                <ImageToggle />
+                <Typography variant="body2">Export Options</Typography>
+                <Stack
+                  className={classes.dialogBtnStack}
+                  direction="row"
+                  spacing={1}
+                >
+                  <SortDirectionToggle />
+                  <ShowAvatarsToggle />
+                  <PreviewImageToggle />
+                  <ImageToggle />
+                </Stack>
               </Stack>
             </Stack>
             <Stack
@@ -155,18 +162,27 @@ const BulkContent = ({ isDm = false }) => {
               Exporting messages from <strong>@{selectedDm?.name}</strong>
             </Typography>
           </DialogContentText>
-          <Stack
-            className={classes.dialogBtnStack}
-            direction="row"
-            justifyContent="flex-end"
-            alignItems="center"
-            spacing={1}
-          >
-            <SortDirectionToggle />
-            <ShowAvatarsToggle />
-            <PreviewImageToggle />
-            <ImageToggle />
+          <Stack direction="row" justifyContent="flex-end" mt={1} mb={1}>
+            <Stack
+              className={classes.exportOptions}
+              direction="column"
+              spacing={1}
+              alignItems="center"
+            >
+              <Typography variant="body2">Export Options</Typography>
+              <Stack
+                className={classes.dialogBtnStack}
+                direction="row"
+                spacing={1}
+              >
+                <SortDirectionToggle />
+                <ShowAvatarsToggle />
+                <PreviewImageToggle />
+                <ImageToggle />
+              </Stack>
+            </Stack>
           </Stack>
+
           <Stack direction="row" justifyContent="flex-end" alignItems="center">
             <PerPage />
           </Stack>

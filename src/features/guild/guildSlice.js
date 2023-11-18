@@ -45,13 +45,19 @@ export const { setIsLoading, setGuilds, setGuild, resetGuild } =
   guildSlice.actions;
 
 export const getGuilds = () => async (dispatch, getState) => {
-  const { token } = getState().user;
-  dispatch(setIsLoading(true));
-  const data = (await fetchGuilds(token)) || [];
-  if (data.length) {
-    dispatch(setGuilds(data));
+  try {
+    const { token } = getState().user;
+    dispatch(setIsLoading(true));
+    const data = (await fetchGuilds(token)) || [];
+    if (data.length) {
+      dispatch(setGuilds(data));
+    }
+    dispatch(setIsLoading(false));
+  } catch (e) {
+    console.error(e);
+    dispatch(setIsLoading(false));
+    dispatch(setGuilds([]));
   }
-  dispatch(setIsLoading(false));
 };
 
 export const changeGuild = (id) => async (dispatch, getState) => {

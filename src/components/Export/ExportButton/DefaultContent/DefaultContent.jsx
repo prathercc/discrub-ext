@@ -31,16 +31,25 @@ const DefaultContent = () => {
               messages are available to export
             </Typography>
           </DialogContentText>
-          <Stack
-            className={classes.dialogBtnStack}
-            direction="row"
-            justifyContent="flex-end"
-            alignItems="center"
-            spacing={1}
-          >
-            <ShowAvatarsToggle />
-            <PreviewImageToggle />
-            <ImageToggle />
+          <Stack direction="row" justifyContent="flex-end" mt={1} mb={1}>
+            <Stack
+              className={classes.exportOptions}
+              direction="column"
+              spacing={1}
+              alignItems="center"
+            >
+              <Typography variant="body2">Export Options</Typography>
+              <Stack
+                className={classes.dialogBtnStack}
+                direction="row"
+                alignItems="center"
+                spacing={1}
+              >
+                <ShowAvatarsToggle />
+                <PreviewImageToggle />
+                <ImageToggle />
+              </Stack>
+            </Stack>
           </Stack>
           <Stack direction="row" justifyContent="flex-end" alignItems="center">
             <PerPage />

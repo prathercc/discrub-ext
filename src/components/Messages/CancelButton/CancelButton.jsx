@@ -2,10 +2,10 @@ import React from "react";
 import { Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  selectMessage,
+  selectApp,
   setDiscrubCancelled,
   setDiscrubPaused,
-} from "../../../features/message/messageSlice";
+} from "../../../features/app/appSlice";
 
 /**
  *
@@ -15,7 +15,7 @@ import {
  */
 const CancelButton = ({ onCancel, disabled = false }) => {
   const dispatch = useDispatch();
-  const { discrubCancelled } = useSelector(selectMessage);
+  const { discrubCancelled } = useSelector(selectApp);
 
   const handleCancel = () => {
     if (onCancel) {

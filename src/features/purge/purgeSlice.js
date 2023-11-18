@@ -1,39 +1,26 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { wait } from "../../utils";
 import {
-  checkDiscrubPaused,
   deleteMessage,
-  getDiscrubCancelled,
   getMessageData,
   resetMessageData,
-  setDiscrubCancelled,
 } from "../message/messageSlice";
+import { liftThreadRestrictions } from "../thread/threadSlice";
+import {
+  checkDiscrubPaused,
+  getDiscrubCancelled,
+  setDiscrubCancelled,
+  setIsModifying,
+  setModifyEntity,
+  setTimeoutMessage as notify,
+} from "../app/appSlice";
 
 export const purgeSlice = createSlice({
   name: "purge",
-  initialState: {
-    debugMessage: null,
-    deleting: false,
-    deleteObj: null,
-  },
-  reducers: {
-    setDebugMessage: (state, { payload }) => {
-      state.debugMessage = payload;
-    },
-    setDeleting: (state, { payload }) => {
-      state.deleting = payload;
-    },
-    setDeleteObj: (state, { payload }) => {
-      state.deleteObj = payload;
-    },
-    resetDebugMessage: (state, { payload }) => {
-      state.debugMessage = "";
-    },
-  },
+  initialState: {},
+  reducers: {},
 });
 
-export const { setDebugMessage, setDeleting, setDeleteObj, resetDebugMessage } =
-  purgeSlice.actions;
+export const {} = purgeSlice.actions;
 
 /**
  * Iterates through the provided array and deletes every message from each entity.
@@ -45,13 +32,12 @@ export const purge =
     const { id: userId } = getState().user;
     const { selectedGuild } = getState().guild;
     const { preFilterUserId } = getState().channel;
-    dispatch(setDeleting(true));
+    dispatch(setIsModifying(true));
     for (const entity of arr) {
       if (dispatch(getDiscrubCancelled())) break;
       await dispatch(checkDiscrubPaused());
-      dispatch(setDeleteObj({}));
-      dispatch(setDebugMessage("Searching for messages..."));
-      await wait(1, () => dispatch(resetDebugMessage()));
+      dispatch(setModifyEntity({}));
+      await dispatch(notify("Searching for messages...", 1));
       dispatch(resetMessageData());
       await dispatch(
         getMessageData(
@@ -64,14 +50,23 @@ export const purge =
       const selectedMessages = getState().message.messages;
       const selectedCount = selectedMessages.length;
       if (selectedCount === 0) {
-        dispatch(setDebugMessage("Still searching..."));
-        await wait(1, () => dispatch(resetDebugMessage()));
+        await dispatch(notify("Still searching...", 1));
       }
+
+      let noPermissionThreadIds = [];
       while (count < selectedCount && !dispatch(getDiscrubCancelled())) {
         await dispatch(checkDiscrubPaused());
         let currentRow = selectedMessages[count];
+
+        noPermissionThreadIds = await dispatch(
+          liftThreadRestrictions(
+            currentRow.getChannelId(),
+            noPermissionThreadIds
+          )
+        );
+
         dispatch(
-          setDeleteObj(
+          setModifyEntity(
             Object.assign(currentRow.getSafeCopy(), {
               _index: count + 1,
               _total: selectedCount,
@@ -79,25 +74,31 @@ export const purge =
           )
         );
 
-        const response = await dispatch(deleteMessage(currentRow));
-        if (response === null) {
-          count++;
-        } else if (response > 0) {
-          dispatch(setDebugMessage(`Pausing for ${response} seconds`));
-          await wait(response, () => dispatch(resetDebugMessage()));
-        } else {
-          dispatch(
-            setDebugMessage(
-              "You do not have permission to modify this message!"
-            )
+        const noPermissionSkip = noPermissionThreadIds.some(
+          (tId) => tId === currentRow.getChannelId()
+        );
+        if (noPermissionSkip) {
+          await dispatch(
+            notify("Permission missing for message, skipping delete", 1)
           );
-          await wait(0.5, () => dispatch(resetDebugMessage()));
           count++;
+        } else {
+          const response = await dispatch(deleteMessage(currentRow));
+          if (response === null) {
+            count++;
+          } else if (response > 0) {
+            await dispatch(notify(`Pausing for ${response} seconds`, response));
+          } else {
+            await dispatch(
+              notify("You do not have permission to modify this message!", 0.5)
+            );
+            count++;
+          }
         }
       }
     }
-    dispatch(setDeleting(false));
-    dispatch(setDeleteObj(null));
+    dispatch(setIsModifying(false));
+    dispatch(setModifyEntity(null));
     dispatch(resetMessageData());
     dispatch(setDiscrubCancelled(false));
   };

@@ -5,22 +5,31 @@ import {
   getUser,
   fetchSearchMessageData,
   fetchMessageData,
-  fetchThreads,
 } from "../../services/discordService";
 import { sortByProperty, wait } from "../../utils";
 import parseISO from "date-fns/parseISO";
 import Message from "../../classes/Message";
 import { MessageType } from "../../enum/MessageType";
 import Thread from "../../classes/Thread";
+import {
+  getArchivedThreads,
+  getThreadsFromMessages,
+  liftThreadRestrictions,
+  resetThreads,
+  setThreads,
+} from "../thread/threadSlice";
+import {
+  checkDiscrubPaused,
+  getDiscrubCancelled,
+  resetModify,
+  setDiscrubCancelled,
+  setIsModifying,
+  setModifyEntity,
+  setTimeoutMessage as notify,
+} from "../app/appSlice";
 
 const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
-};
-
-const defaultModify = {
-  active: false,
-  message: null,
-  statusText: null,
 };
 
 export const messageSlice = createSlice({
@@ -33,7 +42,6 @@ export const messageSlice = createSlice({
     fetchedMessageLength: 0, // Current length of fetched messages, used for debugging message fetch progress
     lookupUserId: null, // The userId being looked up (during message fetch process)
     isLoading: null,
-    threads: [], // The list of threads for a given messages arr
     order: "asc",
     orderBy: "",
     searchBeforeDate: null,
@@ -42,38 +50,11 @@ export const messageSlice = createSlice({
     searchMessageContent: null,
     hasTypes: ["embed", "file", "image", "link", "sound", "sticker", "video"],
     selectedHasTypes: [],
-    discrubPaused: false, // Flag to pause Export/Purge/Search
-    discrubCancelled: false, // Flag to cancel Export/Purge/Search
-    modify: defaultModify,
   },
   reducers: {
     setIsLoading: (state, { payload }) => {
       state.isLoading = payload;
     },
-
-    setIsModifying: (state, { payload }) => {
-      state.modify.active = payload;
-    },
-    setModifyMessage: (state, { payload }) => {
-      state.modify.message = payload;
-    },
-    setModifyStatusText: (state, { payload }) => {
-      state.modify.statusText = payload;
-    },
-    resetModifyStatusText: (state, { payload }) => {
-      state.modify.statusText = "";
-    },
-    resetModify: (state, { payload }) => {
-      state.modify = defaultModify;
-    },
-
-    setDiscrubPaused: (state, { payload }) => {
-      state.discrubPaused = payload;
-    },
-    setDiscrubCancelled: (state, { payload }) => {
-      state.discrubCancelled = payload;
-    },
-
     setSelectedHasTypes: (state, { payload }) => {
       state.selectedHasTypes = payload;
     },
@@ -86,7 +67,6 @@ export const messageSlice = createSlice({
     setSearchAfterDate: (state, { payload }) => {
       state.searchAfterDate = payload;
     },
-
     setSelected: (state, { payload }) => {
       state.selectedMessages = payload;
     },
@@ -108,20 +88,16 @@ export const messageSlice = createSlice({
     setMessages: (state, { payload }) => {
       state.messages = payload;
     },
-    setThreads: (state, { payload }) => {
-      state.threads = payload;
-    },
     setFilteredMessages: (state, { payload }) => {
       state.filteredMessages = payload;
     },
-    resetMessageData: (state, { payload }) => {
+    _resetMessageData: (state, { payload }) => {
       state.messages = [];
       state.selectedMessages = [];
       state.lookupUserId = null;
       state.fetchedMessageLength = 0;
       state.totalSearchMessages = 0;
       state.isLoading = null;
-      state.threads = [];
     },
     setLookupUserId: (state, { payload }) => {
       state.lookupUserId = payload;
@@ -388,27 +364,15 @@ const _filterMessageContent = (fv, message, inverseActive) => {
 
 export const {
   setIsLoading,
-
-  setIsModifying,
-  setModifyMessage,
-  setModifyStatusText,
-  resetModifyStatusText,
-  resetModify,
-
-  setDiscrubPaused,
-  setDiscrubCancelled,
-
   setSelectedHasTypes,
   setSearchMessageContent,
   setSearchBeforeDate,
   setSearchAfterDate,
-
   setSelected,
   setOrder,
   setMessages,
-  setThreads,
   setFilteredMessages,
-  resetMessageData,
+  _resetMessageData,
   setLookupUserId,
   setFetchedMessageLength,
   setTotalSearchMessages,
@@ -420,89 +384,89 @@ export const {
 
 export const selectMessage = (state) => state.message;
 
-export const checkDiscrubPaused = () => async (dispatch, getState) => {
-  while (getState().message.discrubPaused) await wait(2);
-};
-
-// TODO: Use discrubCancelled to stop any Search/Purge/Export
-// Something that we can do here is disable the approriate buttons while this is true (once this flag gets reset to false, we reenable the buttons)
-export const getDiscrubCancelled = () => (dispatch, getState) => {
-  return getState().message.discrubCancelled;
-};
-
 export const deleteAttachment = (attachment) => async (dispatch, getState) => {
-  const { message } = getState().message.modify;
+  const { entity: message } = getState().app.modify;
   const shouldEdit =
     (message.content && message.content.length > 0) ||
     message.attachments.length > 1;
-  dispatch(setIsModifying(true));
-  if (shouldEdit) {
-    const updatedMessage = Object.assign(message.getSafeCopy(), {
-      attachments: message.attachments.filter(
-        (attch) => attch.id !== attachment.id
-      ),
-    });
-    const response = await dispatch(updateMessage(updatedMessage));
-    if (response !== null) {
-      dispatch(
-        setModifyStatusText(
-          "Entire message must be deleted to remove attachment!"
-        )
-      );
-      await wait(0.5, () => dispatch(resetModifyStatusText()));
+
+  await dispatch(liftThreadRestrictions(message.getChannelId()));
+
+  try {
+    dispatch(setIsModifying(true));
+    if (shouldEdit) {
+      const updatedMessage = Object.assign(message.getSafeCopy(), {
+        attachments: message.attachments.filter(
+          (attch) => attch.id !== attachment.id
+        ),
+      });
+      const response = await dispatch(updateMessage(updatedMessage));
+      if (response !== null) {
+        await dispatch(
+          notify("Entire message must be deleted to remove attachment!", 0.5)
+        );
+      } else {
+        dispatch(setModifyEntity(updatedMessage));
+      }
     } else {
-      dispatch(setModifyMessage(updatedMessage));
+      const response = await dispatch(deleteMessage(message));
+      if (response !== null) {
+        await dispatch(
+          notify("You do not have permission to delete this attachment!", 0.5)
+        );
+      } else {
+        dispatch(setModifyEntity(null));
+      }
     }
-  } else {
-    const response = await dispatch(deleteMessage(message));
-    if (response !== null) {
-      dispatch(
-        setModifyStatusText(
-          "You do not have permission to delete this attachment!"
-        )
-      );
-      await wait(0.5, () => dispatch(resetModifyStatusText()));
-    } else {
-      dispatch(setModifyMessage(null));
-    }
+    dispatch(setIsModifying(false));
+  } catch (e) {
+    console.error(e);
+    dispatch(resetModify());
   }
-  dispatch(setIsModifying(false));
 };
 
 export const updateMessage = (message) => async (dispatch, getState) => {
   const { token } = getState().user;
-  const data = await editMsg(
-    token,
-    message.id,
-    { content: message.content, attachments: message.attachments },
-    message.channel_id
-  );
-  if (!data.message) {
-    const { messages, filteredMessages, modify } = getState().message;
-    const { message: modifyMessage } = modify;
-    const updatedMessages = messages.map((message) =>
-      message.id === data.id
-        ? Object.assign(new Message(data), { username: message.username })
-        : message
+  try {
+    const data = await editMsg(
+      token,
+      message.id,
+      { content: message.content, attachments: message.attachments },
+      message.channel_id
     );
-    const updatedFilterMessages = filteredMessages.map((message) =>
-      message.id === data.id
-        ? Object.assign(new Message(data), { username: message.username })
-        : message
-    );
-    const updatedModifyMessage =
-      modifyMessage?.id === data.id
-        ? Object.assign(new Message(data), { username: modifyMessage.username })
-        : modifyMessage;
+    if (!data.message) {
+      const { modify } = getState().app;
+      const { messages, filteredMessages } = getState().message;
+      const { entity: modifyMessage } = modify;
+      const updatedMessages = messages.map((message) =>
+        message.id === data.id
+          ? Object.assign(new Message(data), { username: message.username })
+          : message
+      );
+      const updatedFilterMessages = filteredMessages.map((message) =>
+        message.id === data.id
+          ? Object.assign(new Message(data), { username: message.username })
+          : message
+      );
+      const updatedModifyMessage =
+        modifyMessage?.id === data.id
+          ? Object.assign(new Message(data), {
+              username: modifyMessage.username,
+            })
+          : modifyMessage;
 
-    dispatch(setMessages(updatedMessages));
-    dispatch(setFilteredMessages(updatedFilterMessages));
-    dispatch(setModifyMessage(updatedModifyMessage));
+      dispatch(setMessages(updatedMessages));
+      dispatch(setFilteredMessages(updatedFilterMessages));
+      dispatch(setModifyEntity(updatedModifyMessage));
 
-    return null;
-  } else if (data.retry_after) {
-    return data.retry_after;
-  } else {
+      return null;
+    } else if (data.retry_after) {
+      return data.retry_after;
+    } else {
+      return -1;
+    }
+  } catch (e) {
+    console.error(e);
     return -1;
   }
 };
@@ -511,35 +475,53 @@ export const editMessages =
   (messages, updateText) => async (dispatch, getState) => {
     dispatch(setIsModifying(true));
     let count = 0;
+    let noPermissionThreadIds = [];
     while (count < messages.length && !dispatch(getDiscrubCancelled())) {
       await dispatch(checkDiscrubPaused());
       const currentMessage = messages[count];
-      dispatch(setModifyMessage(currentMessage));
-      let response = null;
 
-      if (!dispatch(getDiscrubCancelled())) {
-        response = await dispatch(
-          updateMessage(
-            Object.assign(currentMessage.getSafeCopy(), {
-              content: updateText,
-            })
-          )
+      noPermissionThreadIds = await dispatch(
+        liftThreadRestrictions(
+          currentMessage.getChannelId(),
+          noPermissionThreadIds
+        )
+      );
+
+      dispatch(setModifyEntity(currentMessage));
+
+      const noPermissionSkip = noPermissionThreadIds.some(
+        (tId) => tId === currentMessage.getChannelId()
+      );
+      if (noPermissionSkip) {
+        await dispatch(
+          notify("Permission missing for message, skipping edit", 1)
         );
-      }
-
-      if (response === null) {
         count++;
-      } else if (response > 0) {
-        dispatch(setModifyStatusText(`Pausing for ${response} seconds...`));
-        await wait(response, () => dispatch(resetModifyStatusText()));
       } else {
-        dispatch(
-          setModifyStatusText(
-            "You do not have permission to modify this message!"
-          )
-        );
-        await wait(2, () => dispatch(resetModifyStatusText()));
-        count++;
+        let response = null;
+
+        if (!dispatch(getDiscrubCancelled())) {
+          response = await dispatch(
+            updateMessage(
+              Object.assign(currentMessage.getSafeCopy(), {
+                content: updateText,
+              })
+            )
+          );
+        }
+
+        if (response === null) {
+          count++;
+        } else if (response > 0) {
+          await dispatch(
+            notify(`Pausing for ${response} seconds...`, response)
+          );
+        } else {
+          await dispatch(
+            notify("You do not have permission to modify this message!", 2)
+          );
+          count++;
+        }
       }
     }
     dispatch(resetModify());
@@ -548,27 +530,33 @@ export const editMessages =
 
 export const deleteMessage = (message) => async (dispatch, getState) => {
   const { token } = getState().user;
-  const response = await delMsg(token, message.id, message.channel_id);
-  if (response.status === 204) {
-    const { messages, filteredMessages, selectedMessages } = getState().message;
-    const updatedMessages = messages.filter(
-      ({ id: messageId }) => messageId !== message.id
-    );
-    const updatedFilterMessages = filteredMessages.filter(
-      ({ id: messageId }) => messageId !== message.id
-    );
-    const updatedSelectMessages = selectedMessages.filter(
-      (messageId) => messageId !== message.id
-    );
+  try {
+    const response = await delMsg(token, message.id, message.channel_id);
+    if (response.status === 204) {
+      const { messages, filteredMessages, selectedMessages } =
+        getState().message;
+      const updatedMessages = messages.filter(
+        ({ id: messageId }) => messageId !== message.id
+      );
+      const updatedFilterMessages = filteredMessages.filter(
+        ({ id: messageId }) => messageId !== message.id
+      );
+      const updatedSelectMessages = selectedMessages.filter(
+        (messageId) => messageId !== message.id
+      );
 
-    dispatch(setMessages(updatedMessages));
-    dispatch(setFilteredMessages(updatedFilterMessages));
-    dispatch(setSelected(updatedSelectMessages));
+      dispatch(setMessages(updatedMessages));
+      dispatch(setFilteredMessages(updatedFilterMessages));
+      dispatch(setSelected(updatedSelectMessages));
 
-    return null;
-  } else if (response.retry_after) {
-    return response.retry_after;
-  } else {
+      return null;
+    } else if (response.retry_after) {
+      return response.retry_after;
+    } else {
+      return -1;
+    }
+  } catch (e) {
+    console.error(e);
     return -1;
   }
 };
@@ -584,70 +572,86 @@ export const deleteMessages =
   async (dispatch, getState) => {
     dispatch(setIsModifying(true));
     let count = 0;
+    let noPermissionThreadIds = [];
     while (count < messages.length && !dispatch(getDiscrubCancelled())) {
       await dispatch(checkDiscrubPaused());
       const currentRow = messages[count];
+
+      noPermissionThreadIds = await dispatch(
+        liftThreadRestrictions(currentRow.getChannelId(), noPermissionThreadIds)
+      );
+
       dispatch(
-        setModifyMessage(
+        setModifyEntity(
           Object.assign(currentRow.getSafeCopy(), {
             _index: count + 1,
             _total: messages.length,
           })
         )
       );
-
-      const shouldDelete =
-        (deleteConfig.attachments && deleteConfig.messages) ||
-        (currentRow.content.length === 0 && deleteConfig.attachments) ||
-        (currentRow.attachments.length === 0 && deleteConfig.messages);
-      const shouldEdit = deleteConfig.attachments || deleteConfig.messages;
-
-      if (shouldDelete && !dispatch(getDiscrubCancelled())) {
-        const response = await dispatch(
-          deleteMessage(currentRow.getSafeCopy())
+      const noPermissionSkip = noPermissionThreadIds.some(
+        (tId) => tId === currentRow.getChannelId()
+      );
+      if (noPermissionSkip) {
+        await dispatch(
+          notify("Permission missing for message, skipping delete", 1)
         );
-        if (response === null) {
-          count++;
-        } else if (response > 0) {
-          dispatch(setModifyStatusText(`Pausing for ${response} seconds...`));
-          await wait(response, () => dispatch(resetModifyStatusText()));
-        } else {
-          dispatch(
-            setModifyStatusText(
-              "You do not have permission to modify this message!"
+        count++;
+      } else {
+        const shouldDelete =
+          (deleteConfig.attachments && deleteConfig.messages) ||
+          (currentRow.content.length === 0 && deleteConfig.attachments) ||
+          (currentRow.attachments.length === 0 && deleteConfig.messages);
+        const shouldEdit = deleteConfig.attachments || deleteConfig.messages;
+
+        if (shouldDelete && !dispatch(getDiscrubCancelled())) {
+          const response = await dispatch(
+            deleteMessage(currentRow.getSafeCopy())
+          );
+          if (response === null) {
+            count++;
+          } else if (response > 0) {
+            await dispatch(
+              notify(`Pausing for ${response} seconds...`, response)
+            );
+          } else {
+            await dispatch(
+              notify("You do not have permission to modify this message!", 2)
+            );
+            count++;
+          }
+        } else if (shouldEdit && !dispatch(getDiscrubCancelled())) {
+          const response = await dispatch(
+            updateMessage(
+              Object.assign(
+                currentRow.getSafeCopy(),
+                deleteConfig.attachments ? { attachments: [] } : { content: "" }
+              )
             )
           );
-          await wait(2, () => dispatch(resetModifyStatusText()));
-          count++;
-        }
-      } else if (shouldEdit && !dispatch(getDiscrubCancelled())) {
-        const response = await dispatch(
-          updateMessage(
-            Object.assign(
-              currentRow.getSafeCopy(),
-              deleteConfig.attachments ? { attachments: [] } : { content: "" }
-            )
-          )
-        );
-        if (response === null) {
-          count++;
-        } else if (response > 0) {
-          dispatch(setModifyStatusText(`Pausing for ${response} seconds...`));
-          await wait(response, () => dispatch(resetModifyStatusText()));
-        } else {
-          dispatch(
-            setModifyStatusText(
-              "You do not have permission to modify this message!"
-            )
-          );
-          await wait(2, () => dispatch(resetModifyStatusText()));
-          count++;
-        }
-      } else break;
+          if (response === null) {
+            count++;
+          } else if (response > 0) {
+            await dispatch(
+              notify(`Pausing for ${response} seconds...`, response)
+            );
+          } else {
+            await dispatch(
+              notify("You do not have permission to modify this message!", 2)
+            );
+            count++;
+          }
+        } else break;
+      }
     }
     dispatch(resetModify());
     dispatch(setDiscrubCancelled(false));
   };
+
+export const resetMessageData = () => (dispatch, getState) => {
+  dispatch(_resetMessageData());
+  dispatch(resetThreads());
+};
 
 export const getMessageData =
   (guildId, channelId, preFilterUserId) => async (dispatch, getState) => {
@@ -901,14 +905,14 @@ const _getMessages = (channelId) => async (dispatch, getState) => {
     }
 
     if (!channel.isDm()) {
-      const threadsFromMessages = _getThreadsFromMessages(
+      const threadsFromMessages = getThreadsFromMessages(
         messages,
         trackedThreads
       );
       threadsFromMessages.forEach((ft) => trackedThreads.push(ft));
 
       const archivedThreads = await dispatch(
-        _getArchivedThreads(channelId, trackedThreads)
+        getArchivedThreads(channelId, trackedThreads)
       );
       archivedThreads.forEach((at) => trackedThreads.push(at));
 
@@ -950,23 +954,6 @@ const _getMessagesFromChannel = (channelId) => async (dispatch, getState) => {
     }
   }
   return messages;
-};
-
-const _getArchivedThreads =
-  (channelId, knownThreads) => async (dispatch, getState) => {
-    const { token } = getState().user;
-    if (!dispatch(getDiscrubCancelled())) {
-      return (await fetchThreads(token, channelId))
-        .filter((at) => !knownThreads.some((kt) => kt.id === at.id))
-        .map((at) => new Thread(at));
-    }
-  };
-
-const _getThreadsFromMessages = (messages, knownThreads) => {
-  return messages
-    .filter((m) => m.thread && m.thread.id)
-    .map((m) => new Thread(m.thread))
-    .filter((t) => !knownThreads.some((kt) => kt.id === t.id));
 };
 
 export default messageSlice.reducer;

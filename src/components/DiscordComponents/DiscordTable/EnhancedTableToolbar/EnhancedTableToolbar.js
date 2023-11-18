@@ -19,6 +19,7 @@ import {
   resetFilters,
   selectMessage,
 } from "../../../../features/message/messageSlice";
+import { selectApp } from "../../../../features/app/appSlice";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -30,7 +31,8 @@ const EnhancedTableToolbar = ({
 
   const dispatch = useDispatch();
   const { selectedDm } = useSelector(selectDm);
-  const { selectedMessages, discrubCancelled } = useSelector(selectMessage);
+  const { selectedMessages } = useSelector(selectMessage);
+  const { discrubCancelled } = useSelector(selectApp);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 

@@ -55,13 +55,19 @@ export const { setIsLoading, setDms, setDm, resetDm, setPreFilterUserId } =
   dmSlice.actions;
 
 export const getDms = () => async (dispatch, getState) => {
-  const { token } = getState().user;
-  dispatch(setIsLoading(true));
-  const data = (await fetchDirectMessages(token)) || [];
-  if (data.length) {
-    dispatch(setDms(data.map((dm) => new Channel(dm))));
+  try {
+    const { token } = getState().user;
+    dispatch(setIsLoading(true));
+    const data = (await fetchDirectMessages(token)) || [];
+    if (data.length) {
+      dispatch(setDms(data.map((dm) => new Channel(dm))));
+    }
+    dispatch(setIsLoading(false));
+  } catch (e) {
+    console.error(e);
+    dispatch(setIsLoading(false));
+    dispatch(setDms([]));
   }
-  dispatch(setIsLoading(false));
 };
 
 export const changeDm = (dmId) => (dispatch, getState) => {

@@ -24,11 +24,11 @@ import {
   resetAdvancedFilters,
   resetFilters,
   resetMessageData,
-  setDiscrubPaused,
 } from "../../features/message/messageSlice";
 import { resetDm } from "../../features/dm/dmSlice";
 import { resetChannel } from "../../features/channel/channelSlice";
 import { resetGuild } from "../../features/guild/guildSlice";
+import { setDiscrubPaused } from "../../features/app/appSlice";
 
 function DiscrubDialog() {
   const classes = DiscrubDialogStyles();

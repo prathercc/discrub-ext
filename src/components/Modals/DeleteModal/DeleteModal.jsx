@@ -22,26 +22,22 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   deleteMessages,
   selectMessage,
-  setDiscrubCancelled,
-  setDiscrubPaused,
 } from "../../../features/message/messageSlice";
 import PauseButton from "../../PauseButton/PauseButton";
 import CancelButton from "../../Messages/CancelButton/CancelButton";
+import {
+  selectApp,
+  setDiscrubCancelled,
+  setDiscrubPaused,
+} from "../../../features/app/appSlice";
 
 const DeleteModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
   const dispatch = useDispatch();
-  const {
-    selectedMessages,
-    messages,
-    modify: modifyState,
-  } = useSelector(selectMessage);
+  const { modify } = useSelector(selectApp);
+  const { selectedMessages, messages } = useSelector(selectMessage);
 
-  const {
-    active: deleting,
-    message: deleteObj,
-    statusText: debugMessage,
-  } = modifyState;
+  const { active, entity, statusText } = modify;
 
   const [deleteConfig, setDeleteConfig] = useState({
     attachments: true,
@@ -60,7 +56,7 @@ const DeleteModal = ({ open, handleClose }) => {
   };
 
   const handleModalClose = () => {
-    if (deleting) {
+    if (active) {
       // We are actively deleting, we need to send a cancel request
       dispatch(setDiscrubCancelled(true));
     }
@@ -90,7 +86,7 @@ const DeleteModal = ({ open, handleClose }) => {
             control={
               <Checkbox
                 color="secondary"
-                disabled={deleting}
+                disabled={active}
                 defaultChecked
                 onChange={(e) => {
                   setDeleteConfig({
@@ -106,7 +102,7 @@ const DeleteModal = ({ open, handleClose }) => {
             control={
               <Checkbox
                 color="secondary"
-                disabled={deleting}
+                disabled={active}
                 defaultChecked
                 onChange={(e) => {
                   setDeleteConfig({
@@ -118,23 +114,23 @@ const DeleteModal = ({ open, handleClose }) => {
             }
             label="Messages"
           />
-          {deleting && deleteObj && (
+          {active && entity && (
             <>
               <Box my={1} className={classes.box}>
                 <MessageChip
-                  avatar={`https://cdn.discordapp.com/avatars/${deleteObj.author.id}/${deleteObj.author.avatar}.png`}
-                  username={deleteObj.username}
-                  content={deleteObj.content}
+                  avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
+                  username={entity.username}
+                  content={entity.content}
                 />
                 <ArrowRightAltIcon className={classes.icon} />
                 <DeleteSweepIcon className={classes.deleteIcon} />
               </Box>
-              <ModalDebugMessage debugMessage={debugMessage} />
+              <ModalDebugMessage debugMessage={statusText} />
               <Stack justifyContent="center" alignItems="center">
                 <CircularProgress />
               </Stack>
               <Typography className={classes.objIdTypography} variant="caption">
-                {`Message ${deleteObj._index} of ${deleteObj._total}`}
+                {`Message ${entity._index} of ${entity._total}`}
               </Typography>
             </>
           )}
@@ -142,10 +138,10 @@ const DeleteModal = ({ open, handleClose }) => {
       </DialogContent>
       <DialogActions>
         <CancelButton onCancel={handleModalClose} />
-        <PauseButton disabled={!deleting} />
+        <PauseButton disabled={!active} />
         <Button
           variant="contained"
-          disabled={deleting}
+          disabled={active}
           onClick={handleDeleteMessage}
           autoFocus
         >

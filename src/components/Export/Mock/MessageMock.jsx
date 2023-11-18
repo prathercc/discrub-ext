@@ -10,11 +10,13 @@ import { selectChannel } from "../../../features/channel/channelSlice";
 import { useSelector } from "react-redux";
 import { selectGuild } from "../../../features/guild/guildSlice";
 import { selectMessage } from "../../../features/message/messageSlice";
+import { selectThread } from "../../../features/thread/threadSlice";
 
 const MessageMock = ({ message, index, hideAttachments = false }) => {
   const { selectedGuild } = useSelector(selectGuild);
   const { selectedChannel, channels } = useSelector(selectChannel);
-  const { threads, messages } = useSelector(selectMessage);
+  const { threads } = useSelector(selectThread);
+  const { messages } = useSelector(selectMessage);
 
   const classes = ExportStyles();
   const messageDate = parseISO(message.timestamp, new Date());
