@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { IconButton, Snackbar } from "@mui/material";
+import { Alert, IconButton, Snackbar } from "@mui/material";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import copy from "copy-to-clipboard";
 
@@ -20,14 +20,17 @@ function CopyAdornment({ copyValue, copyName, disabled }) {
         </IconButton>
       </Tooltip>
       <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={2000}
         open={textCopied}
         onClose={() => {
           setTextCopied(false);
         }}
-        message={<span>{copyName} copied</span>}
-      />
+      >
+        <Alert severity="info">
+          <span>{copyName} copied</span>
+        </Alert>
+      </Snackbar>
     </>
   );
 }

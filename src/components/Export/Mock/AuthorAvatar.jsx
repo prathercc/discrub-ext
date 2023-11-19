@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Avatar, Box, Snackbar } from "@mui/material";
+import { Alert, Avatar, Box, Snackbar } from "@mui/material";
 import ExportStyles from "../Styles/Export.styles";
 import PersonIcon from "@mui/icons-material/Person";
 import copy from "copy-to-clipboard";
@@ -38,18 +38,17 @@ const AuthorAvatar = ({ author, reply, hideAttachments }) => {
         </Avatar>
       </Box>
       <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={2000}
         open={textCopied}
         onClose={() => {
           setTextCopied(false);
         }}
-        message={
-          <span>
-            User ID copied from <strong>{username}</strong>
-          </span>
-        }
-      />
+      >
+        <Alert severity="info">
+          User ID copied from <strong>{username}</strong>
+        </Alert>
+      </Snackbar>
     </>
   );
 };
