@@ -26,11 +26,10 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   const classes = MenuBarStyles();
   const { isExporting, isGenerating } = useSelector(selectExport);
   const { modify } = useSelector(selectApp);
-  const { active, entity } = modify || {};
+  const { active } = modify || {};
   const { isLoading } = useSelector(selectMessage);
 
-  const menuDisabled =
-    isExporting || isGenerating || active || entity || isLoading;
+  const menuDisabled = isExporting || isGenerating || active || isLoading;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = !!anchorEl;
