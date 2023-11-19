@@ -759,6 +759,7 @@ const _parseMentions = (messages) => async (dispatch, getState) => {
   let count = 0;
   const keys = Object.keys(userMap);
   while (count < keys.length) {
+    if (dispatch(getDiscrubCancelled())) break;
     await dispatch(checkDiscrubPaused());
     const mentionedUserId = keys[count];
     try {
