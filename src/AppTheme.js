@@ -211,6 +211,15 @@ const theme = createTheme({
         },
       },
     },
+    MuiAlert: {
+      styleOverrides: {
+        standardInfo: {
+          "& .MuiSvgIcon-root": {
+            color: "rgb(3, 169, 244) !important",
+          },
+        },
+      },
+    },
   },
 });
 
