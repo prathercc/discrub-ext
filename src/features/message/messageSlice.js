@@ -720,11 +720,11 @@ export const getMessageData =
       dispatch(setFetchedMessageLength(0));
       dispatch(setTotalSearchMessages(0));
 
-      const { deleteObj, deleting } = getState().purge;
+      const { active, entity } = getState().app.modify;
       const { isGenerating, isExporting } = getState().export;
       const purgingOrExporting = [
-        deleteObj,
-        deleting,
+        active,
+        entity,
         isGenerating,
         isExporting,
       ].some((c) => !!c);

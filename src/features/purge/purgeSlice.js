@@ -54,7 +54,8 @@ export const purge =
       }
 
       let noPermissionThreadIds = [];
-      while (count < selectedCount && !dispatch(getDiscrubCancelled())) {
+      while (count < selectedCount) {
+        if (dispatch(getDiscrubCancelled())) break;
         await dispatch(checkDiscrubPaused());
         let currentRow = selectedMessages[count];
 
