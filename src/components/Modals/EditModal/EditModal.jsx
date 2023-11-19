@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import MessageChip from "../MessageChip/MessageChip";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
@@ -14,72 +14,54 @@ import {
   DialogContent,
   TextField,
 } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ModalStyles from "../Styles/Modal.styles";
-import { wait } from "../../../utils";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  editMessages,
+  selectMessage,
+} from "../../../features/message/messageSlice";
+import PauseButton from "../../PauseButton/PauseButton";
+import CancelButton from "../../Messages/CancelButton/CancelButton";
+import {
+  selectApp,
+  setDiscrubCancelled,
+  setDiscrubPaused,
+} from "../../../features/app/appSlice";
 
 const EditModal = ({ open, handleClose }) => {
   const classes = ModalStyles();
+  const dispatch = useDispatch();
+  const { modify } = useSelector(selectApp);
+  const { selectedMessages, messages } = useSelector(selectMessage);
 
-  const { state: messageState, updateMessage } = useContext(MessageContext);
-  const { selectedMessages, messages } = messageState;
+  const { active, entity, statusText } = modify;
 
   const [updateText, setUpdateText] = useState("");
-  const [editing, setEditing] = useState(false);
-  const [editObj, setEditObj] = useState(null);
-  const [debugMessage, setDebugMessage] = useState("");
-  const resetDebugMessage = () => {
-    setDebugMessage("");
+
+  const handleEditMessage = () => {
+    const toEdit = messages.filter((m) =>
+      selectedMessages.some((smId) => smId === m.id)
+    );
+    dispatch(editMessages(toEdit, updateText));
   };
-  const openRef = useRef();
-  openRef.current = open;
 
-  /**
-   * Attempt to edit the selected message
-   */
-  const handleEditMessage = async () => {
-    setEditing(true);
-    let count = 0;
-    while (count < selectedMessages.length && openRef.current) {
-      let currentMessage = await messages.filter(
-        // eslint-disable-next-line no-loop-func
-        (x) => x.id === selectedMessages[count]
-      )[0];
-      if (currentMessage)
-        setEditObj({
-          author: currentMessage.author,
-          content: currentMessage.content,
-          username: currentMessage.username,
-          id: currentMessage.id,
-        });
-
-      const response = await updateMessage({
-        ...currentMessage,
-        content: updateText,
-      });
-      if (response === null) {
-        count++;
-      } else if (response > 0) {
-        setDebugMessage(`Pausing for ${response} seconds...`);
-        await wait(response, resetDebugMessage);
-      } else {
-        setDebugMessage("You do not have permission to modify this message!");
-        await wait(0.5, resetDebugMessage);
-        count++;
-      }
+  const handleModalClose = () => {
+    if (active) {
+      // We are actively editing, we need to send a cancel request
+      dispatch(setDiscrubCancelled(true));
     }
-    setEditing(false);
+    dispatch(setDiscrubPaused(false));
+    handleClose();
   };
 
   useEffect(() => {
     if (open) {
       setUpdateText("");
-      setEditing(false);
     }
   }, [open]);
 
   return (
-    <Dialog fullWidth open={open} onClose={handleClose}>
+    <Dialog fullWidth open={open}>
       <DialogTitle>
         <Typography variant="h5">Edit Data</Typography>
         <Typography variant="caption">
@@ -90,43 +72,42 @@ const EditModal = ({ open, handleClose }) => {
         <TextField
           fullWidth
           variant="filled"
-          disabled={editing}
+          disabled={active}
           label="Update Text"
           value={updateText}
           onChange={(e) => setUpdateText(e.target.value)}
         />
-        {editing && editObj && (
+        {active && entity && (
           <>
             <Box my={1} className={classes.box}>
               <MessageChip
-                avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
-                username={editObj.username}
-                content={editObj.content}
+                avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
+                username={entity.username}
+                content={entity.content}
               />
               <ArrowRightAltIcon className={classes.icon} />
               <MessageChip
-                avatar={`https://cdn.discordapp.com/avatars/${editObj.author.id}/${editObj.author.avatar}.png`}
-                username={editObj.username}
+                avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
+                username={entity.username}
                 content={updateText}
               />
             </Box>
-            <ModalDebugMessage debugMessage={debugMessage} />
+            <ModalDebugMessage debugMessage={statusText} />
             <Stack justifyContent="center" alignItems="center">
               <CircularProgress />
             </Stack>
             <Typography className={classes.objIdTypography} variant="caption">
-              {editObj.id}
+              {entity.id}
             </Typography>
           </>
         )}
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={handleClose} color="secondary">
-          Close
-        </Button>
+        <CancelButton onCancel={handleModalClose} />
+        <PauseButton disabled={!active} />
         <Button
           variant="contained"
-          disabled={updateText.length === 0 || editing}
+          disabled={updateText.length === 0 || active}
           onClick={handleEditMessage}
           autoFocus
         >

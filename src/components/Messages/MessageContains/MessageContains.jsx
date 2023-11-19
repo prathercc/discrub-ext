@@ -1,16 +1,17 @@
-import React, { useContext, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { IconButton, TextField } from "@mui/material";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { MessageContext } from "../../../context/message/MessageContext";
 import CloseIcon from "@mui/icons-material/Close";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectMessage,
+  setSearchMessageContent,
+} from "../../../features/message/messageSlice";
 
 function MessageContains({ disabled }) {
   const inputRef = useRef(null);
-
-  const { state: messageState, setSearchMessageContent } =
-    useContext(MessageContext);
-
-  const { searchMessageContent } = messageState;
+  const dispatch = useDispatch();
+  const { searchMessageContent } = useSelector(selectMessage);
 
   useEffect(() => {
     if (!searchMessageContent) {
@@ -31,7 +32,7 @@ function MessageContains({ disabled }) {
         InputProps={{
           endAdornment: (
             <IconButton
-              onClick={() => setSearchMessageContent(null)}
+              onClick={() => dispatch(setSearchMessageContent(null))}
               disabled={disabled}
               color="secondary"
             >
@@ -44,7 +45,7 @@ function MessageContains({ disabled }) {
         label="Message Content"
         variant="filled"
         value={searchMessageContent}
-        onChange={(e) => setSearchMessageContent(e.target.value)}
+        onChange={(e) => dispatch(setSearchMessageContent(e.target.value))}
       />
     </Tooltip>
   );

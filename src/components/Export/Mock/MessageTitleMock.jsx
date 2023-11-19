@@ -1,25 +1,23 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Stack, Typography } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
-import { ExportContext } from "../../../context/export/ExportContext";
-import { DmContext } from "../../../context/dm/DmContext";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
 import MessageTitleMockStyles from "./Styles/MessageTitleMock.styles";
 import ExportStyles from "../Styles/Export.styles";
-import { GuildContext } from "../../../context/guild/GuildContext";
+import { useSelector } from "react-redux";
+import { selectGuild } from "../../../features/guild/guildSlice";
+import { selectDm } from "../../../features/dm/dmSlice";
+import { selectChannel } from "../../../features/channel/channelSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
+import { selectExport } from "../../../features/export/exportSlice";
 
 const MessageTitleMock = () => {
   const classes = MessageTitleMockStyles();
   const exportClasses = ExportStyles();
 
-  const { state: guildState } = useContext(GuildContext);
-  const { selectedGuild } = guildState;
-
-  const { state: dmState } = useContext(DmContext);
-  const { selectedDm } = dmState;
-
-  const { state: channelState } = useContext(ChannelContext);
-  const { selectedChannel } = channelState;
+  const { selectedGuild } = useSelector(selectGuild);
+  const { selectedDm } = useSelector(selectDm);
+  const { selectedChannel } = useSelector(selectChannel);
+  const { filteredMessages, messages } = useSelector(selectMessage);
+  const { currentPage, messagesPerPage } = useSelector(selectExport);
 
   const entity = selectedDm.id
     ? selectedDm
@@ -28,10 +26,6 @@ const MessageTitleMock = () => {
     : selectedGuild;
   const isDm = !!selectedDm.id;
 
-  const { state: messageState } = useContext(MessageContext);
-  const { filteredMessages, messages } = messageState;
-  const { state: exportState } = useContext(ExportContext);
-  const { currentPage, messagesPerPage } = exportState;
   const pageTitle = `Page ${currentPage} of ${Math.ceil(
     (filteredMessages.length ? filteredMessages.length : messages.length) /
       messagesPerPage

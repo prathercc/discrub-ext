@@ -1,13 +1,18 @@
-import React, { useContext } from "react";
+import React from "react";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ExportContext } from "../../../../context/export/ExportContext";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOffIcon from "@mui/icons-material/FileDownloadOff";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectExport,
+  setDownloadImages,
+} from "../../../../features/export/exportSlice";
 
 const ImageToggle = () => {
-  const { state: exportState, setDownloadImages } = useContext(ExportContext);
-  const { downloadImages, isExporting } = exportState;
+  const dispatch = useDispatch();
+  const { downloadImages, isExporting } = useSelector(selectExport);
+
   return (
     <Tooltip
       arrow
@@ -17,7 +22,7 @@ const ImageToggle = () => {
     >
       <IconButton
         disabled={isExporting}
-        onClick={async () => await setDownloadImages(!downloadImages)}
+        onClick={() => dispatch(setDownloadImages(!downloadImages))}
         color={downloadImages ? "primary" : "secondary"}
       >
         {downloadImages ? <DownloadIcon /> : <FileDownloadOffIcon />}

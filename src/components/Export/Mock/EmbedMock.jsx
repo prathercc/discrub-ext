@@ -1,14 +1,14 @@
-import React, { useContext } from "react";
-import { ExportContext } from "../../../context/export/ExportContext";
+import React from "react";
 import AttachmentStyles from "./Styles/Attachment.styles";
 import AttachmentMock from "./AttachmentMock";
 import Attachment from "../../../classes/Attachment";
+import { useSelector } from "react-redux";
+import { selectExport } from "../../../features/export/exportSlice";
 
 const EmbedMock = ({ embed, index }) => {
   const { type, video, local_url, description, thumbnail } = embed;
   const attachmentClasses = AttachmentStyles();
-  const { state: exportState } = useContext(ExportContext);
-  const { previewImages } = exportState;
+  const { previewImages } = useSelector(selectExport);
   const supportedVideoHosts = ["youtube"];
 
   return (

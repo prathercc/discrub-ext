@@ -1,20 +1,22 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Box, Stack } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ExportStyles from "../Styles/Export.styles";
 import MessageMock from "../Mock/MessageMock";
 import MessageTitleMock from "../Mock/MessageTitleMock";
-import { ExportContext } from "../../../context/export/ExportContext";
 import { sortByProperty } from "../../../utils";
+import { useSelector } from "react-redux";
+import { selectExport } from "../../../features/export/exportSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
+import { selectThread } from "../../../features/thread/threadSlice";
 
 const ExportMessages = ({ componentRef, bulk = false }) => {
   const classes = ExportStyles();
 
-  const { state: exportState } = useContext(ExportContext);
   const { isExporting, currentPage, messagesPerPage, sortOverride } =
-    exportState;
-  const { state: messageState } = useContext(MessageContext);
-  const { messages, filters, filteredMessages, threads } = messageState;
+    useSelector(selectExport);
+  const { threads } = useSelector(selectThread);
+  const { messages, filters, filteredMessages } = useSelector(selectMessage);
+
   let exportMessages = filters.length > 0 ? filteredMessages : messages;
   exportMessages = bulk
     ? exportMessages?.toSorted((a, b) =>

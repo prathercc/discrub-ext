@@ -10,11 +10,11 @@ const ModalDebugMessage = ({ debugMessage }) => {
         alignItems: "center",
         justifyContent: "center",
         display: "flex",
-        opacity: debugMessage.length === 0 ? 0 : 1,
+        opacity: debugMessage?.length === 0 ? 0 : 1,
       }}
     >
       <Typography variant="caption" sx={{ color: "orange" }}>
-        {debugMessage.length === 0 ? "An Error Occurred!" : debugMessage}
+        {debugMessage?.length === 0 ? "An Error Occurred!" : debugMessage}
       </Typography>
     </Box>
   );

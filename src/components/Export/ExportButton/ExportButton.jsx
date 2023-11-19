@@ -1,71 +1,33 @@
-import React, { useContext, useRef } from "react";
+import React, { useRef } from "react";
 import { Button } from "@mui/material";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { GuildContext } from "../../../context/guild/GuildContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ExportMessages from "../../Export/ExportMessages/ExportMessages";
-import { DmContext } from "../../../context/dm/DmContext";
-import { ExportContext } from "../../../context/export/ExportContext";
 import ExportModal from "../../Modals/ExportModal/ExportModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  resetExportSettings,
+  selectExport,
+} from "../../../features/export/exportSlice";
 
 const ExportButton = ({
   dialogOpen,
   setDialogOpen,
   isDm = false,
   bulk = false,
+  disabled = false,
 }) => {
-  const {
-    state: exportState,
-    setDownloadImages,
-    setShowAvatars,
-    setPreviewImages,
-    setMessagesPerPage,
-    setSortOverride,
-  } = useContext(ExportContext);
-  const { isGenerating } = exportState;
+  const dispatch = useDispatch();
+  const { isGenerating } = useSelector(selectExport);
 
   const exportType = isDm ? "DM" : "Guild";
-  const { state: messageState } = useContext(MessageContext);
 
-  const { state: dmState } = useContext(DmContext);
-  const { state: channelState } = useContext(ChannelContext);
-  const { state: guildState } = useContext(GuildContext);
-  const {
-    isLoading: messagesLoading,
-    messages,
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes,
-  } = messageState;
-  const { preFilterUserId, selectedChannel } = channelState;
-  const { selectedDm, preFilterUserId: dmPreFilterUserId } = dmState;
-  const { selectedGuild } = guildState;
   const contentRef = useRef();
-
-  const bulkDisabled =
-    (isDm ? selectedDm.id === null : selectedGuild.id === null) ||
-    messagesLoading ||
-    selectedChannel.id !== null ||
-    messages.length > 0 ||
-    !!dmPreFilterUserId ||
-    !!preFilterUserId ||
-    !!searchBeforeDate ||
-    !!searchAfterDate ||
-    !!searchMessageContent ||
-    !!selectedHasTypes.length ||
-    dialogOpen;
 
   return (
     <>
       <Button
-        disabled={bulk && bulkDisabled}
+        disabled={disabled}
         onClick={async () => {
-          await setDownloadImages(false);
-          await setShowAvatars(false);
-          await setPreviewImages(false);
-          await setSortOverride("desc");
-          await setMessagesPerPage(1000);
+          dispatch(resetExportSettings());
           setDialogOpen(true);
         }}
         variant="contained"

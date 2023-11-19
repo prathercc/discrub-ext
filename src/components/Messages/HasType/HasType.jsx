@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import {
   Checkbox,
   FilledInput,
@@ -9,17 +9,21 @@ import {
   Select,
 } from "@mui/material";
 import Tooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { MessageContext } from "../../../context/message/MessageContext";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectMessage,
+  setSelectedHasTypes,
+} from "../../../features/message/messageSlice";
 
 function HasType({ disabled }) {
-  const { state: messageState, setSelectedHasTypes } =
-    useContext(MessageContext);
-
-  const { selectedHasTypes, hasTypes } = messageState;
+  const dispatch = useDispatch();
+  const { selectedHasTypes, hasTypes } = useSelector(selectMessage);
 
   const handleChange = (e) => {
     const { value } = e?.target || {};
-    setSelectedHasTypes(typeof value === "string" ? value.split(",") : value);
+    dispatch(
+      setSelectedHasTypes(typeof value === "string" ? value.split(",") : value)
+    );
   };
 
   return (

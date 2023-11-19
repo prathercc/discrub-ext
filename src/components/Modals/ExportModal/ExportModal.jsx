@@ -1,12 +1,16 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Dialog, DialogTitle } from "@mui/material";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ExportButtonStyles from "../../Export/ExportButton/Styles/ExportButton.styles";
-import { ExportContext } from "../../../context/export/ExportContext";
 import BulkContent from "../../Export/ExportButton/BulkContent/BulkContent";
 import Actions from "../../Export/ExportButton/Actions/Actions";
 import DefaultContent from "../../Export/ExportButton/DefaultContent/DefaultContent";
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedExportChannels } from "../../../features/channel/channelSlice";
+import { selectExport } from "../../../features/export/exportSlice";
+import {
+  setDiscrubCancelled,
+  setDiscrubPaused,
+} from "../../../features/app/appSlice";
 
 const ExportModal = ({
   dialogOpen,
@@ -16,33 +20,25 @@ const ExportModal = ({
   contentRef,
 }) => {
   const classes = ExportButtonStyles();
-
-  const { setName, setIsExporting } = useContext(ExportContext);
-
+  const dispatch = useDispatch();
   const exportType = isDm ? "DM" : "Guild";
-  const { resetMessageData, setDiscrubPaused } = useContext(MessageContext);
 
-  const { setSelectedExportChannels, resetChannel } =
-    useContext(ChannelContext);
+  const { isGenerating, isExporting } = useSelector(selectExport);
 
   const handleDialogClose = () => {
-    setDialogOpen(false);
-    if (bulk) {
-      setSelectedExportChannels([]);
-      resetChannel();
-      resetMessageData();
+    if (isGenerating || isExporting) {
+      // We are actively exporting, we need to send a cancel request
+      dispatch(setDiscrubCancelled(true));
     }
-    setName("");
-    setIsExporting(false);
-    setDiscrubPaused(false);
+    if (bulk) {
+      dispatch(setSelectedExportChannels([]));
+    }
+    dispatch(setDiscrubPaused(false));
+    setDialogOpen(false);
   };
 
   return (
-    <Dialog
-      PaperProps={{ className: classes.dialogPaper }}
-      open={dialogOpen}
-      onClose={handleDialogClose}
-    >
+    <Dialog PaperProps={{ className: classes.dialogPaper }} open={dialogOpen}>
       <DialogTitle>Export {bulk ? exportType : "Messages"}</DialogTitle>
       {bulk ? <BulkContent isDm={isDm} /> : <DefaultContent />}
       <Actions

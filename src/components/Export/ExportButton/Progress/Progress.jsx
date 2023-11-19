@@ -1,16 +1,27 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Stack, CircularProgress, Typography } from "@mui/material";
-import { MessageContext } from "../../../../context/message/MessageContext";
 import ExportButtonStyles from "../Styles/ExportButton.styles";
-import { ExportContext } from "../../../../context/export/ExportContext";
+import { useSelector } from "react-redux";
+import { selectExport } from "../../../../features/export/exportSlice";
+import { selectMessage } from "../../../../features/message/messageSlice";
 
 const Progress = () => {
   const classes = ExportButtonStyles();
+  const { name, statusText } = useSelector(selectExport);
+  const { fetchProgress, lookupUserId } = useSelector(selectMessage);
+  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
 
-  const { state: exportState } = useContext(ExportContext);
-  const { name, statusText } = exportState;
-  const { state: messageState } = useContext(MessageContext);
-  const { fetchedMessageLength } = messageState;
+  const getProgressText = () => {
+    return (
+      <>
+        {parsingThreads && <>{threadCount} Threads Found</>}
+        {!parsingThreads && !lookupUserId && (
+          <>{messageCount ? `${messageCount} Messages Found` : "Processing"}</>
+        )}
+        {lookupUserId && `User Lookup: ${lookupUserId}`}
+      </>
+    );
+  };
 
   return (
     <Stack
@@ -23,13 +34,7 @@ const Progress = () => {
       <Typography>{name}</Typography>
       <CircularProgress />
       <Typography variant="caption">
-        {statusText || (
-          <>
-            {fetchedMessageLength
-              ? `${fetchedMessageLength} Messages Found`
-              : "Processing"}
-          </>
-        )}
+        {statusText || getProgressText()}
       </Typography>
     </Stack>
   );

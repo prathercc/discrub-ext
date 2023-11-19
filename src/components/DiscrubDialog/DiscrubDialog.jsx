@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import MenuBar from "./MenuBar/MenuBar";
 import ChannelMessages from "../Messages/ChannelMessages/ChannelMessages";
 import DirectMessages from "../Messages/DirectMessages/DirectMessages";
 import Box from "@mui/material/Box";
 import About from "./About/About";
-import { UserContext } from "../../context/user/UserContext";
 import CloseWindowButton from "./CloseWindowButton/CloseWindowButton";
-import { MessageContext } from "../../context/message/MessageContext";
-import { ChannelContext } from "../../context/channel/ChannelContext";
-import { GuildContext } from "../../context/guild/GuildContext";
 import {
   Alert,
   AlertTitle,
@@ -18,43 +14,39 @@ import {
   Typography,
 } from "@mui/material";
 import Tooltip from "../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { DmContext } from "../../context/dm/DmContext";
 import DiscrubDialogStyles from "./Styles/DiscrubDialog.styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { fetchAnnouncementData } from "../../services/announcementService";
 import DonationComponent from "./DonationComponent/DonationComponent";
-// import Sponsorship from "./Sponsorship/Sponsorship";
+import { useDispatch } from "react-redux";
+import { getUserData } from "../../features/user/userSlice";
+import {
+  resetAdvancedFilters,
+  resetFilters,
+  resetMessageData,
+} from "../../features/message/messageSlice";
+import { resetDm } from "../../features/dm/dmSlice";
+import { resetChannel } from "../../features/channel/channelSlice";
+import { resetGuild } from "../../features/guild/guildSlice";
+import { setDiscrubPaused } from "../../features/app/appSlice";
 
 function DiscrubDialog() {
   const classes = DiscrubDialogStyles();
 
-  const { getUserData } = useContext(UserContext);
-  const { resetChannel } = useContext(ChannelContext);
-  const {
-    resetMessageData,
-    resetFilters,
-    setSearchAfterDate,
-    setSearchBeforeDate,
-    setDiscrubPaused,
-  } = useContext(MessageContext);
-  const { resetGuild } = useContext(GuildContext);
-  const { resetDm } = useContext(DmContext);
+  const dispatch = useDispatch();
 
   const [menuIndex, setMenuIndex] = useState(0);
   const [alertOpen, setAlertOpen] = useState(true);
   const [announcement, setAnnouncement] = useState(null);
 
   const handleChangeMenuIndex = async (index) => {
-    await Promise.all([
-      setSearchBeforeDate(null),
-      setSearchAfterDate(null),
-      resetMessageData(),
-      resetDm(),
-      resetChannel(),
-      resetGuild(),
-      resetFilters(),
-      setDiscrubPaused(false),
-    ]);
+    dispatch(resetAdvancedFilters());
+    dispatch(resetMessageData());
+    dispatch(resetGuild());
+    dispatch(resetDm());
+    dispatch(resetChannel());
+    dispatch(resetFilters());
+    dispatch(setDiscrubPaused(false));
     setMenuIndex(index);
     setAlertOpen(false);
   };
@@ -65,13 +57,12 @@ function DiscrubDialog() {
       setAnnouncement(data);
     };
     getAnnouncementData();
-    getUserData();
+    dispatch(getUserData());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Box className={classes.boxContainer}>
-      {/* <Sponsorship /> */}
       <DonationComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && (
@@ -95,17 +86,13 @@ function DiscrubDialog() {
           )}
           <Collapse in={alertOpen}>
             <Alert severity="info" onClose={() => setAlertOpen(false)}>
-              <AlertTitle sx={{ color: "rgb(1, 67, 97)" }}>
-                <Typography className={classes.alertText} variant="body2">
-                  <strong>
-                    {announcement.title}
-                    {announcement.date && ` - ${announcement.date}`}
-                  </strong>
-                </Typography>
+              <AlertTitle sx={{ color: "rgb(1, 67, 97) !important" }}>
+                <strong>
+                  {announcement.title}
+                  {announcement.date && ` - ${announcement.date}`}
+                </strong>
               </AlertTitle>
-              <Typography className={classes.alertText} variant="body2">
-                {announcement.message}
-              </Typography>
+              {announcement.message}
             </Alert>
           </Collapse>
         </Box>
@@ -118,7 +105,7 @@ function DiscrubDialog() {
           justifyContent="center"
           spacing={1}
         >
-          <Typography variant="body2">1.11.0</Typography>
+          <Typography variant="body2">1.11.1</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />

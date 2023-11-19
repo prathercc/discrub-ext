@@ -1,23 +1,32 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Stack, Typography } from "@mui/material";
 import ExportStyles from "../Styles/Export.styles";
 import AttachmentMock from "./AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
-import { MessageContext } from "../../../context/message/MessageContext";
 import EmbedMock from "./EmbedMock";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { GuildContext } from "../../../context/guild/GuildContext";
 import classNames from "classnames";
 import { format, parseISO } from "date-fns";
+import { selectChannel } from "../../../features/channel/channelSlice";
+import { useSelector } from "react-redux";
+import { selectGuild } from "../../../features/guild/guildSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
+import { selectThread } from "../../../features/thread/threadSlice";
+import { renderToString } from "react-dom/server";
+import MessageMockStyles from "./Styles/MessageMock.styles";
+import {
+  getEmojiReferences,
+  selectExport,
+} from "../../../features/export/exportSlice";
 
 const MessageMock = ({ message, index, hideAttachments = false }) => {
-  const { state: guildState } = useContext(GuildContext);
-  const { state: channelState } = useContext(ChannelContext);
-  const { state: messageState } = useContext(MessageContext);
-  const { selectedGuild } = guildState;
-  const { selectedChannel, channels } = channelState;
-  const { threads, messages } = messageState;
+  const { selectedGuild } = useSelector(selectGuild);
+  const { selectedChannel, channels } = useSelector(selectChannel);
+  const { threads } = useSelector(selectThread);
+  const { messages } = useSelector(selectMessage);
+  const { emojiMap } = useSelector(selectExport);
+
   const classes = ExportStyles();
+  const messageMockClasses = MessageMockStyles();
   const messageDate = parseISO(message.timestamp, new Date());
   const tz = messageDate
     .toLocaleTimeString(undefined, { timeZoneName: "short" })
@@ -31,6 +40,139 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
 
   const showChannelName = selectedGuild.id && !selectedChannel.id;
 
+  const getEmoji = (
+    { name: parsedEmojiName, id: parsedEmojiId },
+    smallEmoji
+  ) => {
+    let emojiUrl = `https://cdn.discordapp.com/emojis/${parsedEmojiId}`;
+    if (emojiMap && emojiMap[parsedEmojiId] && !hideAttachments) {
+      emojiUrl = `../${emojiMap[parsedEmojiId]}`;
+    }
+
+    return (
+      <span className={messageMockClasses.emojiBox}>
+        <img
+          id={parsedEmojiName}
+          src={`${emojiUrl}`}
+          alt={parsedEmojiName}
+          className={classNames({
+            [messageMockClasses.emojiImgDefault]: !smallEmoji,
+            [messageMockClasses.emojiImgSmall]: smallEmoji,
+          })}
+        />
+        {!smallEmoji && (
+          <span className={messageMockClasses.emojiTooltip}>
+            {parsedEmojiName}
+          </span>
+        )}
+      </span>
+    );
+  };
+
+  const getMessageContent = (content, id, smallEmoji = false) => {
+    const emojiReferences = getEmojiReferences(content);
+    let rawHtml = content;
+    if (emojiReferences.length) {
+      emojiReferences.forEach((emojiRef) => {
+        rawHtml = rawHtml.replaceAll(
+          emojiRef.raw,
+          renderToString(getEmoji(emojiRef, smallEmoji))
+        );
+      });
+    }
+
+    return (
+      <Typography
+        id={id}
+        variant={smallEmoji ? "caption" : "body1"}
+        className={classNames({
+          [classes.typographyMessageText]: !smallEmoji,
+          [classes.replyMessageText]: smallEmoji,
+        })}
+        sx={{
+          display: "flex",
+          gap: "5px",
+        }}
+        dangerouslySetInnerHTML={{ __html: rawHtml }}
+      />
+    );
+  };
+
+  const getRepliedToContent = () => {
+    return (
+      <Stack
+        direction="row"
+        alignItems="flex-start"
+        justifyContent="flex-start"
+        spacing={1}
+      >
+        <div className={classes.replyDiv} />
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="flex-start"
+          spacing={1}
+          sx={{ maxWidth: 600 }}
+        >
+          <AuthorAvatar
+            hideAttachments={hideAttachments}
+            author={repliedToMsg.author}
+            reply
+          />
+          <Typography className={classes.replyMessageName} variant="caption">
+            {hideAttachments ? (
+              <strong>{repliedToMsg.username}</strong>
+            ) : (
+              <a href={`#${repliedToMsg.id}`}>
+                <strong>{repliedToMsg.username}</strong>
+              </a>
+            )}
+          </Typography>
+          {getMessageContent(repliedToMsg.content, `reply-data-${index}`, true)}
+        </Stack>
+      </Stack>
+    );
+  };
+
+  const getChannelName = () => {
+    return (
+      <Typography
+        variant="caption"
+        mt="1px"
+        className={classNames(classes.channelName, classes.typographyTitle)}
+      >
+        {channels.find((channel) => channel.id === message.channel_id)?.name}
+      </Typography>
+    );
+  };
+
+  const getThread = () => {
+    return (
+      <Typography variant="caption" className={classes.typographyHash}>
+        {foundThread.name}
+      </Typography>
+    );
+  };
+
+  const getAttachments = () => {
+    return (
+      <Stack
+        mt="5px"
+        direction="column"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+        spacing={1}
+      >
+        {message.attachments.map((attachment) => (
+          <AttachmentMock attachment={attachment} />
+        ))}
+        {message.embeds.map((embed, index) => (
+          <EmbedMock embed={embed} index={index} />
+        ))}
+      </Stack>
+    );
+  };
+
   return (
     <Stack
       direction="column"
@@ -39,39 +181,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
       id={message.id}
       className={classes.mockStack}
     >
-      {repliedToMsg && (
-        <Stack
-          direction="row"
-          alignItems="flex-start"
-          justifyContent="flex-start"
-          spacing={1}
-        >
-          <div className={classes.replyDiv} />
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="flex-start"
-            spacing={1}
-            sx={{ maxWidth: 600 }}
-          >
-            <AuthorAvatar
-              hideAttachments={hideAttachments}
-              author={repliedToMsg.author}
-              reply
-            />
-            <Typography className={classes.replyMessageName} variant="caption">
-              <strong>{repliedToMsg.username}</strong>
-            </Typography>
-            <Typography className={classes.replyMessageText} variant="caption">
-              {hideAttachments ? (
-                repliedToMsg.content
-              ) : (
-                <a href={`#${repliedToMsg.id}`}>{repliedToMsg.content}</a>
-              )}
-            </Typography>
-          </Stack>
-        </Stack>
-      )}
+      {repliedToMsg && getRepliedToContent()}
       <Stack
         direction="row"
         alignItems="flex-start"
@@ -107,50 +217,11 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
                 "HH:mm:ss"
               )} ${tz}`}
             </Typography>
-            {showChannelName && (
-              <Typography
-                variant="caption"
-                mt="1px"
-                className={classNames(
-                  classes.channelName,
-                  classes.typographyTitle
-                )}
-              >
-                {
-                  channels.find((channel) => channel.id === message.channel_id)
-                    ?.name
-                }
-              </Typography>
-            )}
+            {showChannelName && getChannelName()}
           </Stack>
-          {foundThread && (
-            <Typography variant="caption" className={classes.typographyHash}>
-              {foundThread.name}
-            </Typography>
-          )}
-          <Typography
-            className={classes.typographyMessageText}
-            variant="body1"
-            id={`message-data-${index}`}
-          >
-            {message.content}
-          </Typography>
-          {!hideAttachments && (
-            <Stack
-              mt="5px"
-              direction="column"
-              justifyContent="flex-start"
-              alignItems="center"
-              spacing={1}
-            >
-              {message.attachments.map((attachment) => (
-                <AttachmentMock attachment={attachment} />
-              ))}
-              {message.embeds.map((embed, index) => (
-                <EmbedMock embed={embed} index={index} />
-              ))}
-            </Stack>
-          )}
+          {foundThread && getThread()}
+          {getMessageContent(message.content, `message-data-${index}`)}
+          {!hideAttachments && getAttachments()}
         </Stack>
       </Stack>
     </Stack>

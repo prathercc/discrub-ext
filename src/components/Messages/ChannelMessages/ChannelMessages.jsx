@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import DiscordTable from "../../DiscordComponents/DiscordTable/DiscordTable";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
@@ -11,106 +11,82 @@ import {
   TextField,
   Button,
   Autocomplete,
+  IconButton,
+  Collapse,
 } from "@mui/material";
-import { UserContext } from "../../../context/user/UserContext";
-import { GuildContext } from "../../../context/guild/GuildContext";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
-import { MessageContext } from "../../../context/message/MessageContext";
 import ChannelMessagesStyles from "./Styles/ChannelMessages.styles";
 import PurgeButton from "../../Purge/PurgeButton/PurgeButton";
 import ExportButton from "../../Export/ExportButton/ExportButton";
 import AdvancedFiltering from "../AdvancedFiltering/AdvancedFiltering";
 import TokenNotFound from "../TokenNotFound/TokenNotFound";
 import { sortByProperty } from "../../../utils";
-import classNames from "classnames";
 import CopyAdornment from "../CopyAdornment/CopyAdornment";
 import PauseButton from "../../PauseButton/PauseButton";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser } from "../../../features/user/userSlice";
+import {
+  changeGuild,
+  getGuilds,
+  selectGuild,
+} from "../../../features/guild/guildSlice";
+import {
+  changeChannel,
+  selectChannel,
+} from "../../../features/channel/channelSlice";
+import {
+  getMessageData,
+  selectMessage,
+} from "../../../features/message/messageSlice";
+import CancelButton from "../CancelButton/CancelButton";
+import { selectApp } from "../../../features/app/appSlice";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
+import DiscordTooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 
 function ChannelMessages({ closeAnnouncement }) {
-  const {
-    state: messageDataState,
-    getMessageData,
-    resetMessageData,
-    resetFilters,
-    setSearchBeforeDate,
-    setSearchAfterDate,
-    setSearchMessageContent,
-    setSelectedHasTypes,
-  } = useContext(MessageContext);
-  const { state: userState } = useContext(UserContext);
-  const {
-    state: guildState,
-    getGuilds,
-    setGuild,
-    resetGuild,
-  } = useContext(GuildContext);
-  const {
-    state: channelState,
-    getChannels,
-    setChannel,
-    resetChannel,
-    setPreFilterUserId,
-  } = useContext(ChannelContext);
-
-  const [showOptionalFilters, setShowOptionalFilters] = useState(false);
-  const [searchTouched, setSearchTouched] = useState(false);
-  const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const classes = ChannelMessagesStyles({
-    purgeDialogOpen,
-    exportDialogOpen,
-    showOptionalFilters,
-  });
-
-  const { token } = userState;
-  const { guilds, selectedGuild } = guildState;
-  const { channels, selectedChannel, preFilterUserId } = channelState;
+  const dispatch = useDispatch();
+  const { token, isLoading: userLoading } = useSelector(selectUser);
+  const { guilds, selectedGuild } = useSelector(selectGuild);
+  const { channels, selectedChannel, preFilterUserId } =
+    useSelector(selectChannel);
   const {
     messages,
     isLoading: messagesLoading,
-    fetchedMessageLength,
+    fetchProgress,
     lookupUserId,
     searchBeforeDate,
     searchAfterDate,
     searchMessageContent,
     selectedHasTypes,
-  } = messageDataState;
+  } = useSelector(selectMessage);
+  const { discrubCancelled } = useSelector(selectApp);
+
+  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
+
+  const [showOptionalFilters, setShowOptionalFilters] = useState(false);
+  const [searchTouched, setSearchTouched] = useState(false);
+  const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [expanded, setExpanded] = useState(true);
+
+  const classes = ChannelMessagesStyles();
 
   const fetchChannelData = async () => {
-    await resetMessageData();
-    await getMessageData();
+    dispatch(
+      getMessageData(selectedGuild.id, selectedChannel.id, preFilterUserId)
+    );
     setSearchTouched(true);
+    setExpanded(false);
   };
 
   const handleGuildChange = async (id) => {
-    if (id) {
-      setGuild(id);
-      await getChannels(id);
-    } else {
-      resetGuild();
-    }
-    await resetChannel();
-    await resetFilters();
-    await setSearchBeforeDate(null);
-    await setSearchAfterDate(null);
-    await setSearchMessageContent(null);
-    await setSelectedHasTypes([]);
-    await resetMessageData();
+    dispatch(changeGuild(id));
     setSearchTouched(false);
   };
 
   const handleChannelChange = async (id) => {
-    if (!id) {
-      await setPreFilterUserId(null);
-      await setSearchBeforeDate(null);
-      await setSearchAfterDate(null);
-      await setSearchMessageContent(null);
-      await setSelectedHasTypes([]);
-    }
-    await resetFilters();
-    await resetMessageData();
+    dispatch(changeChannel(id));
     setSearchTouched(false);
-    setChannel(id);
   };
 
   const advancedFilterActive = [
@@ -121,8 +97,23 @@ function ChannelMessages({ closeAnnouncement }) {
     selectedHasTypes.length,
   ].some((c) => c);
 
-  const guildFieldDisabled = messagesLoading || purgeDialogOpen;
-  const channelFieldDisabled = selectedGuild.id === null || messagesLoading;
+  const pauseCancelDisabled = !messagesLoading;
+  const guildFieldDisabled = messagesLoading || discrubCancelled;
+  const channelFieldDisabled =
+    selectedGuild.id === null || messagesLoading || discrubCancelled;
+  const searchBtnDisabled =
+    !selectedGuild.id ||
+    messagesLoading ||
+    (!advancedFilterActive && !selectedChannel.id) ||
+    discrubCancelled;
+  const exportAndPurgeDisabled =
+    !selectedGuild.id ||
+    messagesLoading ||
+    selectedChannel.id ||
+    messages.length > 0 ||
+    advancedFilterActive ||
+    discrubCancelled;
+
   const sortedGuilds = guilds.toSorted((a, b) =>
     sortByProperty(
       { name: a.name.toLowerCase() },
@@ -145,9 +136,26 @@ function ChannelMessages({ closeAnnouncement }) {
   }, [purgeDialogOpen, exportDialogOpen]);
 
   useEffect(() => {
-    if (token) getGuilds();
+    if (token) dispatch(getGuilds());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  const getProgressText = () => {
+    return (
+      <>
+        {parsingThreads && <>Fetched {threadCount} Threads</>}
+        {!parsingThreads && (
+          <>
+            {lookupUserId && `User Lookup: ${lookupUserId}`}
+            {!lookupUserId &&
+              messageCount > 0 &&
+              `Fetched ${messageCount} Messages`}
+            {!lookupUserId && messageCount <= 0 && "Fetching Data"}
+          </>
+        )}
+      </>
+    );
+  };
 
   return (
     <Stack spacing={2} className={classes.boxContainer}>
@@ -155,133 +163,141 @@ function ChannelMessages({ closeAnnouncement }) {
         <Stack spacing={2}>
           <Paper className={classes.paper}>
             <Stack spacing={2}>
-              <Stack>
-                <Typography variant="body1">Channel Messages</Typography>
-              </Stack>
-
               <Stack
-                direction="row"
-                justifyContent="center"
+                justifyContent="space-between"
                 alignItems="center"
-                spacing={1}
+                direction="row"
               >
-                <Autocomplete
-                  clearIcon={<ClearIcon />}
-                  onChange={(_, val) => handleGuildChange(val)}
-                  options={sortedGuilds.map((guild) => {
-                    return guild.id;
-                  })}
-                  getOptionLabel={(id) =>
-                    guilds.find((guild) => guild.id === id)?.name
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="filled"
-                      fullWidth
-                      size="small"
-                      label="Guild"
-                      onFocus={closeAnnouncement}
-                      className={classes.autocomplete}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <CopyAdornment
-                            copyValue={sortedGuilds
-                              .map((guild) => guild.name)
-                              .join("\r\n")}
-                            copyName="Guild List"
-                            disabled={guildFieldDisabled}
-                          />
-                        ),
-                      }}
-                    />
-                  )}
-                  value={selectedGuild?.id}
-                  disabled={guildFieldDisabled}
-                />
-
-                <Autocomplete
-                  clearIcon={<ClearIcon />}
-                  onChange={(_, val) => handleChannelChange(val)}
-                  options={sortedChannels.map((channel) => {
-                    return channel.id;
-                  })}
-                  getOptionLabel={(id) =>
-                    channels.find((channel) => channel.id === id)?.name
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="filled"
-                      fullWidth
-                      size="small"
-                      label="Channel"
-                      className={classNames(
-                        classes.autocomplete,
-                        classes.purgeHidden
-                      )}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <CopyAdornment
-                            copyValue={sortedChannels
-                              .map((channel) => channel.name)
-                              .join("\r\n")}
-                            copyName="Channel List"
-                            disabled={channelFieldDisabled}
-                          />
-                        ),
-                      }}
-                    />
-                  )}
-                  value={selectedChannel?.id}
-                  disabled={channelFieldDisabled}
-                />
+                <Typography variant="body1">Channel Messages</Typography>
+                <DiscordTooltip title={expanded ? "Collapse" : "Expand"}>
+                  <IconButton
+                    onClick={(e) => {
+                      setExpanded(!expanded);
+                    }}
+                    color="secondary"
+                  >
+                    {expanded ? <RemoveIcon /> : <AddIcon />}
+                  </IconButton>
+                </DiscordTooltip>
               </Stack>
 
-              <span className={classes.purgeHidden}>
-                <AdvancedFiltering
-                  closeAnnouncement={closeAnnouncement}
-                  setShowOptionalFilters={setShowOptionalFilters}
-                  showOptionalFilters={showOptionalFilters}
-                />
-              </span>
+              <Collapse orientation="vertical" in={expanded}>
+                <Stack direction="column" gap="5px">
+                  <Stack
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                    spacing={1}
+                  >
+                    <Autocomplete
+                      clearIcon={<ClearIcon />}
+                      onChange={(_, val) => handleGuildChange(val)}
+                      options={sortedGuilds.map((guild) => {
+                        return guild.id;
+                      })}
+                      getOptionLabel={(id) =>
+                        guilds.find((guild) => guild.id === id)?.name
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="filled"
+                          fullWidth
+                          size="small"
+                          label="Guild"
+                          onFocus={closeAnnouncement}
+                          className={classes.autocomplete}
+                          InputProps={{
+                            ...params.InputProps,
+                            startAdornment: (
+                              <CopyAdornment
+                                copyValue={sortedGuilds
+                                  .map((guild) => guild.name)
+                                  .join("\r\n")}
+                                copyName="Guild List"
+                                disabled={guildFieldDisabled}
+                              />
+                            ),
+                          }}
+                        />
+                      )}
+                      value={selectedGuild?.id}
+                      disabled={guildFieldDisabled}
+                    />
 
+                    <Autocomplete
+                      clearIcon={<ClearIcon />}
+                      onChange={(_, val) => handleChannelChange(val)}
+                      options={sortedChannels.map((channel) => {
+                        return channel.id;
+                      })}
+                      getOptionLabel={(id) =>
+                        channels.find((channel) => channel.id === id)?.name
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="filled"
+                          fullWidth
+                          size="small"
+                          label="Channel"
+                          className={classes.autocomplete}
+                          InputProps={{
+                            ...params.InputProps,
+                            startAdornment: (
+                              <CopyAdornment
+                                copyValue={sortedChannels
+                                  .map((channel) => channel.name)
+                                  .join("\r\n")}
+                                copyName="Channel List"
+                                disabled={channelFieldDisabled}
+                              />
+                            ),
+                          }}
+                        />
+                      )}
+                      value={selectedChannel?.id}
+                      disabled={channelFieldDisabled}
+                    />
+                  </Stack>
+
+                  <AdvancedFiltering
+                    closeAnnouncement={closeAnnouncement}
+                    setShowOptionalFilters={setShowOptionalFilters}
+                    showOptionalFilters={showOptionalFilters}
+                  />
+                </Stack>
+              </Collapse>
               <Stack
                 alignItems="center"
                 direction="row"
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <span className={purgeDialogOpen && classes.purgeHidden}>
-                  <ExportButton
-                    bulk
-                    dialogOpen={exportDialogOpen}
-                    setDialogOpen={setExportDialogOpen}
-                  />
-                </span>
-                <span className={exportDialogOpen && classes.purgeHidden}>
-                  <PurgeButton
-                    dialogOpen={purgeDialogOpen}
-                    setDialogOpen={setPurgeDialogOpen}
-                  />
-                </span>
-                <span className={classes.purgeHidden}>
-                  <PauseButton disabled={!messagesLoading} />
-                </span>
+                <ExportButton
+                  bulk
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={exportDialogOpen}
+                  setDialogOpen={setExportDialogOpen}
+                />
+
+                <PurgeButton
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={purgeDialogOpen}
+                  setDialogOpen={setPurgeDialogOpen}
+                />
+
+                <PauseButton disabled={pauseCancelDisabled} />
+
                 <Button
-                  className={classes.purgeHidden}
-                  disabled={
-                    selectedGuild.id === null ||
-                    messagesLoading ||
-                    (!advancedFilterActive && selectedChannel.id === null)
-                  }
+                  disabled={searchBtnDisabled}
                   onClick={fetchChannelData}
                   variant="contained"
                 >
                   Search
                 </Button>
+
+                <CancelButton disabled={pauseCancelDisabled} />
               </Stack>
             </Stack>
           </Paper>
@@ -306,24 +322,15 @@ function ChannelMessages({ closeAnnouncement }) {
               )}
             </>
           )}
-          {token !== undefined &&
-            (token === null || !guilds.length || messagesLoading) && (
-              <Paper justifyContent="center" className={classes.paper}>
-                <Box className={classes.box}>
-                  <CircularProgress />
-                  <Typography variant="caption">
-                    {lookupUserId && `User Lookup: ${lookupUserId}`}
-                    {!lookupUserId &&
-                      fetchedMessageLength > 0 &&
-                      `Fetched ${fetchedMessageLength} Messages`}
-                    {!lookupUserId &&
-                      fetchedMessageLength <= 0 &&
-                      "Fetching Data"}
-                  </Typography>
-                </Box>
-              </Paper>
-            )}
-          {token === undefined && <TokenNotFound />}
+          {(userLoading || messagesLoading) && (
+            <Paper justifyContent="center" className={classes.paper}>
+              <Box className={classes.box}>
+                <CircularProgress />
+                <Typography variant="caption">{getProgressText()}</Typography>
+              </Box>
+            </Paper>
+          )}
+          {!token && !userLoading && <TokenNotFound />}
         </>
       )}
     </Stack>

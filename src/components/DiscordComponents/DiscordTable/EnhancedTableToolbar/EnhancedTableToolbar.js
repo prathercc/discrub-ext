@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -9,12 +9,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import EditIcon from "@mui/icons-material/Edit";
-import { MessageContext } from "../../../../context/message/MessageContext";
 import FilterComponent from "../FilterComponent/FilterComponent";
 import DiscordTableStyles from "../Styles/DiscordTable.styles";
 import ExportButton from "../../../Export/ExportButton/ExportButton";
-import { DmContext } from "../../../../context/dm/DmContext";
 import { Button, Collapse } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { selectDm } from "../../../../features/dm/dmSlice";
+import {
+  resetFilters,
+  selectMessage,
+} from "../../../../features/message/messageSlice";
+import { selectApp } from "../../../../features/app/appSlice";
 
 const EnhancedTableToolbar = ({
   setFilterOpen,
@@ -24,17 +29,19 @@ const EnhancedTableToolbar = ({
 }) => {
   const classes = DiscordTableStyles();
 
-  const { state: dmState } = useContext(DmContext);
-  const { selectedDm } = dmState;
-  const { state: messageState, resetFilters } = useContext(MessageContext);
-  const { selectedMessages } = messageState;
+  const dispatch = useDispatch();
+  const { selectedDm } = useSelector(selectDm);
+  const { selectedMessages } = useSelector(selectMessage);
+  const { discrubCancelled } = useSelector(selectApp);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleFilterToggle = () => {
-    if (filterOpen) resetFilters();
+    if (filterOpen) dispatch(resetFilters());
     setFilterOpen(!filterOpen);
   };
+
+  const editDeleteExportDisabled = discrubCancelled;
 
   return (
     <Toolbar
@@ -75,6 +82,7 @@ const EnhancedTableToolbar = ({
               Quick Filtering
             </Button>
             <ExportButton
+              disabled={editDeleteExportDisabled}
               setDialogOpen={setDialogOpen}
               dialogOpen={dialogOpen}
               isDm={!!selectedDm.id}
@@ -85,6 +93,7 @@ const EnhancedTableToolbar = ({
             className={classes.collapse}
             orientation="vertical"
             in={filterOpen}
+            unmountOnExit
           >
             <FilterComponent />
           </Collapse>
@@ -101,12 +110,18 @@ const EnhancedTableToolbar = ({
             </Typography>
             <Stack justifyContent="flex-end" direction="row">
               <Tooltip arrow title="Delete">
-                <IconButton onClick={() => setDeleteModalOpen(true)}>
+                <IconButton
+                  disabled={editDeleteExportDisabled}
+                  onClick={() => setDeleteModalOpen(true)}
+                >
                   <DeleteIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>
               <Tooltip arrow title="Edit">
-                <IconButton onClick={() => setEditModalOpen(true)}>
+                <IconButton
+                  disabled={editDeleteExportDisabled}
+                  onClick={() => setEditModalOpen(true)}
+                >
                   <EditIcon className={classes.icon} />
                 </IconButton>
               </Tooltip>
