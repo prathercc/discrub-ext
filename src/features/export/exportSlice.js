@@ -22,6 +22,7 @@ export const exportSlice = createSlice({
     currentPage: 1,
     messagesPerPage: 1000,
     sortOverride: "desc",
+    emojiMap: {},
   },
   reducers: {
     setSortOverride: (state, { payload }) => {
@@ -61,6 +62,12 @@ export const exportSlice = createSlice({
       state.sortOverride = "desc";
       state.messagesPerPage = 1000;
     },
+    setEmojiMap: (state, { payload }) => {
+      state.emojiMap = payload;
+    },
+    resetEmojiMap: (state, { payload }) => {
+      state.emojiMap = {};
+    },
   },
 });
 
@@ -76,6 +83,8 @@ export const {
   setName,
   setStatusText,
   resetExportSettings,
+  setEmojiMap,
+  resetEmojiMap,
 } = exportSlice.actions;
 
 /**
@@ -95,6 +104,51 @@ const _getDownloadUrl = (entity) => {
       return entity.proxy_url;
   }
 };
+
+export const getEmojiReferences = (content) => {
+  const emojiRegex = /<a:[A-Za-z0-9]+:[0-9]+>|<:[A-Za-z0-9]+:[0-9]+>/g;
+  return (
+    content.match(emojiRegex)?.map((emojiRef) => ({
+      raw: emojiRef,
+      name: `:${emojiRef.split(":")[1]}:`,
+      id: emojiRef.split(":")[2].replace(">", ""),
+    })) || []
+  );
+};
+
+const _downloadEmojisFromMessage =
+  (message, exportUtils) => async (dispatch, getState) => {
+    const emojiReferences = getEmojiReferences(message.content);
+
+    for (let count = 0; count < emojiReferences.length; count += 1) {
+      if (dispatch(getDiscrubCancelled())) break;
+      await dispatch(checkDiscrubPaused());
+      const { emojiMap } = getState().export;
+      const { id: parsedEmojiId, name: parsedEmojiName } =
+        emojiReferences[count];
+
+      try {
+        if (!emojiMap[parsedEmojiId]) {
+          const blob = await fetch(
+            `https://cdn.discordapp.com/emojis/${parsedEmojiId}`
+          ).then((r) => r.blob());
+          if (blob.size) {
+            const fileExt = blob.type?.split("/")?.[1] || ".gif";
+            const emojiFilePath = `emojis/${parsedEmojiName.replaceAll(
+              ":",
+              ""
+            )}-${parsedEmojiId}.${fileExt}`;
+            await exportUtils.addToZip(blob, emojiFilePath);
+            dispatch(
+              setEmojiMap({ ...emojiMap, [parsedEmojiId]: emojiFilePath })
+            );
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
 const _downloadCollection =
   (
@@ -168,6 +222,7 @@ const _processMessages =
           (attachment) => ({ ...attachment, local_url: null })
         );
       }
+      await dispatch(_downloadEmojisFromMessage(message, exportUtils));
       return updatedMessage;
     };
     const retArr = [];
@@ -276,6 +331,7 @@ export const exportMessages =
     const { messagesPerPage, downloadImages } = getState().export;
     const { preFilterUserId } = getState().channel;
     const { preFilterUserId: dmPreFilterUserId } = getState().dm;
+
     while (
       count < selectedChannels.length &&
       !dispatch(getDiscrubCancelled())
@@ -353,6 +409,7 @@ export const exportMessages =
     dispatch(setStatusText(null));
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
+    dispatch(resetEmojiMap());
   };
 
 export const selectExport = (state) => state.export;
