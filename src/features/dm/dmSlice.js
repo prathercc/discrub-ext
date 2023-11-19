@@ -64,7 +64,7 @@ export const getDms = () => async (dispatch, getState) => {
     }
     dispatch(setIsLoading(false));
   } catch (e) {
-    console.error(e);
+    console.error("Failed to fetch dms", e);
     dispatch(setIsLoading(false));
     dispatch(setDms([]));
   }

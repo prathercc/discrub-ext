@@ -420,7 +420,7 @@ export const deleteAttachment = (attachment) => async (dispatch, getState) => {
     }
     dispatch(setIsModifying(false));
   } catch (e) {
-    console.error(e);
+    console.error("Failed to delete attachment", e, attachment);
     dispatch(resetModify());
   }
 };
@@ -466,7 +466,7 @@ export const updateMessage = (message) => async (dispatch, getState) => {
       return -1;
     }
   } catch (e) {
-    console.error(e);
+    console.error("Failed to update message", e, message);
     return -1;
   }
 };
@@ -556,7 +556,7 @@ export const deleteMessage = (message) => async (dispatch, getState) => {
       return -1;
     }
   } catch (e) {
-    console.error(e);
+    console.error("Failed to delete message", e, message);
     return -1;
   }
 };
@@ -760,9 +760,8 @@ const _parseMentions = (messages) => async (dispatch, getState) => {
   const keys = Object.keys(userMap);
   while (count < keys.length) {
     await dispatch(checkDiscrubPaused());
+    const mentionedUserId = keys[count];
     try {
-      const mentionedUserId = keys[count];
-
       dispatch(setLookupUserId(mentionedUserId));
       const { id, retry_after, username } = await getUser(
         token,
@@ -782,7 +781,8 @@ const _parseMentions = (messages) => async (dispatch, getState) => {
         count++;
       }
     } catch (e) {
-      console.error("Failed to fetch User", e);
+      console.error("Failed to fetch user by id", e, mentionedUserId);
+      count++;
     }
   }
   return messages.map((msg) =>
@@ -852,7 +852,7 @@ const _getSearchMessages =
         dispatch(setTotalSearchMessages(totalMessages));
       }
     } catch (e) {
-      console.error("Error fetching channel messages", e);
+      console.error("Failed to fetch messages", e);
     } finally {
       return {
         retArr: retArr.map((m) => new Message(m)),
@@ -924,7 +924,7 @@ const _getMessages = (channelId) => async (dispatch, getState) => {
       }
     }
   } catch (e) {
-    console.error("Error fetching channel messages", e);
+    console.error("Failed to fetch messages", e);
   } finally {
     return {
       retArr: messages.map((m) => new Message(m)),

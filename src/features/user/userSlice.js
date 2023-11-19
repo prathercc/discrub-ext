@@ -55,7 +55,7 @@ export const getUserData = () => async (dispatch) => {
       }
       dispatch(setIsLoading(false));
     } catch (e) {
-      console.error(e);
+      console.error("Failed to authorize", e);
       dispatch(setIsLoading(false));
     }
   };
@@ -80,7 +80,7 @@ export const getUserDataManually =
           return { successful: true };
         }
       } catch (e) {
-        console.error(e);
+        console.error("Failed to authorize by token", e);
         dispatch(setToken(undefined));
         dispatch(setIsLoading(false));
         return { successful: false };

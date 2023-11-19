@@ -54,7 +54,7 @@ export const getGuilds = () => async (dispatch, getState) => {
     }
     dispatch(setIsLoading(false));
   } catch (e) {
-    console.error(e);
+    console.error("Failed to fetch guilds", e);
     dispatch(setIsLoading(false));
     dispatch(setGuilds([]));
   }

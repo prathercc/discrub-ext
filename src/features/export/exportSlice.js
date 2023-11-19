@@ -129,7 +129,7 @@ const _downloadAvatarFromMessage =
         }
       }
     } catch (e) {
-      console.error(e);
+      console.error("Failed to download avatar from message", e, message);
     }
   };
 
@@ -173,7 +173,7 @@ const _downloadEmojisFromMessage =
           }
         }
       } catch (e) {
-        console.error(e);
+        console.error("Failed to download emojis from message", e, message);
       }
     }
   };
@@ -217,7 +217,11 @@ const _downloadCollection =
           }
         }
       } catch (e) {
-        console.error(e);
+        console.error(
+          `Failed to download media from ${collectionName}`,
+          e,
+          collection?.[c2]
+        );
       }
     }
   };

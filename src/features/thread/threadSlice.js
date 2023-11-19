@@ -74,7 +74,7 @@ export const unarchiveThread = (threadId) => async (dispatch, getState) => {
         return -1;
       }
     } catch (e) {
-      console.error(e);
+      console.error("Failed to unarchive thread by id", e, threadId);
       return -1;
     }
   }

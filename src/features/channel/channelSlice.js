@@ -86,7 +86,7 @@ export const getChannels = (guildId) => async (dispatch, getState) => {
       dispatch(setIsLoading(false));
     }
   } catch (e) {
-    console.error(e);
+    console.error("Failed to fetch channels from guild id", e, guildId);
     dispatch(setIsLoading(false));
     dispatch(setChannels([]));
   }
