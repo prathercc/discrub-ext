@@ -15,8 +15,7 @@ const ChannelMessagesStyles = makeStyles(() => ({
     flexDirection: "column",
   },
   tableBox: {
-    maxHeight: ({ showOptionalFilters }) =>
-      `calc(296px - ${showOptionalFilters ? "46px" : "0px"})`,
+    maxHeight: "430px",
     overflow: "auto",
   },
   paper: {

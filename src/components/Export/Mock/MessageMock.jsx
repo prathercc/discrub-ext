@@ -45,7 +45,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
     smallEmoji
   ) => {
     let emojiUrl = `https://cdn.discordapp.com/emojis/${parsedEmojiId}`;
-    if (emojiMap && emojiMap[parsedEmojiId]) {
+    if (emojiMap && emojiMap[parsedEmojiId] && !hideAttachments) {
       emojiUrl = `../${emojiMap[parsedEmojiId]}`;
     }
 

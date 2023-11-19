@@ -11,6 +11,8 @@ import {
   TextField,
   Button,
   Autocomplete,
+  IconButton,
+  Collapse,
 } from "@mui/material";
 import DirectMessagesStyles from "./Styles/DirectMessages.styles";
 import ExportButton from "../../Export/ExportButton/ExportButton";
@@ -29,12 +31,16 @@ import {
 } from "../../../features/message/messageSlice";
 import CancelButton from "../CancelButton/CancelButton";
 import { selectApp } from "../../../features/app/appSlice";
+import DiscordTooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
 
 function DirectMessages() {
   const [searchTouched, setSearchTouched] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [showOptionalFilters, setShowOptionalFilters] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const dispatch = useDispatch();
   const { token, isLoading: userLoading } = useSelector(selectUser);
@@ -51,15 +57,12 @@ function DirectMessages() {
   } = useSelector(selectMessage);
   const { discrubCancelled } = useSelector(selectApp);
 
-  const classes = DirectMessagesStyles({
-    purgeDialogOpen,
-    exportDialogOpen,
-    showOptionalFilters,
-  });
+  const classes = DirectMessagesStyles();
 
   const fetchDmData = async () => {
     dispatch(getMessageData(null, selectedDm.id, preFilterUserId));
     setSearchTouched(true);
+    setExpanded(false);
   };
 
   const handleChangeDm = async (id) => {
@@ -104,89 +107,109 @@ function DirectMessages() {
         <Stack spacing={2}>
           <Paper className={classes.paper}>
             <Stack spacing={2}>
-              <Stack>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
                 <Typography variant="body1">Direct Messages</Typography>
+                <DiscordTooltip title={expanded ? "Collapse" : "Expand"}>
+                  <IconButton
+                    onClick={(e) => {
+                      setExpanded(!expanded);
+                    }}
+                    color="secondary"
+                  >
+                    {expanded ? <RemoveIcon /> : <AddIcon />}
+                  </IconButton>
+                </DiscordTooltip>
               </Stack>
 
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                spacing={1}
-              >
-                <Autocomplete
-                  clearIcon={<ClearIcon />}
-                  onChange={(_, val) => handleChangeDm(val)}
-                  options={sortedDms.map((directMessage) => {
-                    return directMessage.id;
-                  })}
-                  getOptionLabel={(id) => dms.find((dm) => dm.id === id)?.name}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="filled"
-                      fullWidth
-                      size="small"
-                      label="DM"
-                      className={classes.dmField}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <CopyAdornment
-                            copyValue={sortedDms
-                              .map((dm) => dm.name)
-                              .join("\r\n")}
-                            copyName="DM List"
-                            disabled={dmFieldDisabled}
-                          />
-                        ),
-                      }}
+              <Collapse orientation="vertical" in={expanded}>
+                <Stack direction="column" gap="5px">
+                  <Stack
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                    spacing={1}
+                  >
+                    <Autocomplete
+                      clearIcon={<ClearIcon />}
+                      onChange={(_, val) => handleChangeDm(val)}
+                      options={sortedDms.map((directMessage) => {
+                        return directMessage.id;
+                      })}
+                      getOptionLabel={(id) =>
+                        dms.find((dm) => dm.id === id)?.name
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="filled"
+                          fullWidth
+                          size="small"
+                          label="DM"
+                          className={classes.dmField}
+                          InputProps={{
+                            ...params.InputProps,
+                            startAdornment: (
+                              <CopyAdornment
+                                copyValue={sortedDms
+                                  .map((dm) => dm.name)
+                                  .join("\r\n")}
+                                copyName="DM List"
+                                disabled={dmFieldDisabled}
+                              />
+                            ),
+                          }}
+                        />
+                      )}
+                      value={selectedDm?.id}
+                      disabled={dmFieldDisabled}
                     />
-                  )}
-                  value={selectedDm?.id}
-                  disabled={dmFieldDisabled}
-                />
-              </Stack>
+                  </Stack>
 
-              <AdvancedFiltering
-                isDm
-                setShowOptionalFilters={setShowOptionalFilters}
-                showOptionalFilters={showOptionalFilters}
-              />
+                  <AdvancedFiltering
+                    isDm
+                    setShowOptionalFilters={setShowOptionalFilters}
+                    showOptionalFilters={showOptionalFilters}
+                  />
 
-              <Stack
-                alignItems="center"
-                direction="row"
-                spacing={1}
-                justifyContent="flex-end"
-              >
-                <ExportButton
-                  bulk
-                  disabled={exportAndPurgeDisabled}
-                  dialogOpen={exportDialogOpen}
-                  setDialogOpen={setExportDialogOpen}
-                  isDm
-                />
+                  <Stack
+                    alignItems="center"
+                    direction="row"
+                    spacing={1}
+                    justifyContent="flex-end"
+                  >
+                    <ExportButton
+                      bulk
+                      disabled={exportAndPurgeDisabled}
+                      dialogOpen={exportDialogOpen}
+                      setDialogOpen={setExportDialogOpen}
+                      isDm
+                    />
 
-                <PurgeButton
-                  disabled={exportAndPurgeDisabled}
-                  dialogOpen={purgeDialogOpen}
-                  setDialogOpen={setPurgeDialogOpen}
-                  isDm
-                />
+                    <PurgeButton
+                      disabled={exportAndPurgeDisabled}
+                      dialogOpen={purgeDialogOpen}
+                      setDialogOpen={setPurgeDialogOpen}
+                      isDm
+                    />
 
-                <PauseButton disabled={pauseCancelDisabled} />
+                    <PauseButton disabled={pauseCancelDisabled} />
 
-                <Button
-                  disabled={searchDisabled}
-                  onClick={() => selectedDm.id && fetchDmData()}
-                  variant="contained"
-                >
-                  Search
-                </Button>
+                    <Button
+                      disabled={searchDisabled}
+                      onClick={() => selectedDm.id && fetchDmData()}
+                      variant="contained"
+                    >
+                      Search
+                    </Button>
 
-                <CancelButton disabled={pauseCancelDisabled} />
-              </Stack>
+                    <CancelButton disabled={pauseCancelDisabled} />
+                  </Stack>
+                </Stack>
+              </Collapse>
             </Stack>
           </Paper>
         </Stack>

@@ -15,8 +15,7 @@ const DirectMessagesStyles = makeStyles(() => ({
     flexDirection: "column",
   },
   tableBox: {
-    maxHeight: ({ showOptionalFilters }) =>
-      `calc(360px - ${showOptionalFilters ? "50px" : "0px"})`,
+    maxHeight: "430px",
     overflow: "auto",
   },
   paper: {

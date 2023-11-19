@@ -86,7 +86,11 @@ function DiscrubDialog() {
             </Stack>
           )}
           <Collapse in={alertOpen}>
-            <Alert severity="info" onClose={() => setAlertOpen(false)}>
+            <Alert
+              sx={{ border: "1px solid rgb(210,213,247,0.2)" }}
+              severity="info"
+              onClose={() => setAlertOpen(false)}
+            >
               <AlertTitle sx={{ color: "rgb(1, 67, 97)" }}>
                 <Typography className={classes.alertText} variant="body2">
                   <strong>

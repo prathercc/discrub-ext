@@ -11,6 +11,8 @@ import {
   TextField,
   Button,
   Autocomplete,
+  IconButton,
+  Collapse,
 } from "@mui/material";
 import ChannelMessagesStyles from "./Styles/ChannelMessages.styles";
 import PurgeButton from "../../Purge/PurgeButton/PurgeButton";
@@ -37,6 +39,9 @@ import {
 } from "../../../features/message/messageSlice";
 import CancelButton from "../CancelButton/CancelButton";
 import { selectApp } from "../../../features/app/appSlice";
+import RemoveIcon from "@mui/icons-material/Remove";
+import AddIcon from "@mui/icons-material/Add";
+import DiscordTooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 
 function ChannelMessages({ closeAnnouncement }) {
   const dispatch = useDispatch();
@@ -60,17 +65,16 @@ function ChannelMessages({ closeAnnouncement }) {
   const [searchTouched, setSearchTouched] = useState(false);
   const [purgeDialogOpen, setPurgeDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const classes = ChannelMessagesStyles({
-    purgeDialogOpen,
-    exportDialogOpen,
-    showOptionalFilters,
-  });
+  const [expanded, setExpanded] = useState(true);
+
+  const classes = ChannelMessagesStyles();
 
   const fetchChannelData = async () => {
     dispatch(
       getMessageData(selectedGuild.id, selectedChannel.id, preFilterUserId)
     );
     setSearchTouched(true);
+    setExpanded(false);
   };
 
   const handleGuildChange = async (id) => {
@@ -140,125 +144,143 @@ function ChannelMessages({ closeAnnouncement }) {
         <Stack spacing={2}>
           <Paper className={classes.paper}>
             <Stack spacing={2}>
-              <Stack>
+              <Stack
+                justifyContent="space-between"
+                alignItems="center"
+                direction="row"
+              >
                 <Typography variant="body1">Channel Messages</Typography>
+                <DiscordTooltip title={expanded ? "Collapse" : "Expand"}>
+                  <IconButton
+                    onClick={(e) => {
+                      setExpanded(!expanded);
+                    }}
+                    color="secondary"
+                  >
+                    {expanded ? <RemoveIcon /> : <AddIcon />}
+                  </IconButton>
+                </DiscordTooltip>
               </Stack>
 
-              <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                spacing={1}
-              >
-                <Autocomplete
-                  clearIcon={<ClearIcon />}
-                  onChange={(_, val) => handleGuildChange(val)}
-                  options={sortedGuilds.map((guild) => {
-                    return guild.id;
-                  })}
-                  getOptionLabel={(id) =>
-                    guilds.find((guild) => guild.id === id)?.name
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="filled"
-                      fullWidth
-                      size="small"
-                      label="Guild"
-                      onFocus={closeAnnouncement}
-                      className={classes.autocomplete}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <CopyAdornment
-                            copyValue={sortedGuilds
-                              .map((guild) => guild.name)
-                              .join("\r\n")}
-                            copyName="Guild List"
-                            disabled={guildFieldDisabled}
-                          />
-                        ),
-                      }}
+              <Collapse orientation="vertical" in={expanded}>
+                <Stack direction="column" gap="5px">
+                  <Stack
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                    spacing={1}
+                  >
+                    <Autocomplete
+                      clearIcon={<ClearIcon />}
+                      onChange={(_, val) => handleGuildChange(val)}
+                      options={sortedGuilds.map((guild) => {
+                        return guild.id;
+                      })}
+                      getOptionLabel={(id) =>
+                        guilds.find((guild) => guild.id === id)?.name
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="filled"
+                          fullWidth
+                          size="small"
+                          label="Guild"
+                          onFocus={closeAnnouncement}
+                          className={classes.autocomplete}
+                          InputProps={{
+                            ...params.InputProps,
+                            startAdornment: (
+                              <CopyAdornment
+                                copyValue={sortedGuilds
+                                  .map((guild) => guild.name)
+                                  .join("\r\n")}
+                                copyName="Guild List"
+                                disabled={guildFieldDisabled}
+                              />
+                            ),
+                          }}
+                        />
+                      )}
+                      value={selectedGuild?.id}
+                      disabled={guildFieldDisabled}
                     />
-                  )}
-                  value={selectedGuild?.id}
-                  disabled={guildFieldDisabled}
-                />
 
-                <Autocomplete
-                  clearIcon={<ClearIcon />}
-                  onChange={(_, val) => handleChannelChange(val)}
-                  options={sortedChannels.map((channel) => {
-                    return channel.id;
-                  })}
-                  getOptionLabel={(id) =>
-                    channels.find((channel) => channel.id === id)?.name
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="filled"
-                      fullWidth
-                      size="small"
-                      label="Channel"
-                      className={classes.autocomplete}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <CopyAdornment
-                            copyValue={sortedChannels
-                              .map((channel) => channel.name)
-                              .join("\r\n")}
-                            copyName="Channel List"
-                            disabled={channelFieldDisabled}
-                          />
-                        ),
-                      }}
+                    <Autocomplete
+                      clearIcon={<ClearIcon />}
+                      onChange={(_, val) => handleChannelChange(val)}
+                      options={sortedChannels.map((channel) => {
+                        return channel.id;
+                      })}
+                      getOptionLabel={(id) =>
+                        channels.find((channel) => channel.id === id)?.name
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="filled"
+                          fullWidth
+                          size="small"
+                          label="Channel"
+                          className={classes.autocomplete}
+                          InputProps={{
+                            ...params.InputProps,
+                            startAdornment: (
+                              <CopyAdornment
+                                copyValue={sortedChannels
+                                  .map((channel) => channel.name)
+                                  .join("\r\n")}
+                                copyName="Channel List"
+                                disabled={channelFieldDisabled}
+                              />
+                            ),
+                          }}
+                        />
+                      )}
+                      value={selectedChannel?.id}
+                      disabled={channelFieldDisabled}
                     />
-                  )}
-                  value={selectedChannel?.id}
-                  disabled={channelFieldDisabled}
-                />
-              </Stack>
+                  </Stack>
 
-              <AdvancedFiltering
-                closeAnnouncement={closeAnnouncement}
-                setShowOptionalFilters={setShowOptionalFilters}
-                showOptionalFilters={showOptionalFilters}
-              />
+                  <AdvancedFiltering
+                    closeAnnouncement={closeAnnouncement}
+                    setShowOptionalFilters={setShowOptionalFilters}
+                    showOptionalFilters={showOptionalFilters}
+                  />
 
-              <Stack
-                alignItems="center"
-                direction="row"
-                spacing={1}
-                justifyContent="flex-end"
-              >
-                <ExportButton
-                  bulk
-                  disabled={exportAndPurgeDisabled}
-                  dialogOpen={exportDialogOpen}
-                  setDialogOpen={setExportDialogOpen}
-                />
+                  <Stack
+                    alignItems="center"
+                    direction="row"
+                    spacing={1}
+                    justifyContent="flex-end"
+                  >
+                    <ExportButton
+                      bulk
+                      disabled={exportAndPurgeDisabled}
+                      dialogOpen={exportDialogOpen}
+                      setDialogOpen={setExportDialogOpen}
+                    />
 
-                <PurgeButton
-                  disabled={exportAndPurgeDisabled}
-                  dialogOpen={purgeDialogOpen}
-                  setDialogOpen={setPurgeDialogOpen}
-                />
+                    <PurgeButton
+                      disabled={exportAndPurgeDisabled}
+                      dialogOpen={purgeDialogOpen}
+                      setDialogOpen={setPurgeDialogOpen}
+                    />
 
-                <PauseButton disabled={pauseCancelDisabled} />
+                    <PauseButton disabled={pauseCancelDisabled} />
 
-                <Button
-                  disabled={searchBtnDisabled}
-                  onClick={fetchChannelData}
-                  variant="contained"
-                >
-                  Search
-                </Button>
+                    <Button
+                      disabled={searchBtnDisabled}
+                      onClick={fetchChannelData}
+                      variant="contained"
+                    >
+                      Search
+                    </Button>
 
-                <CancelButton disabled={pauseCancelDisabled} />
-              </Stack>
+                    <CancelButton disabled={pauseCancelDisabled} />
+                  </Stack>
+                </Stack>
+              </Collapse>
             </Stack>
           </Paper>
         </Stack>

@@ -8,20 +8,21 @@ import { selectExport } from "../../../features/export/exportSlice";
 
 const AuthorAvatar = ({ author, reply, hideAttachments }) => {
   const classes = ExportStyles({ reply, hideAttachments });
+  const { id: userId, avatar: avatarId, username } = author || {};
   const { avatarMap } = useSelector(selectExport);
   const [textCopied, setTextCopied] = useState(false);
 
   const handleAvatarClick = (e) => {
     if (hideAttachments && !reply) {
       e.stopPropagation();
-      copy(author.id);
+      copy(userId);
       setTextCopied(true);
     }
   };
 
-  const idAndAvatar = `${author?.id}/${author?.avatar}`;
-  let avatarUrl = `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png`;
-  if (avatarMap && avatarMap[idAndAvatar]) {
+  const idAndAvatar = `${userId}/${avatarId}`;
+  let avatarUrl = `https://cdn.discordapp.com/avatars/${userId}/${avatarId}`;
+  if (avatarMap && avatarMap[idAndAvatar] && !hideAttachments) {
     avatarUrl = `../${avatarMap[idAndAvatar]}`;
   }
 
@@ -45,7 +46,7 @@ const AuthorAvatar = ({ author, reply, hideAttachments }) => {
         }}
         message={
           <span>
-            User ID copied from <strong>{author.username}</strong>
+            User ID copied from <strong>{username}</strong>
           </span>
         }
       />
