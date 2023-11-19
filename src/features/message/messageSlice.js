@@ -810,7 +810,7 @@ const _getSearchMessages =
       let criteria = { ...searchCriteria };
       let totalMessages = null;
       while (!reachedEnd) {
-        await checkDiscrubPaused();
+        await dispatch(checkDiscrubPaused());
         if (dispatch(getDiscrubCancelled())) break;
 
         const data = await fetchSearchMessageData(
