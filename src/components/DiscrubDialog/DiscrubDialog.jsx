@@ -63,7 +63,6 @@ function DiscrubDialog() {
 
   return (
     <Box className={classes.boxContainer}>
-      {/* <Sponsorship /> */}
       <DonationComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && (
@@ -86,22 +85,14 @@ function DiscrubDialog() {
             </Stack>
           )}
           <Collapse in={alertOpen}>
-            <Alert
-              sx={{ border: "1px solid rgb(210,213,247,0.2)" }}
-              severity="info"
-              onClose={() => setAlertOpen(false)}
-            >
-              <AlertTitle sx={{ color: "rgb(1, 67, 97)" }}>
-                <Typography className={classes.alertText} variant="body2">
-                  <strong>
-                    {announcement.title}
-                    {announcement.date && ` - ${announcement.date}`}
-                  </strong>
-                </Typography>
+            <Alert severity="info" onClose={() => setAlertOpen(false)}>
+              <AlertTitle sx={{ color: "rgb(1, 67, 97) !important" }}>
+                <strong>
+                  {announcement.title}
+                  {announcement.date && ` - ${announcement.date}`}
+                </strong>
               </AlertTitle>
-              <Typography className={classes.alertText} variant="body2">
-                {announcement.message}
-              </Typography>
+              {announcement.message}
             </Alert>
           </Collapse>
         </Box>
