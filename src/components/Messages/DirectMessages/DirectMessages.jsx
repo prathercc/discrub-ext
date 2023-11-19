@@ -47,7 +47,7 @@ function DirectMessages() {
   const { selectedDm, dms, preFilterUserId } = useSelector(selectDm);
   const {
     lookupUserId,
-    fetchedMessageLength,
+    fetchProgress,
     isLoading: messagesLoading,
     messages,
     searchBeforeDate,
@@ -56,6 +56,8 @@ function DirectMessages() {
     selectedHasTypes,
   } = useSelector(selectMessage);
   const { discrubCancelled } = useSelector(selectApp);
+
+  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
 
   const classes = DirectMessagesStyles();
 
@@ -100,6 +102,23 @@ function DirectMessages() {
     if (token) dispatch(getDms());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  const getProgressText = () => {
+    return (
+      <>
+        {parsingThreads && <>Fetched {threadCount} Threads</>}
+        {!parsingThreads && (
+          <>
+            {lookupUserId && `User Lookup: ${lookupUserId}`}
+            {!lookupUserId &&
+              messageCount > 0 &&
+              `Fetched ${messageCount} Messages`}
+            {!lookupUserId && messageCount <= 0 && "Fetching Data"}
+          </>
+        )}
+      </>
+    );
+  };
 
   return (
     <Stack spacing={2} className={classes.boxContainer}>
@@ -238,15 +257,7 @@ function DirectMessages() {
             <Paper justifyContent="center" className={classes.paper}>
               <Box className={classes.box}>
                 <CircularProgress />
-                <Typography variant="caption">
-                  {lookupUserId && `User Lookup: ${lookupUserId}`}
-                  {!lookupUserId &&
-                    fetchedMessageLength > 0 &&
-                    `Fetched ${fetchedMessageLength} Messages`}
-                  {!lookupUserId &&
-                    fetchedMessageLength <= 0 &&
-                    "Fetching Data"}
-                </Typography>
+                <Typography variant="caption">{getProgressText()}</Typography>
               </Box>
             </Paper>
           )}

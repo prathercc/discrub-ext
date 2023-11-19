@@ -8,7 +8,20 @@ import { selectMessage } from "../../../../features/message/messageSlice";
 const Progress = () => {
   const classes = ExportButtonStyles();
   const { name, statusText } = useSelector(selectExport);
-  const { fetchedMessageLength } = useSelector(selectMessage);
+  const { fetchProgress, lookupUserId } = useSelector(selectMessage);
+  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
+
+  const getProgressText = () => {
+    return (
+      <>
+        {parsingThreads && <>{threadCount} Threads Found</>}
+        {!parsingThreads && !lookupUserId && (
+          <>{messageCount ? `${messageCount} Messages Found` : "Processing"}</>
+        )}
+        {lookupUserId && `User Lookup: ${lookupUserId}`}
+      </>
+    );
+  };
 
   return (
     <Stack
@@ -21,13 +34,7 @@ const Progress = () => {
       <Typography>{name}</Typography>
       <CircularProgress />
       <Typography variant="caption">
-        {statusText || (
-          <>
-            {fetchedMessageLength
-              ? `${fetchedMessageLength} Messages Found`
-              : "Processing"}
-          </>
-        )}
+        {statusText || getProgressText()}
       </Typography>
     </Stack>
   );

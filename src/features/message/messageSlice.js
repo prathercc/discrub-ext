@@ -32,6 +32,13 @@ const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
 };
 
+const defaultFetchProgress = {
+  messageCount: 0,
+  channelId: null,
+  threadCount: 0,
+  parsingThreads: false,
+};
+
 export const messageSlice = createSlice({
   name: "message",
   initialState: {
@@ -39,7 +46,7 @@ export const messageSlice = createSlice({
     selectedMessages: [], // Array of id
     filteredMessages: [], // Message objects
     filters: [], // Array of object filters
-    fetchedMessageLength: 0, // Current length of fetched messages, used for debugging message fetch progress
+    fetchProgress: defaultFetchProgress,
     lookupUserId: null, // The userId being looked up (during message fetch process)
     isLoading: null,
     order: "asc",
@@ -95,15 +102,18 @@ export const messageSlice = createSlice({
       state.messages = [];
       state.selectedMessages = [];
       state.lookupUserId = null;
-      state.fetchedMessageLength = 0;
+      state.fetchProgress = defaultFetchProgress;
       state.totalSearchMessages = 0;
       state.isLoading = null;
     },
     setLookupUserId: (state, { payload }) => {
       state.lookupUserId = payload;
     },
-    setFetchedMessageLength: (state, { payload }) => {
-      state.fetchedMessageLength = payload;
+    setFetchProgress: (state, { payload }) => {
+      state.fetchProgress = { ...state.fetchProgress, ...payload };
+    },
+    resetFetchProgress: (state, { payload }) => {
+      state.fetchProgress = defaultFetchProgress;
     },
     setTotalSearchMessages: (state, { payload }) => {
       state.totalSearchMessages = payload;
@@ -374,7 +384,8 @@ export const {
   setFilteredMessages,
   _resetMessageData,
   setLookupUserId,
-  setFetchedMessageLength,
+  setFetchProgress,
+  resetFetchProgress,
   setTotalSearchMessages,
   resetFilters,
   resetAdvancedFilters,
@@ -700,10 +711,12 @@ export const getMessageData =
       if (!dispatch(getDiscrubCancelled())) {
         const messagesWithMentions = await dispatch(_parseMentions(retArr));
 
-        payload = {
-          threads: retThreads,
-          messages: messagesWithMentions,
-        };
+        if (!dispatch(getDiscrubCancelled())) {
+          payload = {
+            threads: retThreads,
+            messages: messagesWithMentions,
+          };
+        }
       }
       const sortedMessages = payload.messages.toSorted((a, b) =>
         sortByProperty(
@@ -717,7 +730,7 @@ export const getMessageData =
       dispatch(setMessages(sortedMessages));
       dispatch(setIsLoading(false));
       dispatch(setLookupUserId(null));
-      dispatch(setFetchedMessageLength(0));
+      dispatch(resetFetchProgress());
       dispatch(setTotalSearchMessages(0));
 
       const { active, entity } = getState().app.modify;
@@ -849,7 +862,13 @@ const _getSearchMessages =
         for (const m of foundMessages) {
           if (_messageTypeAllowed(m.type)) retArr.push(m);
         }
-        dispatch(setFetchedMessageLength(retArr.length));
+        dispatch(
+          setFetchProgress({
+            messageCount: retArr.length,
+            channelId,
+            threadCount: retThreads.length,
+          })
+        );
         dispatch(setTotalSearchMessages(totalMessages));
       }
     } catch (e) {
@@ -892,9 +911,11 @@ const _getMessages = (channelId) => async (dispatch, getState) => {
 
   try {
     if (channel.isGuildForum()) {
+      dispatch(setFetchProgress({ parsingThreads: true }));
       const { retThreads: threads } = await dispatch(
         _getSearchMessages(channelId, channel.getGuildId(), {})
       );
+      dispatch(resetFetchProgress());
       threads.forEach((t) => {
         if (!trackedThreads.some((tt) => tt.id === t.id)) {
           trackedThreads.push(new Thread(t));
@@ -948,8 +969,12 @@ const _getMessagesFromChannel = (channelId) => async (dispatch, getState) => {
     if (data.length > 0) lastId = data[data.length - 1].id;
     const hasValidMessages = data && (data[0]?.content || data[0]?.attachments);
     if (hasValidMessages) {
-      const { fetchedMessageLength } = getState().message;
-      dispatch(setFetchedMessageLength(data.length + fetchedMessageLength));
+      const { fetchProgress } = getState().message;
+      const { messageCount } = fetchProgress;
+      dispatch(
+        setFetchProgress({ messageCount: data.length + messageCount }),
+        channelId
+      );
       data
         .filter((m) => _messageTypeAllowed(m.type))
         .forEach((m) => messages.push(m));

@@ -52,7 +52,7 @@ function ChannelMessages({ closeAnnouncement }) {
   const {
     messages,
     isLoading: messagesLoading,
-    fetchedMessageLength,
+    fetchProgress,
     lookupUserId,
     searchBeforeDate,
     searchAfterDate,
@@ -60,6 +60,8 @@ function ChannelMessages({ closeAnnouncement }) {
     selectedHasTypes,
   } = useSelector(selectMessage);
   const { discrubCancelled } = useSelector(selectApp);
+
+  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
 
   const [showOptionalFilters, setShowOptionalFilters] = useState(false);
   const [searchTouched, setSearchTouched] = useState(false);
@@ -137,6 +139,23 @@ function ChannelMessages({ closeAnnouncement }) {
     if (token) dispatch(getGuilds());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  const getProgressText = () => {
+    return (
+      <>
+        {parsingThreads && <>Fetched {threadCount} Threads</>}
+        {!parsingThreads && (
+          <>
+            {lookupUserId && `User Lookup: ${lookupUserId}`}
+            {!lookupUserId &&
+              messageCount > 0 &&
+              `Fetched ${messageCount} Messages`}
+            {!lookupUserId && messageCount <= 0 && "Fetching Data"}
+          </>
+        )}
+      </>
+    );
+  };
 
   return (
     <Stack spacing={2} className={classes.boxContainer}>
@@ -307,15 +326,7 @@ function ChannelMessages({ closeAnnouncement }) {
             <Paper justifyContent="center" className={classes.paper}>
               <Box className={classes.box}>
                 <CircularProgress />
-                <Typography variant="caption">
-                  {lookupUserId && `User Lookup: ${lookupUserId}`}
-                  {!lookupUserId &&
-                    fetchedMessageLength > 0 &&
-                    `Fetched ${fetchedMessageLength} Messages`}
-                  {!lookupUserId &&
-                    fetchedMessageLength <= 0 &&
-                    "Fetching Data"}
-                </Typography>
+                <Typography variant="caption">{getProgressText()}</Typography>
               </Box>
             </Paper>
           )}

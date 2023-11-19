@@ -47,8 +47,9 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
 
   const {
     isLoading: messagesLoading,
-    fetchedMessageLength,
+    fetchProgress,
     totalSearchMessages,
+    lookupUserId,
   } = useSelector(selectMessage);
   const { channels, selectedChannel, preFilterUserId } =
     useSelector(selectChannel);
@@ -56,6 +57,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const { id: userId } = useSelector(selectUser);
   const { modify } = useSelector(selectApp);
   const { active, entity, statusText } = modify;
+  const { messageCount, threadCount, parsingThreads } = fetchProgress;
 
   const finishedPurge = !active && entity;
 
@@ -95,17 +97,25 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const guildDialogText =
     "Are you sure you want to purge this Guild? All messages in every Channel will be deleted for yourself or a given User Id.";
 
-  const searchProgressText = (
-    <span>
-      Found{" "}
-      {totalSearchMessages > 0
-        ? ((fetchedMessageLength / totalSearchMessages) * 100)
-            .toString()
-            .split(".")[0]
-        : 0}
-      % of <strong>{selectedChannel?.name}</strong> messages
-    </span>
-  );
+  const getProgressText = () => {
+    return (
+      <>
+        {parsingThreads && <>Found {threadCount} Threads</>}
+        {!parsingThreads && !lookupUserId && (
+          <span>
+            Found{" "}
+            {totalSearchMessages > 0
+              ? ((messageCount / totalSearchMessages) * 100)
+                  .toString()
+                  .split(".")[0]
+              : 0}
+            % of <strong>{selectedChannel?.name}</strong> messages
+          </span>
+        )}
+        {lookupUserId && `User Lookup: ${lookupUserId}`}
+      </>
+    );
+  };
 
   return (
     <Dialog open={dialogOpen}>
@@ -164,7 +174,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               )}
 
               <ModalDebugMessage
-                debugMessage={messagesLoading ? searchProgressText : statusText}
+                debugMessage={messagesLoading ? getProgressText() : statusText}
               />
 
               <Stack justifyContent="center" alignItems="center">
