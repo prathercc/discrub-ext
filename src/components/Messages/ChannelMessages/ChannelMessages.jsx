@@ -247,40 +247,39 @@ function ChannelMessages({ closeAnnouncement }) {
                     setShowOptionalFilters={setShowOptionalFilters}
                     showOptionalFilters={showOptionalFilters}
                   />
-
-                  <Stack
-                    alignItems="center"
-                    direction="row"
-                    spacing={1}
-                    justifyContent="flex-end"
-                  >
-                    <ExportButton
-                      bulk
-                      disabled={exportAndPurgeDisabled}
-                      dialogOpen={exportDialogOpen}
-                      setDialogOpen={setExportDialogOpen}
-                    />
-
-                    <PurgeButton
-                      disabled={exportAndPurgeDisabled}
-                      dialogOpen={purgeDialogOpen}
-                      setDialogOpen={setPurgeDialogOpen}
-                    />
-
-                    <PauseButton disabled={pauseCancelDisabled} />
-
-                    <Button
-                      disabled={searchBtnDisabled}
-                      onClick={fetchChannelData}
-                      variant="contained"
-                    >
-                      Search
-                    </Button>
-
-                    <CancelButton disabled={pauseCancelDisabled} />
-                  </Stack>
                 </Stack>
               </Collapse>
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+              >
+                <ExportButton
+                  bulk
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={exportDialogOpen}
+                  setDialogOpen={setExportDialogOpen}
+                />
+
+                <PurgeButton
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={purgeDialogOpen}
+                  setDialogOpen={setPurgeDialogOpen}
+                />
+
+                <PauseButton disabled={pauseCancelDisabled} />
+
+                <Button
+                  disabled={searchBtnDisabled}
+                  onClick={fetchChannelData}
+                  variant="contained"
+                >
+                  Search
+                </Button>
+
+                <CancelButton disabled={pauseCancelDisabled} />
+              </Stack>
             </Stack>
           </Paper>
         </Stack>

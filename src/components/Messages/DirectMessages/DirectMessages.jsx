@@ -174,42 +174,41 @@ function DirectMessages() {
                     setShowOptionalFilters={setShowOptionalFilters}
                     showOptionalFilters={showOptionalFilters}
                   />
-
-                  <Stack
-                    alignItems="center"
-                    direction="row"
-                    spacing={1}
-                    justifyContent="flex-end"
-                  >
-                    <ExportButton
-                      bulk
-                      disabled={exportAndPurgeDisabled}
-                      dialogOpen={exportDialogOpen}
-                      setDialogOpen={setExportDialogOpen}
-                      isDm
-                    />
-
-                    <PurgeButton
-                      disabled={exportAndPurgeDisabled}
-                      dialogOpen={purgeDialogOpen}
-                      setDialogOpen={setPurgeDialogOpen}
-                      isDm
-                    />
-
-                    <PauseButton disabled={pauseCancelDisabled} />
-
-                    <Button
-                      disabled={searchDisabled}
-                      onClick={() => selectedDm.id && fetchDmData()}
-                      variant="contained"
-                    >
-                      Search
-                    </Button>
-
-                    <CancelButton disabled={pauseCancelDisabled} />
-                  </Stack>
                 </Stack>
               </Collapse>
+              <Stack
+                alignItems="center"
+                direction="row"
+                spacing={1}
+                justifyContent="flex-end"
+              >
+                <ExportButton
+                  bulk
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={exportDialogOpen}
+                  setDialogOpen={setExportDialogOpen}
+                  isDm
+                />
+
+                <PurgeButton
+                  disabled={exportAndPurgeDisabled}
+                  dialogOpen={purgeDialogOpen}
+                  setDialogOpen={setPurgeDialogOpen}
+                  isDm
+                />
+
+                <PauseButton disabled={pauseCancelDisabled} />
+
+                <Button
+                  disabled={searchDisabled}
+                  onClick={() => selectedDm.id && fetchDmData()}
+                  variant="contained"
+                >
+                  Search
+                </Button>
+
+                <CancelButton disabled={pauseCancelDisabled} />
+              </Stack>
             </Stack>
           </Paper>
         </Stack>
