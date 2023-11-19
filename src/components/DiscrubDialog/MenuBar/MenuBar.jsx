@@ -17,9 +17,20 @@ import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import RedditIcon from "@mui/icons-material/Reddit";
+import { useSelector } from "react-redux";
+import { selectExport } from "../../../features/export/exportSlice";
+import { selectApp } from "../../../features/app/appSlice";
+import { selectMessage } from "../../../features/message/messageSlice";
 
 const MenuBar = ({ menuIndex, setMenuIndex }) => {
   const classes = MenuBarStyles();
+  const { isExporting, isGenerating } = useSelector(selectExport);
+  const { modify } = useSelector(selectApp);
+  const { active, entity } = modify || {};
+  const { isLoading } = useSelector(selectMessage);
+
+  const menuDisabled =
+    isExporting || isGenerating || active || entity || isLoading;
 
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = !!anchorEl;
@@ -33,6 +44,7 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   return (
     <Box className={classes.menuBox}>
       <Button
+        disabled={menuDisabled}
         color="secondary"
         startIcon={menuOpen ? <MenuOpenIcon /> : <MenuIcon />}
         onClick={(e) => setAnchorEl(e.currentTarget)}
