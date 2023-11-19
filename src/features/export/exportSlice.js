@@ -15,7 +15,6 @@ export const exportSlice = createSlice({
     isExporting: false,
     downloadImages: false,
     previewImages: false,
-    showAvatars: false,
     name: "",
     statusText: "",
     isGenerating: false,
@@ -23,6 +22,7 @@ export const exportSlice = createSlice({
     messagesPerPage: 1000,
     sortOverride: "desc",
     emojiMap: {},
+    avatarMap: {},
   },
   reducers: {
     setSortOverride: (state, { payload }) => {
@@ -40,9 +40,6 @@ export const exportSlice = createSlice({
     setIsExporting: (state, { payload }) => {
       state.isExporting = payload;
     },
-    setShowAvatars: (state, { payload }) => {
-      state.showAvatars = payload;
-    },
     setPreviewImages: (state, { payload }) => {
       state.previewImages = payload;
     },
@@ -57,7 +54,6 @@ export const exportSlice = createSlice({
     },
     resetExportSettings: (state, { payload }) => {
       state.downloadImages = false;
-      state.showAvatars = false;
       state.previewImages = false;
       state.sortOverride = "desc";
       state.messagesPerPage = 1000;
@@ -68,6 +64,12 @@ export const exportSlice = createSlice({
     resetEmojiMap: (state, { payload }) => {
       state.emojiMap = {};
     },
+    setAvatarMap: (state, { payload }) => {
+      state.avatarMap = payload;
+    },
+    resetAvatarMap: (state, { payload }) => {
+      state.avatarMap = {};
+    },
   },
 });
 
@@ -77,7 +79,6 @@ export const {
   setCurrentPage,
   setIsGenerating,
   setIsExporting,
-  setShowAvatars,
   setPreviewImages,
   setDownloadImages,
   setName,
@@ -85,6 +86,8 @@ export const {
   resetExportSettings,
   setEmojiMap,
   resetEmojiMap,
+  setAvatarMap,
+  resetAvatarMap,
 } = exportSlice.actions;
 
 /**
@@ -104,6 +107,31 @@ const _getDownloadUrl = (entity) => {
       return entity.proxy_url;
   }
 };
+
+const _downloadAvatarFromMessage =
+  (message, exportUtils) => async (dispatch, getState) => {
+    const { avatarMap } = getState().export;
+    const { id: userId, avatar: avatarId } = message?.author;
+    const idAndAvatar = `${userId}/${avatarId}`;
+
+    try {
+      if (userId && avatarId && !avatarMap[idAndAvatar]) {
+        const blob = await fetch(
+          `https://cdn.discordapp.com/avatars/${idAndAvatar}`
+        ).then((r) => r.blob());
+        if (blob.size) {
+          const fileExt = blob.type?.split("/")?.[1] || "webp";
+          const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
+          await exportUtils.addToZip(blob, avatarFilePath);
+          dispatch(
+            setAvatarMap({ ...avatarMap, [idAndAvatar]: avatarFilePath })
+          );
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
 export const getEmojiReferences = (content) => {
   const emojiRegex = /<a:[A-Za-z0-9]+:[0-9]+>|<:[A-Za-z0-9]+:[0-9]+>/g;
@@ -133,7 +161,7 @@ const _downloadEmojisFromMessage =
             `https://cdn.discordapp.com/emojis/${parsedEmojiId}`
           ).then((r) => r.blob());
           if (blob.size) {
-            const fileExt = blob.type?.split("/")?.[1] || ".gif";
+            const fileExt = blob.type?.split("/")?.[1] || "gif";
             const emojiFilePath = `emojis/${parsedEmojiName.replaceAll(
               ":",
               ""
@@ -223,6 +251,7 @@ const _processMessages =
         );
       }
       await dispatch(_downloadEmojisFromMessage(message, exportUtils));
+      await dispatch(_downloadAvatarFromMessage(message, exportUtils));
       return updatedMessage;
     };
     const retArr = [];
@@ -410,6 +439,7 @@ export const exportMessages =
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
     dispatch(resetEmojiMap());
+    dispatch(resetAvatarMap());
   };
 
 export const selectExport = (state) => state.export;

@@ -20,7 +20,6 @@ import ImageToggle from "../ImageToggle/ImageToggle";
 import ExportButtonStyles from "../Styles/ExportButton.styles";
 import Progress from "../Progress/Progress";
 import PreviewImageToggle from "../PreviewImageToggle/PreviewImageToggle";
-import ShowAvatarsToggle from "../ShowAvatarsToggle/ShowAvatarsToggle";
 import PerPage from "../PerPage/PerPage";
 import SortDirectionToggle from "../SortDirectionToggle/SortDirectionToggle";
 import { useDispatch, useSelector } from "react-redux";
@@ -138,7 +137,6 @@ const BulkContent = ({ isDm = false }) => {
                   spacing={1}
                 >
                   <SortDirectionToggle />
-                  <ShowAvatarsToggle />
                   <PreviewImageToggle />
                   <ImageToggle />
                 </Stack>
@@ -176,7 +174,6 @@ const BulkContent = ({ isDm = false }) => {
                 spacing={1}
               >
                 <SortDirectionToggle />
-                <ShowAvatarsToggle />
                 <PreviewImageToggle />
                 <ImageToggle />
               </Stack>

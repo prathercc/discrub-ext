@@ -8,11 +8,8 @@ import { selectExport } from "../../../features/export/exportSlice";
 
 const AuthorAvatar = ({ author, reply, hideAttachments }) => {
   const classes = ExportStyles({ reply, hideAttachments });
-  const { showAvatars } = useSelector(selectExport);
+  const { avatarMap } = useSelector(selectExport);
   const [textCopied, setTextCopied] = useState(false);
-  const showAvatar =
-    (hideAttachments && author.avatar) ||
-    (!hideAttachments && showAvatars && author.avatar);
 
   const handleAvatarClick = (e) => {
     if (hideAttachments && !reply) {
@@ -22,16 +19,19 @@ const AuthorAvatar = ({ author, reply, hideAttachments }) => {
     }
   };
 
+  const idAndAvatar = `${author?.id}/${author?.avatar}`;
+  let avatarUrl = `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png`;
+  if (avatarMap && avatarMap[idAndAvatar]) {
+    avatarUrl = `../${avatarMap[idAndAvatar]}`;
+  }
+
   return (
     <>
       <Box className={classes.avatarBox}>
         <Avatar
           onClick={handleAvatarClick}
           className={classes.avatarMain}
-          src={
-            showAvatar &&
-            `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png`
-          }
+          src={avatarUrl}
         >
           <PersonIcon />
         </Avatar>

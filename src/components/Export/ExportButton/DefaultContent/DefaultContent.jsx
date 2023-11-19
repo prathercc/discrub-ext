@@ -9,7 +9,6 @@ import ImageToggle from "../ImageToggle/ImageToggle";
 import ExportButtonStyles from "../Styles/ExportButton.styles";
 import Progress from "../Progress/Progress";
 import PreviewImageToggle from "../PreviewImageToggle/PreviewImageToggle";
-import ShowAvatarsToggle from "../ShowAvatarsToggle/ShowAvatarsToggle";
 import PerPage from "../PerPage/PerPage";
 import { useSelector } from "react-redux";
 import { selectExport } from "../../../../features/export/exportSlice";
@@ -45,7 +44,6 @@ const DefaultContent = () => {
                 alignItems="center"
                 spacing={1}
               >
-                <ShowAvatarsToggle />
                 <PreviewImageToggle />
                 <ImageToggle />
               </Stack>
