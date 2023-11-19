@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -10,144 +10,86 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { MessageContext } from "../../../context/message/MessageContext";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import { ChannelContext } from "../../../context/channel/ChannelContext";
 import ModalDebugMessage from "../ModalDebugMessage/ModalDebugMessage";
 import ChannelMessagesStyles from "../../Messages/ChannelMessages/Styles/ChannelMessages.styles";
 import MessageChip from "../MessageChip/MessageChip";
-import { UserContext } from "../../../context/user/UserContext";
-import { DmContext } from "../../../context/dm/DmContext";
 import PrefilterUser from "../../Messages/PrefilterUser/PrefilterUser";
-import { wait } from "../../../utils";
 import PauseButton from "../../PauseButton/PauseButton";
+import { useDispatch, useSelector } from "react-redux";
+import { selectMessage } from "../../../features/message/messageSlice";
+import {
+  resetChannel,
+  selectChannel,
+  setPreFilterUserId,
+} from "../../../features/channel/channelSlice";
+import {
+  selectDm,
+  setPreFilterUserId as setDmPreFilterUserId,
+} from "../../../features/dm/dmSlice";
+import { purge } from "../../../features/purge/purgeSlice";
+import { selectUser } from "../../../features/user/userSlice";
+import CancelButton from "../../Messages/CancelButton/CancelButton";
+import {
+  setDiscrubCancelled,
+  setDiscrubPaused,
+  selectApp,
+  setModifyEntity,
+  setIsModifying,
+} from "../../../features/app/appSlice";
 
 const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
+  const dispatch = useDispatch();
   const classes = ChannelMessagesStyles();
-  const [deleting, setDeleting] = useState(false);
-  const [deleteObj, setDeleteObj] = useState(null);
-  const [debugMessage, setDebugMessage] = useState("");
-  const resetDebugMessage = () => {
-    setDebugMessage("");
-  };
-
-  const openRef = useRef();
-  openRef.current = dialogOpen;
 
   const {
-    state: channelState,
-    setPreFilterUserId,
-    setChannel,
-    resetChannel,
-  } = useContext(ChannelContext);
-
-  const {
-    state: dmState,
-    setPreFilterUserId: setDmPreFilterUserId,
-    setDm,
-  } = useContext(DmContext);
-
-  const {
-    state: messageDataState,
-    deleteMessage,
-    resetMessageData,
-    getMessageData,
-    setDiscrubPaused,
-    checkDiscrubPaused,
-  } = useContext(MessageContext);
-  const { state: userState } = useContext(UserContext);
-
-  const {
-    messages,
     isLoading: messagesLoading,
-    fetchedMessageLength,
+    fetchProgress,
     totalSearchMessages,
-  } = messageDataState;
-  const { channels, selectedChannel, preFilterUserId } = channelState;
-  const { selectedDm } = dmState;
+    lookupUserId,
+  } = useSelector(selectMessage);
+  const { channels, selectedChannel, preFilterUserId } =
+    useSelector(selectChannel);
+  const { selectedDm } = useSelector(selectDm);
+  const { id: userId } = useSelector(selectUser);
+  const { modify } = useSelector(selectApp);
+  const { active, entity, statusText } = modify;
+  const { messageCount, threadCount, parsingThreads } = fetchProgress;
 
-  const messagesRef = useRef();
-  messagesRef.current = messages;
-
-  const messagesLoadingRef = useRef();
-  messagesLoadingRef.current = messagesLoading;
-
-  const finishedPurge = !deleting && deleteObj;
+  const finishedPurge = !active && entity;
 
   const deleteType = isDm ? "DM" : "Guild";
 
   useEffect(() => {
     if (dialogOpen) {
-      setDeleteObj(null);
-      setDeleting(false);
+      dispatch(setModifyEntity(null));
+      dispatch(setIsModifying(false));
       if (!isDm) {
-        setPreFilterUserId(userState.id);
+        dispatch(setPreFilterUserId(userId));
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen]);
 
   const handleClose = async () => {
-    setDialogOpen(false);
-    await resetMessageData();
-    isDm ? await setDmPreFilterUserId(null) : await setPreFilterUserId(null);
-    !isDm && (await resetChannel());
-    setDiscrubPaused(false);
-  };
-
-  const handleDeleteMessage = async () => {
-    setDeleting(true);
-    for (const entity of isDm ? [selectedDm] : channels) {
-      setDeleteObj({});
-      setDebugMessage("Searching for messages...");
-      await wait(1, resetDebugMessage);
-      await resetMessageData();
-      isDm ? await setDm(entity.id) : await setChannel(entity.id);
-      isDm && (await setDmPreFilterUserId(userState.id));
-      await getMessageData();
-      let count = 0;
-      const selectedMessages = [...messagesRef.current];
-
-      const selectedCount = selectedMessages.length;
-
-      if (selectedCount === 0) {
-        setDebugMessage("Still searching...");
-        await wait(1, resetDebugMessage);
-      }
-
-      while (count < selectedCount && openRef.current) {
-        await checkDiscrubPaused();
-        let currentRow = selectedMessages[count];
-        setDeleteObj(
-          Object.assign(currentRow, {
-            _index: count + 1,
-            _total: selectedCount,
-          })
-        );
-        const response = await deleteMessage(currentRow);
-        if (response === null) {
-          count++;
-        } else if (response > 0) {
-          setDebugMessage(`Pausing for ${response} seconds`);
-          await wait(response, resetDebugMessage);
-        } else {
-          setDebugMessage("You do not have permission to modify this message!");
-          await wait(0.5, resetDebugMessage);
-          count++;
-        }
-      }
-      if (!openRef.current) break;
+    if (!!entity || active) {
+      // We are actively deleting, we need to send a cancel request
+      dispatch(setDiscrubCancelled(true));
     }
-    setDeleting(false);
-    await resetMessageData();
-    !isDm && (await resetChannel());
+    if (isDm) {
+      dispatch(setDmPreFilterUserId(null));
+    } else {
+      dispatch(setPreFilterUserId(null));
+      dispatch(resetChannel());
+    }
+    dispatch(setDiscrubPaused(false));
+    setDialogOpen(false);
   };
 
-  const dialogBtnDisabled =
-    deleting || deleteObj || (!isDm && !preFilterUserId);
+  const dialogBtnDisabled = active || entity || (!isDm && !preFilterUserId);
 
   const dmDialogText =
     "Are you sure you want to purge this DM? All of your messages will be deleted.";
@@ -155,24 +97,32 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const guildDialogText =
     "Are you sure you want to purge this Guild? All messages in every Channel will be deleted for yourself or a given User Id.";
 
-  const searchProgressText = (
-    <span>
-      Found{" "}
-      {totalSearchMessages > 0
-        ? ((fetchedMessageLength / totalSearchMessages) * 100)
-            .toString()
-            .split(".")[0]
-        : 0}
-      % of <strong>{selectedChannel?.name}</strong> messages
-    </span>
-  );
+  const getProgressText = () => {
+    return (
+      <>
+        {parsingThreads && <>Found {threadCount} Threads</>}
+        {!parsingThreads && !lookupUserId && (
+          <span>
+            Found{" "}
+            {totalSearchMessages > 0
+              ? ((messageCount / totalSearchMessages) * 100)
+                  .toString()
+                  .split(".")[0]
+              : 0}
+            % of <strong>{selectedChannel?.name}</strong> messages
+          </span>
+        )}
+        {lookupUserId && `User Lookup: ${lookupUserId}`}
+      </>
+    );
+  };
 
   return (
-    <Dialog open={dialogOpen} onClose={handleClose}>
+    <Dialog open={dialogOpen}>
       <DialogTitle>
-        {deleting && deleteObj && `Purging ${deleteType}`}
+        {active && entity && `Purging ${deleteType}`}
         {finishedPurge && `${deleteType} Purged`}
-        {!finishedPurge && !deleting && `Purge ${deleteType}`}
+        {!finishedPurge && !active && `Purge ${deleteType}`}
       </DialogTitle>
       <DialogContent>
         <Stack
@@ -204,9 +154,9 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
           {!isDm && !finishedPurge && (
             <PrefilterUser isDm={false} purge disabled={messagesLoading} />
           )}
-          {deleting && deleteObj && (
+          {active && entity && (
             <>
-              {deleteObj.id && (
+              {entity.id && (
                 <Stack
                   direction="row"
                   justifyContent="center"
@@ -214,9 +164,9 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   spacing={2}
                 >
                   <MessageChip
-                    avatar={`https://cdn.discordapp.com/avatars/${deleteObj?.author?.id}/${deleteObj?.author?.avatar}.png`}
-                    username={deleteObj?.username}
-                    content={deleteObj?.content}
+                    avatar={`https://cdn.discordapp.com/avatars/${entity?.author?.id}/${entity?.author?.avatar}.png`}
+                    username={entity?.username}
+                    content={entity?.content}
                   />
                   <ArrowRightAltIcon color="secondary" />
                   <DeleteSweepIcon color="error" />
@@ -224,17 +174,15 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
               )}
 
               <ModalDebugMessage
-                debugMessage={
-                  messagesLoading ? searchProgressText : debugMessage
-                }
+                debugMessage={messagesLoading ? getProgressText() : statusText}
               />
 
               <Stack justifyContent="center" alignItems="center">
                 <CircularProgress />
               </Stack>
               <Typography className={classes.objIdTypography} variant="caption">
-                {deleteObj?._index
-                  ? `Message ${deleteObj._index} of ${deleteObj._total}`
+                {entity?._index
+                  ? `Message ${entity._index} of ${entity._total}`
                   : ""}
               </Typography>
             </>
@@ -242,15 +190,13 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button color="secondary" variant="contained" onClick={handleClose}>
-          Cancel
-        </Button>
-        <PauseButton disabled={!deleting} />
+        <CancelButton onCancel={handleClose} />
+        <PauseButton disabled={!active} />
         {!finishedPurge && (
           <Button
             disabled={dialogBtnDisabled}
             variant="contained"
-            onClick={handleDeleteMessage}
+            onClick={() => dispatch(purge(isDm ? [selectedDm] : channels))}
           >
             Purge
           </Button>

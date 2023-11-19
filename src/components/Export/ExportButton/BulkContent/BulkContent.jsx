@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import {
   DialogContent,
   DialogContentText,
@@ -16,36 +16,39 @@ import {
 import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 import SelectAllIcon from "@mui/icons-material/SelectAll";
 import DeselectIcon from "@mui/icons-material/Deselect";
-import { ChannelContext } from "../../../../context/channel/ChannelContext";
-import { DmContext } from "../../../../context/dm/DmContext";
 import ImageToggle from "../ImageToggle/ImageToggle";
 import ExportButtonStyles from "../Styles/ExportButton.styles";
-import { ExportContext } from "../../../../context/export/ExportContext";
 import Progress from "../Progress/Progress";
 import PreviewImageToggle from "../PreviewImageToggle/PreviewImageToggle";
-import ShowAvatarsToggle from "../ShowAvatarsToggle/ShowAvatarsToggle";
 import PerPage from "../PerPage/PerPage";
 import SortDirectionToggle from "../SortDirectionToggle/SortDirectionToggle";
+import { useDispatch, useSelector } from "react-redux";
+import { selectExport } from "../../../../features/export/exportSlice";
+import { selectDm } from "../../../../features/dm/dmSlice";
+import {
+  selectChannel,
+  setSelectedExportChannels,
+} from "../../../../features/channel/channelSlice";
 
 const BulkContent = ({ isDm = false }) => {
   const classes = ExportButtonStyles();
+  const dispatch = useDispatch();
 
-  const { state: exportState } = useContext(ExportContext);
-  const { isExporting } = exportState;
-
-  const { state: dmState } = useContext(DmContext);
-  const { state: channelState, setSelectedExportChannels } =
-    useContext(ChannelContext);
-  const { channels, selectedExportChannels } = channelState;
-  const { selectedDm } = dmState;
+  const { isExporting } = useSelector(selectExport);
+  const { selectedDm } = useSelector(selectDm);
+  const { channels, selectedExportChannels } = useSelector(selectChannel);
 
   const handleChannelSelect = (id) => {
     const isSelected = selectedExportChannels.some((cId) => cId === id);
-    if (isSelected)
-      setSelectedExportChannels([
-        ...selectedExportChannels.filter((cId) => cId !== id),
-      ]);
-    else setSelectedExportChannels([...selectedExportChannels, id]);
+    if (isSelected) {
+      dispatch(
+        setSelectedExportChannels([
+          ...selectedExportChannels.filter((cId) => cId !== id),
+        ])
+      );
+    } else {
+      dispatch(setSelectedExportChannels([...selectedExportChannels, id]));
+    }
   };
 
   return (
@@ -91,7 +94,7 @@ const BulkContent = ({ isDm = false }) => {
               className={classes.dialogBtnStack}
               direction="row"
               justifyContent="space-between"
-              alignItems="flex-start"
+              alignItems="center"
             >
               <Tooltip
                 arrow
@@ -101,10 +104,12 @@ const BulkContent = ({ isDm = false }) => {
               >
                 <IconButton
                   onClick={() =>
-                    setSelectedExportChannels(
-                      selectedExportChannels.length
-                        ? []
-                        : channels.map((c) => c.id)
+                    dispatch(
+                      setSelectedExportChannels(
+                        selectedExportChannels.length
+                          ? []
+                          : channels.map((c) => c.id)
+                      )
                     )
                   }
                   color={
@@ -119,16 +124,22 @@ const BulkContent = ({ isDm = false }) => {
                 </IconButton>
               </Tooltip>
               <Stack
-                className={classes.dialogBtnStack}
-                direction="row"
+                className={classes.exportOptions}
+                direction="column"
                 justifyContent="flex-end"
-                alignItems="center"
                 spacing={1}
+                alignItems="center"
               >
-                <SortDirectionToggle />
-                <ShowAvatarsToggle />
-                <PreviewImageToggle />
-                <ImageToggle />
+                <Typography variant="body2">Export Options</Typography>
+                <Stack
+                  className={classes.dialogBtnStack}
+                  direction="row"
+                  spacing={1}
+                >
+                  <SortDirectionToggle />
+                  <PreviewImageToggle />
+                  <ImageToggle />
+                </Stack>
               </Stack>
             </Stack>
             <Stack
@@ -149,18 +160,26 @@ const BulkContent = ({ isDm = false }) => {
               Exporting messages from <strong>@{selectedDm?.name}</strong>
             </Typography>
           </DialogContentText>
-          <Stack
-            className={classes.dialogBtnStack}
-            direction="row"
-            justifyContent="flex-end"
-            alignItems="center"
-            spacing={1}
-          >
-            <SortDirectionToggle />
-            <ShowAvatarsToggle />
-            <PreviewImageToggle />
-            <ImageToggle />
+          <Stack direction="row" justifyContent="flex-end" mt={1} mb={1}>
+            <Stack
+              className={classes.exportOptions}
+              direction="column"
+              spacing={1}
+              alignItems="center"
+            >
+              <Typography variant="body2">Export Options</Typography>
+              <Stack
+                className={classes.dialogBtnStack}
+                direction="row"
+                spacing={1}
+              >
+                <SortDirectionToggle />
+                <PreviewImageToggle />
+                <ImageToggle />
+              </Stack>
+            </Stack>
           </Stack>
+
           <Stack direction="row" justifyContent="flex-end" alignItems="center">
             <PerPage />
           </Stack>

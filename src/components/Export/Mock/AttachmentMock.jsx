@@ -1,10 +1,11 @@
-import React, { useContext } from "react";
+import React from "react";
 import { IconButton, Stack, Typography } from "@mui/material";
 import ExportStyles from "../Styles/Export.styles";
 import AttachmentStyles from "./Styles/Attachment.styles";
 import DownloadIcon from "@mui/icons-material/Download";
 import bytes from "bytes";
-import { ExportContext } from "../../../context/export/ExportContext";
+import { useSelector } from "react-redux";
+import { selectExport } from "../../../features/export/exportSlice";
 
 const AttachmentMock = ({ attachment }) => {
   const exportClasses = ExportStyles();
@@ -12,8 +13,7 @@ const AttachmentMock = ({ attachment }) => {
     height: attachment?.height,
     width: attachment?.width,
   });
-  const { state: exportState } = useContext(ExportContext);
-  const { previewImages } = exportState;
+  const { previewImages } = useSelector(selectExport);
   const isImg = attachment?.isImage?.();
   const isVid = attachment?.isVideo?.();
 

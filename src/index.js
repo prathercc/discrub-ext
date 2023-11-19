@@ -5,6 +5,8 @@ import App from "./App";
 import DiscrubButton from "./components/DiscrubButton/DiscrubButton";
 import reportWebVitals from "./reportWebVitals";
 import AppTheme from "./AppTheme";
+import store from "./app/store";
+import { Provider } from "react-redux";
 
 const injectionButton = document.getElementById("button_injection");
 if (injectionButton) {
@@ -17,11 +19,21 @@ if (injectionButton) {
 }
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  ReactDOM.render(<App />, rootElement);
+  ReactDOM.render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+    rootElement
+  );
 }
 const injectionDialog = document.getElementById("dialog_injection");
 if (injectionDialog) {
-  ReactDOM.render(<App />, injectionDialog);
+  ReactDOM.render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+    injectionDialog
+  );
 }
 
 // If you want to start measuring performance in your app, pass a function

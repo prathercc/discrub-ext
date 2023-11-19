@@ -1,5 +1,17 @@
 [
   {
+    "version": "1.11.1",
+    "changes": [
+      "Fix bug where Guild Forum searches were not correctly fetching message data.",
+      "Add 'Inverse' toggle to Quick Filters.",
+      "Make the 'Thread' Quick Filter an Autocomplete field and sort options alphabetically.",
+      "Fix an issue where Messages from locked/archived Threads could not be modified or Purged.",
+      "Add support for Guild Emojis.",
+      "Automatically download User Avatars during exports, remove Show Avatar export toggle.",
+      "Add ability to collapse the Channel/Direct Message sections, automatically collapse after clicking 'Search'."
+    ]
+  },
+  {
     "version": "1.11.0",
     "changes": [
       "Add ability to pause message Search, Export, and Purge.",

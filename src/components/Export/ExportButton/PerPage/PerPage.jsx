@@ -1,11 +1,15 @@
-import React, { useContext } from "react";
+import React from "react";
 import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ExportContext } from "../../../../context/export/ExportContext";
 import TextField from "@mui/material/TextField";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectExport,
+  setMessagesPerPage,
+} from "../../../../features/export/exportSlice";
 
 const PerPage = () => {
-  const { state: exportState, setMessagesPerPage } = useContext(ExportContext);
-  const { messagesPerPage, isExporting } = exportState;
+  const dispatch = useDispatch();
+  const { messagesPerPage, isExporting } = useSelector(selectExport);
 
   return (
     <Tooltip
@@ -23,8 +27,8 @@ const PerPage = () => {
         value={messagesPerPage}
         onChange={(e) => {
           const input = parseInt(e.target.value);
-          if (!isNaN(input)) setMessagesPerPage(input);
-          else setMessagesPerPage(null);
+          if (!isNaN(input)) dispatch(setMessagesPerPage(input));
+          else dispatch(setMessagesPerPage(null));
         }}
       />
     </Tooltip>

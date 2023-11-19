@@ -103,6 +103,18 @@ export const fetchChannels = (authorization, guildId) => {
   }).then((resp) => resp.json());
 };
 
+export const editChannel = (authorization, channelId, updateObj) => {
+  return fetch(`${discordChannelsUrl}/${channelId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+    body: JSON.stringify({ ...updateObj }),
+  }).then((resp) => resp.json());
+};
+
 export const editMessage = (authorization, messageId, updateObj, channelId) => {
   return fetch(`${discordChannelsUrl}/${channelId}/messages/${messageId}`, {
     method: "PATCH",
@@ -159,14 +171,14 @@ export const fetchSearchMessageData = (
     selectedHasTypes,
   } = searchCriteria;
   const urlSearchParams = new URLSearchParams({
-    author_id: preFilterUserId,
+    author_id: preFilterUserId || "null",
     min_id: searchAfterDate ? generateSnowflake(searchAfterDate) : null,
     max_id: searchBeforeDate ? generateSnowflake(searchBeforeDate) : null,
     content: searchMessageContent || "null",
     channel_id: guildId && channelId ? channelId : "null",
     include_nsfw: true,
   });
-  selectedHasTypes.forEach((type) => {
+  selectedHasTypes?.forEach((type) => {
     urlSearchParams.append("has", type);
   });
   const nullKeys = [];

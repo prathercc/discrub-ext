@@ -1,13 +1,18 @@
-import React, { useContext } from "react";
+import React from "react";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "../../../DiscordComponents/DiscordTooltip/DiscordToolTip";
-import { ExportContext } from "../../../../context/export/ExportContext";
 import ImageIcon from "@mui/icons-material/Image";
 import HideImageIcon from "@mui/icons-material/HideImage";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectExport,
+  setPreviewImages,
+} from "../../../../features/export/exportSlice";
 
 const PreviewImageToggle = () => {
-  const { state: exportState, setPreviewImages } = useContext(ExportContext);
-  const { previewImages, isExporting } = exportState;
+  const dispatch = useDispatch();
+  const { previewImages, isExporting } = useSelector(selectExport);
+
   return (
     <Tooltip
       arrow
@@ -17,7 +22,7 @@ const PreviewImageToggle = () => {
     >
       <IconButton
         disabled={isExporting}
-        onClick={async () => await setPreviewImages(!previewImages)}
+        onClick={() => dispatch(setPreviewImages(!previewImages))}
         color={previewImages ? "primary" : "secondary"}
       >
         {!previewImages ? <HideImageIcon /> : <ImageIcon />}

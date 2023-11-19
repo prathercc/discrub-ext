@@ -27,17 +27,6 @@ const DiscrubDialogStyles = makeStyles(() => ({
     bottom: "54px",
     left: "268px",
     width: "714px",
-    "& .MuiAlert-root": {
-      backgroundColor: "#2f3136 !important",
-      color: "#d2d5f7 !important",
-      boxShadow: "10px 11px 7px -1px rgba(0,0,0,0.41)",
-    },
-    "& .MuiAlert-icon": {
-      color: "#d0d3f5 !important",
-    },
-    "& .MuiTypography-root": {
-      color: "#d2d5f7 !important",
-    },
   },
   logo: {
     width: "24px",

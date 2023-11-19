@@ -15,16 +15,11 @@ const DirectMessagesStyles = makeStyles(() => ({
     flexDirection: "column",
   },
   tableBox: {
-    maxHeight: ({ showOptionalFilters }) =>
-      `calc(360px - ${showOptionalFilters ? "50px" : "0px"})`,
+    maxHeight: "430px",
     overflow: "auto",
   },
   paper: {
     padding: "10px",
-  },
-  purgeHidden: {
-    opacity: ({ purgeDialogOpen, exportDialogOpen }) =>
-      (purgeDialogOpen || exportDialogOpen) && 0,
   },
   dmField: {
     width: "670px !important",

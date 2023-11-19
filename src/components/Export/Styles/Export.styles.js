@@ -65,14 +65,14 @@ const ExportStyles = makeStyles(() => ({
     color: "#b8b9bf !important",
     overflow: "hidden",
     whiteSpace: "nowrap",
-    "& a": {
-      color: "inherit",
-      textDecoration: "inherit",
-    },
   },
   replyMessageName: {
     color: "#a0a1a4 !important",
     whiteSpace: "nowrap",
+    "& a": {
+      color: "inherit",
+      textDecoration: "inherit",
+    },
   },
   replyDiv: {
     marginLeft: 20,
