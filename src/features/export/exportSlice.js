@@ -111,14 +111,12 @@ const _getDownloadUrl = (entity) => {
 const _downloadAvatarFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
     const { avatarMap } = getState().export;
-    const { id: userId, avatar: avatarId } = message?.author;
+    const { id: userId, avatar: avatarId } = message?.getAuthor();
     const idAndAvatar = `${userId}/${avatarId}`;
 
     try {
-      if (userId && avatarId && !avatarMap[idAndAvatar]) {
-        const blob = await fetch(
-          `https://cdn.discordapp.com/avatars/${idAndAvatar}`
-        ).then((r) => r.blob());
+      if (!avatarMap[idAndAvatar]) {
+        const blob = await fetch(message?.getAvatarUrl()).then((r) => r.blob());
         if (blob.size) {
           const fileExt = blob.type?.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
