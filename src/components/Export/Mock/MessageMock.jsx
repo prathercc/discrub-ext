@@ -7,10 +7,12 @@ import EmbedMock from "./EmbedMock";
 import classNames from "classnames";
 import { format, parseISO } from "date-fns";
 import { selectChannel } from "../../../features/channel/channelSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectGuild } from "../../../features/guild/guildSlice";
 import { selectMessage } from "../../../features/message/messageSlice";
 import { selectThread } from "../../../features/thread/threadSlice";
+import { getFormattedInnerHtml } from "../../../features/export/exportSlice";
+import { getTimeZone } from "../../../utils";
 import { renderToString } from "react-dom/server";
 import MessageMockStyles from "./Styles/MessageMock.styles";
 import {
@@ -19,14 +21,13 @@ import {
 } from "../../../features/export/exportSlice";
 
 const MessageMock = ({ message, index, hideAttachments = false }) => {
+  const dispatch = useDispatch();
   const { selectedGuild } = useSelector(selectGuild);
   const { selectedChannel, channels } = useSelector(selectChannel);
   const { threads } = useSelector(selectThread);
   const { messages } = useSelector(selectMessage);
-  const { emojiMap } = useSelector(selectExport);
 
   const classes = ExportStyles();
-  const messageMockClasses = MessageMockStyles();
   const messageDate = parseISO(message.timestamp, new Date());
   const tz = getTimeZone(messageDate);
   const foundThread = threads?.find(
@@ -38,59 +39,18 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
 
   const showChannelName = selectedGuild.id && !selectedChannel.id;
 
-  const getEmoji = (
-    { name: parsedEmojiName, id: parsedEmojiId },
-    smallEmoji
-  ) => {
-    let emojiUrl = `https://cdn.discordapp.com/emojis/${parsedEmojiId}`;
-    if (emojiMap && emojiMap[parsedEmojiId] && !hideAttachments) {
-      emojiUrl = `../${emojiMap[parsedEmojiId]}`;
-    }
-
-    return (
-      <span className={messageMockClasses.emojiBox}>
-        <img
-          id={parsedEmojiName}
-          src={`${emojiUrl}`}
-          alt={parsedEmojiName}
-          className={classNames({
-            [messageMockClasses.emojiImgDefault]: !smallEmoji,
-            [messageMockClasses.emojiImgSmall]: smallEmoji,
-          })}
-        />
-        {!smallEmoji && (
-          <span className={messageMockClasses.emojiTooltip}>
-            {parsedEmojiName}
-          </span>
-        )}
-      </span>
+  const getMessageContent = (content, id, isReply = false) => {
+    let rawHtml = dispatch(
+      getFormattedInnerHtml(content, isReply, !hideAttachments)
     );
-  };
-
-  const getMessageContent = (content, id, smallEmoji = false) => {
-    const emojiReferences = getEmojiReferences(content);
-    let rawHtml = content;
-    if (emojiReferences.length) {
-      emojiReferences.forEach((emojiRef) => {
-        rawHtml = rawHtml.replaceAll(
-          emojiRef.raw,
-          renderToString(getEmoji(emojiRef, smallEmoji))
-        );
-      });
-    }
-
     return (
       <Typography
         id={id}
-        variant={smallEmoji ? "caption" : "body1"}
-        className={classNames({
-          [classes.typographyMessageText]: !smallEmoji,
-          [classes.replyMessageText]: smallEmoji,
+        variant={isReply ? "caption" : "body1"}
+        className={classNames(classes.messageContent, {
+          [classes.typographyMessageText]: !isReply,
+          [classes.replyMessageText]: isReply,
         })}
-        sx={{
-          display: "flex",
-          gap: "5px",
-        }}
         dangerouslySetInnerHTML={{ __html: rawHtml }}
       />
     );

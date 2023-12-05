@@ -7,6 +7,8 @@ const ExportStyles = makeStyles(() => ({
   },
   typographyTitle: {
     color: "#fff !important",
+    display: "flex",
+    gap: "5px",
   },
   channelName: {
     textDecoration: "underline",
@@ -15,8 +17,24 @@ const ExportStyles = makeStyles(() => ({
   typographyHash: {
     color: "#8e9297 !important",
   },
+  botTag: {
+    backgroundColor: "#5865f2",
+    borderRadius: "5px",
+    display: "inline-flex",
+    fontSize: "10px",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "16px",
+    width: "38px",
+    gap: "2px",
+    wordBreak: "keep-all",
+    "& svg": {
+      width: "12px !important",
+    },
+  },
   typographyMessageText: {
     color: "#DCDDDE !important",
+    whiteSpace: "pre-line",
   },
   messagesStack: {
     marginTop: "55px",
@@ -89,6 +107,9 @@ const ExportStyles = makeStyles(() => ({
       padding: "5px",
       width: "calc(100% - 10px)",
     },
+  },
+  messageContent: {
+    display: "block",
   },
 }));
 

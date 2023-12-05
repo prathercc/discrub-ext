@@ -8,6 +8,9 @@ import {
   getDiscrubCancelled,
   setDiscrubCancelled,
 } from "../app/appSlice";
+import { renderToString } from "react-dom/server";
+import ExportSliceStyles from "./styles/ExportSliceStyles";
+import classNames from "classnames";
 
 export const exportSlice = createSlice({
   name: "export",
@@ -131,8 +134,8 @@ const _downloadAvatarFromMessage =
     }
   };
 
-export const getEmojiReferences = (content) => {
-  const emojiRegex = /<a:[A-Za-z0-9]+:[0-9]+>|<:[A-Za-z0-9]+:[0-9]+>/g;
+const _getEmojiReferences = (content) => {
+  const emojiRegex = /<a:[^<>]+:[0-9]+>|<:[^<>]+:[0-9]+>/g;
   return (
     content.match(emojiRegex)?.map((emojiRef) => ({
       raw: emojiRef,
@@ -142,9 +145,179 @@ export const getEmojiReferences = (content) => {
   );
 };
 
+/**
+ *
+ * @param {String} content String content to parse bold and link formatting
+ * @returns An Object of special formatting
+ */
+const _getSpecialFormatting = (content) => {
+  const boldRegex = /\*\*(?<text>.*)(?=(\*\*))\*\*/g;
+  const linkRegex =
+    /(?:(?<name>\[[^\]]+\])(?<url>\([^ )]+)?(?<description>[^[]*(?=(?:'|")\))'\))?)/g;
+  const backTickRegex = /`([^`]*)`/g;
+  const channelRegex = /<#(?<channel_id>\d+)>/g;
+
+  return {
+    channel: Array.from(content.matchAll(channelRegex))?.map(
+      ({ 0: channelRef, groups: channelGroups }) => {
+        return { channelId: channelGroups?.channel_id, raw: channelRef };
+      }
+    ),
+    bold: Array.from(content.matchAll(boldRegex))?.map(
+      ({ 0: boldRef, groups: boldGroups }) => {
+        return { text: boldGroups?.text || "", raw: boldRef };
+      }
+    ),
+    link: Array.from(content.matchAll(linkRegex))?.map(
+      ({ 0: linkRef, groups: linkGroups }) => {
+        const rawUrl = linkGroups?.url || null;
+        const rawText = linkGroups?.name || null;
+        const rawDescription = linkGroups?.description?.trim() || null;
+        return {
+          url: rawUrl ? rawUrl.slice(1) : "",
+          text: rawText ? rawText?.slice(1, rawText.length - 1) : "",
+          description: rawDescription
+            ? rawDescription?.slice(1, rawDescription.length - 2)
+            : "",
+          raw: `${linkRef}${rawDescription ? "" : ")"}`,
+        };
+      }
+    ),
+    backTick: content.match(backTickRegex)?.map((backTickRef) => ({
+      text: backTickRef.split("`")[1],
+      raw: backTickRef,
+    })),
+  };
+};
+
+const _getEmoji =
+  ({ name, id }, isReply, exportView) =>
+  (dispatch, getState) => {
+    const { emojiMap } = getState().export;
+    const classes = ExportSliceStyles();
+    let emojiUrl = `https://cdn.discordapp.com/emojis/${id}`;
+    if (emojiMap && emojiMap[id] && exportView) {
+      emojiUrl = `../${emojiMap[id]}`;
+    }
+
+    return (
+      <img
+        title={!isReply ? name : null}
+        id={name}
+        src={`${emojiUrl}`}
+        alt={name}
+        className={classNames(classes.emoji, {
+          [classes.emojiImgDefault]: !isReply,
+          [classes.emojiImgSmall]: isReply,
+        })}
+      />
+    );
+  };
+
+/**
+ *
+ * @param {String} content String content to get formatted html from
+ * @returns Html in String format
+ */
+export const getFormattedInnerHtml =
+  (content, isReply = false, exportView = false) =>
+  (dispatch, getState) => {
+    let rawHtml = content;
+
+    const emoji = _getEmojiReferences(rawHtml);
+    if (emoji.length) {
+      emoji.forEach((emojiRef) => {
+        rawHtml = rawHtml.replaceAll(
+          emojiRef.raw,
+          renderToString(dispatch(_getEmoji(emojiRef, isReply, exportView)))
+        );
+      });
+    }
+
+    const { link } = _getSpecialFormatting(rawHtml);
+    if (link?.length) {
+      link.forEach((linkRef) => {
+        rawHtml = rawHtml.replaceAll(
+          linkRef.raw,
+          renderToString(
+            <a
+              style={{
+                textDecoration: "none",
+                color: "rgb(0, 168, 252)",
+                cursor: "pointer !important",
+              }}
+              href={linkRef.url}
+              target="_blank"
+              alt={"link-to"}
+              rel="noreferrer"
+              title={linkRef.description}
+              dangerouslySetInnerHTML={{ __html: linkRef.text }}
+            />
+          )
+        );
+      });
+    }
+
+    const { bold } = _getSpecialFormatting(rawHtml);
+    if (bold?.length) {
+      bold.forEach((boldRef) => {
+        rawHtml = rawHtml.replaceAll(
+          boldRef.raw,
+          renderToString(
+            <strong dangerouslySetInnerHTML={{ __html: boldRef.text }} />
+          )
+        );
+      });
+    }
+
+    const { backTick } = _getSpecialFormatting(rawHtml);
+    if (backTick?.length) {
+      backTick.forEach((backTickRef) => {
+        rawHtml = rawHtml.replaceAll(
+          backTickRef.raw,
+          renderToString(
+            <span
+              style={{
+                backgroundColor: "#242529",
+                borderRadius: 5,
+                padding: "3px",
+              }}
+              dangerouslySetInnerHTML={{ __html: backTickRef.text }}
+            />
+          )
+        );
+      });
+    }
+
+    const { channel } = _getSpecialFormatting(rawHtml);
+    if (channel?.length) {
+      channel.forEach((channelRef) => {
+        const { channels } = getState().channel;
+        const channelName =
+          channels.find((c) => c.id === channelRef.channelId)?.name ||
+          "Channel Not Found";
+        rawHtml = rawHtml.replaceAll(
+          channelRef.raw,
+          renderToString(
+            <span
+              style={{
+                backgroundColor: "#3c4270",
+                padding: "0 2px",
+                borderRadius: "5px",
+              }}
+              dangerouslySetInnerHTML={{ __html: `# ${channelName}` }}
+            />
+          )
+        );
+      });
+    }
+
+    return rawHtml;
+};
+
 const _downloadEmojisFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
-    const emojiReferences = getEmojiReferences(message.content);
+    const emojiReferences = _getEmojiReferences(message.content);
 
     for (let count = 0; count < emojiReferences.length; count += 1) {
       if (dispatch(getDiscrubCancelled())) break;
