@@ -26,3 +26,14 @@ export const wait = async (seconds, callback = () => {}) => {
   await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   return callback();
 };
+
+/**
+ *
+ * @param {Date} date Date object to retrieve timezone from
+ * @returns Timezone as String
+ */
+export const getTimeZone = (date = new Date()) => {
+  return date
+    .toLocaleTimeString(undefined, { timeZoneName: "short" })
+    .split(" ")[2];
+};

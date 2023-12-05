@@ -28,9 +28,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
   const classes = ExportStyles();
   const messageMockClasses = MessageMockStyles();
   const messageDate = parseISO(message.timestamp, new Date());
-  const tz = messageDate
-    .toLocaleTimeString(undefined, { timeZoneName: "short" })
-    .split(" ")[2];
+  const tz = getTimeZone(messageDate);
   const foundThread = threads?.find(
     (thread) => thread.id === message.id || thread.id === message.channel_id
   );
