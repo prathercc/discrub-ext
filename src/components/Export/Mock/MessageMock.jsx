@@ -116,7 +116,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
         >
           <AuthorAvatar
             hideAttachments={hideAttachments}
-            author={repliedToMsg.author}
+            message={repliedToMsg}
             reply
           />
           <Typography className={classes.replyMessageName} variant="caption">

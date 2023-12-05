@@ -118,7 +118,7 @@ const DeleteModal = ({ open, handleClose }) => {
             <>
               <Box my={1} className={classes.box}>
                 <MessageChip
-                  avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
+                  avatar={entity?.getAvatarUrl()}
                   username={entity.username}
                   content={entity.content}
                 />

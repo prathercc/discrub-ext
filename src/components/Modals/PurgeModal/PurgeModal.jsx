@@ -164,7 +164,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
                   spacing={2}
                 >
                   <MessageChip
-                    avatar={`https://cdn.discordapp.com/avatars/${entity?.author?.id}/${entity?.author?.avatar}.png`}
+                    avatar={entity?.getAvatarUrl()}
                     username={entity?.username}
                     content={entity?.content}
                   />
