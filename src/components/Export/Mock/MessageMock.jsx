@@ -13,12 +13,7 @@ import { selectMessage } from "../../../features/message/messageSlice";
 import { selectThread } from "../../../features/thread/threadSlice";
 import { getFormattedInnerHtml } from "../../../features/export/exportSlice";
 import { getTimeZone } from "../../../utils";
-import { renderToString } from "react-dom/server";
-import MessageMockStyles from "./Styles/MessageMock.styles";
-import {
-  getEmojiReferences,
-  selectExport,
-} from "../../../features/export/exportSlice";
+import CheckIcon from "@mui/icons-material/Check";
 
 const MessageMock = ({ message, index, hideAttachments = false }) => {
   const dispatch = useDispatch();
@@ -131,6 +126,14 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
     );
   };
 
+  const getBotTag = () => {
+    return (
+      <span className={classes.botTag}>
+        <CheckIcon /> BOT
+      </span>
+    );
+  };
+
   return (
     <Stack
       direction="column"
@@ -161,6 +164,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
           >
             <Typography className={classes.typographyTitle} variant="body2">
               <strong>{message.username}</strong>
+              {message.getAuthor()?.isBot() && getBotTag()}
             </Typography>
             <Typography
               mt="1px"
