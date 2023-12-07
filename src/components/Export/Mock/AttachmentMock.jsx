@@ -13,23 +13,18 @@ const AttachmentMock = ({ attachment }) => {
     height: attachment?.height,
     width: attachment?.width,
   });
-  const { previewImages } = useSelector(selectExport);
+  const { previewImages, mediaMap } = useSelector(selectExport);
   const isImg = attachment?.isImage?.();
   const isVid = attachment?.isVideo?.();
+  const url = attachment.isMedia()
+    ? mediaMap[attachment.getMediaUrl()] || attachment.getMediaUrl()
+    : attachment.getNonMediaUrl();
 
   return (
     <Stack direction="column" justifyContent="center" alignItems="flex-start">
-      {isImg && previewImages && (attachment.local_url || attachment.url) && (
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          href={attachment.local_url || attachment.url}
-        >
-          <img
-            className={classes.attachmentImg}
-            src={attachment.local_url || attachment.url}
-            alt="attachment"
-          />
+      {isImg && previewImages && url && (
+        <a target="_blank" rel="noopener noreferrer" href={url}>
+          <img className={classes.attachmentImg} src={url} alt="attachment" />
         </a>
       )}
       {previewImages && isVid && (
@@ -37,11 +32,13 @@ const AttachmentMock = ({ attachment }) => {
           className={classes.video}
           width={attachment.width > 400 ? 400 : attachment.width}
           height={attachment.height > 225 ? 225 : attachment.height}
-          src={attachment.local_url || attachment.proxy_url}
+          src={url}
           controls
           playsinline
           autoPlay={false}
-          poster={attachment.local_url ? null : "discrub2.png"}
+          poster={
+            Boolean(mediaMap[attachment.getMediaUrl()]) ? null : "discrub2.png"
+          }
         />
       )}
       {((!isVid && !isImg) || !previewImages) && (
@@ -51,11 +48,7 @@ const AttachmentMock = ({ attachment }) => {
           justifyContent="flex-start"
           alignItems="center"
         >
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href={attachment.local_url || attachment.url}
-          >
+          <a target="_blank" rel="noopener noreferrer" href={url}>
             <IconButton>
               <DownloadIcon className={exportClasses.typographyHash} />
             </IconButton>
@@ -69,7 +62,7 @@ const AttachmentMock = ({ attachment }) => {
               className={exportClasses.typographyHash}
               variant="body2"
             >
-              {attachment.filename || attachment.url}
+              {attachment.filename || url}
             </Typography>
             <Typography
               className={exportClasses.messageAttachmentSize}

@@ -14,6 +14,7 @@ import { selectThread } from "../../../features/thread/threadSlice";
 import { getFormattedInnerHtml } from "../../../features/export/exportSlice";
 import { getTimeZone } from "../../../utils";
 import CheckIcon from "@mui/icons-material/Check";
+import WebhookEmbedMock from "./WebhookEmbedMock";
 
 const MessageMock = ({ message, index, browserView = false }) => {
   const dispatch = useDispatch();
@@ -116,11 +117,28 @@ const MessageMock = ({ message, index, browserView = false }) => {
         alignItems="flex-start"
         spacing={1}
       >
-        {message.attachments.map((attachment) => (
+        {message.getAttachments().map((attachment) => (
           <AttachmentMock attachment={attachment} />
         ))}
-        {message.embeds.map((embed, index) => (
+        {message.getEmbeds().map((embed, index) => (
           <EmbedMock embed={embed} index={index} />
+        ))}
+      </Stack>
+    );
+  };
+
+  const getRichEmbeds = () => {
+    return (
+      <Stack
+        sx={{ maxWidth: "600px" }}
+        mt="5px"
+        direction="column"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+        spacing={1}
+      >
+        {message?.getRichEmbeds().map((embed) => (
+          <WebhookEmbedMock alwaysExpanded={true} embed={embed} />
         ))}
       </Stack>
     );
@@ -181,6 +199,7 @@ const MessageMock = ({ message, index, browserView = false }) => {
           {foundThread && getThread()}
           {getMessageContent(message.content, `message-data-${index}`)}
           {!browserView && getAttachments()}
+          {!browserView && getRichEmbeds()}
         </Stack>
       </Stack>
     </Stack>

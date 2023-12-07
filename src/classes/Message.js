@@ -69,5 +69,13 @@ class Message {
   getEmbeds() {
     return this.embeds || [];
   }
+
+  getAttachments() {
+    return this.attachments || [];
+  }
+
+  getRichEmbeds() {
+    return this.getEmbeds().filter((embed) => embed.type === "rich");
+  }
 }
 export default Message;

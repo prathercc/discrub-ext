@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getMessageData, resetMessageData } from "../message/messageSlice";
 import { v4 as uuidv4 } from "uuid";
-import { sortByProperty, wait } from "../../utils";
+import { getPercent, sortByProperty, wait } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channelSlice";
 import {
   checkDiscrubPaused,
@@ -18,6 +18,7 @@ export const exportSlice = createSlice({
     isExporting: false,
     downloadImages: false,
     previewImages: false,
+    downloadFiles: false, // Discord does not currently allow us to download non-media attachments cross-origin.
     name: "",
     statusText: "",
     isGenerating: false,
@@ -26,6 +27,8 @@ export const exportSlice = createSlice({
     sortOverride: "desc",
     emojiMap: {},
     avatarMap: {},
+    mediaMap: {},
+    nonMediaMap: {},
   },
   reducers: {
     setSortOverride: (state, { payload }) => {
@@ -49,6 +52,9 @@ export const exportSlice = createSlice({
     setDownloadImages: (state, { payload }) => {
       state.downloadImages = payload;
     },
+    setDownloadFiles: (state, { payload }) => {
+      state.downloadFiles = payload;
+    },
     setName: (state, { payload }) => {
       state.name = payload;
     },
@@ -56,6 +62,7 @@ export const exportSlice = createSlice({
       state.statusText = payload;
     },
     resetExportSettings: (state, { payload }) => {
+      state.downloadFiles = false;
       state.downloadImages = false;
       state.previewImages = false;
       state.sortOverride = "desc";
@@ -73,6 +80,18 @@ export const exportSlice = createSlice({
     resetAvatarMap: (state, { payload }) => {
       state.avatarMap = {};
     },
+    setMediaMap: (state, { payload }) => {
+      state.mediaMap = payload;
+    },
+    resetMediaMap: (state, { payload }) => {
+      state.mediaMap = {};
+    },
+    setNonMediaMap: (state, { payload }) => {
+      state.mediaMap = payload;
+    },
+    resetNonMediaMap: (state, { payload }) => {
+      state.nonMediaMap = {};
+    },
   },
 });
 
@@ -84,6 +103,7 @@ export const {
   setIsExporting,
   setPreviewImages,
   setDownloadImages,
+  setDownloadFiles,
   setName,
   setStatusText,
   resetExportSettings,
@@ -91,25 +111,61 @@ export const {
   resetEmojiMap,
   setAvatarMap,
   resetAvatarMap,
+  setMediaMap,
+  resetMediaMap,
+  setNonMediaMap,
+  resetNonMediaMap,
 } = exportSlice.actions;
 
-/**
- *
- * @param Object An Attachment/Embed object
- * @returns The download URL for the given entity
- */
-const _getDownloadUrl = (entity) => {
-  switch (entity.type) {
-    case "gifv":
-      return entity.video.proxy_url;
-    case "image":
-      return entity.thumbnail.proxy_url;
-    case "video":
-      return null; // We do not want to download video embeds
-    default:
-      return entity.proxy_url;
-  }
-};
+const _downloadFilesFromMessage =
+  (message, exportUtils, paths = { media: null, non_media: null }) =>
+  async (dispatch, getState) => {
+    const { downloadImages, downloadFiles } = getState().export;
+    let embeds = message.getEmbeds();
+    let attachments = message.getAttachments();
+    if (!downloadImages) {
+      embeds = [];
+      attachments = attachments.filter((attachment) => !attachment.isMedia());
+    }
+    if (!downloadFiles) {
+      attachments = attachments.filter((attachment) => attachment.isMedia());
+    }
+
+    const { media: mediaPath, non_media: nonMediaPath } = paths;
+
+    for (const entity of [...embeds, ...attachments]) {
+      const setMap = entity.isMedia() ? setMediaMap : setNonMediaMap;
+      const path = entity.isMedia() ? mediaPath : nonMediaPath;
+      const downloadUrls = entity.isMedia()
+        ? entity.getMediaDownloadUrls()
+        : [entity.getNonMediaUrl()].filter(Boolean);
+
+      for (const downloadUrl of downloadUrls) {
+        if (dispatch(getDiscrubCancelled())) break;
+        await dispatch(checkDiscrubPaused());
+        const { mediaMap, nonMediaMap } = getState().export;
+        const map = entity.isMedia() ? mediaMap : nonMediaMap;
+        try {
+          if (!Boolean(map[downloadUrl])) {
+            const blob = await fetch(downloadUrl).then((r) => r.blob());
+            if (blob.size) {
+              const blobType = blob.type?.split("/")?.[1];
+              const fileName = entity.getExportFileName(blobType);
+              await exportUtils.addToZip(blob, `${path}/${fileName}`);
+              dispatch(
+                setMap({
+                  ...map,
+                  [downloadUrl]: `${path.split("/")[1]}/${fileName}`,
+                })
+              );
+            }
+          }
+        } catch (e) {
+          console.error(`Failed to download from: ${downloadUrl}`, e, message);
+        }
+      }
+    }
+  };
 
 const _downloadAvatarFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
@@ -154,8 +210,13 @@ const _getSpecialFormatting = (content) => {
   const boldRegex = /\*\*(?<text>.*)(?=(\*\*))\*\*/g;
   const linkRegex =
     /(?:(?<name>\[[^\]]+\])(?<url>\([^ )]+)?(?<description>[^[]*(?=(?:'|")\))'\))?)/g;
-  const backTickRegex = /`([^`]*)`/g;
+  const backTickRegex = /`([^`]*)`/g; // This is quote
   const channelRegex = /<#(?<channel_id>\d+)>/g;
+  const hyperLinkRegex = /(^|\s)(http(s)?:\/\/)+[^\s]+(?=[\s])?/g;
+  // TODO: Parse User mentions here, remove parseMentions
+  // TODO: Parse italics here: _TEXT_
+  // TODO: Parse underlines here: __TEXT__
+  // TODO: Parse code: ```TEXT```
 
   return {
     channel: Array.from(content.matchAll(channelRegex))?.map(
@@ -165,7 +226,10 @@ const _getSpecialFormatting = (content) => {
     ),
     bold: Array.from(content.matchAll(boldRegex))?.map(
       ({ 0: boldRef, groups: boldGroups }) => {
-        return { text: boldGroups?.text || "", raw: boldRef };
+        return {
+          text: boldGroups?.text?.replaceAll("**", "") || "",
+          raw: boldRef,
+        };
       }
     ),
     link: Array.from(content.matchAll(linkRegex))?.map(
@@ -184,8 +248,11 @@ const _getSpecialFormatting = (content) => {
       }
     ),
     backTick: content.match(backTickRegex)?.map((backTickRef) => ({
-      text: backTickRef.split("`")[1],
+      text: backTickRef?.split("`")[1],
       raw: backTickRef,
+    })),
+    hyperLink: content.match(hyperLinkRegex)?.map((hyperLinkRef) => ({
+      raw: hyperLinkRef?.trim(),
     })),
   };
 };
@@ -222,7 +289,7 @@ const _getEmoji =
 export const getFormattedInnerHtml =
   (content, isReply = false, exportView = false) =>
   (dispatch, getState) => {
-    let rawHtml = content;
+    let rawHtml = content || "";
 
     const emoji = _getEmojiReferences(rawHtml);
     if (emoji.length) {
@@ -252,6 +319,30 @@ export const getFormattedInnerHtml =
               rel="noreferrer"
               title={linkRef.description}
               dangerouslySetInnerHTML={{ __html: linkRef.text }}
+            />
+          )
+        );
+      });
+    }
+
+    const { hyperLink } = _getSpecialFormatting(rawHtml);
+    if (hyperLink?.length) {
+      hyperLink.forEach((hyperLinkRef) => {
+        rawHtml = rawHtml.replaceAll(
+          hyperLinkRef.raw,
+          renderToString(
+            <a
+              style={{
+                textDecoration: "none",
+                color: "rgb(0, 168, 252)",
+                cursor: "pointer !important",
+              }}
+              href={hyperLinkRef.raw}
+              target="_blank"
+              alt={"link-to"}
+              rel="noreferrer"
+              title={hyperLinkRef.raw}
+              dangerouslySetInnerHTML={{ __html: hyperLinkRef.raw }}
             />
           )
         );
@@ -313,7 +404,7 @@ export const getFormattedInnerHtml =
     }
 
     return rawHtml;
-};
+  };
 
 const _downloadEmojisFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
@@ -349,136 +440,49 @@ const _downloadEmojisFromMessage =
     }
   };
 
-const _downloadCollection =
-  (
-    collection = [],
-    collectionName = "",
-    message = {},
-    imgPath = "",
-    exportUtils
-  ) =>
-  async (dispatch, getState) => {
-    for (let c2 = 0; c2 < collection.length; c2 += 1) {
-      if (dispatch(getDiscrubCancelled())) break;
-      await dispatch(checkDiscrubPaused());
-      try {
-        const entity = message[collectionName][c2];
-        const downloadUrl = _getDownloadUrl(entity);
-        if (downloadUrl) {
-          const blob = await fetch(downloadUrl).then((r) => r.blob());
-          if (blob.size) {
-            // TODO: We really should create Embed/Attachment getFileName functions instead of doing this
-            let cleanFileName;
-            if (entity.filename) {
-              const fNameSplit = entity.filename.split(".");
-              const fileExt = fNameSplit.pop();
-              cleanFileName = `${fNameSplit.join(".")}_${uuidv4()}.${fileExt}`;
-            } else {
-              const blobType = blob.type?.split("/")?.[1];
-              cleanFileName = `${
-                entity.title ? `${entity.title}_` : ""
-              }${uuidv4()}.${blobType}`;
-            }
-            await exportUtils.addToZip(blob, `${imgPath}/${cleanFileName}`);
-
-            message[collectionName][c2] = Object.assign(
-              message[collectionName][c2],
-              { local_url: `${imgPath.split("/")[1]}/${cleanFileName}` }
-            );
-          }
-        }
-      } catch (e) {
-        console.error(
-          `Failed to download media from ${collectionName}`,
-          e,
-          collection?.[c2]
-        );
-      }
-    }
-  };
-
 const _processMessages =
-  (messages, imgPath, exportUtils) => async (dispatch, getState) => {
-    const processMessage = async (message) => {
-      let updatedMessage = message;
-      if (imgPath) {
-        await dispatch(
-          _downloadCollection(
-            updatedMessage.attachments,
-            "attachments",
-            updatedMessage,
-            imgPath,
-            exportUtils
-          )
-        );
-        await dispatch(
-          _downloadCollection(
-            updatedMessage.embeds,
-            "embeds",
-            updatedMessage,
-            imgPath,
-            exportUtils
-          )
-        );
-      } else {
-        updatedMessage.attachments = updatedMessage.attachments?.map(
-          (attachment) => ({ ...attachment, local_url: null })
-        );
-      }
-      await dispatch(_downloadEmojisFromMessage(message, exportUtils));
-      await dispatch(_downloadAvatarFromMessage(message, exportUtils));
-      return updatedMessage;
-    };
-    const retArr = [];
-    for (let c1 = 0; c1 < messages.length; c1 += 1) {
-      if (c1 === 0) {
-        await wait(3);
-      }
+  (messages, paths, exportUtils) => async (dispatch, getState) => {
+    for (const [i, msg] of messages.entries()) {
+      await wait(!Boolean(i) ? 3 : 0);
+
       if (dispatch(getDiscrubCancelled())) break;
       await dispatch(checkDiscrubPaused());
-      retArr.push(await processMessage(messages[c1]));
-      if (c1 % 100 === 0) {
-        dispatch(
-          setStatusText(
-            `Processing - ${
-              ((c1 / messages.length) * 100).toString().split(".")[0]
-            }%`
-          )
-        );
+
+      await dispatch(_downloadFilesFromMessage(msg, exportUtils, paths));
+      await dispatch(_downloadEmojisFromMessage(msg, exportUtils));
+      await dispatch(_downloadAvatarFromMessage(msg, exportUtils));
+
+      if (i % 100 === 0) {
+        const percent = getPercent(i, messages.length);
+        dispatch(setStatusText(`Processing - ${percent}%`));
         await wait(0.1);
       }
     }
-
-    return retArr;
   };
 
 const _compressMessages =
-  (
-    updatedMessages,
-    format,
-    entityName,
-    entityMainDirectory,
-    bulk,
-    exportUtils
-  ) =>
+  (messages, format, entityName, entityMainDirectory, bulk, exportUtils) =>
   async (dispatch, getState) => {
     const { sortOverride, messagesPerPage } = getState().export;
+
+    // TODO: Combine the setStatusText and wait calls within exportSlice.
     dispatch(
       setStatusText(
         `Compressing${
-          updatedMessages.length > 2000 ? " - This may take a while..." : ""
+          messages.length > 2000 ? " - This may take a while..." : ""
         }`
       )
     );
     await wait(5);
 
-    if (format === "json")
+    // TODO: Break this up into two new private functions.
+    if (format === "json") {
       return await exportUtils.addToZip(
         new Blob(
           [
             JSON.stringify(
               bulk
-                ? updatedMessages.toSorted((a, b) =>
+                ? messages.toSorted((a, b) =>
                     sortByProperty(
                       Object.assign(a, { date: new Date(a.timestamp) }),
                       Object.assign(b, { date: new Date(b.timestamp) }),
@@ -486,7 +490,7 @@ const _compressMessages =
                       sortOverride
                     )
                   )
-                : updatedMessages
+                : messages
             ),
           ],
           {
@@ -495,10 +499,10 @@ const _compressMessages =
         ),
         `${entityMainDirectory}/${entityName}.json`
       );
-    else {
+    } else {
       const totalPages =
-        updatedMessages.length > messagesPerPage
-          ? Math.ceil(updatedMessages.length / messagesPerPage)
+        messages.length > messagesPerPage
+          ? Math.ceil(messages.length / messagesPerPage)
           : 1;
       while (
         getState().export.currentPage <= totalPages &&
@@ -513,7 +517,7 @@ const _compressMessages =
         const startIndex =
           currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
         exportUtils.setExportMessages(
-          updatedMessages?.slice(startIndex, startIndex + messagesPerPage)
+          messages?.slice(startIndex, startIndex + messagesPerPage)
         );
         const htmlBlob = await exportUtils.generateHTML();
         await exportUtils.addToZip(
@@ -529,25 +533,23 @@ const _compressMessages =
 export const exportMessages =
   (selectedChannels, exportUtils, bulk = false, format = "json") =>
   async (dispatch, getState) => {
-    let count = 0;
     const { messages: contextMessages, filteredMessages } = getState().message;
     const { selectedGuild } = getState().guild;
-    const { messagesPerPage, downloadImages } = getState().export;
+    const { messagesPerPage } = getState().export;
     const { preFilterUserId } = getState().channel;
     const { preFilterUserId: dmPreFilterUserId } = getState().dm;
 
-    while (
-      count < selectedChannels.length &&
-      !dispatch(getDiscrubCancelled())
-    ) {
+    for (const entity of selectedChannels) {
+      if (dispatch(getDiscrubCancelled())) break;
       dispatch(setStatusText(null));
-      const entity = selectedChannels[count];
       const entityMainDirectory = `${entity.name}_${uuidv4()}`;
       dispatch(setIsExporting(true));
       dispatch(setName(entity.name));
       if (bulk && !entity.isDm()) {
         dispatch(setChannel(entity.id));
       }
+
+      // TODO: Refactor this.
       const { messages } = bulk
         ? await dispatch(
             getMessageData(
@@ -561,24 +563,23 @@ export const exportMessages =
               ? filteredMessages
               : contextMessages,
           };
+      //
 
-      const imgPath = downloadImages
-        ? `${entityMainDirectory}/${entity.name}_images`
-        : null;
+      const mediaPath = `${entityMainDirectory}/${entity.name}_media`;
+      const nonMediaPath = `${entityMainDirectory}/${entity.name}_non_media`;
+      const paths = { media: mediaPath, non_media: nonMediaPath };
 
-      const updatedMessages = await dispatch(
-        _processMessages(messages, imgPath, exportUtils)
-      );
+      await dispatch(_processMessages(messages, paths, exportUtils));
 
       if (messagesPerPage === null || messagesPerPage === 0)
-        await dispatch(setMessagesPerPage(updatedMessages.length));
+        await dispatch(setMessagesPerPage(messages.length));
 
-      if (updatedMessages.length > 0) {
+      if (messages.length > 0) {
         if (dispatch(getDiscrubCancelled())) break;
         await dispatch(checkDiscrubPaused());
         await dispatch(
           _compressMessages(
-            updatedMessages,
+            messages,
             format,
             entity.name,
             entityMainDirectory,
@@ -588,7 +589,6 @@ export const exportMessages =
         );
       }
 
-      count += 1;
       if (dispatch(getDiscrubCancelled())) break;
       await dispatch(checkDiscrubPaused());
     }
@@ -615,6 +615,8 @@ export const exportMessages =
     dispatch(setDiscrubCancelled(false));
     dispatch(resetEmojiMap());
     dispatch(resetAvatarMap());
+    dispatch(resetMediaMap());
+    dispatch(resetNonMediaMap());
   };
 
 export const selectExport = (state) => state.export;
