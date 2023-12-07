@@ -37,3 +37,13 @@ export const getTimeZone = (date = new Date()) => {
     .toLocaleTimeString(undefined, { timeZoneName: "short" })
     .split(" ")[2];
 };
+
+/**
+ *
+ * @param {Number} index The index to check the percentage of
+ * @param {Number} total The total number that to check the percentage from
+ * @returns
+ */
+export const getPercent = (index, total) => {
+  return ((index / total) * 100).toString().split(".")[0];
+};

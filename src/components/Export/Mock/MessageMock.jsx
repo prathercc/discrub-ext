@@ -15,7 +15,7 @@ import { getFormattedInnerHtml } from "../../../features/export/exportSlice";
 import { getTimeZone } from "../../../utils";
 import CheckIcon from "@mui/icons-material/Check";
 
-const MessageMock = ({ message, index, hideAttachments = false }) => {
+const MessageMock = ({ message, index, browserView = false }) => {
   const dispatch = useDispatch();
   const { selectedGuild } = useSelector(selectGuild);
   const { selectedChannel, channels } = useSelector(selectChannel);
@@ -36,7 +36,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
 
   const getMessageContent = (content, id, isReply = false) => {
     let rawHtml = dispatch(
-      getFormattedInnerHtml(content, isReply, !hideAttachments)
+      getFormattedInnerHtml(content, isReply, !browserView)
     );
     return (
       <Typography
@@ -68,12 +68,12 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
           sx={{ maxWidth: 600 }}
         >
           <AuthorAvatar
-            hideAttachments={hideAttachments}
+            browserView={browserView}
             message={repliedToMsg}
             reply
           />
           <Typography className={classes.replyMessageName} variant="caption">
-            {hideAttachments ? (
+            {browserView ? (
               <strong>{repliedToMsg.username}</strong>
             ) : (
               <a href={`#${repliedToMsg.id}`}>
@@ -150,7 +150,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
         spacing={1}
         className={classes.messageMockMainStack}
       >
-        <AuthorAvatar hideAttachments={hideAttachments} message={message} />
+        <AuthorAvatar browserView={browserView} message={message} />
         <Stack
           direction="column"
           alignItems="flex-start"
@@ -180,7 +180,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
           </Stack>
           {foundThread && getThread()}
           {getMessageContent(message.content, `message-data-${index}`)}
-          {!hideAttachments && getAttachments()}
+          {!browserView && getAttachments()}
         </Stack>
       </Stack>
     </Stack>

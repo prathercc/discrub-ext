@@ -69,14 +69,11 @@ const ExportStyles = makeStyles(() => ({
     boxShadow: ({ reply }) => !reply && "rgba(0, 0, 0, 0.75) 5px 4px 1px -2px",
     transition: "all ease-in-out .1s",
     "&:hover": {
-      boxShadow: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "rgba(0, 0, 0, 0.75) 5px 4px 1px 1px",
-      width: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "42px",
-      height: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "42px",
-      cursor: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "pointer",
+      boxShadow: ({ reply, browserView }) =>
+        !reply && browserView && "rgba(0, 0, 0, 0.75) 5px 4px 1px 1px",
+      width: ({ reply, browserView }) => !reply && browserView && "42px",
+      height: ({ reply, browserView }) => !reply && browserView && "42px",
+      cursor: ({ reply, browserView }) => !reply && browserView && "pointer",
     },
   },
   replyMessageText: {
