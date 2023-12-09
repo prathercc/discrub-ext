@@ -7,6 +7,8 @@ const ExportStyles = makeStyles(() => ({
   },
   typographyTitle: {
     color: "#fff !important",
+    display: "flex",
+    gap: "5px",
   },
   channelName: {
     textDecoration: "underline",
@@ -15,8 +17,24 @@ const ExportStyles = makeStyles(() => ({
   typographyHash: {
     color: "#8e9297 !important",
   },
+  botTag: {
+    backgroundColor: "#5865f2",
+    borderRadius: "5px",
+    display: "inline-flex",
+    fontSize: "10px",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "16px",
+    width: "38px",
+    gap: "2px",
+    wordBreak: "keep-all",
+    "& svg": {
+      width: "12px !important",
+    },
+  },
   typographyMessageText: {
     color: "#DCDDDE !important",
+    whiteSpace: "pre-line",
   },
   messagesStack: {
     marginTop: "55px",
@@ -51,14 +69,11 @@ const ExportStyles = makeStyles(() => ({
     boxShadow: ({ reply }) => !reply && "rgba(0, 0, 0, 0.75) 5px 4px 1px -2px",
     transition: "all ease-in-out .1s",
     "&:hover": {
-      boxShadow: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "rgba(0, 0, 0, 0.75) 5px 4px 1px 1px",
-      width: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "42px",
-      height: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "42px",
-      cursor: ({ reply, hideAttachments }) =>
-        !reply && hideAttachments && "pointer",
+      boxShadow: ({ reply, browserView }) =>
+        !reply && browserView && "rgba(0, 0, 0, 0.75) 5px 4px 1px 1px",
+      width: ({ reply, browserView }) => !reply && browserView && "42px",
+      height: ({ reply, browserView }) => !reply && browserView && "42px",
+      cursor: ({ reply, browserView }) => !reply && browserView && "pointer",
     },
   },
   replyMessageText: {
@@ -89,6 +104,9 @@ const ExportStyles = makeStyles(() => ({
       padding: "5px",
       width: "calc(100% - 10px)",
     },
+  },
+  messageContent: {
+    display: "block",
   },
 }));
 

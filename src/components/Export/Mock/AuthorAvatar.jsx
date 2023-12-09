@@ -6,14 +6,15 @@ import copy from "copy-to-clipboard";
 import { useSelector } from "react-redux";
 import { selectExport } from "../../../features/export/exportSlice";
 
-const AuthorAvatar = ({ author, reply, hideAttachments }) => {
-  const classes = ExportStyles({ reply, hideAttachments });
+const AuthorAvatar = ({ message, reply, browserView }) => {
+  const classes = ExportStyles({ reply, browserView });
+  const { author } = message;
   const { id: userId, avatar: avatarId, username } = author || {};
   const { avatarMap } = useSelector(selectExport);
   const [textCopied, setTextCopied] = useState(false);
 
   const handleAvatarClick = (e) => {
-    if (hideAttachments && !reply) {
+    if (browserView && !reply) {
       e.stopPropagation();
       copy(userId);
       setTextCopied(true);
@@ -21,8 +22,8 @@ const AuthorAvatar = ({ author, reply, hideAttachments }) => {
   };
 
   const idAndAvatar = `${userId}/${avatarId}`;
-  let avatarUrl = `https://cdn.discordapp.com/avatars/${userId}/${avatarId}`;
-  if (avatarMap && avatarMap[idAndAvatar] && !hideAttachments) {
+  let avatarUrl = message?.getAvatarUrl();
+  if (avatarMap && avatarMap[idAndAvatar] && !browserView) {
     avatarUrl = `../${avatarMap[idAndAvatar]}`;
   }
 

@@ -7,30 +7,25 @@ import EmbedMock from "./EmbedMock";
 import classNames from "classnames";
 import { format, parseISO } from "date-fns";
 import { selectChannel } from "../../../features/channel/channelSlice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectGuild } from "../../../features/guild/guildSlice";
 import { selectMessage } from "../../../features/message/messageSlice";
 import { selectThread } from "../../../features/thread/threadSlice";
-import { renderToString } from "react-dom/server";
-import MessageMockStyles from "./Styles/MessageMock.styles";
-import {
-  getEmojiReferences,
-  selectExport,
-} from "../../../features/export/exportSlice";
+import { getFormattedInnerHtml } from "../../../features/export/exportSlice";
+import { getTimeZone } from "../../../utils";
+import CheckIcon from "@mui/icons-material/Check";
+import WebhookEmbedMock from "./WebhookEmbedMock";
 
-const MessageMock = ({ message, index, hideAttachments = false }) => {
+const MessageMock = ({ message, index, browserView = false }) => {
+  const dispatch = useDispatch();
   const { selectedGuild } = useSelector(selectGuild);
   const { selectedChannel, channels } = useSelector(selectChannel);
   const { threads } = useSelector(selectThread);
   const { messages } = useSelector(selectMessage);
-  const { emojiMap } = useSelector(selectExport);
 
   const classes = ExportStyles();
-  const messageMockClasses = MessageMockStyles();
   const messageDate = parseISO(message.timestamp, new Date());
-  const tz = messageDate
-    .toLocaleTimeString(undefined, { timeZoneName: "short" })
-    .split(" ")[2];
+  const tz = getTimeZone(messageDate);
   const foundThread = threads?.find(
     (thread) => thread.id === message.id || thread.id === message.channel_id
   );
@@ -40,59 +35,18 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
 
   const showChannelName = selectedGuild.id && !selectedChannel.id;
 
-  const getEmoji = (
-    { name: parsedEmojiName, id: parsedEmojiId },
-    smallEmoji
-  ) => {
-    let emojiUrl = `https://cdn.discordapp.com/emojis/${parsedEmojiId}`;
-    if (emojiMap && emojiMap[parsedEmojiId] && !hideAttachments) {
-      emojiUrl = `../${emojiMap[parsedEmojiId]}`;
-    }
-
-    return (
-      <span className={messageMockClasses.emojiBox}>
-        <img
-          id={parsedEmojiName}
-          src={`${emojiUrl}`}
-          alt={parsedEmojiName}
-          className={classNames({
-            [messageMockClasses.emojiImgDefault]: !smallEmoji,
-            [messageMockClasses.emojiImgSmall]: smallEmoji,
-          })}
-        />
-        {!smallEmoji && (
-          <span className={messageMockClasses.emojiTooltip}>
-            {parsedEmojiName}
-          </span>
-        )}
-      </span>
+  const getMessageContent = (content, id, isReply = false) => {
+    let rawHtml = dispatch(
+      getFormattedInnerHtml(content, isReply, !browserView)
     );
-  };
-
-  const getMessageContent = (content, id, smallEmoji = false) => {
-    const emojiReferences = getEmojiReferences(content);
-    let rawHtml = content;
-    if (emojiReferences.length) {
-      emojiReferences.forEach((emojiRef) => {
-        rawHtml = rawHtml.replaceAll(
-          emojiRef.raw,
-          renderToString(getEmoji(emojiRef, smallEmoji))
-        );
-      });
-    }
-
     return (
       <Typography
         id={id}
-        variant={smallEmoji ? "caption" : "body1"}
-        className={classNames({
-          [classes.typographyMessageText]: !smallEmoji,
-          [classes.replyMessageText]: smallEmoji,
+        variant={isReply ? "caption" : "body1"}
+        className={classNames(classes.messageContent, {
+          [classes.typographyMessageText]: !isReply,
+          [classes.replyMessageText]: isReply,
         })}
-        sx={{
-          display: "flex",
-          gap: "5px",
-        }}
         dangerouslySetInnerHTML={{ __html: rawHtml }}
       />
     );
@@ -115,16 +69,16 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
           sx={{ maxWidth: 600 }}
         >
           <AuthorAvatar
-            hideAttachments={hideAttachments}
-            author={repliedToMsg.author}
+            browserView={browserView}
+            message={repliedToMsg}
             reply
           />
           <Typography className={classes.replyMessageName} variant="caption">
-            {hideAttachments ? (
-              <strong>{repliedToMsg.username}</strong>
+            {browserView ? (
+              <strong>{repliedToMsg.getUserName()}</strong>
             ) : (
               <a href={`#${repliedToMsg.id}`}>
-                <strong>{repliedToMsg.username}</strong>
+                <strong>{repliedToMsg.getUserName()}</strong>
               </a>
             )}
           </Typography>
@@ -163,13 +117,38 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
         alignItems="flex-start"
         spacing={1}
       >
-        {message.attachments.map((attachment) => (
+        {message.getAttachments().map((attachment) => (
           <AttachmentMock attachment={attachment} />
         ))}
-        {message.embeds.map((embed, index) => (
+        {message.getEmbeds().map((embed, index) => (
           <EmbedMock embed={embed} index={index} />
         ))}
       </Stack>
+    );
+  };
+
+  const getRichEmbeds = () => {
+    return (
+      <Stack
+        sx={{ maxWidth: "600px" }}
+        mt="5px"
+        direction="column"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+        spacing={1}
+      >
+        {message?.getRichEmbeds().map((embed) => (
+          <WebhookEmbedMock alwaysExpanded={true} embed={embed} />
+        ))}
+      </Stack>
+    );
+  };
+
+  const getBotTag = () => {
+    return (
+      <span className={classes.botTag}>
+        <CheckIcon /> BOT
+      </span>
     );
   };
 
@@ -189,10 +168,7 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
         spacing={1}
         className={classes.messageMockMainStack}
       >
-        <AuthorAvatar
-          hideAttachments={hideAttachments}
-          author={message.author}
-        />
+        <AuthorAvatar browserView={browserView} message={message} />
         <Stack
           direction="column"
           alignItems="flex-start"
@@ -205,7 +181,8 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
             spacing={1}
           >
             <Typography className={classes.typographyTitle} variant="body2">
-              <strong>{message.username}</strong>
+              <strong>{message.getUserName()}</strong>
+              {message.getAuthor()?.isBot() && getBotTag()}
             </Typography>
             <Typography
               mt="1px"
@@ -221,7 +198,8 @@ const MessageMock = ({ message, index, hideAttachments = false }) => {
           </Stack>
           {foundThread && getThread()}
           {getMessageContent(message.content, `message-data-${index}`)}
-          {!hideAttachments && getAttachments()}
+          {!browserView && getAttachments()}
+          {!browserView && getRichEmbeds()}
         </Stack>
       </Stack>
     </Stack>

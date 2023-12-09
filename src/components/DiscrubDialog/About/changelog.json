@@ -1,5 +1,17 @@
 [
   {
+    "version": "1.11.2",
+    "changes": [
+      "Show BOT tag on messages from bots.",
+      "Fix issue where some emojis were not being parsed and displayed properly.",
+      "Add support for the following special formatted text: bold, quote, hyperlink, Channel mention, and hyperlink.",
+      "Multi-line messages will now be properly displayed in Discrub and in HTML exports.",
+      "Add export support for 'rich' embeds.",
+      "Slightly reduce export time by remembering User lookups when exporting multiple times during a single session.",
+      "Show search progress when using Advanced Filtering."
+    ]
+  },
+  {
     "version": "1.11.1",
     "changes": [
       "Fix bug where Guild Forum searches were not correctly fetching message data.",

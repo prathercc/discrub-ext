@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class ThreadMetaData {
   constructor(json = {}) {
     const {
@@ -7,11 +8,7 @@ class ThreadMetaData {
       create_timestamp,
       locked,
     } = json;
-    this.archive_timestamp = archive_timestamp;
-    this.archived = archived;
-    this.auto_archive_duration = auto_archive_duration;
-    this.create_timestamp = create_timestamp;
-    this.locked = locked;
+    Object.assign(this, json);
   }
 }
 

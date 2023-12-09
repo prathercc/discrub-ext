@@ -1,25 +1,11 @@
+/* eslint-disable no-unused-vars */
+import { v4 as uuidv4 } from "uuid";
+
 class Attachment {
   constructor(json) {
-    const {
-      content_type,
-      filename,
-      height,
-      id,
-      proxy_url,
-      size,
-      url,
-      width,
-      local_url,
-    } = json;
-    this.content_type = content_type;
-    this.filename = filename;
-    this.height = height;
-    this.id = id;
-    this.proxy_url = proxy_url;
-    this.size = size;
-    this.url = url;
-    this.width = width;
-    this.local_url = local_url;
+    const { content_type, filename, height, id, proxy_url, size, url, width } =
+      json;
+    Object.assign(this, json);
   }
 
   isImage() {
@@ -31,6 +17,26 @@ class Attachment {
 
   isVideo() {
     return this.content_type?.includes("video");
+  }
+
+  isMedia() {
+    return this.isImage() || this.isVideo();
+  }
+
+  getMediaUrl() {
+    return this.proxy_url;
+  }
+
+  getNonMediaUrl() {
+    return this.url;
+  }
+
+  getMediaDownloadUrls() {
+    return [this.getMediaUrl()].filter(Boolean);
+  }
+
+  getExportFileName(type) {
+    return `${this.filename}_${uuidv4()}.${type}`;
   }
 }
 export default Attachment;

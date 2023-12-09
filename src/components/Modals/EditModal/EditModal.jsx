@@ -81,14 +81,14 @@ const EditModal = ({ open, handleClose }) => {
           <>
             <Box my={1} className={classes.box}>
               <MessageChip
-                avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
-                username={entity.username}
+                avatar={entity.getAvatarUrl()}
+                username={entity.getUserName()}
                 content={entity.content}
               />
               <ArrowRightAltIcon className={classes.icon} />
               <MessageChip
-                avatar={`https://cdn.discordapp.com/avatars/${entity.author.id}/${entity.author.avatar}.png`}
-                username={entity.username}
+                avatar={entity.getAvatarUrl()}
+                username={entity.getUserName()}
                 content={updateText}
               />
             </Box>

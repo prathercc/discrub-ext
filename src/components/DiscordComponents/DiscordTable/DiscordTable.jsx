@@ -134,7 +134,7 @@ export default function DiscordTable() {
           setDeleteModalOpen={setDeleteModalOpen}
           setEditModalOpen={setEditModalOpen}
         />
-        <TableContainer>
+        <TableContainer sx={{ overflowX: "hidden" }}>
           <Table className={classes.table} size="small">
             <EnhancedTableHead
               order={order}

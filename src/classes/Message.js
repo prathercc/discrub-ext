@@ -1,5 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { MessageType } from "../enum/MessageType";
 import Attachment from "./Attachment";
+import Author from "./Author";
+import Embed from "./Embed";
 
 class Message {
   constructor(json) {
@@ -22,24 +25,25 @@ class Message {
       tts,
       username,
     } = json;
-    this.attachments = attachments.map((a) => new Attachment(a));
-    this.author = author;
-    this.channel_id = channel_id;
-    this.components = components;
-    this.content = content;
-    this.edited_timestamp = edited_timestamp;
-    this.embeds = embeds;
-    this.flags = flags;
-    this.hit = hit;
-    this.id = id;
-    this.mention_everyone = mention_everyone;
-    this.mentions = mentions;
-    this.pinned = pinned;
-    this.timestamp = timestamp;
-    this.tts = tts;
-    this.type = json.type;
-    this.username = username;
-    this.message_reference = message_reference;
+    const mappedAttachments = attachments.map((a) => new Attachment(a));
+    const mappedEmbeds = embeds.map((e) => new Embed(e));
+    Object.assign(this, json, {
+      attachments: mappedAttachments,
+      embeds: mappedEmbeds,
+      author: new Author(author),
+    });
+  }
+
+  getId() {
+    return this.id;
+  }
+
+  getUserName() {
+    return this.author?.getUserName();
+  }
+
+  getContent() {
+    return this.content;
   }
 
   isReply() {
@@ -52,6 +56,28 @@ class Message {
 
   getChannelId() {
     return this.channel_id;
+  }
+
+  getAvatarUrl() {
+    return this.author?.avatar
+      ? `https://cdn.discordapp.com/avatars/${this.author.id}/${this.author.avatar}`
+      : "default_avatar.png";
+  }
+
+  getAuthor() {
+    return this.author;
+  }
+
+  getEmbeds() {
+    return this.embeds || [];
+  }
+
+  getAttachments() {
+    return this.attachments || [];
+  }
+
+  getRichEmbeds() {
+    return this.getEmbeds().filter((embed) => embed.type === "rich");
   }
 }
 export default Message;

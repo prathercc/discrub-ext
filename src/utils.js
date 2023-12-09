@@ -26,3 +26,24 @@ export const wait = async (seconds, callback = () => {}) => {
   await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   return callback();
 };
+
+/**
+ *
+ * @param {Date} date Date object to retrieve timezone from
+ * @returns Timezone as String
+ */
+export const getTimeZone = (date = new Date()) => {
+  return date
+    .toLocaleTimeString(undefined, { timeZoneName: "short" })
+    .split(" ")[2];
+};
+
+/**
+ *
+ * @param {Number} index The index to check the percentage of
+ * @param {Number} total The total number that to check the percentage from
+ * @returns
+ */
+export const getPercent = (index, total) => {
+  return ((index / total) * 100).toString().split(".")[0];
+};

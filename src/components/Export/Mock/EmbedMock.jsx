@@ -6,10 +6,11 @@ import { useSelector } from "react-redux";
 import { selectExport } from "../../../features/export/exportSlice";
 
 const EmbedMock = ({ embed, index }) => {
-  const { type, video, local_url, description, thumbnail } = embed;
+  const { type, video, description, thumbnail } = embed;
   const attachmentClasses = AttachmentStyles();
-  const { previewImages } = useSelector(selectExport);
+  const { previewImages, mediaMap } = useSelector(selectExport);
   const supportedVideoHosts = ["youtube"];
+  const videoUrl = mediaMap[embed.getVideoUrl()] || embed.getVideoUrl();
 
   return (
     <>
@@ -18,12 +19,12 @@ const EmbedMock = ({ embed, index }) => {
           className={attachmentClasses.video}
           width={video.width > 400 ? 400 : video.width}
           height={video.height > 225 ? 225 : video.height}
-          src={local_url || video.url}
+          src={videoUrl}
           loop
           controls
           playsinline
           autoPlay={false}
-          poster={thumbnail?.proxy_url || thumbnail?.url || "discrub2.png"}
+          poster={embed.getThumbnailUrl() || "discrub2.png"}
         />
       )}
       {previewImages &&
@@ -51,11 +52,9 @@ const EmbedMock = ({ embed, index }) => {
               filename: null,
               height: thumbnail.height,
               id: `EMBEDDED-MEDIA-${index}`,
-              proxy_url: thumbnail.proxy_url,
               size: null,
-              url: thumbnail.url,
+              proxy_url: embed.getThumbnailUrl(),
               width: thumbnail.width,
-              local_url: embed.local_url,
             })
           }
         />

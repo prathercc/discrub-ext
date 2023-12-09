@@ -27,6 +27,8 @@ import {
   setModifyEntity,
   setTimeoutMessage as notify,
 } from "../app/appSlice";
+import { MessageRegex } from "../../enum/MessageRegex";
+import { setUserMap } from "../export/exportSlice";
 
 const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
@@ -441,29 +443,24 @@ export const updateMessage = (message) => async (dispatch, getState) => {
   try {
     const data = await editMsg(
       token,
-      message.id,
-      { content: message.content, attachments: message.attachments },
-      message.channel_id
+      message.getId(),
+      { content: message.getContent(), attachments: message.getAttachments() },
+      message.getChannelId()
     );
     if (!data.message) {
       const { modify } = getState().app;
       const { messages, filteredMessages } = getState().message;
       const { entity: modifyMessage } = modify;
+      const updatedMessage = new Message(data);
       const updatedMessages = messages.map((message) =>
-        message.id === data.id
-          ? Object.assign(new Message(data), { username: message.username })
-          : message
+        message.getId() === updatedMessage.getId() ? updatedMessage : message
       );
       const updatedFilterMessages = filteredMessages.map((message) =>
-        message.id === data.id
-          ? Object.assign(new Message(data), { username: message.username })
-          : message
+        message.getId() === updatedMessage.getId() ? updatedMessage : message
       );
       const updatedModifyMessage =
-        modifyMessage?.id === data.id
-          ? Object.assign(new Message(data), {
-              username: modifyMessage.username,
-            })
+        modifyMessage?.getId() === updatedMessage.getId()
+          ? updatedMessage.getId()
           : modifyMessage;
 
       dispatch(setMessages(updatedMessages));
@@ -709,12 +706,11 @@ export const getMessageData =
       };
 
       if (!dispatch(getDiscrubCancelled())) {
-        const messagesWithMentions = await dispatch(_parseMentions(retArr));
-
+        await dispatch(_parseMentions(retArr));
         if (!dispatch(getDiscrubCancelled())) {
           payload = {
             threads: retThreads,
-            messages: messagesWithMentions,
+            messages: retArr,
           };
         }
       }
@@ -753,20 +749,18 @@ export const getMessageData =
 
 const _parseMentions = (messages) => async (dispatch, getState) => {
   const { token } = getState().user;
+  const { userMap: existingUserMap } = getState().export;
   const userMap = {};
-  const regex = /<@[0-9]+>|<@&[0-9]+>|<@![0-9]+>/g;
 
-  messages.forEach((msg) => {
-    msg.content
-      .match(regex)
-      ?.map((mention) =>
-        mention
-          .replace("<@!", "")
-          .replace("<@&", "")
-          .replace("<@", "")
-          .replace(">", "")
-      )
-      ?.forEach((mention) => (userMap[mention] = null));
+  messages.forEach(({ content }) => {
+    Array.from(content.matchAll(MessageRegex.USER_MENTION))?.forEach(
+      ({ groups: userMentionGroups }) => {
+        const userId = userMentionGroups?.user_id;
+        if (Boolean(userId) && !Boolean(existingUserMap[userId])) {
+          userMap[userMentionGroups.user_id] = null;
+        }
+      }
+    );
   });
 
   let count = 0;
@@ -799,18 +793,8 @@ const _parseMentions = (messages) => async (dispatch, getState) => {
       count++;
     }
   }
-  return messages.map((msg) =>
-    Object.assign(msg, {
-      content: Object.keys(userMap).reduce((acc, curr) => {
-        const keyValue = userMap[curr];
-        return acc
-          .replaceAll(`<@${curr}>`, `@${keyValue}`)
-          .replaceAll(`<@!${curr}>`, `@${keyValue}`)
-          .replaceAll(`<@&${curr}>`, `@${keyValue}`);
-      }, msg.content),
-      username: msg.author.username,
-    })
-  );
+
+  dispatch(setUserMap({ ...existingUserMap, ...userMap }));
 };
 
 const _getSearchMessages =
