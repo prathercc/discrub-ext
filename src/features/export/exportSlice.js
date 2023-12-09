@@ -12,6 +12,7 @@ import { renderToString } from "react-dom/server";
 import ExportSliceStyles from "./styles/ExportSliceStyles";
 import classNames from "classnames";
 import { MessageRegex } from "../../enum/MessageRegex";
+import { Typography } from "@mui/material";
 
 export const exportSlice = createSlice({
   name: "export",
@@ -407,7 +408,7 @@ export const getFormattedInnerHtml =
                 minWidth: "400px",
               }}
             >
-              <span>{codeRef.text?.trim()}</span>
+              <Typography>{codeRef.text?.trim()}</Typography>
             </div>
           )
         );
