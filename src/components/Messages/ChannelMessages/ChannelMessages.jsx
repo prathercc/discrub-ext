@@ -58,6 +58,7 @@ function ChannelMessages({ closeAnnouncement }) {
     searchAfterDate,
     searchMessageContent,
     selectedHasTypes,
+    totalSearchMessages,
   } = useSelector(selectMessage);
   const { discrubCancelled } = useSelector(selectApp);
 
@@ -149,7 +150,11 @@ function ChannelMessages({ closeAnnouncement }) {
             {lookupUserId && `User Lookup: ${lookupUserId}`}
             {!lookupUserId &&
               messageCount > 0 &&
-              `Fetched ${messageCount} Messages`}
+              `Fetched ${messageCount}${
+                Boolean(totalSearchMessages) ? ` of ${totalSearchMessages}` : ""
+              } Messages
+                
+              `}
             {!lookupUserId && messageCount <= 0 && "Fetching Data"}
           </>
         )}
