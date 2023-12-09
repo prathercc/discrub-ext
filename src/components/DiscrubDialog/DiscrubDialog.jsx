@@ -63,6 +63,16 @@ function DiscrubDialog() {
 
   return (
     <Box className={classes.boxContainer}>
+      <img
+        style={{ position: "absolute", bottom: 56, left: 883, width: 90 }}
+        src="heart.png"
+        alt="heart"
+      />
+      <img
+        style={{ position: "absolute", top: 7, left: 768, width: 125 }}
+        src="holiday_build.png"
+        alt="holiday_build"
+      />
       <DonationComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && (
@@ -105,7 +115,7 @@ function DiscrubDialog() {
           justifyContent="center"
           spacing={1}
         >
-          <Typography variant="body2">1.11.1</Typography>
+          <Typography variant="body2">1.11.2</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />
