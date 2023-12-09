@@ -11,6 +11,7 @@ import {
 import { renderToString } from "react-dom/server";
 import ExportSliceStyles from "./styles/ExportSliceStyles";
 import classNames from "classnames";
+import { MessageRegex } from "../../enum/MessageRegex";
 
 export const exportSlice = createSlice({
   name: "export",
@@ -25,6 +26,7 @@ export const exportSlice = createSlice({
     currentPage: 1,
     messagesPerPage: 1000,
     sortOverride: "desc",
+    userMap: {},
     emojiMap: {},
     avatarMap: {},
     mediaMap: {},
@@ -92,6 +94,12 @@ export const exportSlice = createSlice({
     resetNonMediaMap: (state, { payload }) => {
       state.nonMediaMap = {};
     },
+    setUserMap: (state, { payload }) => {
+      state.userMap = payload;
+    },
+    resetUserMap: (state, { payload }) => {
+      state.userMap = {};
+    },
   },
 });
 
@@ -115,6 +123,8 @@ export const {
   resetMediaMap,
   setNonMediaMap,
   resetNonMediaMap,
+  setUserMap,
+  resetUserMap,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -190,41 +200,55 @@ const _downloadAvatarFromMessage =
     }
   };
 
-const _getEmojiReferences = (content) => {
-  const emojiRegex = /<a:[^<>]+:[0-9]+>|<:[^<>]+:[0-9]+>/g;
-  return (
-    content.match(emojiRegex)?.map((emojiRef) => ({
-      raw: emojiRef,
-      name: `:${emojiRef.split(":")[1]}:`,
-      id: emojiRef.split(":")[2].replace(">", ""),
-    })) || []
-  );
-};
-
 /**
  *
- * @param {String} content String content to parse bold and link formatting
+ * @param {String} content String content to parse Discord special formatting
  * @returns An Object of special formatting
  */
-const _getSpecialFormatting = (content) => {
-  const boldRegex = /\*\*(?<text>.*)(?=(\*\*))\*\*/g;
-  const linkRegex =
-    /(?:(?<name>\[[^\]]+\])(?<url>\([^ )]+)?(?<description>[^[]*(?=(?:'|")\))'\))?)/g;
-  const backTickRegex = /`([^`]*)`/g; // This is quote
-  const channelRegex = /<#(?<channel_id>\d+)>/g;
-  const hyperLinkRegex = /(^|\s)(http(s)?:\/\/)+[^\s]+(?=[\s])?/g;
-  // TODO: Parse User mentions here, remove parseMentions
-  // TODO: Parse italics here: _TEXT_
-  // TODO: Parse underlines here: __TEXT__
-  // TODO: Parse code: ```TEXT```
+const _getSpecialFormatting = (content) => (dispatch, getState) => {
+  const { userMap } = getState().export;
 
   return {
-    channel: Array.from(content.matchAll(channelRegex))?.map(
+    userMention: Array.from(content.matchAll(MessageRegex.USER_MENTION))?.map(
+      ({ 0: userMentionRef, groups: userMentionGroups }) => {
+        const userId = userMentionGroups?.user_id;
+        return {
+          raw: userMentionRef,
+          userName: userMap[userId] || "Deleted User",
+          id: userId,
+        };
+      }
+    ),
+    channel: Array.from(content.matchAll(MessageRegex.CHANNEL_MENTION))?.map(
       ({ 0: channelRef, groups: channelGroups }) => {
         return { channelId: channelGroups?.channel_id, raw: channelRef };
       }
     ),
-    bold: Array.from(content.matchAll(boldRegex))?.map(
+    underLine: Array.from(content.matchAll(MessageRegex.UNDER_LINE))?.map(
+      ({ 0: underLineRef, groups: underLineGroups }) => {
+        return {
+          text: underLineGroups?.text?.replaceAll("__", "") || "",
+          raw: underLineRef,
+        };
+      }
+    ),
+    code: Array.from(content.matchAll(MessageRegex.CODE))?.map(
+      ({ 0: codeRef, groups: codeGroups }) => {
+        return {
+          text: codeGroups?.text?.replaceAll("```", "") || "",
+          raw: codeRef,
+        };
+      }
+    ),
+    italics: Array.from(content.matchAll(MessageRegex.ITALICS))?.map(
+      ({ 0: italicRef, groups: italicGroups }) => {
+        return {
+          text: italicGroups?.text?.replaceAll("_", "") || "",
+          raw: italicRef,
+        };
+      }
+    ),
+    bold: Array.from(content.matchAll(MessageRegex.BOLD))?.map(
       ({ 0: boldRef, groups: boldGroups }) => {
         return {
           text: boldGroups?.text?.replaceAll("**", "") || "",
@@ -232,7 +256,7 @@ const _getSpecialFormatting = (content) => {
         };
       }
     ),
-    link: Array.from(content.matchAll(linkRegex))?.map(
+    link: Array.from(content.matchAll(MessageRegex.LINK))?.map(
       ({ 0: linkRef, groups: linkGroups }) => {
         const rawUrl = linkGroups?.url || null;
         const rawText = linkGroups?.name || null;
@@ -247,12 +271,17 @@ const _getSpecialFormatting = (content) => {
         };
       }
     ),
-    backTick: content.match(backTickRegex)?.map((backTickRef) => ({
-      text: backTickRef?.split("`")[1],
-      raw: backTickRef,
+    quote: content.match(MessageRegex.QUOTE)?.map((quoteRef) => ({
+      text: quoteRef?.split("`")[1],
+      raw: quoteRef,
     })),
-    hyperLink: content.match(hyperLinkRegex)?.map((hyperLinkRef) => ({
+    hyperLink: content.match(MessageRegex.HYPER_LINK)?.map((hyperLinkRef) => ({
       raw: hyperLinkRef?.trim(),
+    })),
+    emoji: content.match(MessageRegex.EMOJI)?.map((emojiRef) => ({
+      raw: emojiRef,
+      name: `:${emojiRef.split(":")[1]}:`,
+      id: emojiRef.split(":")[2].replace(">", ""),
     })),
   };
 };
@@ -291,8 +320,8 @@ export const getFormattedInnerHtml =
   (dispatch, getState) => {
     let rawHtml = content || "";
 
-    const emoji = _getEmojiReferences(rawHtml);
-    if (emoji.length) {
+    const { emoji } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(emoji?.length)) {
       emoji.forEach((emojiRef) => {
         rawHtml = rawHtml.replaceAll(
           emojiRef.raw,
@@ -301,8 +330,8 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { link } = _getSpecialFormatting(rawHtml);
-    if (link?.length) {
+    const { link } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(link?.length)) {
       link.forEach((linkRef) => {
         rawHtml = rawHtml.replaceAll(
           linkRef.raw,
@@ -325,8 +354,8 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { hyperLink } = _getSpecialFormatting(rawHtml);
-    if (hyperLink?.length) {
+    const { hyperLink } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(hyperLink?.length)) {
       hyperLink.forEach((hyperLinkRef) => {
         rawHtml = rawHtml.replaceAll(
           hyperLinkRef.raw,
@@ -349,8 +378,8 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { bold } = _getSpecialFormatting(rawHtml);
-    if (bold?.length) {
+    const { bold } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(bold?.length)) {
       bold.forEach((boldRef) => {
         rawHtml = rawHtml.replaceAll(
           boldRef.raw,
@@ -361,11 +390,35 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { backTick } = _getSpecialFormatting(rawHtml);
-    if (backTick?.length) {
-      backTick.forEach((backTickRef) => {
+    const { code } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(code?.length)) {
+      code.forEach((codeRef) => {
         rawHtml = rawHtml.replaceAll(
-          backTickRef.raw,
+          codeRef.raw,
+          renderToString(
+            <div
+              style={{
+                backgroundColor: "#2b2d31",
+                borderRadius: 5,
+                padding: "7px",
+                border: "1px solid #1e1f22",
+                whiteSpace: "pre-line",
+                color: "rgb(220, 221, 222) !important",
+                minWidth: "400px",
+              }}
+            >
+              <span>{codeRef.text?.trim()}</span>
+            </div>
+          )
+        );
+      });
+    }
+
+    const { quote } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(quote?.length)) {
+      quote.forEach((quoteRef) => {
+        rawHtml = rawHtml.replaceAll(
+          quoteRef.raw,
           renderToString(
             <span
               style={{
@@ -373,15 +426,49 @@ export const getFormattedInnerHtml =
                 borderRadius: 5,
                 padding: "3px",
               }}
-              dangerouslySetInnerHTML={{ __html: backTickRef.text }}
+              dangerouslySetInnerHTML={{ __html: quoteRef.text }}
             />
           )
         );
       });
     }
 
-    const { channel } = _getSpecialFormatting(rawHtml);
-    if (channel?.length) {
+    const { underLine } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(underLine?.length)) {
+      underLine.forEach((underLineRef) => {
+        rawHtml = rawHtml.replaceAll(
+          underLineRef.raw,
+          renderToString(
+            <span
+              style={{
+                textDecoration: "underline",
+              }}
+              dangerouslySetInnerHTML={{ __html: underLineRef.text }}
+            />
+          )
+        );
+      });
+    }
+
+    const { italics } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(italics?.length)) {
+      italics.forEach((italicsRef) => {
+        rawHtml = rawHtml.replaceAll(
+          italicsRef.raw,
+          renderToString(
+            <span
+              style={{
+                fontStyle: "italic",
+              }}
+              dangerouslySetInnerHTML={{ __html: italicsRef.text }}
+            />
+          )
+        );
+      });
+    }
+
+    const { channel } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(channel?.length)) {
       channel.forEach((channelRef) => {
         const { channels } = getState().channel;
         const channelName =
@@ -403,39 +490,59 @@ export const getFormattedInnerHtml =
       });
     }
 
+    const { userMention } = dispatch(_getSpecialFormatting(rawHtml));
+    if (Boolean(userMention?.length)) {
+      userMention.forEach((userMentionRef) => {
+        rawHtml = rawHtml.replaceAll(
+          userMentionRef.raw,
+          renderToString(
+            <span
+              title={userMentionRef.id}
+              style={{
+                backgroundColor: "#4a4b6f",
+                padding: "0 2px",
+                borderRadius: "5px",
+              }}
+              dangerouslySetInnerHTML={{
+                __html: `@${userMentionRef.userName}`,
+              }}
+            />
+          )
+        );
+      });
+    }
+
     return rawHtml;
   };
 
 const _downloadEmojisFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
-    const emojiReferences = _getEmojiReferences(message.content);
-
-    for (let count = 0; count < emojiReferences.length; count += 1) {
-      if (dispatch(getDiscrubCancelled())) break;
-      await dispatch(checkDiscrubPaused());
-      const { emojiMap } = getState().export;
-      const { id: parsedEmojiId, name: parsedEmojiName } =
-        emojiReferences[count];
-
-      try {
-        if (!emojiMap[parsedEmojiId]) {
-          const blob = await fetch(
-            `https://cdn.discordapp.com/emojis/${parsedEmojiId}`
-          ).then((r) => r.blob());
-          if (blob.size) {
-            const fileExt = blob.type?.split("/")?.[1] || "gif";
-            const emojiFilePath = `emojis/${parsedEmojiName.replaceAll(
-              ":",
-              ""
-            )}-${parsedEmojiId}.${fileExt}`;
-            await exportUtils.addToZip(blob, emojiFilePath);
-            dispatch(
-              setEmojiMap({ ...emojiMap, [parsedEmojiId]: emojiFilePath })
-            );
+    const { emoji: emojiReferences } = dispatch(
+      _getSpecialFormatting(message.getContent())
+    );
+    if (Boolean(emojiReferences?.length)) {
+      for (const { id, name } of emojiReferences) {
+        if (dispatch(getDiscrubCancelled())) break;
+        await dispatch(checkDiscrubPaused());
+        const { emojiMap } = getState().export;
+        try {
+          if (!emojiMap[id]) {
+            const blob = await fetch(
+              `https://cdn.discordapp.com/emojis/${id}`
+            ).then((r) => r.blob());
+            if (blob.size) {
+              const fileExt = blob.type?.split("/")?.[1] || "gif";
+              const emojiFilePath = `emojis/${name.replaceAll(
+                ":",
+                ""
+              )}-${id}.${fileExt}`;
+              await exportUtils.addToZip(blob, emojiFilePath);
+              dispatch(setEmojiMap({ ...emojiMap, [id]: emojiFilePath }));
+            }
           }
+        } catch (e) {
+          console.error("Failed to download emojis from message", e, message);
         }
-      } catch (e) {
-        console.error("Failed to download emojis from message", e, message);
       }
     }
   };

@@ -27,6 +27,8 @@ import {
   setModifyEntity,
   setTimeoutMessage as notify,
 } from "../app/appSlice";
+import { MessageRegex } from "../../enum/MessageRegex";
+import { setUserMap } from "../export/exportSlice";
 
 const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
@@ -704,12 +706,11 @@ export const getMessageData =
       };
 
       if (!dispatch(getDiscrubCancelled())) {
-        const messagesWithMentions = await dispatch(_parseMentions(retArr));
-
+        await dispatch(_parseMentions(retArr));
         if (!dispatch(getDiscrubCancelled())) {
           payload = {
             threads: retThreads,
-            messages: messagesWithMentions,
+            messages: retArr,
           };
         }
       }
@@ -748,20 +749,18 @@ export const getMessageData =
 
 const _parseMentions = (messages) => async (dispatch, getState) => {
   const { token } = getState().user;
+  const { userMap: existingUserMap } = getState().export;
   const userMap = {};
-  const regex = /<@[0-9]+>|<@&[0-9]+>|<@![0-9]+>/g;
 
-  messages.forEach((msg) => {
-    msg.content
-      .match(regex)
-      ?.map((mention) =>
-        mention
-          .replace("<@!", "")
-          .replace("<@&", "")
-          .replace("<@", "")
-          .replace(">", "")
-      )
-      ?.forEach((mention) => (userMap[mention] = null));
+  messages.forEach(({ content }) => {
+    Array.from(content.matchAll(MessageRegex.USER_MENTION))?.forEach(
+      ({ groups: userMentionGroups }) => {
+        const userId = userMentionGroups?.user_id;
+        if (Boolean(userId) && !Boolean(existingUserMap[userId])) {
+          userMap[userMentionGroups.user_id] = null;
+        }
+      }
+    );
   });
 
   let count = 0;
@@ -794,18 +793,8 @@ const _parseMentions = (messages) => async (dispatch, getState) => {
       count++;
     }
   }
-  return messages.map((msg) =>
-    Object.assign(msg, {
-      content: Object.keys(userMap).reduce((acc, curr) => {
-        const keyValue = userMap[curr];
-        return acc
-          .replaceAll(`<@${curr}>`, `@${keyValue}`)
-          .replaceAll(`<@!${curr}>`, `@${keyValue}`)
-          .replaceAll(`<@&${curr}>`, `@${keyValue}`);
-      }, msg.content),
-      username: msg.author.username,
-    })
-  );
+
+  dispatch(setUserMap({ ...existingUserMap, ...userMap }));
 };
 
 const _getSearchMessages =
