@@ -441,29 +441,24 @@ export const updateMessage = (message) => async (dispatch, getState) => {
   try {
     const data = await editMsg(
       token,
-      message.id,
-      { content: message.content, attachments: message.attachments },
-      message.channel_id
+      message.getId(),
+      { content: message.getContent(), attachments: message.getAttachments() },
+      message.getChannelId()
     );
     if (!data.message) {
       const { modify } = getState().app;
       const { messages, filteredMessages } = getState().message;
       const { entity: modifyMessage } = modify;
+      const updatedMessage = new Message(data);
       const updatedMessages = messages.map((message) =>
-        message.id === data.id
-          ? Object.assign(new Message(data), { username: message.username })
-          : message
+        message.getId() === updatedMessage.getId() ? updatedMessage : message
       );
       const updatedFilterMessages = filteredMessages.map((message) =>
-        message.id === data.id
-          ? Object.assign(new Message(data), { username: message.username })
-          : message
+        message.getId() === updatedMessage.getId() ? updatedMessage : message
       );
       const updatedModifyMessage =
-        modifyMessage?.id === data.id
-          ? Object.assign(new Message(data), {
-              username: modifyMessage.username,
-            })
+        modifyMessage?.getId() === updatedMessage.getId()
+          ? updatedMessage.getId()
           : modifyMessage;
 
       dispatch(setMessages(updatedMessages));

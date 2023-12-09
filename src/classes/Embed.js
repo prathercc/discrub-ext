@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { v4 as uuidv4 } from "uuid";
 class Embed {
   constructor(json) {
@@ -15,18 +16,7 @@ class Embed {
       url,
       video,
     } = json;
-    this.type = type;
-    this.description = description;
-    this.color = color;
-    this.fields = fields;
-    this.author = author;
-    this.image = image;
-    this.thumbnail = thumbnail;
-    this.video = video;
-    this.footer = footer;
-    this.timestamp = timestamp;
-    this.title = title;
-    this.url = url;
+    Object.assign(this, json);
   }
 
   getAuthorIconUrl() {

@@ -1,17 +1,11 @@
+/* eslint-disable no-unused-vars */
 import { v4 as uuidv4 } from "uuid";
 
 class Attachment {
   constructor(json) {
     const { content_type, filename, height, id, proxy_url, size, url, width } =
       json;
-    this.content_type = content_type;
-    this.filename = filename;
-    this.height = height;
-    this.id = id;
-    this.proxy_url = proxy_url;
-    this.size = size;
-    this.url = url;
-    this.width = width;
+    Object.assign(this, json);
   }
 
   isImage() {

@@ -75,10 +75,10 @@ const MessageMock = ({ message, index, browserView = false }) => {
           />
           <Typography className={classes.replyMessageName} variant="caption">
             {browserView ? (
-              <strong>{repliedToMsg.username}</strong>
+              <strong>{repliedToMsg.getUserName()}</strong>
             ) : (
               <a href={`#${repliedToMsg.id}`}>
-                <strong>{repliedToMsg.username}</strong>
+                <strong>{repliedToMsg.getUserName()}</strong>
               </a>
             )}
           </Typography>
@@ -181,7 +181,7 @@ const MessageMock = ({ message, index, browserView = false }) => {
             spacing={1}
           >
             <Typography className={classes.typographyTitle} variant="body2">
-              <strong>{message.username}</strong>
+              <strong>{message.getUserName()}</strong>
               {message.getAuthor()?.isBot() && getBotTag()}
             </Typography>
             <Typography
