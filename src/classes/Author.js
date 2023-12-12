@@ -19,6 +19,10 @@ class Author {
     Object.assign(this, json);
   }
 
+  getUserId() {
+    return this.id;
+  }
+
   getUserName() {
     return this.username;
   }

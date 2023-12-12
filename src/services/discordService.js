@@ -72,6 +72,16 @@ export const fetchUserData = (authorization) => {
     },
   }).then((resp) => resp.json());
 };
+export const fetchGuildUser = (guildId, userId, authorization) => {
+  return fetch(`${discordGuildsUrl}/${guildId}/members/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+  }).then((resp) => resp.json());
+};
 export const fetchDirectMessages = (authorization) => {
   return fetch(`${discordUsersUrl}/@me/channels`, {
     method: "GET",

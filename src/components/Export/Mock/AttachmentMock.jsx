@@ -13,7 +13,8 @@ const AttachmentMock = ({ attachment }) => {
     height: attachment?.height,
     width: attachment?.width,
   });
-  const { previewImages, mediaMap } = useSelector(selectExport);
+  const { previewImages, exportMaps } = useSelector(selectExport);
+  const { mediaMap } = exportMaps;
   const isImg = attachment?.isImage?.();
   const isVid = attachment?.isVideo?.();
   const url = attachment.isMedia()

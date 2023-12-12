@@ -14,6 +14,15 @@ import classNames from "classnames";
 import { MessageRegex } from "../../enum/MessageRegex";
 import { Typography } from "@mui/material";
 
+const defaultMaps = {
+  userMap: {}, // { id: { userName: null, guilds: { guildId: { roles: [] } } } }
+  emojiMap: {},
+  avatarMap: {},
+  mediaMap: {},
+  nonMediaMap: {},
+  roleMap: {},
+};
+
 export const exportSlice = createSlice({
   name: "export",
   initialState: {
@@ -27,13 +36,21 @@ export const exportSlice = createSlice({
     currentPage: 1,
     messagesPerPage: 1000,
     sortOverride: "desc",
-    userMap: {},
-    emojiMap: {},
-    avatarMap: {},
-    mediaMap: {},
-    nonMediaMap: {},
+    exportMaps: defaultMaps,
   },
   reducers: {
+    setExportMaps: (state, { payload }) => {
+      state.exportMaps = { ...state.exportMaps, ...payload };
+    },
+    resetExportMaps: (state, { payload }) => {
+      if (Boolean(payload?.length)) {
+        payload.forEach((mapName) => {
+          state.exportMaps[mapName] = {};
+        });
+      } else {
+        state.exportMaps = defaultMaps;
+      }
+    },
     setSortOverride: (state, { payload }) => {
       state.sortOverride = payload;
     },
@@ -71,36 +88,6 @@ export const exportSlice = createSlice({
       state.sortOverride = "desc";
       state.messagesPerPage = 1000;
     },
-    setEmojiMap: (state, { payload }) => {
-      state.emojiMap = payload;
-    },
-    resetEmojiMap: (state, { payload }) => {
-      state.emojiMap = {};
-    },
-    setAvatarMap: (state, { payload }) => {
-      state.avatarMap = payload;
-    },
-    resetAvatarMap: (state, { payload }) => {
-      state.avatarMap = {};
-    },
-    setMediaMap: (state, { payload }) => {
-      state.mediaMap = payload;
-    },
-    resetMediaMap: (state, { payload }) => {
-      state.mediaMap = {};
-    },
-    setNonMediaMap: (state, { payload }) => {
-      state.mediaMap = payload;
-    },
-    resetNonMediaMap: (state, { payload }) => {
-      state.nonMediaMap = {};
-    },
-    setUserMap: (state, { payload }) => {
-      state.userMap = payload;
-    },
-    resetUserMap: (state, { payload }) => {
-      state.userMap = {};
-    },
   },
 });
 
@@ -116,16 +103,8 @@ export const {
   setName,
   setStatusText,
   resetExportSettings,
-  setEmojiMap,
-  resetEmojiMap,
-  setAvatarMap,
-  resetAvatarMap,
-  setMediaMap,
-  resetMediaMap,
-  setNonMediaMap,
-  resetNonMediaMap,
-  setUserMap,
-  resetUserMap,
+  setExportMaps,
+  resetExportMaps,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -145,17 +124,18 @@ const _downloadFilesFromMessage =
     const { media: mediaPath, non_media: nonMediaPath } = paths;
 
     for (const entity of [...embeds, ...attachments]) {
-      const setMap = entity.isMedia() ? setMediaMap : setNonMediaMap;
-      const path = entity.isMedia() ? mediaPath : nonMediaPath;
-      const downloadUrls = entity.isMedia()
+      const isMedia = entity.isMedia();
+      const path = isMedia ? mediaPath : nonMediaPath;
+      const downloadUrls = isMedia
         ? entity.getMediaDownloadUrls()
         : [entity.getNonMediaUrl()].filter(Boolean);
 
       for (const downloadUrl of downloadUrls) {
         if (dispatch(getDiscrubCancelled())) break;
         await dispatch(checkDiscrubPaused());
-        const { mediaMap, nonMediaMap } = getState().export;
-        const map = entity.isMedia() ? mediaMap : nonMediaMap;
+        const { exportMaps } = getState().export;
+        const mapName = isMedia ? "mediaMap" : "nonMediaMap";
+        const map = exportMaps[mapName];
         try {
           if (!Boolean(map[downloadUrl])) {
             const blob = await fetch(downloadUrl).then((r) => r.blob());
@@ -164,9 +144,11 @@ const _downloadFilesFromMessage =
               const fileName = entity.getExportFileName(blobType);
               await exportUtils.addToZip(blob, `${path}/${fileName}`);
               dispatch(
-                setMap({
-                  ...map,
-                  [downloadUrl]: `${path.split("/")[1]}/${fileName}`,
+                setExportMaps({
+                  [mapName]: {
+                    ...map,
+                    [downloadUrl]: `${path.split("/")[1]}/${fileName}`,
+                  },
                 })
               );
             }
@@ -180,19 +162,25 @@ const _downloadFilesFromMessage =
 
 const _downloadAvatarFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
-    const { avatarMap } = getState().export;
+    const { exportMaps } = getState().export;
     const { id: userId, avatar: avatarId } = message?.getAuthor();
     const idAndAvatar = `${userId}/${avatarId}`;
 
     try {
-      if (!avatarMap[idAndAvatar]) {
+      if (!exportMaps.avatarMap[idAndAvatar]) {
         const blob = await fetch(message?.getAvatarUrl()).then((r) => r.blob());
         if (blob.size) {
           const fileExt = blob.type?.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
           await exportUtils.addToZip(blob, avatarFilePath);
+
           dispatch(
-            setAvatarMap({ ...avatarMap, [idAndAvatar]: avatarFilePath })
+            setExportMaps({
+              avatarMap: {
+                ...exportMaps.avatarMap,
+                [idAndAvatar]: avatarFilePath,
+              },
+            })
           );
         }
       }
@@ -207,7 +195,7 @@ const _downloadAvatarFromMessage =
  * @returns An Object of special formatting
  */
 const _getSpecialFormatting = (content) => (dispatch, getState) => {
-  const { userMap } = getState().export;
+  const { userMap } = getState().export.exportMaps;
 
   return {
     userMention: Array.from(content.matchAll(MessageRegex.USER_MENTION))?.map(
@@ -215,7 +203,7 @@ const _getSpecialFormatting = (content) => (dispatch, getState) => {
         const userId = userMentionGroups?.user_id;
         return {
           raw: userMentionRef,
-          userName: userMap[userId] || "Deleted User",
+          userName: userMap[userId]?.userName || "Deleted User",
           id: userId,
         };
       }
@@ -290,7 +278,7 @@ const _getSpecialFormatting = (content) => (dispatch, getState) => {
 const _getEmoji =
   ({ name, id }, isReply, exportView) =>
   (dispatch, getState) => {
-    const { emojiMap } = getState().export;
+    const { emojiMap } = getState().export.exportMaps;
     const classes = ExportSliceStyles();
     let emojiUrl = `https://cdn.discordapp.com/emojis/${id}`;
     if (emojiMap && emojiMap[id] && exportView) {
@@ -525,9 +513,9 @@ const _downloadEmojisFromMessage =
       for (const { id, name } of emojiReferences) {
         if (dispatch(getDiscrubCancelled())) break;
         await dispatch(checkDiscrubPaused());
-        const { emojiMap } = getState().export;
+        const { exportMaps } = getState().export;
         try {
-          if (!emojiMap[id]) {
+          if (!exportMaps.emojiMap[id]) {
             const blob = await fetch(
               `https://cdn.discordapp.com/emojis/${id}`
             ).then((r) => r.blob());
@@ -538,7 +526,12 @@ const _downloadEmojisFromMessage =
                 ""
               )}-${id}.${fileExt}`;
               await exportUtils.addToZip(blob, emojiFilePath);
-              dispatch(setEmojiMap({ ...emojiMap, [id]: emojiFilePath }));
+
+              dispatch(
+                setExportMaps({
+                  emojiMap: { ...exportMaps.emojiMap, [id]: emojiFilePath },
+                })
+              );
             }
           }
         } catch (e) {
@@ -721,10 +714,9 @@ export const exportMessages =
     dispatch(setStatusText(null));
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
-    dispatch(resetEmojiMap());
-    dispatch(resetAvatarMap());
-    dispatch(resetMediaMap());
-    dispatch(resetNonMediaMap());
+    dispatch(
+      resetExportMaps(["emojiMap", "avatarMap", "mediaMap", "nonMediaMap"])
+    );
   };
 
 export const selectExport = (state) => state.export;

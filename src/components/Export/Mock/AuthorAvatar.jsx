@@ -10,7 +10,8 @@ const AuthorAvatar = ({ message, reply, browserView }) => {
   const classes = ExportStyles({ reply, browserView });
   const { author } = message;
   const { id: userId, avatar: avatarId, username } = author || {};
-  const { avatarMap } = useSelector(selectExport);
+  const { exportMaps } = useSelector(selectExport);
+  const { avatarMap } = exportMaps;
   const [textCopied, setTextCopied] = useState(false);
 
   const handleAvatarClick = (e) => {

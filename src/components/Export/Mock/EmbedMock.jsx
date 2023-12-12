@@ -8,7 +8,8 @@ import { selectExport } from "../../../features/export/exportSlice";
 const EmbedMock = ({ embed, index }) => {
   const { type, video, description, thumbnail } = embed;
   const attachmentClasses = AttachmentStyles();
-  const { previewImages, mediaMap } = useSelector(selectExport);
+  const { previewImages, exportMaps } = useSelector(selectExport);
+  const { mediaMap } = exportMaps;
   const supportedVideoHosts = ["youtube"];
   const videoUrl = mediaMap[embed.getVideoUrl()] || embed.getVideoUrl();
 
