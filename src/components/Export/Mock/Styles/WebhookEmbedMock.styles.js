@@ -3,7 +3,7 @@ import { makeStyles } from "@mui/styles";
 const WebhookEmbedMockStyles = makeStyles(() => ({
   embedAccordian: {
     backgroundColor: "#202225 !important",
-    borderLeft: ({ borderLeftColor }) => `3px solid #${borderLeftColor}`,
+    borderLeft: ({ borderLeftColor }) => `3px solid ${borderLeftColor}`,
   },
   embedAccordianSummary: {
     cursor: "default !important",

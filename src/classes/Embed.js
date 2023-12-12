@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { v4 as uuidv4 } from "uuid";
+import { colorToHex } from "../utils";
 class Embed {
   constructor(json) {
     const {
@@ -17,6 +18,10 @@ class Embed {
       video,
     } = json;
     Object.assign(this, json);
+  }
+
+  getColor() {
+    return colorToHex(this.color);
   }
 
   getAuthorIconUrl() {

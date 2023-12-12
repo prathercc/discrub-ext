@@ -20,7 +20,7 @@ const WebhookEmbedMock = ({ embed, alwaysExpanded = false }) => {
   const { mediaMap } = useSelector(selectExport);
 
   const classes = WebhookEmbedMockStyles({
-    borderLeftColor: embed?.color?.toString?.(16),
+    borderLeftColor: embed.getColor(),
   });
 
   const [expanded, setExpanded] = useState(false);

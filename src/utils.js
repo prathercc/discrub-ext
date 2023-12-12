@@ -47,3 +47,16 @@ export const getTimeZone = (date = new Date()) => {
 export const getPercent = (index, total) => {
   return ((index / total) * 100).toString().split(".")[0];
 };
+
+/**
+ *
+ * @param {Number} color Integer representation of hexadecimal color code
+ * @returns Hexadecimal color code
+ */
+export const colorToHex = (color) => {
+  if (!Boolean(color)) {
+    return "#FFF";
+  }
+
+  return `#${color.toString(16)}`;
+};
