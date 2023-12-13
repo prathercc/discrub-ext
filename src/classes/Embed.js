@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { v4 as uuidv4 } from "uuid";
-import { colorToHex } from "../utils";
+import { colorToHex, getSafeExportName } from "../utils";
 class Embed {
   constructor(json) {
     const {
@@ -46,7 +46,7 @@ class Embed {
 
   getExportFileName(type) {
     const name = this.title ? `${this.title}_` : "";
-    return `${name}${uuidv4()}.${type}`;
+    return `${getSafeExportName(name)}${uuidv4()}.${type}`;
   }
 
   isMedia() {

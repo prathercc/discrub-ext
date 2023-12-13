@@ -9,4 +9,5 @@ export const MessageRegex = Object.freeze({
   CODE: /```(?<text>[^`]+)(?=(```))```/g,
   USER_MENTION: /<@(?:&|!)?(?<user_id>[0-9]+)>/g,
   EMOJI: /<a:[^<>]+:[0-9]+>|<:[^<>]+:[0-9]+>/g,
+  WINDOWS_INVALID_CHARACTERS: /\[|<|>|:|"|\/|\\|\||\?|\*|\]/g,
 });

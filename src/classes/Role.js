@@ -1,4 +1,4 @@
-import { colorToHex } from "../utils";
+import { colorToHex, getSafeExportName } from "../utils";
 
 /* eslint-disable no-unused-vars */
 class Role {
@@ -45,6 +45,10 @@ class Role {
       return null;
     }
     return `https://cdn.discordapp.com/role-icons/${this.id}/${this.icon}`;
+  }
+
+  getExportFileName(type) {
+    return `${getSafeExportName(this.getName())}_${this.getId()}.${type}`;
   }
 }
 

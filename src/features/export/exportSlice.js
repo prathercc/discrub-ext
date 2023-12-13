@@ -1,7 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getMessageData, resetMessageData } from "../message/messageSlice";
 import { v4 as uuidv4 } from "uuid";
-import { getPercent, sortByProperty, wait } from "../../utils";
+import {
+  getPercent,
+  getSafeExportName,
+  sortByProperty,
+  wait,
+} from "../../utils";
 import { resetChannel, setChannel } from "../channel/channelSlice";
 import {
   checkDiscrubPaused,
@@ -527,10 +532,9 @@ const _downloadEmojisFromMessage =
             ).then((r) => r.blob());
             if (blob.size) {
               const fileExt = blob.type?.split("/")?.[1] || "gif";
-              const emojiFilePath = `emojis/${name.replaceAll(
-                ":",
-                ""
-              )}-${id}.${fileExt}`;
+              const emojiFilePath = `emojis/${getSafeExportName(
+                name
+              )}_${id}.${fileExt}`;
               await exportUtils.addToZip(blob, emojiFilePath);
 
               dispatch(
@@ -604,7 +608,7 @@ const _compressMessages =
             type: "text/plain",
           }
         ),
-        `${entityMainDirectory}/${entityName}.json`
+        `${entityMainDirectory}/${getSafeExportName(entityName)}.json`
       );
     } else {
       const totalPages =
@@ -629,7 +633,9 @@ const _compressMessages =
         const htmlBlob = await exportUtils.generateHTML();
         await exportUtils.addToZip(
           htmlBlob,
-          `${entityMainDirectory}/${entityName}_page_${currentPage}.html`
+          `${entityMainDirectory}/${getSafeExportName(
+            entityName
+          )}_page_${currentPage}.html`
         );
         await dispatch(setCurrentPage(currentPage + 1));
       }
@@ -649,7 +655,8 @@ export const exportMessages =
     for (const entity of selectedChannels) {
       if (dispatch(getDiscrubCancelled())) break;
       dispatch(setStatusText(null));
-      const entityMainDirectory = `${entity.name}_${uuidv4()}`;
+      const safeEntityName = getSafeExportName(entity.name);
+      const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
       dispatch(setIsExporting(true));
       dispatch(setName(entity.name));
       if (bulk && !entity.isDm()) {
@@ -672,8 +679,8 @@ export const exportMessages =
           };
       //
 
-      const mediaPath = `${entityMainDirectory}/${entity.name}_media`;
-      const nonMediaPath = `${entityMainDirectory}/${entity.name}_non_media`;
+      const mediaPath = `${entityMainDirectory}/${safeEntityName}_media`;
+      const nonMediaPath = `${entityMainDirectory}/${safeEntityName}_non_media`;
       const paths = { media: mediaPath, non_media: nonMediaPath };
 
       await dispatch(_processMessages(messages, paths, exportUtils));

@@ -1,3 +1,5 @@
+import { MessageRegex } from "./enum/MessageRegex";
+
 /**
  *
  * @param {*} a Compare from
@@ -59,4 +61,14 @@ export const colorToHex = (color) => {
   }
 
   return `#${color.toString(16)}`;
+};
+
+export const getSafeExportName = (name) => {
+  const matchedWindowsCharacters =
+    name.match(MessageRegex.WINDOWS_INVALID_CHARACTERS) || [];
+  let retStr = name;
+  matchedWindowsCharacters.forEach((char) => {
+    retStr = retStr.replaceAll(char, "");
+  });
+  return retStr;
 };
