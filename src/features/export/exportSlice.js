@@ -165,6 +165,42 @@ const _downloadFilesFromMessage =
     }
   };
 
+const _downloadRoles = (exportUtils) => async (dispatch, getState) => {
+  const { selectedGuild } = getState().guild;
+  if (selectedGuild) {
+    const guildRoles = selectedGuild.getRoles() || [];
+    for (const role of guildRoles) {
+      const { exportMaps } = getState().export;
+      const iconUrl = role.getIconUrl();
+      if (iconUrl) {
+        try {
+          const blob = await fetch(iconUrl).then((r) => r.blob());
+          if (blob.size) {
+            const fileExt = blob.type?.split("/")?.[1] || "webp";
+            const fileName = role.getExportFileName(fileExt);
+            const roleFilePath = `roles/${fileName}.${fileExt}`;
+            await exportUtils.addToZip(blob, roleFilePath);
+
+            dispatch(
+              setExportMaps({
+                roleMap: {
+                  ...exportMaps.roleMap,
+                  [iconUrl]: `../${roleFilePath}`,
+                },
+              })
+            );
+          }
+        } catch (e) {
+          console.error(
+            `Failed to download role icon from roleId ${role.getId()} and guildId ${selectedGuild.getId()}`,
+            e
+          );
+        }
+      }
+    }
+  }
+};
+
 const _downloadAvatarFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
     const { exportMaps } = getState().export;
@@ -553,6 +589,7 @@ const _downloadEmojisFromMessage =
 
 const _processMessages =
   (messages, paths, exportUtils) => async (dispatch, getState) => {
+    await dispatch(_downloadRoles(exportUtils));
     for (const [i, msg] of messages.entries()) {
       await wait(!Boolean(i) ? 3 : 0);
 
@@ -728,7 +765,13 @@ export const exportMessages =
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
     dispatch(
-      resetExportMaps(["emojiMap", "avatarMap", "mediaMap", "nonMediaMap"])
+      resetExportMaps([
+        "emojiMap",
+        "avatarMap",
+        "mediaMap",
+        "nonMediaMap",
+        "roleMap",
+      ])
     );
   };
 

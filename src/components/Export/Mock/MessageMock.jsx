@@ -26,7 +26,7 @@ const MessageMock = ({ message, index, browserView = false }) => {
   const { threads } = useSelector(selectThread);
   const { messages } = useSelector(selectMessage);
   const { exportMaps } = useSelector(selectExport);
-  const { userMap } = exportMaps;
+  const { userMap, roleMap } = exportMaps;
 
   const classes = ExportStyles();
   const messageDate = parseISO(message.timestamp, new Date());
@@ -61,7 +61,7 @@ const MessageMock = ({ message, index, browserView = false }) => {
           <img
             title={iconRole.getName()}
             className={classes.roleIconImg}
-            src={iconRole.getIconUrl()}
+            src={roleMap[iconRole.getIconUrl()] || iconRole.getIconUrl()}
             alt="role-icon"
           />
         )}
