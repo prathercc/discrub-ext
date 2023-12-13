@@ -27,6 +27,10 @@ class Author {
     return this.id;
   }
 
+  getAvatar() {
+    return this.avatar;
+  }
+
   getUserName() {
     return this.username;
   }

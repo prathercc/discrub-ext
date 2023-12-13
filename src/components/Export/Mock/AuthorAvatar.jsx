@@ -8,8 +8,10 @@ import { selectExport } from "../../../features/export/exportSlice";
 
 const AuthorAvatar = ({ message, reply, browserView }) => {
   const classes = ExportStyles({ reply, browserView });
-  const { author } = message;
-  const { id: userId, avatar: avatarId, username } = author || {};
+  const author = message.getAuthor();
+  const avatarId = author.getAvatar();
+  const userId = author.getUserId();
+  const name = author.getDisplayName() || author.getUserName();
   const { exportMaps } = useSelector(selectExport);
   const { avatarMap } = exportMaps;
   const [textCopied, setTextCopied] = useState(false);
@@ -23,7 +25,7 @@ const AuthorAvatar = ({ message, reply, browserView }) => {
   };
 
   const idAndAvatar = `${userId}/${avatarId}`;
-  let avatarUrl = message?.getAvatarUrl();
+  let avatarUrl = message.getAvatarUrl();
   if (avatarMap && avatarMap[idAndAvatar] && !browserView) {
     avatarUrl = `../${avatarMap[idAndAvatar]}`;
   }
@@ -48,7 +50,7 @@ const AuthorAvatar = ({ message, reply, browserView }) => {
         }}
       >
         <Alert severity="info">
-          User ID copied from <strong>{username}</strong>
+          User ID copied from <strong>{name}</strong>
         </Alert>
       </Snackbar>
     </>
