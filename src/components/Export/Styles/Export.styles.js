@@ -5,10 +5,12 @@ const ExportStyles = makeStyles(() => ({
     display: "none",
     margin: 0,
   },
-  typographyTitle: {
-    color: "#fff !important",
+  authorNameParent: {
     display: "flex",
     gap: "5px",
+  },
+  typographyTitle: {
+    color: "#fff !important",
   },
   channelName: {
     textDecoration: "underline",
@@ -18,6 +20,7 @@ const ExportStyles = makeStyles(() => ({
     color: "#8e9297 !important",
   },
   botTag: {
+    color: "#FFF !important",
     backgroundColor: "#5865f2",
     borderRadius: "5px",
     display: "inline-flex",
@@ -107,6 +110,10 @@ const ExportStyles = makeStyles(() => ({
   },
   messageContent: {
     display: "block",
+  },
+  roleIconImg: {
+    width: "20px",
+    height: "20px",
   },
 }));
 

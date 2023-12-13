@@ -11,7 +11,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectGuild } from "../../../features/guild/guildSlice";
 import { selectMessage } from "../../../features/message/messageSlice";
 import { selectThread } from "../../../features/thread/threadSlice";
-import { getFormattedInnerHtml } from "../../../features/export/exportSlice";
+import {
+  getFormattedInnerHtml,
+  selectExport,
+} from "../../../features/export/exportSlice";
 import { getTimeZone } from "../../../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./WebhookEmbedMock";
@@ -22,6 +25,8 @@ const MessageMock = ({ message, index, browserView = false }) => {
   const { selectedChannel, channels } = useSelector(selectChannel);
   const { threads } = useSelector(selectThread);
   const { messages } = useSelector(selectMessage);
+  const { exportMaps } = useSelector(selectExport);
+  const { userMap } = exportMaps;
 
   const classes = ExportStyles();
   const messageDate = parseISO(message.timestamp, new Date());
@@ -34,6 +39,40 @@ const MessageMock = ({ message, index, browserView = false }) => {
     : null;
 
   const showChannelName = selectedGuild.id && !selectedChannel.id;
+
+  const getAuthorName = (msg) => {
+    const author = msg.getAuthor();
+
+    const guildRoles =
+      userMap[author.getUserId()]?.guilds[selectedGuild.getId()]?.roles || [];
+
+    const { colorRole, iconRole } =
+      selectedGuild.getHighestRoles(guildRoles) || {};
+
+    return (
+      <>
+        <strong
+          title={author.getUserName()}
+          style={{ color: colorRole && colorRole.getColor() }}
+        >
+          {author.getDisplayName() || author.getUserName()}
+        </strong>
+        {Boolean(iconRole) && (
+          <img
+            title={iconRole.getName()}
+            className={classes.roleIconImg}
+            src={iconRole.getIconUrl()}
+            alt="role-icon"
+          />
+        )}
+        {!Boolean(iconRole) && msg.getAuthor().isBot() && (
+          <span title="Verified Bot" className={classes.botTag}>
+            <CheckIcon /> BOT
+          </span>
+        )}
+      </>
+    );
+  };
 
   const getMessageContent = (content, id, isReply = false) => {
     let rawHtml = dispatch(
@@ -73,13 +112,17 @@ const MessageMock = ({ message, index, browserView = false }) => {
             message={repliedToMsg}
             reply
           />
-          <Typography className={classes.replyMessageName} variant="caption">
+          <Typography
+            className={classNames(
+              classes.authorNameParent,
+              classes.replyMessageName
+            )}
+            variant="caption"
+          >
             {browserView ? (
-              <strong>{repliedToMsg.getUserName()}</strong>
+              getAuthorName(repliedToMsg)
             ) : (
-              <a href={`#${repliedToMsg.id}`}>
-                <strong>{repliedToMsg.getUserName()}</strong>
-              </a>
+              <a href={`#${repliedToMsg.id}`}>{getAuthorName(repliedToMsg)}</a>
             )}
           </Typography>
           {getMessageContent(repliedToMsg.content, `reply-data-${index}`, true)}
@@ -95,7 +138,10 @@ const MessageMock = ({ message, index, browserView = false }) => {
         mt="1px"
         className={classNames(classes.channelName, classes.typographyTitle)}
       >
-        {channels.find((channel) => channel.id === message.channel_id)?.name}
+        {
+          channels.find((channel) => channel.id === message.getChannelId())
+            ?.name
+        }
       </Typography>
     );
   };
@@ -144,14 +190,6 @@ const MessageMock = ({ message, index, browserView = false }) => {
     );
   };
 
-  const getBotTag = () => {
-    return (
-      <span className={classes.botTag}>
-        <CheckIcon /> BOT
-      </span>
-    );
-  };
-
   return (
     <Stack
       direction="column"
@@ -180,9 +218,14 @@ const MessageMock = ({ message, index, browserView = false }) => {
             alignItems="center"
             spacing={1}
           >
-            <Typography className={classes.typographyTitle} variant="body2">
-              <strong>{message.getUserName()}</strong>
-              {message.getAuthor()?.isBot() && getBotTag()}
+            <Typography
+              className={classNames(
+                classes.authorNameParent,
+                classes.typographyTitle
+              )}
+              variant="body2"
+            >
+              {getAuthorName(message)}
             </Typography>
             <Typography
               mt="1px"

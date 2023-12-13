@@ -196,14 +196,20 @@ const _downloadAvatarFromMessage =
  */
 const _getSpecialFormatting = (content) => (dispatch, getState) => {
   const { userMap } = getState().export.exportMaps;
+  const { selectedGuild } = getState().guild;
+  const guildRoles = selectedGuild.getRoles() || [];
 
   return {
     userMention: Array.from(content.matchAll(MessageRegex.USER_MENTION))?.map(
       ({ 0: userMentionRef, groups: userMentionGroups }) => {
         const userId = userMentionGroups?.user_id;
+        const foundRole = guildRoles.find((role) => role.getId() === userId);
+        const { userName, displayName } = userMap[userId] || {};
+
         return {
           raw: userMentionRef,
-          userName: userMap[userId]?.userName || "Deleted User",
+          userName:
+            foundRole?.getName() || displayName || userName || "Not Found",
           id: userId,
         };
       }

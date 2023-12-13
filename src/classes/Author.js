@@ -19,6 +19,10 @@ class Author {
     Object.assign(this, json);
   }
 
+  getDisplayName() {
+    return this.global_name;
+  }
+
   getUserId() {
     return this.id;
   }
