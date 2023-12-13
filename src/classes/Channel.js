@@ -28,6 +28,10 @@ class Channel {
     Object.assign(this, json, { thread: thread ? new Thread(thread) : null });
   }
 
+  getDescription() {
+    return this.topic;
+  }
+
   getGuildId() {
     return this.guild_id;
   }
