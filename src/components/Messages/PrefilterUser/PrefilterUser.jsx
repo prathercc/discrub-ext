@@ -9,9 +9,9 @@ import {
   setPreFilterUserId as setDmPreFilterUserId,
 } from "../../../features/dm/dmSlice";
 import {
-  selectChannel,
+  selectGuild,
   setPreFilterUserId,
-} from "../../../features/channel/channelSlice";
+} from "../../../features/guild/guildSlice";
 
 function PrefilterUser({ isDm = false, purge, disabled = false }) {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ function PrefilterUser({ isDm = false, purge, disabled = false }) {
     preFilterUserId: dmPreFilterUserId,
     preFilterUserIds: dmPreFilterUserIds,
   } = useSelector(selectDm);
-  const { preFilterUserId, preFilterUserIds } = useSelector(selectChannel);
+  const { preFilterUserId, preFilterUserIds } = useSelector(selectGuild);
 
   const classes = AdvancedFilteringStyles();
 

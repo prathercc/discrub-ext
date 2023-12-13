@@ -8,12 +8,15 @@ import {
 } from "../message/messageSlice";
 import Role from "../../classes/Role";
 import Guild from "../../classes/Guild";
+import { sortByProperty } from "../../utils";
 
 export const guildSlice = createSlice({
   name: "guild",
   initialState: {
     guilds: [],
     selectedGuild: new Guild(),
+    preFilterUserId: null,
+    preFilterUserIds: [],
     isLoading: null,
   },
   reducers: {
@@ -29,12 +32,25 @@ export const guildSlice = createSlice({
     },
     resetGuild: (state, { payload }) => {
       state.selectedGuild = new Guild();
+      state.preFilterUserId = null;
+    },
+    setPreFilterUserId: (state, { payload }) => {
+      state.preFilterUserId = payload;
+    },
+    setPreFilterUserIds: (state, { payload }) => {
+      state.preFilterUserIds = payload;
     },
   },
 });
 
-export const { setIsLoading, setGuilds, setGuild, resetGuild } =
-  guildSlice.actions;
+export const {
+  setIsLoading,
+  setGuilds,
+  setGuild,
+  resetGuild,
+  setPreFilterUserId,
+  setPreFilterUserIds,
+} = guildSlice.actions;
 
 export const getRoles = (guildId) => async (dispatch, getState) => {
   const { guilds } = getState().guild;
@@ -82,6 +98,7 @@ export const changeGuild = (id) => async (dispatch, getState) => {
     dispatch(setGuild(id));
     await dispatch(getRoles(id));
     await dispatch(getChannels(id));
+    dispatch(getPreFilterUsers(id));
   } else {
     dispatch(resetGuild());
   }
@@ -89,6 +106,27 @@ export const changeGuild = (id) => async (dispatch, getState) => {
   dispatch(resetFilters());
   dispatch(resetAdvancedFilters());
   dispatch(resetMessageData());
+};
+
+export const getPreFilterUsers = (guildId) => (dispatch, getState) => {
+  const { id: userId, username: userName } = getState().user;
+  const { userMap } = getState().export.exportMaps;
+  const preFilterUserIds = Object.keys(userMap).map((key) => {
+    const mapping = userMap[key];
+    return { name: mapping.userName, id: key };
+  });
+
+  const filteredPreFilters = [
+    ...preFilterUserIds.filter(
+      (mapping) =>
+        mapping.id !== userId &&
+        Boolean(userMap[mapping.id].guilds[guildId]) &&
+        mapping.name !== "Deleted User"
+    ),
+    { id: userId, name: userName },
+  ].toSorted((a, b) => sortByProperty(a, b, "name", "asc"));
+
+  dispatch(setPreFilterUserIds(filteredPreFilters));
 };
 
 export const selectGuild = (state) => state.guild;

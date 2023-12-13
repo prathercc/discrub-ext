@@ -30,6 +30,7 @@ import {
 } from "../app/appSlice";
 import { MessageRegex } from "../../enum/MessageRegex";
 import { setExportMaps } from "../export/exportSlice";
+import { getPreFilterUsers } from "../guild/guildSlice";
 
 const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
@@ -711,6 +712,7 @@ export const getMessageData =
         await dispatch(_collectUserNames(userMap));
         if (Boolean(guildId)) {
           await dispatch(_collectUserRoles(userMap, guildId));
+          dispatch(getPreFilterUsers(guildId));
         }
 
         if (!dispatch(getDiscrubCancelled())) {

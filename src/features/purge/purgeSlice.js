@@ -30,8 +30,7 @@ export const purge =
   (arr = []) =>
   async (dispatch, getState) => {
     const { id: userId } = getState().user;
-    const { selectedGuild } = getState().guild;
-    const { preFilterUserId } = getState().channel;
+    const { selectedGuild, preFilterUserId } = getState().guild;
     dispatch(setIsModifying(true));
     for (const entity of arr) {
       if (dispatch(getDiscrubCancelled())) break;

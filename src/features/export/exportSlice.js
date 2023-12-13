@@ -684,9 +684,8 @@ export const exportMessages =
   (selectedChannels, exportUtils, bulk = false, format = "json") =>
   async (dispatch, getState) => {
     const { messages: contextMessages, filteredMessages } = getState().message;
-    const { selectedGuild } = getState().guild;
+    const { selectedGuild, preFilterUserId } = getState().guild;
     const { messagesPerPage } = getState().export;
-    const { preFilterUserId } = getState().channel;
     const { preFilterUserId: dmPreFilterUserId } = getState().dm;
 
     for (const entity of selectedChannels) {

@@ -46,9 +46,8 @@ import DiscordTooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTi
 function ChannelMessages({ closeAnnouncement }) {
   const dispatch = useDispatch();
   const { token, isLoading: userLoading } = useSelector(selectUser);
-  const { guilds, selectedGuild } = useSelector(selectGuild);
-  const { channels, selectedChannel, preFilterUserId } =
-    useSelector(selectChannel);
+  const { guilds, selectedGuild, preFilterUserId } = useSelector(selectGuild);
+  const { channels, selectedChannel } = useSelector(selectChannel);
   const {
     messages,
     isLoading: messagesLoading,

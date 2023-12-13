@@ -24,7 +24,6 @@ import { selectMessage } from "../../../features/message/messageSlice";
 import {
   resetChannel,
   selectChannel,
-  setPreFilterUserId,
 } from "../../../features/channel/channelSlice";
 import {
   selectDm,
@@ -40,6 +39,10 @@ import {
   setModifyEntity,
   setIsModifying,
 } from "../../../features/app/appSlice";
+import {
+  selectGuild,
+  setPreFilterUserId,
+} from "../../../features/guild/guildSlice";
 
 const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
   const dispatch = useDispatch();
@@ -51,8 +54,8 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     totalSearchMessages,
     lookupUserId,
   } = useSelector(selectMessage);
-  const { channels, selectedChannel, preFilterUserId } =
-    useSelector(selectChannel);
+  const { channels, selectedChannel } = useSelector(selectChannel);
+  const { preFilterUserId } = useSelector(selectGuild);
   const { selectedDm } = useSelector(selectDm);
   const { id: userId } = useSelector(selectUser);
   const { modify } = useSelector(selectApp);

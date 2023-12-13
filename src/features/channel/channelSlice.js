@@ -6,6 +6,7 @@ import {
   resetMessageData,
 } from "../message/messageSlice";
 import Channel from "../../classes/Channel";
+import { setPreFilterUserId } from "../guild/guildSlice";
 
 const defaultChannel = {
   flags: null,
@@ -24,8 +25,6 @@ export const channelSlice = createSlice({
     channels: [],
     selectedChannel: defaultChannel,
     isLoading: null,
-    preFilterUserId: null,
-    preFilterUserIds: [],
     selectedExportChannels: [], // Array of channel ID's, used for exporting Guild
   },
   reducers: {
@@ -35,9 +34,6 @@ export const channelSlice = createSlice({
     setChannels: (state, { payload }) => {
       state.channels = payload;
     },
-    setPreFilterUserIds: (state, { payload }) => {
-      state.preFilterUserIds = payload;
-    },
     setChannel: (state, { payload }) => {
       const selectedChannel = state.channels.find(
         (channel) => channel.id === payload
@@ -46,10 +42,6 @@ export const channelSlice = createSlice({
     },
     resetChannel: (state, { payload }) => {
       state.selectedChannel = defaultChannel;
-      state.preFilterUserId = null;
-    },
-    setPreFilterUserId: (state, { payload }) => {
-      state.preFilterUserId = payload;
     },
     setSelectedExportChannels: (state, { payload }) => {
       state.selectedExportChannels = payload;
@@ -60,17 +52,15 @@ export const channelSlice = createSlice({
 export const {
   setIsLoading,
   setChannels,
-  setPreFilterUserIds,
   setChannel,
   resetChannel,
-  setPreFilterUserId,
   setSelectedExportChannels,
 } = channelSlice.actions;
 
 export const getChannels = (guildId) => async (dispatch, getState) => {
   try {
     if (guildId) {
-      const { token, username, id } = getState().user;
+      const { token } = getState().user;
       dispatch(setIsLoading(true));
       const data = await fetchChannels(token, guildId);
       if (data) {
@@ -81,7 +71,6 @@ export const getChannels = (guildId) => async (dispatch, getState) => {
               .map((channel) => new Channel(channel))
           )
         );
-        dispatch(setPreFilterUserIds([{ name: username, id: id }]));
       }
       dispatch(setIsLoading(false));
     }
