@@ -8,6 +8,10 @@ const ExportStyles = makeStyles(() => ({
   authorNameParent: {
     display: "flex",
     gap: "5px",
+    "& a": {
+      display: "flex",
+      gap: "5px",
+    },
   },
   typographyTitle: {
     color: "#fff !important",
