@@ -102,6 +102,16 @@ export const fetchGuilds = (authorization) => {
     },
   }).then((resp) => resp.json());
 };
+export const fetchRoles = (guildId, authorization) => {
+  return fetch(`${discordGuildsUrl}/${guildId}/roles`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: authorization,
+      "user-agent": userAgent,
+    },
+  }).then((resp) => resp.json());
+};
 export const fetchChannels = (authorization, guildId) => {
   return fetch(`${discordGuildsUrl}/${guildId}/channels`, {
     method: "GET",
