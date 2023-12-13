@@ -23,14 +23,19 @@ class Message {
       pinned,
       timestamp,
       tts,
-      username,
     } = json;
     const mappedAttachments = attachments.map((a) => new Attachment(a));
     const mappedEmbeds = embeds.map((e) => new Embed(e));
+    const mappedAuthor = new Author(author);
     Object.assign(this, json, {
       attachments: mappedAttachments,
       embeds: mappedEmbeds,
-      author: new Author(author),
+      author: mappedAuthor,
+
+      // These are for message Quick Filtering purposes
+      userName: mappedAuthor.getUserName(),
+      displayName: mappedAuthor.getDisplayName(),
+      // ----------------------------------------------
     });
   }
 

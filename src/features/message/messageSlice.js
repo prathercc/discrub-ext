@@ -310,7 +310,7 @@ const _filterStartTime = (filterValue, message, inverseActive) => {
 const _filterText = (filterName, filterValue, message, inverseActive) => {
   const textContainsValue = message[filterName]
     ?.toLowerCase()
-    ?.includes(filterValue);
+    ?.includes(filterValue?.toLowerCase());
 
   const criteriaMet =
     (!inverseActive && !textContainsValue) ||
