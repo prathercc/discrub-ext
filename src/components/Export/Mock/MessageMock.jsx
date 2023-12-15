@@ -1,5 +1,5 @@
 import React from "react";
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import ExportStyles from "../Styles/Export.styles";
 import AttachmentMock from "./AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
@@ -19,7 +19,12 @@ import { getTimeZone } from "../../../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./WebhookEmbedMock";
 
-const MessageMock = ({ message, index, browserView = false }) => {
+const MessageMock = ({
+  message,
+  index,
+  browserView = false,
+  isChained = false,
+}) => {
   const dispatch = useDispatch();
   const { selectedGuild } = useSelector(selectGuild);
   const { selectedChannel, channels } = useSelector(selectChannel);
@@ -28,9 +33,23 @@ const MessageMock = ({ message, index, browserView = false }) => {
   const { exportMaps } = useSelector(selectExport);
   const { userMap, roleMap } = exportMaps;
 
-  const classes = ExportStyles();
+  const classes = ExportStyles({
+    isChained,
+    browserView,
+    messageId: message.getId(),
+  });
+
   const messageDate = parseISO(message.timestamp, new Date());
   const tz = getTimeZone(messageDate);
+  const shortDateTime = `${format(messageDate, "MM/dd/yyyy")} at ${format(
+    messageDate,
+    "HH:mm:ss"
+  )} ${tz}`;
+  const longDateTime = `${format(
+    messageDate,
+    "EEEE, LLLL d, yyyy HH:mm:ss"
+  )} ${tz}`;
+
   const foundThread = threads?.find(
     (thread) => thread.id === message.id || thread.id === message.channel_id
   );
@@ -190,6 +209,22 @@ const MessageMock = ({ message, index, browserView = false }) => {
     );
   };
 
+  const getChainedDate = () => {
+    const shortTime = format(messageDate, "HH:mm:ss");
+
+    return (
+      <Box title={longDateTime} className={classes.chainedDateParent}>
+        <Typography
+          id={`chained-message-${message.getId()}`}
+          className={classes.chainedDate}
+          variant="caption"
+        >
+          {shortTime}
+        </Typography>
+      </Box>
+    );
+  };
+
   return (
     <Stack
       direction="column"
@@ -206,7 +241,10 @@ const MessageMock = ({ message, index, browserView = false }) => {
         spacing={1}
         className={classes.messageMockMainStack}
       >
-        <AuthorAvatar browserView={browserView} message={message} />
+        {!isChained && (
+          <AuthorAvatar browserView={browserView} message={message} />
+        )}
+        {isChained && getChainedDate()}
         <Stack
           direction="column"
           alignItems="flex-start"
@@ -225,21 +263,23 @@ const MessageMock = ({ message, index, browserView = false }) => {
               )}
               variant="body2"
             >
-              {getAuthorName(message)}
+              {!isChained && getAuthorName(message)}
             </Typography>
-            <Typography
-              mt="1px"
-              className={classes.typographyHash}
-              variant="caption"
-            >
-              {`${format(messageDate, "MM/dd/yyyy")} at ${format(
-                messageDate,
-                "HH:mm:ss"
-              )} ${tz}`}
-            </Typography>
-            {showChannelName && getChannelName()}
+            {!isChained && (
+              <>
+                <Typography
+                  title={longDateTime}
+                  mt="1px"
+                  className={classes.typographyHash}
+                  variant="caption"
+                >
+                  {shortDateTime}
+                </Typography>
+                {showChannelName && getChannelName()}
+              </>
+            )}
           </Stack>
-          {foundThread && getThread()}
+          {!isChained && foundThread && getThread()}
           {getMessageContent(message.content, `message-data-${index}`)}
           {!browserView && getAttachments()}
           {!browserView && getRichEmbeds()}

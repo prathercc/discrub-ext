@@ -48,9 +48,10 @@ const ExportStyles = makeStyles(() => ({
     width: "100%",
   },
   messageMockMainStack: {
+    paddingLeft: ({ browserView }) => !browserView && "8px",
     maxWidth: "100vw",
     wordBreak: "break-all",
-    minHeight: "50px",
+    minHeight: ({ isChained }) => (isChained ? 0 : "50px"),
   },
   messageAttachmentStack: {
     backgroundColor: "#2f3136",
@@ -106,6 +107,12 @@ const ExportStyles = makeStyles(() => ({
     borderTopLeftRadius: "5px",
   },
   mockStack: {
+    width: "calc(100% - 10px)",
+    "&:hover": {
+      backgroundColor: ({ browserView }) => !browserView && "#2e2f35",
+      "& span": { opacity: "1 !important" },
+    },
+    margin: ({ isChained }) => isChained && "0px 0px 0px !important",
     "&:target": {
       background: "rgb(92, 107, 192, 0.25)",
       padding: "5px",
@@ -126,6 +133,17 @@ const ExportStyles = makeStyles(() => ({
     color: "rgb(142, 146, 151) !important",
     whiteSpace: "pre-line",
     padding: "0px 5px 0px 5px",
+  },
+  chainedDateParent: {
+    width: "40px",
+    height: "20px",
+    display: "flex",
+    alignItems: "center",
+  },
+  chainedDate: {
+    fontSize: "10px !important",
+    color: "rgb(142, 146, 151) !important",
+    opacity: 0,
   },
 }));
 

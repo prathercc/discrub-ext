@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { parseISO } from "date-fns";
 import { MessageType } from "../enum/MessageType";
 import Attachment from "./Attachment";
 import Author from "./Author";
@@ -37,6 +38,10 @@ class Message {
       displayName: mappedAuthor.getDisplayName(),
       // ----------------------------------------------
     });
+  }
+
+  getDate() {
+    return parseISO(this.timestamp, new Date());
   }
 
   getId() {
