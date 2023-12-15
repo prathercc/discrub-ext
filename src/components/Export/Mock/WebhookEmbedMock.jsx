@@ -22,6 +22,7 @@ const WebhookEmbedMock = ({ embed, alwaysExpanded = false }) => {
 
   const classes = WebhookEmbedMockStyles({
     borderLeftColor: embed.getColor(),
+    alwaysExpanded,
   });
 
   const [expanded, setExpanded] = useState(false);

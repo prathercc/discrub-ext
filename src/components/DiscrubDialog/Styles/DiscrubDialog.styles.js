@@ -2,7 +2,7 @@ import { makeStyles } from "@mui/styles";
 
 const DiscrubDialogStyles = makeStyles(() => ({
   boxContainer: {
-    backgroundColor: "rgb(32, 34, 37, 1)",
+    backgroundColor: "#2b2d31",
     height: "615px",
     maxHeight: "615px",
     maxWidth: "720px",

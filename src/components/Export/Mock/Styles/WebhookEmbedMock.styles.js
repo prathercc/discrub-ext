@@ -4,6 +4,7 @@ const WebhookEmbedMockStyles = makeStyles(() => ({
   embedAccordian: {
     backgroundColor: "#202225 !important",
     borderLeft: ({ borderLeftColor }) => `3px solid ${borderLeftColor}`,
+    marginBottom: ({ alwaysExpanded }) => alwaysExpanded && "16px !important",
   },
   embedAccordianSummary: {
     cursor: "default !important",

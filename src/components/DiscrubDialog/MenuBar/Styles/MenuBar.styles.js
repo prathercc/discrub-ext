@@ -18,7 +18,7 @@ const MenuBarStyles = makeStyles(() => ({
       color: "rgb(210, 213, 247, 1)",
     },
     "& .MuiTabs-flexContainer": {
-      backgroundColor: "rgb(47, 49, 54, 1)",
+      backgroundColor: "#313338",
     },
   },
   menuBox: {

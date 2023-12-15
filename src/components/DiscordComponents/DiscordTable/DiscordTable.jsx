@@ -152,6 +152,7 @@ export default function DiscordTable() {
 
                   return (
                     <TableRow
+                      className={classes.tableRow}
                       hover
                       onClick={(event) => handleClick(event, row.id)}
                       role="checkbox"
