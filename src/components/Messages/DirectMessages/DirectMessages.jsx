@@ -123,6 +123,16 @@ function DirectMessages() {
     );
   };
 
+  const getDmIcon = (dm) => {
+    return (
+      <img
+        style={{ width: "24px", height: "24px", borderRadius: "50px" }}
+        src={dm.getIconUrl()}
+        alt="dm-icon"
+      />
+    );
+  };
+
   return (
     <Stack spacing={2} className={classes.boxContainer}>
       {token && dms && (
@@ -164,6 +174,15 @@ function DirectMessages() {
                       getOptionLabel={(id) =>
                         dms.find((dm) => dm.id === id)?.name
                       }
+                      renderOption={(params, id) => {
+                        const foundDm = dms.find((dm) => dm.getId() === id);
+                        return (
+                          <Typography gap="4px" {...params}>
+                            {getDmIcon(foundDm)}
+                            {foundDm?.getName()}
+                          </Typography>
+                        );
+                      }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -175,13 +194,16 @@ function DirectMessages() {
                           InputProps={{
                             ...params.InputProps,
                             startAdornment: (
-                              <CopyAdornment
-                                copyValue={sortedDms
-                                  .map((dm) => dm.name)
-                                  .join("\r\n")}
-                                copyName="DM List"
-                                disabled={dmFieldDisabled}
-                              />
+                              <>
+                                <CopyAdornment
+                                  copyValue={sortedDms
+                                    .map((dm) => dm.name)
+                                    .join("\r\n")}
+                                  copyName="DM List"
+                                  disabled={dmFieldDisabled}
+                                />
+                                {selectedDm.getId() && getDmIcon(selectedDm)}
+                              </>
                             ),
                           }}
                         />
