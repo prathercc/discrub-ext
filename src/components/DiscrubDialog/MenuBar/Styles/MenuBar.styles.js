@@ -26,6 +26,9 @@ const MenuBarStyles = makeStyles(() => ({
     marginTop: "5px !important",
     display: "flex",
   },
+  menuButton: {
+    color: "#d2d5f7 !important",
+  },
 }));
 
 export default MenuBarStyles;
