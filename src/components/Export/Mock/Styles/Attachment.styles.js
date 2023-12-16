@@ -27,7 +27,7 @@ const AttachmentStyles = makeStyles(() => ({
     },
   },
   altStack: {
-    backgroundColor: "#313338",
+    backgroundColor: "#2b2d31",
     padding: "5px",
     borderRadius: "5px",
     minWidth: "181px",

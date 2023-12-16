@@ -129,7 +129,8 @@ const ExportStyles = makeStyles(() => ({
   channelDescription: {
     maxWidth: "200px",
     maxHeight: "40px",
-    overflow: "auto",
+    overflowY: "auto",
+    overflowX: "hidden",
     color: "rgb(142, 146, 151) !important",
     whiteSpace: "pre-line",
     padding: "0px 5px 0px 5px",
