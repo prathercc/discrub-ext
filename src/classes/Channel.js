@@ -28,6 +28,36 @@ class Channel {
     Object.assign(this, json, { thread: thread ? new Thread(thread) : null });
   }
 
+  getIconUrl() {
+    const recipientCount = this.recipients?.length;
+
+    if (this.isGroupDm()) {
+      return "default_group_chat_icon.png";
+    }
+
+    if (this.isDm() && Boolean(this.recipients?.[0]?.avatar)) {
+      return `https://cdn.discordapp.com/avatars/${this.recipients[0].id}/${this.recipients[0].avatar}`;
+    }
+
+    return "default_dm_icon.png";
+  }
+
+  getRecipientCount() {
+    return Number(this.recipients?.length);
+  }
+
+  getId() {
+    return this.id;
+  }
+
+  getName() {
+    return this.name;
+  }
+
+  getDescription() {
+    return this.topic;
+  }
+
   getGuildId() {
     return this.guild_id;
   }
@@ -36,6 +66,10 @@ class Channel {
     return [ChannelType.DM, ChannelType.GROUP_DM].some(
       (type) => type === this.type
     );
+  }
+
+  isGroupDm() {
+    return this.type === ChannelType.GROUP_DM;
   }
 
   isGuildForum() {

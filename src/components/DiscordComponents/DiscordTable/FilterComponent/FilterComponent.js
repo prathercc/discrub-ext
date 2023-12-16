@@ -106,7 +106,7 @@ const FilterComponent = () => {
           variant="filled"
           label="Username"
           onChange={(e) =>
-            handleFilterUpdate("username", e.target.value, "text")
+            handleFilterUpdate("userName", e.target.value, "text")
           }
         />
         <TextField

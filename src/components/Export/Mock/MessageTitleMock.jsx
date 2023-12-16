@@ -31,6 +31,8 @@ const MessageTitleMock = () => {
       messagesPerPage
   )}`;
 
+  const channelDescription = entity.getDescription?.();
+
   return (
     <Stack
       className={classes.exportTitleStack}
@@ -61,6 +63,14 @@ const MessageTitleMock = () => {
             entity?.name
           )}
         </Typography>
+        {channelDescription && (
+          <Typography
+            className={exportClasses.channelDescription}
+            variant="caption"
+          >
+            {channelDescription}
+          </Typography>
+        )}
       </Stack>
       <Typography className={exportClasses.typographyTitle} variant="h6">
         {pageTitle}

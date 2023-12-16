@@ -16,7 +16,7 @@ const ModalStyles = makeStyles(() => ({
     display: "block",
   },
   attachment: {
-    backgroundColor: "rgb(32, 34, 37, 1)",
+    backgroundColor: "#2b2d31",
     padding: "10px",
     borderRadius: "5px",
   },

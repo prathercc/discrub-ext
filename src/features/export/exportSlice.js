@@ -1,7 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getMessageData, resetMessageData } from "../message/messageSlice";
 import { v4 as uuidv4 } from "uuid";
-import { getPercent, sortByProperty, wait } from "../../utils";
+import {
+  formatUserData,
+  getPercent,
+  getSafeExportName,
+  sortByProperty,
+  wait,
+} from "../../utils";
 import { resetChannel, setChannel } from "../channel/channelSlice";
 import {
   checkDiscrubPaused,
@@ -13,6 +19,15 @@ import ExportSliceStyles from "./styles/ExportSliceStyles";
 import classNames from "classnames";
 import { MessageRegex } from "../../enum/MessageRegex";
 import { Typography } from "@mui/material";
+
+const defaultMaps = {
+  userMap: {}, // { id: { userName: null, guilds: { guildId: { roles: [] } } } }
+  emojiMap: {},
+  avatarMap: {},
+  mediaMap: {},
+  nonMediaMap: {},
+  roleMap: {},
+};
 
 export const exportSlice = createSlice({
   name: "export",
@@ -27,13 +42,21 @@ export const exportSlice = createSlice({
     currentPage: 1,
     messagesPerPage: 1000,
     sortOverride: "desc",
-    userMap: {},
-    emojiMap: {},
-    avatarMap: {},
-    mediaMap: {},
-    nonMediaMap: {},
+    exportMaps: defaultMaps,
   },
   reducers: {
+    setExportMaps: (state, { payload }) => {
+      state.exportMaps = { ...state.exportMaps, ...payload };
+    },
+    resetExportMaps: (state, { payload }) => {
+      if (Boolean(payload?.length)) {
+        payload.forEach((mapName) => {
+          state.exportMaps[mapName] = {};
+        });
+      } else {
+        state.exportMaps = defaultMaps;
+      }
+    },
     setSortOverride: (state, { payload }) => {
       state.sortOverride = payload;
     },
@@ -71,36 +94,6 @@ export const exportSlice = createSlice({
       state.sortOverride = "desc";
       state.messagesPerPage = 1000;
     },
-    setEmojiMap: (state, { payload }) => {
-      state.emojiMap = payload;
-    },
-    resetEmojiMap: (state, { payload }) => {
-      state.emojiMap = {};
-    },
-    setAvatarMap: (state, { payload }) => {
-      state.avatarMap = payload;
-    },
-    resetAvatarMap: (state, { payload }) => {
-      state.avatarMap = {};
-    },
-    setMediaMap: (state, { payload }) => {
-      state.mediaMap = payload;
-    },
-    resetMediaMap: (state, { payload }) => {
-      state.mediaMap = {};
-    },
-    setNonMediaMap: (state, { payload }) => {
-      state.mediaMap = payload;
-    },
-    resetNonMediaMap: (state, { payload }) => {
-      state.nonMediaMap = {};
-    },
-    setUserMap: (state, { payload }) => {
-      state.userMap = payload;
-    },
-    resetUserMap: (state, { payload }) => {
-      state.userMap = {};
-    },
   },
 });
 
@@ -116,16 +109,8 @@ export const {
   setName,
   setStatusText,
   resetExportSettings,
-  setEmojiMap,
-  resetEmojiMap,
-  setAvatarMap,
-  resetAvatarMap,
-  setMediaMap,
-  resetMediaMap,
-  setNonMediaMap,
-  resetNonMediaMap,
-  setUserMap,
-  resetUserMap,
+  setExportMaps,
+  resetExportMaps,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -145,17 +130,18 @@ const _downloadFilesFromMessage =
     const { media: mediaPath, non_media: nonMediaPath } = paths;
 
     for (const entity of [...embeds, ...attachments]) {
-      const setMap = entity.isMedia() ? setMediaMap : setNonMediaMap;
-      const path = entity.isMedia() ? mediaPath : nonMediaPath;
-      const downloadUrls = entity.isMedia()
+      const isMedia = entity.isMedia();
+      const path = isMedia ? mediaPath : nonMediaPath;
+      const downloadUrls = isMedia
         ? entity.getMediaDownloadUrls()
         : [entity.getNonMediaUrl()].filter(Boolean);
 
       for (const downloadUrl of downloadUrls) {
         if (dispatch(getDiscrubCancelled())) break;
         await dispatch(checkDiscrubPaused());
-        const { mediaMap, nonMediaMap } = getState().export;
-        const map = entity.isMedia() ? mediaMap : nonMediaMap;
+        const { exportMaps } = getState().export;
+        const mapName = isMedia ? "mediaMap" : "nonMediaMap";
+        const map = exportMaps[mapName];
         try {
           if (!Boolean(map[downloadUrl])) {
             const blob = await fetch(downloadUrl).then((r) => r.blob());
@@ -164,9 +150,11 @@ const _downloadFilesFromMessage =
               const fileName = entity.getExportFileName(blobType);
               await exportUtils.addToZip(blob, `${path}/${fileName}`);
               dispatch(
-                setMap({
-                  ...map,
-                  [downloadUrl]: `${path.split("/")[1]}/${fileName}`,
+                setExportMaps({
+                  [mapName]: {
+                    ...map,
+                    [downloadUrl]: `${path.split("/")[1]}/${fileName}`,
+                  },
                 })
               );
             }
@@ -178,21 +166,63 @@ const _downloadFilesFromMessage =
     }
   };
 
+const _downloadRoles = (exportUtils) => async (dispatch, getState) => {
+  const { selectedGuild } = getState().guild;
+  if (selectedGuild) {
+    const guildRoles = selectedGuild.getRoles() || [];
+    for (const role of guildRoles) {
+      const { exportMaps } = getState().export;
+      const iconUrl = role.getIconUrl();
+      if (iconUrl) {
+        try {
+          const blob = await fetch(iconUrl).then((r) => r.blob());
+          if (blob.size) {
+            const fileExt = blob.type?.split("/")?.[1] || "webp";
+            const fileName = role.getExportFileName(fileExt);
+            const roleFilePath = `roles/${fileName}.${fileExt}`;
+            await exportUtils.addToZip(blob, roleFilePath);
+
+            dispatch(
+              setExportMaps({
+                roleMap: {
+                  ...exportMaps.roleMap,
+                  [iconUrl]: `../${roleFilePath}`,
+                },
+              })
+            );
+          }
+        } catch (e) {
+          console.error(
+            `Failed to download role icon from roleId ${role.getId()} and guildId ${selectedGuild.getId()}`,
+            e
+          );
+        }
+      }
+    }
+  }
+};
+
 const _downloadAvatarFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
-    const { avatarMap } = getState().export;
+    const { exportMaps } = getState().export;
     const { id: userId, avatar: avatarId } = message?.getAuthor();
     const idAndAvatar = `${userId}/${avatarId}`;
 
     try {
-      if (!avatarMap[idAndAvatar]) {
+      if (!exportMaps.avatarMap[idAndAvatar]) {
         const blob = await fetch(message?.getAvatarUrl()).then((r) => r.blob());
         if (blob.size) {
           const fileExt = blob.type?.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
           await exportUtils.addToZip(blob, avatarFilePath);
+
           dispatch(
-            setAvatarMap({ ...avatarMap, [idAndAvatar]: avatarFilePath })
+            setExportMaps({
+              avatarMap: {
+                ...exportMaps.avatarMap,
+                [idAndAvatar]: avatarFilePath,
+              },
+            })
           );
         }
       }
@@ -207,15 +237,21 @@ const _downloadAvatarFromMessage =
  * @returns An Object of special formatting
  */
 const _getSpecialFormatting = (content) => (dispatch, getState) => {
-  const { userMap } = getState().export;
+  const { userMap } = getState().export.exportMaps;
+  const { selectedGuild } = getState().guild;
+  const guildRoles = selectedGuild.getRoles() || [];
 
   return {
     userMention: Array.from(content.matchAll(MessageRegex.USER_MENTION))?.map(
       ({ 0: userMentionRef, groups: userMentionGroups }) => {
         const userId = userMentionGroups?.user_id;
+        const foundRole = guildRoles.find((role) => role.getId() === userId);
+        const { userName, displayName } = userMap[userId] || {};
+
         return {
           raw: userMentionRef,
-          userName: userMap[userId] || "Deleted User",
+          userName:
+            foundRole?.getName() || displayName || userName || "Not Found",
           id: userId,
         };
       }
@@ -290,7 +326,7 @@ const _getSpecialFormatting = (content) => (dispatch, getState) => {
 const _getEmoji =
   ({ name, id }, isReply, exportView) =>
   (dispatch, getState) => {
-    const { emojiMap } = getState().export;
+    const { emojiMap } = getState().export.exportMaps;
     const classes = ExportSliceStyles();
     let emojiUrl = `https://cdn.discordapp.com/emojis/${id}`;
     if (emojiMap && emojiMap[id] && exportView) {
@@ -319,6 +355,8 @@ const _getEmoji =
 export const getFormattedInnerHtml =
   (content, isReply = false, exportView = false) =>
   (dispatch, getState) => {
+    const { userMap } = getState().export.exportMaps;
+    const { selectedGuild } = getState().guild;
     let rawHtml = content || "";
 
     const { emoji } = dispatch(_getSpecialFormatting(rawHtml));
@@ -494,18 +532,34 @@ export const getFormattedInnerHtml =
     const { userMention } = dispatch(_getSpecialFormatting(rawHtml));
     if (Boolean(userMention?.length)) {
       userMention.forEach((userMentionRef) => {
+        const { guilds, userName, displayName } =
+          userMap[userMentionRef.id] || {};
+        const {
+          nick: guildNickName,
+          roles: guildRoles,
+          joinedAt,
+        } = guilds?.[selectedGuild?.getId()] || {};
+        const roleNames = selectedGuild.getRoleNames(guildRoles);
+
         rawHtml = rawHtml.replaceAll(
           userMentionRef.raw,
           renderToString(
             <span
-              title={userMentionRef.id}
+              title={formatUserData(
+                userMentionRef.id,
+                userName,
+                displayName,
+                guildNickName,
+                joinedAt,
+                roleNames
+              )}
               style={{
                 backgroundColor: "#4a4b6f",
                 padding: "0 2px",
                 borderRadius: "5px",
               }}
               dangerouslySetInnerHTML={{
-                __html: `@${userMentionRef.userName}`,
+                __html: `@${guildNickName || displayName || userName}`,
               }}
             />
           )
@@ -525,20 +579,24 @@ const _downloadEmojisFromMessage =
       for (const { id, name } of emojiReferences) {
         if (dispatch(getDiscrubCancelled())) break;
         await dispatch(checkDiscrubPaused());
-        const { emojiMap } = getState().export;
+        const { exportMaps } = getState().export;
         try {
-          if (!emojiMap[id]) {
+          if (!exportMaps.emojiMap[id]) {
             const blob = await fetch(
               `https://cdn.discordapp.com/emojis/${id}`
             ).then((r) => r.blob());
             if (blob.size) {
               const fileExt = blob.type?.split("/")?.[1] || "gif";
-              const emojiFilePath = `emojis/${name.replaceAll(
-                ":",
-                ""
-              )}-${id}.${fileExt}`;
+              const emojiFilePath = `emojis/${getSafeExportName(
+                name
+              )}_${id}.${fileExt}`;
               await exportUtils.addToZip(blob, emojiFilePath);
-              dispatch(setEmojiMap({ ...emojiMap, [id]: emojiFilePath }));
+
+              dispatch(
+                setExportMaps({
+                  emojiMap: { ...exportMaps.emojiMap, [id]: emojiFilePath },
+                })
+              );
             }
           }
         } catch (e) {
@@ -550,6 +608,7 @@ const _downloadEmojisFromMessage =
 
 const _processMessages =
   (messages, paths, exportUtils) => async (dispatch, getState) => {
+    await dispatch(_downloadRoles(exportUtils));
     for (const [i, msg] of messages.entries()) {
       await wait(!Boolean(i) ? 3 : 0);
 
@@ -605,7 +664,7 @@ const _compressMessages =
             type: "text/plain",
           }
         ),
-        `${entityMainDirectory}/${entityName}.json`
+        `${entityMainDirectory}/${getSafeExportName(entityName)}.json`
       );
     } else {
       const totalPages =
@@ -630,7 +689,9 @@ const _compressMessages =
         const htmlBlob = await exportUtils.generateHTML();
         await exportUtils.addToZip(
           htmlBlob,
-          `${entityMainDirectory}/${entityName}_page_${currentPage}.html`
+          `${entityMainDirectory}/${getSafeExportName(
+            entityName
+          )}_page_${currentPage}.html`
         );
         await dispatch(setCurrentPage(currentPage + 1));
       }
@@ -642,15 +703,15 @@ export const exportMessages =
   (selectedChannels, exportUtils, bulk = false, format = "json") =>
   async (dispatch, getState) => {
     const { messages: contextMessages, filteredMessages } = getState().message;
-    const { selectedGuild } = getState().guild;
+    const { selectedGuild, preFilterUserId } = getState().guild;
     const { messagesPerPage } = getState().export;
-    const { preFilterUserId } = getState().channel;
     const { preFilterUserId: dmPreFilterUserId } = getState().dm;
 
     for (const entity of selectedChannels) {
       if (dispatch(getDiscrubCancelled())) break;
       dispatch(setStatusText(null));
-      const entityMainDirectory = `${entity.name}_${uuidv4()}`;
+      const safeEntityName = getSafeExportName(entity.name);
+      const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
       dispatch(setIsExporting(true));
       dispatch(setName(entity.name));
       if (bulk && !entity.isDm()) {
@@ -673,8 +734,8 @@ export const exportMessages =
           };
       //
 
-      const mediaPath = `${entityMainDirectory}/${entity.name}_media`;
-      const nonMediaPath = `${entityMainDirectory}/${entity.name}_non_media`;
+      const mediaPath = `${entityMainDirectory}/${safeEntityName}_media`;
+      const nonMediaPath = `${entityMainDirectory}/${safeEntityName}_non_media`;
       const paths = { media: mediaPath, non_media: nonMediaPath };
 
       await dispatch(_processMessages(messages, paths, exportUtils));
@@ -721,10 +782,15 @@ export const exportMessages =
     dispatch(setStatusText(null));
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
-    dispatch(resetEmojiMap());
-    dispatch(resetAvatarMap());
-    dispatch(resetMediaMap());
-    dispatch(resetNonMediaMap());
+    dispatch(
+      resetExportMaps([
+        "emojiMap",
+        "avatarMap",
+        "mediaMap",
+        "nonMediaMap",
+        "roleMap",
+      ])
+    );
   };
 
 export const selectExport = (state) => state.export;

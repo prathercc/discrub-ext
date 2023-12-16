@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { parseISO } from "date-fns";
 import { MessageType } from "../enum/MessageType";
 import Attachment from "./Attachment";
 import Author from "./Author";
@@ -23,15 +24,23 @@ class Message {
       pinned,
       timestamp,
       tts,
-      username,
     } = json;
     const mappedAttachments = attachments.map((a) => new Attachment(a));
     const mappedEmbeds = embeds.map((e) => new Embed(e));
+    const mappedAuthor = new Author(author);
     Object.assign(this, json, {
       attachments: mappedAttachments,
       embeds: mappedEmbeds,
-      author: new Author(author),
+      author: mappedAuthor,
+
+      // This is for message Quick Filtering purposes
+      userName: mappedAuthor.getUserName(),
+      // ----------------------------------------------
     });
+  }
+
+  getDate() {
+    return parseISO(this.timestamp, new Date());
   }
 
   getId() {

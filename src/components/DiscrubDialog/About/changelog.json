@@ -1,5 +1,18 @@
 [
   {
+    "version": "1.11.3",
+    "changes": [
+      "Show Server role colors and icons on message authors when applicable.",
+      "Automatically include Server role icons in exports.",
+      "Show global/Server names when possible and fallback to username when no alternative is available.",
+      "Show Channel descriptions in exports.",
+      "Automatically show Server members on the 'Messages By' Advanced Filter and on the Guild Purge dialog, as they are discovered.",
+      "Implement message chaining for when messages are sent within ~5 minutes between eachother.",
+      "Show additional info when hovering over a Users name or mention.",
+      "Show icons on the Server and DM selection fields."
+    ]
+  },
+  {
     "version": "1.11.2",
     "changes": [
       "Show BOT tag on messages from bots.",

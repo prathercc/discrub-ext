@@ -43,6 +43,7 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   return (
     <Box className={classes.menuBox}>
       <Button
+        className={classes.menuButton}
         disabled={menuDisabled}
         color="secondary"
         startIcon={menuOpen ? <MenuOpenIcon /> : <MenuIcon />}

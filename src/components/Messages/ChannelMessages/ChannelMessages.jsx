@@ -46,9 +46,8 @@ import DiscordTooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTi
 function ChannelMessages({ closeAnnouncement }) {
   const dispatch = useDispatch();
   const { token, isLoading: userLoading } = useSelector(selectUser);
-  const { guilds, selectedGuild } = useSelector(selectGuild);
-  const { channels, selectedChannel, preFilterUserId } =
-    useSelector(selectChannel);
+  const { guilds, selectedGuild, preFilterUserId } = useSelector(selectGuild);
+  const { channels, selectedChannel } = useSelector(selectChannel);
   const {
     messages,
     isLoading: messagesLoading,
@@ -162,6 +161,16 @@ function ChannelMessages({ closeAnnouncement }) {
     );
   };
 
+  const getGuildIcon = (guild) => {
+    return (
+      <img
+        style={{ width: "24px", height: "24px", borderRadius: "50px" }}
+        src={guild.getIconUrl()}
+        alt="guild-icon"
+      />
+    );
+  };
+
   return (
     <Stack spacing={2} className={classes.boxContainer}>
       {token && guilds && (
@@ -198,35 +207,50 @@ function ChannelMessages({ closeAnnouncement }) {
                       clearIcon={<ClearIcon />}
                       onChange={(_, val) => handleGuildChange(val)}
                       options={sortedGuilds.map((guild) => {
-                        return guild.id;
+                        return guild.getId();
                       })}
                       getOptionLabel={(id) =>
-                        guilds.find((guild) => guild.id === id)?.name
+                        guilds.find((guild) => guild.getId() === id)?.getName()
                       }
+                      renderOption={(params, id) => {
+                        const foundGuild = guilds.find(
+                          (guild) => guild.getId() === id
+                        );
+                        return (
+                          <Typography gap="4px" {...params}>
+                            {getGuildIcon(foundGuild)}
+                            {foundGuild?.getName()}
+                          </Typography>
+                        );
+                      }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           variant="filled"
                           fullWidth
                           size="small"
-                          label="Guild"
+                          label="Server"
                           onFocus={closeAnnouncement}
                           className={classes.autocomplete}
                           InputProps={{
                             ...params.InputProps,
                             startAdornment: (
-                              <CopyAdornment
-                                copyValue={sortedGuilds
-                                  .map((guild) => guild.name)
-                                  .join("\r\n")}
-                                copyName="Guild List"
-                                disabled={guildFieldDisabled}
-                              />
+                              <>
+                                <CopyAdornment
+                                  copyValue={sortedGuilds
+                                    .map((guild) => guild.getName())
+                                    .join("\r\n")}
+                                  copyName="Server List"
+                                  disabled={guildFieldDisabled}
+                                />
+                                {selectedGuild.getId() &&
+                                  getGuildIcon(selectedGuild)}
+                              </>
                             ),
                           }}
                         />
                       )}
-                      value={selectedGuild?.id}
+                      value={selectedGuild?.getId()}
                       disabled={guildFieldDisabled}
                     />
 
@@ -234,10 +258,12 @@ function ChannelMessages({ closeAnnouncement }) {
                       clearIcon={<ClearIcon />}
                       onChange={(_, val) => handleChannelChange(val)}
                       options={sortedChannels.map((channel) => {
-                        return channel.id;
+                        return channel.getId();
                       })}
                       getOptionLabel={(id) =>
-                        channels.find((channel) => channel.id === id)?.name
+                        channels
+                          .find((channel) => channel.getId() === id)
+                          ?.getName() || ""
                       }
                       renderInput={(params) => (
                         <TextField
@@ -252,7 +278,7 @@ function ChannelMessages({ closeAnnouncement }) {
                             startAdornment: (
                               <CopyAdornment
                                 copyValue={sortedChannels
-                                  .map((channel) => channel.name)
+                                  .map((channel) => channel.getName())
                                   .join("\r\n")}
                                 copyName="Channel List"
                                 disabled={channelFieldDisabled}
@@ -261,7 +287,7 @@ function ChannelMessages({ closeAnnouncement }) {
                           }}
                         />
                       )}
-                      value={selectedChannel?.id}
+                      value={selectedChannel?.getId()}
                       disabled={channelFieldDisabled}
                     />
                   </Stack>

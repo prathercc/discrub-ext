@@ -10,6 +10,7 @@ const DiscordTableStyles = makeStyles(() => ({
   tablecell: {
     borderBottom: "1px solid rgba(79,84,92,0.48) !important",
   },
+  tableRow: { "&:hover": { backgroundColor: "#2e2f35 !important" } },
   tablePagination: { color: "rgb(210, 213, 247, 1)", userSelect: "none" },
   box: {
     width: "100%",
@@ -17,7 +18,7 @@ const DiscordTableStyles = makeStyles(() => ({
   paper: {
     width: "100%",
     marginBottom: 2,
-    backgroundColor: "rgb(47, 49, 54, 1)",
+    backgroundColor: "#313338",
     borderRadius: "6px",
     color: "rgb(88, 101, 242, 1)",
   },

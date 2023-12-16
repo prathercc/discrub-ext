@@ -4,7 +4,7 @@ const SponsorshipStyles = makeStyles(() => ({
   stack: {
     position: "fixed",
     width: "221px",
-    background: "rgb(32, 34, 37, 1)",
+    background: "#313338",
     border: "1px solid rgb(210, 213, 247, 0.2)",
     borderRadius: "5px",
     height: "242px",
@@ -73,7 +73,7 @@ const SponsorshipStyles = makeStyles(() => ({
     left: "6px",
     top: "31px",
     zIndex: 900,
-    backgroundColor: "rgb(32, 34, 37, 1) !important",
+    backgroundColor: "#313338 !important",
     color: "white !important",
     borderRadius: "10px !important",
     padding: "5px !important",

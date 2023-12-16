@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { selectExport } from "../../../features/export/exportSlice";
 import { selectMessage } from "../../../features/message/messageSlice";
 import { selectThread } from "../../../features/thread/threadSlice";
+import { differenceInSeconds } from "date-fns";
 
 const ExportMessages = ({ componentRef, bulk = false }) => {
   const classes = ExportStyles();
@@ -31,6 +32,11 @@ const ExportMessages = ({ componentRef, bulk = false }) => {
   const startIndex =
     currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
 
+  const slicedMessages = exportMessages.slice(
+    startIndex,
+    startIndex + messagesPerPage
+  );
+
   return (
     <Box className={classes.boxContainer}>
       <Stack
@@ -38,7 +44,6 @@ const ExportMessages = ({ componentRef, bulk = false }) => {
         alignItems="center"
         justifyContent="center"
         ref={componentRef}
-        className={classes.stackMessageContainer}
       >
         <MessageTitleMock />
         <Stack
@@ -49,13 +54,33 @@ const ExportMessages = ({ componentRef, bulk = false }) => {
           className={classes.messagesStack}
         >
           {isExporting &&
-            exportMessages
-              .slice(startIndex, startIndex + messagesPerPage)
-              .map((row, index) => {
-                return (
-                  <MessageMock message={row} index={index} threads={threads} />
+            slicedMessages.map((message, index) => {
+              const previousMessage = slicedMessages[index - 1];
+
+              let isChained = false;
+              if (previousMessage) {
+                const elapsedSeconds = differenceInSeconds(
+                  message.getDate(),
+                  previousMessage.getDate()
                 );
-              })}
+
+                isChained =
+                  Math.abs(elapsedSeconds) <= 330 &&
+                  message.getAuthor().getUserId() ===
+                    previousMessage.getAuthor().getUserId() &&
+                  !message.isReply() &&
+                  previousMessage.getChannelId() === message.getChannelId();
+              }
+
+              return (
+                <MessageMock
+                  message={message}
+                  index={index}
+                  threads={threads}
+                  isChained={isChained}
+                />
+              );
+            })}
         </Stack>
       </Stack>
     </Box>

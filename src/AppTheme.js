@@ -15,7 +15,7 @@ const theme = createTheme({
       dark: "rgb(210, 213, 247)",
       contrastText: "rgb(32, 34, 37)",
     },
-    background: { paper: "rgb(47, 49, 54)", default: "rgb(32, 34, 37)" },
+    background: { paper: "#313338", default: "rgb(32, 34, 37)" },
     text: {
       primary: "rgb(210, 213, 247)",
       disabled: "rgb(210, 213, 247, 0.5)",
@@ -69,7 +69,7 @@ const theme = createTheme({
         root: {
           maxWidth: "200px",
           border: "1px solid rgb(88, 101, 242, 1)",
-          backgroundColor: "rgb(32, 34, 37, 1)",
+          backgroundColor: "#313338",
           color: "rgb(210, 213, 247, 1)",
           ".MuiChip-deleteIcon": {
             color: "rgb(210, 213, 247, 1)",

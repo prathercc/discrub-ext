@@ -1,5 +1,5 @@
 import React from "react";
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import ExportStyles from "../Styles/Export.styles";
 import AttachmentMock from "./AttachmentMock";
 import AuthorAvatar from "./AuthorAvatar";
@@ -11,21 +11,45 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectGuild } from "../../../features/guild/guildSlice";
 import { selectMessage } from "../../../features/message/messageSlice";
 import { selectThread } from "../../../features/thread/threadSlice";
-import { getFormattedInnerHtml } from "../../../features/export/exportSlice";
-import { getTimeZone } from "../../../utils";
+import {
+  getFormattedInnerHtml,
+  selectExport,
+} from "../../../features/export/exportSlice";
+import { formatUserData, getTimeZone } from "../../../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./WebhookEmbedMock";
 
-const MessageMock = ({ message, index, browserView = false }) => {
+const MessageMock = ({
+  message,
+  index,
+  browserView = false,
+  isChained = false,
+}) => {
   const dispatch = useDispatch();
   const { selectedGuild } = useSelector(selectGuild);
   const { selectedChannel, channels } = useSelector(selectChannel);
   const { threads } = useSelector(selectThread);
   const { messages } = useSelector(selectMessage);
+  const { exportMaps } = useSelector(selectExport);
+  const { userMap, roleMap } = exportMaps;
 
-  const classes = ExportStyles();
+  const classes = ExportStyles({
+    isChained,
+    browserView,
+    messageId: message.getId(),
+  });
+
   const messageDate = parseISO(message.timestamp, new Date());
   const tz = getTimeZone(messageDate);
+  const shortDateTime = `${format(messageDate, "MM/dd/yyyy")} at ${format(
+    messageDate,
+    "HH:mm:ss"
+  )} ${tz}`;
+  const longDateTime = `${format(
+    messageDate,
+    "EEEE, LLLL d, yyyy HH:mm:ss"
+  )} ${tz}`;
+
   const foundThread = threads?.find(
     (thread) => thread.id === message.id || thread.id === message.channel_id
   );
@@ -34,6 +58,52 @@ const MessageMock = ({ message, index, browserView = false }) => {
     : null;
 
   const showChannelName = selectedGuild.id && !selectedChannel.id;
+
+  const getAuthorName = (msg) => {
+    const author = msg.getAuthor();
+
+    const {
+      roles: guildRoles,
+      nick: guildNickname,
+      joinedAt,
+    } = userMap[author?.getUserId()]?.guilds[selectedGuild?.getId()] || {};
+
+    const { colorRole, iconRole } =
+      selectedGuild.getHighestRoles(guildRoles) || {};
+
+    const roleNames = selectedGuild.getRoleNames(guildRoles);
+
+    return (
+      <>
+        <strong
+          title={formatUserData(
+            author.getUserId(),
+            author.getUserName(),
+            author.getDisplayName(),
+            guildNickname,
+            joinedAt,
+            roleNames
+          )}
+          style={{ color: colorRole && colorRole.getColor() }}
+        >
+          {guildNickname || author.getDisplayName() || author.getUserName()}
+        </strong>
+        {Boolean(iconRole) && (
+          <img
+            title={iconRole.getName()}
+            className={classes.roleIconImg}
+            src={roleMap[iconRole.getIconUrl()] || iconRole.getIconUrl()}
+            alt="role-icon"
+          />
+        )}
+        {!Boolean(iconRole) && msg.getAuthor().isBot() && (
+          <span title="Verified Bot" className={classes.botTag}>
+            <CheckIcon /> BOT
+          </span>
+        )}
+      </>
+    );
+  };
 
   const getMessageContent = (content, id, isReply = false) => {
     let rawHtml = dispatch(
@@ -73,13 +143,17 @@ const MessageMock = ({ message, index, browserView = false }) => {
             message={repliedToMsg}
             reply
           />
-          <Typography className={classes.replyMessageName} variant="caption">
+          <Typography
+            className={classNames(
+              classes.authorNameParent,
+              classes.replyMessageName
+            )}
+            variant="caption"
+          >
             {browserView ? (
-              <strong>{repliedToMsg.getUserName()}</strong>
+              getAuthorName(repliedToMsg)
             ) : (
-              <a href={`#${repliedToMsg.id}`}>
-                <strong>{repliedToMsg.getUserName()}</strong>
-              </a>
+              <a href={`#${repliedToMsg.id}`}>{getAuthorName(repliedToMsg)}</a>
             )}
           </Typography>
           {getMessageContent(repliedToMsg.content, `reply-data-${index}`, true)}
@@ -95,7 +169,10 @@ const MessageMock = ({ message, index, browserView = false }) => {
         mt="1px"
         className={classNames(classes.channelName, classes.typographyTitle)}
       >
-        {channels.find((channel) => channel.id === message.channel_id)?.name}
+        {
+          channels.find((channel) => channel.id === message.getChannelId())
+            ?.name
+        }
       </Typography>
     );
   };
@@ -144,11 +221,19 @@ const MessageMock = ({ message, index, browserView = false }) => {
     );
   };
 
-  const getBotTag = () => {
+  const getChainedDate = () => {
+    const shortTime = format(messageDate, "HH:mm:ss");
+
     return (
-      <span className={classes.botTag}>
-        <CheckIcon /> BOT
-      </span>
+      <Box title={longDateTime} className={classes.chainedDateParent}>
+        <Typography
+          id={`chained-message-${message.getId()}`}
+          className={classes.chainedDate}
+          variant="caption"
+        >
+          {shortTime}
+        </Typography>
+      </Box>
     );
   };
 
@@ -168,7 +253,10 @@ const MessageMock = ({ message, index, browserView = false }) => {
         spacing={1}
         className={classes.messageMockMainStack}
       >
-        <AuthorAvatar browserView={browserView} message={message} />
+        {!isChained && (
+          <AuthorAvatar browserView={browserView} message={message} />
+        )}
+        {isChained && getChainedDate()}
         <Stack
           direction="column"
           alignItems="flex-start"
@@ -180,23 +268,30 @@ const MessageMock = ({ message, index, browserView = false }) => {
             alignItems="center"
             spacing={1}
           >
-            <Typography className={classes.typographyTitle} variant="body2">
-              <strong>{message.getUserName()}</strong>
-              {message.getAuthor()?.isBot() && getBotTag()}
-            </Typography>
             <Typography
-              mt="1px"
-              className={classes.typographyHash}
-              variant="caption"
+              className={classNames(
+                classes.authorNameParent,
+                classes.typographyTitle
+              )}
+              variant="body2"
             >
-              {`${format(messageDate, "MM/dd/yyyy")} at ${format(
-                messageDate,
-                "HH:mm:ss"
-              )} ${tz}`}
+              {!isChained && getAuthorName(message)}
             </Typography>
-            {showChannelName && getChannelName()}
+            {!isChained && (
+              <>
+                <Typography
+                  title={longDateTime}
+                  mt="1px"
+                  className={classes.typographyHash}
+                  variant="caption"
+                >
+                  {shortDateTime}
+                </Typography>
+                {showChannelName && getChannelName()}
+              </>
+            )}
           </Stack>
-          {foundThread && getThread()}
+          {!isChained && foundThread && getThread()}
           {getMessageContent(message.content, `message-data-${index}`)}
           {!browserView && getAttachments()}
           {!browserView && getRichEmbeds()}

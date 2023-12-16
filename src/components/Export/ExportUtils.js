@@ -53,7 +53,7 @@ export default class ExportUtils {
             "body"
           )[0].style;
         bodyElementStyle.margin = "3px";
-        bodyElementStyle.backgroundColor = "#36393f";
+        bodyElementStyle.backgroundColor = "#313338";
 
         let meta = document.createElement("meta");
         meta.httpEquiv = "Content-Type";

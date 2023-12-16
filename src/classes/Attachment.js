@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { v4 as uuidv4 } from "uuid";
+import { getSafeExportName } from "../utils";
 
 class Attachment {
   constructor(json) {
@@ -36,7 +37,7 @@ class Attachment {
   }
 
   getExportFileName(type) {
-    return `${this.filename}_${uuidv4()}.${type}`;
+    return `${getSafeExportName(this.filename)}_${uuidv4()}.${type}`;
   }
 }
 export default Attachment;

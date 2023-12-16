@@ -17,10 +17,12 @@ import { useDispatch, useSelector } from "react-redux";
 
 const WebhookEmbedMock = ({ embed, alwaysExpanded = false }) => {
   const dispatch = useDispatch();
-  const { mediaMap } = useSelector(selectExport);
+  const { exportMaps } = useSelector(selectExport);
+  const { mediaMap } = exportMaps;
 
   const classes = WebhookEmbedMockStyles({
-    borderLeftColor: embed?.color?.toString?.(16),
+    borderLeftColor: embed.getColor(),
+    alwaysExpanded,
   });
 
   const [expanded, setExpanded] = useState(false);

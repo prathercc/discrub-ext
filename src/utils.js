@@ -1,3 +1,5 @@
+import { MessageRegex } from "./enum/MessageRegex";
+
 /**
  *
  * @param {*} a Compare from
@@ -46,4 +48,52 @@ export const getTimeZone = (date = new Date()) => {
  */
 export const getPercent = (index, total) => {
   return ((index / total) * 100).toString().split(".")[0];
+};
+
+/**
+ *
+ * @param {Number} color Integer representation of hexadecimal color code
+ * @returns Hexadecimal color code
+ */
+export const colorToHex = (color) => {
+  if (!Boolean(color)) {
+    return "#FFF";
+  }
+
+  return `#${color.toString(16)}`;
+};
+
+export const getSafeExportName = (name) => {
+  const matchedWindowsCharacters =
+    name.match(MessageRegex.WINDOWS_INVALID_CHARACTERS) || [];
+  let retStr = name;
+  matchedWindowsCharacters.forEach((char) => {
+    retStr = retStr.replaceAll(char, "");
+  });
+  return retStr;
+};
+
+/**
+ *
+ * @param {String} userId
+ * @param {String} userName
+ * @param {String|undefined} displayName
+ * @param {String|undefined} guildNickName
+ * @param {String|undefined} joinedAt,
+ * @param {Array|undefined} roleNames Array of Role names as Strings
+ * @returns String formatted User data, to be used as HTML element title prop value
+ */
+export const formatUserData = (
+  userId,
+  userName,
+  displayName,
+  guildNickname,
+  joinedAt,
+  roleNames = []
+) => {
+  return `Username: ${userName}${
+    displayName ? `\nGlobal Name: ${displayName}` : ""
+  }${guildNickname ? `\nNickname: ${guildNickname}` : ""}\nUser ID: ${userId}${
+    joinedAt ? `\nJoined Server: ${joinedAt}` : ""
+  }${Boolean(roleNames.length) ? `\n\nRoles: ${roleNames.join(", ")}` : ""}`;
 };

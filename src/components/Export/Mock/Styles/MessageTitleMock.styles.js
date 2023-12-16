@@ -8,7 +8,7 @@ const MessageTitleMockStyles = makeStyles(() => ({
     padding: "5px",
     position: "fixed",
     top: 0,
-    backgroundColor: "#36393f",
+    backgroundColor: "#313338",
     "& h4": {
       userSelect: "none !important",
       cursor: "default !important",

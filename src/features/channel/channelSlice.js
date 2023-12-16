@@ -6,26 +6,14 @@ import {
   resetMessageData,
 } from "../message/messageSlice";
 import Channel from "../../classes/Channel";
-
-const defaultChannel = {
-  flags: null,
-  guild_id: null,
-  id: null,
-  name: null,
-  parent_id: null,
-  permission_overwrites: [],
-  position: null,
-  type: null,
-};
+import { setPreFilterUserId } from "../guild/guildSlice";
 
 export const channelSlice = createSlice({
   name: "channel",
   initialState: {
     channels: [],
-    selectedChannel: defaultChannel,
+    selectedChannel: new Channel(),
     isLoading: null,
-    preFilterUserId: null,
-    preFilterUserIds: [],
     selectedExportChannels: [], // Array of channel ID's, used for exporting Guild
   },
   reducers: {
@@ -35,21 +23,14 @@ export const channelSlice = createSlice({
     setChannels: (state, { payload }) => {
       state.channels = payload;
     },
-    setPreFilterUserIds: (state, { payload }) => {
-      state.preFilterUserIds = payload;
-    },
     setChannel: (state, { payload }) => {
       const selectedChannel = state.channels.find(
         (channel) => channel.id === payload
       );
-      state.selectedChannel = selectedChannel || defaultChannel;
+      state.selectedChannel = selectedChannel || new Channel();
     },
     resetChannel: (state, { payload }) => {
-      state.selectedChannel = defaultChannel;
-      state.preFilterUserId = null;
-    },
-    setPreFilterUserId: (state, { payload }) => {
-      state.preFilterUserId = payload;
+      state.selectedChannel = new Channel();
     },
     setSelectedExportChannels: (state, { payload }) => {
       state.selectedExportChannels = payload;
@@ -60,17 +41,15 @@ export const channelSlice = createSlice({
 export const {
   setIsLoading,
   setChannels,
-  setPreFilterUserIds,
   setChannel,
   resetChannel,
-  setPreFilterUserId,
   setSelectedExportChannels,
 } = channelSlice.actions;
 
 export const getChannels = (guildId) => async (dispatch, getState) => {
   try {
     if (guildId) {
-      const { token, username, id } = getState().user;
+      const { token } = getState().user;
       dispatch(setIsLoading(true));
       const data = await fetchChannels(token, guildId);
       if (data) {
@@ -81,7 +60,6 @@ export const getChannels = (guildId) => async (dispatch, getState) => {
               .map((channel) => new Channel(channel))
           )
         );
-        dispatch(setPreFilterUserIds([{ name: username, id: id }]));
       }
       dispatch(setIsLoading(false));
     }
