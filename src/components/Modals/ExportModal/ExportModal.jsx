@@ -21,7 +21,7 @@ const ExportModal = ({
 }) => {
   const classes = ExportButtonStyles();
   const dispatch = useDispatch();
-  const exportType = isDm ? "DM" : "Guild";
+  const exportType = isDm ? "DM" : "Server";
 
   const { isGenerating, isExporting } = useSelector(selectExport);
 

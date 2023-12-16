@@ -18,7 +18,7 @@ const ExportButton = ({
   const dispatch = useDispatch();
   const { isGenerating } = useSelector(selectExport);
 
-  const exportType = isDm ? "DM" : "Guild";
+  const exportType = isDm ? "DM" : "Server";
 
   const contentRef = useRef();
 

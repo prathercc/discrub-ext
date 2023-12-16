@@ -208,7 +208,7 @@ function ChannelMessages({ closeAnnouncement }) {
                           variant="filled"
                           fullWidth
                           size="small"
-                          label="Guild"
+                          label="Server"
                           onFocus={closeAnnouncement}
                           className={classes.autocomplete}
                           InputProps={{
@@ -218,7 +218,7 @@ function ChannelMessages({ closeAnnouncement }) {
                                 copyValue={sortedGuilds
                                   .map((guild) => guild.name)
                                   .join("\r\n")}
-                                copyName="Guild List"
+                                copyName="Server List"
                                 disabled={guildFieldDisabled}
                               />
                             ),

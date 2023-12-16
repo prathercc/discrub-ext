@@ -64,7 +64,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
 
   const finishedPurge = !active && entity;
 
-  const deleteType = isDm ? "DM" : "Guild";
+  const deleteType = isDm ? "DM" : "Server";
 
   useEffect(() => {
     if (dialogOpen) {
@@ -98,7 +98,7 @@ const PurgeModal = ({ dialogOpen, setDialogOpen, isDm = false }) => {
     "Are you sure you want to purge this DM? All of your messages will be deleted.";
 
   const guildDialogText =
-    "Are you sure you want to purge this Guild? All messages in every Channel will be deleted for yourself or a given User Id.";
+    "Are you sure you want to purge this Server? All messages in every Channel will be deleted for yourself or a given User Id.";
 
   const getProgressText = () => {
     return (
