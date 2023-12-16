@@ -161,6 +161,16 @@ function ChannelMessages({ closeAnnouncement }) {
     );
   };
 
+  const getGuildIcon = (guild) => {
+    return (
+      <img
+        style={{ width: "24px", height: "24px", borderRadius: "50px" }}
+        src={guild.getIconUrl()}
+        alt="guild-icon"
+      />
+    );
+  };
+
   return (
     <Stack spacing={2} className={classes.boxContainer}>
       {token && guilds && (
@@ -197,11 +207,23 @@ function ChannelMessages({ closeAnnouncement }) {
                       clearIcon={<ClearIcon />}
                       onChange={(_, val) => handleGuildChange(val)}
                       options={sortedGuilds.map((guild) => {
-                        return guild.id;
+                        return guild.getId();
                       })}
                       getOptionLabel={(id) =>
-                        guilds.find((guild) => guild.id === id)?.name
+                        guilds.find((guild) => guild.getId() === id)?.getName()
                       }
+                      renderOption={(params, id) => {
+                        const foundGuild = guilds.find(
+                          (guild) => guild.getId() === id
+                        );
+                        return (
+                          <Typography gap="4px" {...params}>
+                            {foundGuild.getIconUrl() &&
+                              getGuildIcon(foundGuild)}
+                            {foundGuild?.getName()}
+                          </Typography>
+                        );
+                      }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -214,18 +236,22 @@ function ChannelMessages({ closeAnnouncement }) {
                           InputProps={{
                             ...params.InputProps,
                             startAdornment: (
-                              <CopyAdornment
-                                copyValue={sortedGuilds
-                                  .map((guild) => guild.name)
-                                  .join("\r\n")}
-                                copyName="Server List"
-                                disabled={guildFieldDisabled}
-                              />
+                              <>
+                                <CopyAdornment
+                                  copyValue={sortedGuilds
+                                    .map((guild) => guild.getName())
+                                    .join("\r\n")}
+                                  copyName="Server List"
+                                  disabled={guildFieldDisabled}
+                                />
+                                {selectedGuild.getIconUrl() &&
+                                  getGuildIcon(selectedGuild)}
+                              </>
                             ),
                           }}
                         />
                       )}
-                      value={selectedGuild?.id}
+                      value={selectedGuild?.getId()}
                       disabled={guildFieldDisabled}
                     />
 
@@ -233,10 +259,12 @@ function ChannelMessages({ closeAnnouncement }) {
                       clearIcon={<ClearIcon />}
                       onChange={(_, val) => handleChannelChange(val)}
                       options={sortedChannels.map((channel) => {
-                        return channel.id;
+                        return channel.getId();
                       })}
                       getOptionLabel={(id) =>
-                        channels.find((channel) => channel.id === id)?.name
+                        channels
+                          .find((channel) => channel.getId() === id)
+                          ?.getName() || ""
                       }
                       renderInput={(params) => (
                         <TextField
@@ -251,7 +279,7 @@ function ChannelMessages({ closeAnnouncement }) {
                             startAdornment: (
                               <CopyAdornment
                                 copyValue={sortedChannels
-                                  .map((channel) => channel.name)
+                                  .map((channel) => channel.getName())
                                   .join("\r\n")}
                                 copyName="Channel List"
                                 disabled={channelFieldDisabled}
@@ -260,7 +288,7 @@ function ChannelMessages({ closeAnnouncement }) {
                           }}
                         />
                       )}
-                      value={selectedChannel?.id}
+                      value={selectedChannel?.getId()}
                       disabled={channelFieldDisabled}
                     />
                   </Stack>

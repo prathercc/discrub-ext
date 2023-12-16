@@ -8,6 +8,17 @@ class Guild {
     Object.assign(this, json, { roles: null });
   }
 
+  getIcon() {
+    return this.icon;
+  }
+
+  getIconUrl() {
+    if (!Boolean(this.getIcon())) {
+      return null;
+    }
+    return `https://cdn.discordapp.com/icons/${this.getId()}/${this.getIcon()}`;
+  }
+
   getId() {
     return this.id;
   }

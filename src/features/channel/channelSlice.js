@@ -8,22 +8,11 @@ import {
 import Channel from "../../classes/Channel";
 import { setPreFilterUserId } from "../guild/guildSlice";
 
-const defaultChannel = {
-  flags: null,
-  guild_id: null,
-  id: null,
-  name: null,
-  parent_id: null,
-  permission_overwrites: [],
-  position: null,
-  type: null,
-};
-
 export const channelSlice = createSlice({
   name: "channel",
   initialState: {
     channels: [],
-    selectedChannel: defaultChannel,
+    selectedChannel: new Channel(),
     isLoading: null,
     selectedExportChannels: [], // Array of channel ID's, used for exporting Guild
   },
@@ -38,10 +27,10 @@ export const channelSlice = createSlice({
       const selectedChannel = state.channels.find(
         (channel) => channel.id === payload
       );
-      state.selectedChannel = selectedChannel || defaultChannel;
+      state.selectedChannel = selectedChannel || new Channel();
     },
     resetChannel: (state, { payload }) => {
-      state.selectedChannel = defaultChannel;
+      state.selectedChannel = new Channel();
     },
     setSelectedExportChannels: (state, { payload }) => {
       state.selectedExportChannels = payload;
