@@ -33,9 +33,8 @@ class Message {
       embeds: mappedEmbeds,
       author: mappedAuthor,
 
-      // These are for message Quick Filtering purposes
+      // This is for message Quick Filtering purposes
       userName: mappedAuthor.getUserName(),
-      displayName: mappedAuthor.getDisplayName(),
       // ----------------------------------------------
     });
   }

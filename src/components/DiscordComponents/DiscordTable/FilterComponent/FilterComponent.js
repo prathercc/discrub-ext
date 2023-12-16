@@ -113,15 +113,6 @@ const FilterComponent = () => {
           size="small"
           fullWidth
           variant="filled"
-          label="Display Name"
-          onChange={(e) =>
-            handleFilterUpdate("displayName", e.target.value, "text")
-          }
-        />
-        <TextField
-          size="small"
-          fullWidth
-          variant="filled"
           onChange={(e) =>
             handleFilterUpdate("content", e.target.value, "text")
           }
