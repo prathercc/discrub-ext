@@ -463,7 +463,7 @@ export const updateMessage = (message) => async (dispatch, getState) => {
       );
       const updatedModifyMessage =
         modifyMessage?.getId() === updatedMessage.getId()
-          ? updatedMessage.getId()
+          ? updatedMessage
           : modifyMessage;
 
       dispatch(setMessages(updatedMessages));
