@@ -26,14 +26,11 @@ class Guild {
    * @returns An object containing Role entities for the highest position color and icon
    */
   getHighestRoles(roleIds = []) {
-    if (!Boolean(this.getRoles())) {
+    if (!Boolean(this.getRoles()) || !Boolean(roleIds)) {
       return null;
     }
 
-    const applicableRoles = this.getRoles().filter(
-      (role) =>
-        roleIds.some((id) => id === role.getId()) && Boolean(role.getPosition())
-    );
+    const applicableRoles = this._getApplicableRoles(roleIds);
 
     const colorRole =
       this._orderRoles(
@@ -48,6 +45,12 @@ class Guild {
     return { colorRole, iconRole };
   }
 
+  getRoleNames(roleIds = []) {
+    const applicableRoles = this._getApplicableRoles(roleIds);
+
+    return this._orderRoles(applicableRoles.map((role) => role.getName()));
+  }
+
   /**
    *
    * @param {Array} roles Array of Roles to be ordered
@@ -56,5 +59,15 @@ class Guild {
   _orderRoles = (roles = []) => {
     return roles.toSorted((a, b) => sortByProperty(a, b, "position", "desc"));
   };
+
+  _getApplicableRoles(roleIds = []) {
+    return (
+      this.getRoles()?.filter(
+        (role) =>
+          roleIds.some((id) => id === role.getId()) &&
+          Boolean(role.getPosition())
+      ) || []
+    );
+  }
 }
 export default Guild;

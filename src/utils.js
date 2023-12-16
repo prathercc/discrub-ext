@@ -72,3 +72,28 @@ export const getSafeExportName = (name) => {
   });
   return retStr;
 };
+
+/**
+ *
+ * @param {String} userId
+ * @param {String} userName
+ * @param {String|undefined} displayName
+ * @param {String|undefined} guildNickName
+ * @param {String|undefined} joinedAt,
+ * @param {Array|undefined} roleNames Array of Role names as Strings
+ * @returns String formatted User data, to be used as HTML element title prop value
+ */
+export const formatUserData = (
+  userId,
+  userName,
+  displayName,
+  guildNickname,
+  joinedAt,
+  roleNames = []
+) => {
+  return `Username: ${userName}${
+    displayName ? `\nGlobal Name: ${displayName}` : ""
+  }${guildNickname ? `\nNickname: ${guildNickname}` : ""}\nUser ID: ${userId}${
+    joinedAt ? `\nJoined Server: ${joinedAt}` : ""
+  }${Boolean(roleNames.length) ? `\n\nRoles: ${roleNames.join(", ")}` : ""}`;
+};

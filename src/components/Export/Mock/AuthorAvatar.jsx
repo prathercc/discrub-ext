@@ -5,15 +5,19 @@ import PersonIcon from "@mui/icons-material/Person";
 import copy from "copy-to-clipboard";
 import { useSelector } from "react-redux";
 import { selectExport } from "../../../features/export/exportSlice";
+import { selectGuild } from "../../../features/guild/guildSlice";
 
 const AuthorAvatar = ({ message, reply, browserView }) => {
   const classes = ExportStyles({ reply, browserView });
   const author = message.getAuthor();
   const avatarId = author.getAvatar();
   const userId = author.getUserId();
-  const name = author.getDisplayName() || author.getUserName();
+  const { selectedGuild } = useSelector(selectGuild);
   const { exportMaps } = useSelector(selectExport);
-  const { avatarMap } = exportMaps;
+  const { avatarMap, userMap } = exportMaps;
+  const guildNickName =
+    userMap[author.getUserId()]?.guilds[selectedGuild.getId()]?.nick;
+  const name = guildNickName || author.getDisplayName() || author.getUserName();
   const [textCopied, setTextCopied] = useState(false);
 
   const handleAvatarClick = (e) => {

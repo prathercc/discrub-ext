@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { getMessageData, resetMessageData } from "../message/messageSlice";
 import { v4 as uuidv4 } from "uuid";
 import {
+  formatUserData,
   getPercent,
   getSafeExportName,
   sortByProperty,
@@ -354,6 +355,8 @@ const _getEmoji =
 export const getFormattedInnerHtml =
   (content, isReply = false, exportView = false) =>
   (dispatch, getState) => {
+    const { userMap } = getState().export.exportMaps;
+    const { selectedGuild } = getState().guild;
     let rawHtml = content || "";
 
     const { emoji } = dispatch(_getSpecialFormatting(rawHtml));
@@ -529,18 +532,34 @@ export const getFormattedInnerHtml =
     const { userMention } = dispatch(_getSpecialFormatting(rawHtml));
     if (Boolean(userMention?.length)) {
       userMention.forEach((userMentionRef) => {
+        const { guilds, userName, displayName } =
+          userMap[userMentionRef.id] || {};
+        const {
+          nick: guildNickName,
+          roles: guildRoles,
+          joinedAt,
+        } = guilds?.[selectedGuild?.getId()] || {};
+        const roleNames = selectedGuild.getRoleNames(guildRoles);
+
         rawHtml = rawHtml.replaceAll(
           userMentionRef.raw,
           renderToString(
             <span
-              title={userMentionRef.id}
+              title={formatUserData(
+                userMentionRef.id,
+                userName,
+                displayName,
+                guildNickName,
+                joinedAt,
+                roleNames
+              )}
               style={{
                 backgroundColor: "#4a4b6f",
                 padding: "0 2px",
                 borderRadius: "5px",
               }}
               dangerouslySetInnerHTML={{
-                __html: `@${userMentionRef.userName}`,
+                __html: `@${guildNickName || displayName || userName}`,
               }}
             />
           )

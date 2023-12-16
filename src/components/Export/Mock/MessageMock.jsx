@@ -15,7 +15,7 @@ import {
   getFormattedInnerHtml,
   selectExport,
 } from "../../../features/export/exportSlice";
-import { getTimeZone } from "../../../utils";
+import { formatUserData, getTimeZone } from "../../../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./WebhookEmbedMock";
 
@@ -62,19 +62,31 @@ const MessageMock = ({
   const getAuthorName = (msg) => {
     const author = msg.getAuthor();
 
-    const guildRoles =
-      userMap[author.getUserId()]?.guilds[selectedGuild.getId()]?.roles || [];
+    const {
+      roles: guildRoles,
+      nick: guildNickname,
+      joinedAt,
+    } = userMap[author?.getUserId()]?.guilds[selectedGuild?.getId()] || {};
 
     const { colorRole, iconRole } =
       selectedGuild.getHighestRoles(guildRoles) || {};
 
+    const roleNames = selectedGuild.getRoleNames(guildRoles);
+
     return (
       <>
         <strong
-          title={author.getUserName()}
+          title={formatUserData(
+            author.getUserId(),
+            author.getUserName(),
+            author.getDisplayName(),
+            guildNickname,
+            joinedAt,
+            roleNames
+          )}
           style={{ color: colorRole && colorRole.getColor() }}
         >
-          {author.getDisplayName() || author.getUserName()}
+          {guildNickname || author.getDisplayName() || author.getUserName()}
         </strong>
         {Boolean(iconRole) && (
           <img

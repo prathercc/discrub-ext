@@ -31,6 +31,7 @@ import {
 import { MessageRegex } from "../../enum/MessageRegex";
 import { setExportMaps } from "../export/exportSlice";
 import { getPreFilterUsers } from "../guild/guildSlice";
+import { format } from "date-fns";
 
 const _descendingComparator = (a, b, orderBy) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
@@ -711,7 +712,7 @@ export const getMessageData =
         const userMap = dispatch(_getUserMap(retArr));
         await dispatch(_collectUserNames(userMap));
         if (Boolean(guildId)) {
-          await dispatch(_collectUserRoles(userMap, guildId));
+          await dispatch(_collectUserGuildData(userMap, guildId));
           dispatch(getPreFilterUsers(guildId));
         }
 
@@ -841,65 +842,67 @@ const _collectUserNames = (userMap) => async (dispatch, getState) => {
   dispatch(setExportMaps({ userMap: { ...existingUserMap, ...updateMap } }));
 };
 
-const _collectUserRoles = (userMap, guildId) => async (dispatch, getState) => {
-  const { token } = getState().user;
-  const { userMap: existingUserMap } = getState().export.exportMaps;
-  const updateMap = { ...userMap };
+const _collectUserGuildData =
+  (userMap, guildId) => async (dispatch, getState) => {
+    const { token } = getState().user;
+    const { userMap: existingUserMap } = getState().export.exportMaps;
+    const updateMap = { ...userMap };
 
-  let count = 0;
-  const keys = Object.keys(updateMap);
-  while (count < keys.length) {
-    if (dispatch(getDiscrubCancelled())) break;
-    await dispatch(checkDiscrubPaused());
-    const userId = keys[count];
-    const userMapping = existingUserMap[userId] || updateMap[userId];
-    const userGuilds = userMapping.guilds;
-    if (!Boolean(userGuilds[guildId])) {
-      try {
-        dispatch(setLookupUserId(userId));
-        const { user, retry_after, roles } = await fetchGuildUser(
-          guildId,
-          userId,
-          token
-        );
-        if (!user && !retry_after) {
-          const errorMsg = `Unable to retrieve guild user data from userId ${userId} and guildId ${guildId}`;
-          console.error(errorMsg);
-          updateMap[userId] = {
-            ...userMapping,
-            guilds: {
-              ...userGuilds,
-              [guildId]: { roles: [] },
-            },
-          };
-          count++;
-        } else if (retry_after) {
-          await wait(retry_after);
-          const warningMsg = `You are being rate limited, waiting: ${retry_after} seconds.`;
-          console.warn(warningMsg);
-          continue;
-        } else {
-          updateMap[userId] = {
-            ...userMapping,
-            guilds: {
-              ...userGuilds,
-              [guildId]: { roles: roles },
-            },
-          };
+    let count = 0;
+    const keys = Object.keys(updateMap);
+    while (count < keys.length) {
+      if (dispatch(getDiscrubCancelled())) break;
+      await dispatch(checkDiscrubPaused());
+      const userId = keys[count];
+      const userMapping = existingUserMap[userId] || updateMap[userId];
+      const userGuilds = userMapping.guilds;
+      if (!Boolean(userGuilds[guildId])) {
+        try {
+          dispatch(setLookupUserId(userId));
+          const { user, retry_after, roles, nick, joined_at } =
+            await fetchGuildUser(guildId, userId, token);
+          if (!user && !retry_after) {
+            const errorMsg = `Unable to retrieve guild user data from userId ${userId} and guildId ${guildId}`;
+            console.error(errorMsg);
+            updateMap[userId] = {
+              ...userMapping,
+              guilds: {
+                ...userGuilds,
+                [guildId]: { roles: [], nick: null, joinedAt: null },
+              },
+            };
+            count++;
+          } else if (retry_after) {
+            await wait(retry_after);
+            const warningMsg = `You are being rate limited, waiting: ${retry_after} seconds.`;
+            console.warn(warningMsg);
+            continue;
+          } else {
+            updateMap[userId] = {
+              ...userMapping,
+              guilds: {
+                ...userGuilds,
+                [guildId]: {
+                  roles: roles,
+                  nick,
+                  joinedAt: format(parseISO(joined_at), "MMM d, yyyy"),
+                },
+              },
+            };
+            count++;
+          }
+        } catch (e) {
+          const errorMsg = `Failed to fetch guild user data from userId ${userId} and guildId ${guildId}`;
+          console.error(errorMsg, e);
           count++;
         }
-      } catch (e) {
-        const errorMsg = `Failed to fetch guild user data from userId ${userId} and guildId ${guildId}`;
-        console.error(errorMsg, e);
+      } else {
         count++;
       }
-    } else {
-      count++;
     }
-  }
 
-  dispatch(setExportMaps({ userMap: { ...existingUserMap, ...updateMap } }));
-};
+    dispatch(setExportMaps({ userMap: { ...existingUserMap, ...updateMap } }));
+  };
 
 const _getSearchMessages =
   (channelId, guildId, searchCriteria) => async (dispatch, getState) => {
