@@ -14,7 +14,7 @@ class Guild {
 
   getIconUrl() {
     if (!Boolean(this.getIcon())) {
-      return null;
+      return "default_group_chat_icon.png";
     }
     return `https://cdn.discordapp.com/icons/${this.getId()}/${this.getIcon()}`;
   }

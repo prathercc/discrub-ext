@@ -218,8 +218,7 @@ function ChannelMessages({ closeAnnouncement }) {
                         );
                         return (
                           <Typography gap="4px" {...params}>
-                            {foundGuild.getIconUrl() &&
-                              getGuildIcon(foundGuild)}
+                            {getGuildIcon(foundGuild)}
                             {foundGuild?.getName()}
                           </Typography>
                         );
@@ -244,7 +243,7 @@ function ChannelMessages({ closeAnnouncement }) {
                                   copyName="Server List"
                                   disabled={guildFieldDisabled}
                                 />
-                                {selectedGuild.getIconUrl() &&
+                                {selectedGuild.getId() &&
                                   getGuildIcon(selectedGuild)}
                               </>
                             ),
