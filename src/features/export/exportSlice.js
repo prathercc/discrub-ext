@@ -646,22 +646,41 @@ const _exportHtml = async (
   );
 };
 
-const _exportJson = async (
-  exportUtils,
-  messages,
-  entityMainDirectory,
-  entityName,
-  currentPage
-) => {
-  return exportUtils.addToZip(
-    new Blob([JSON.stringify(messages)], {
-      type: "text/plain",
-    }),
-    `${entityMainDirectory}/${getSafeExportName(
-      entityName
-    )}_page_${currentPage}.json`
-  );
-};
+const _exportJson =
+  (exportUtils, messages, entityMainDirectory, entityName, currentPage) =>
+  async (dispatch, getState) => {
+    const { userMap } = getState().export.exportMaps;
+
+    return exportUtils.addToZip(
+      new Blob(
+        [
+          JSON.stringify(
+            messages.map((message) => {
+              let { content } = message;
+              // We are currently only parsing User mentions, using username, in JSON exports.
+              const { userMention } = dispatch(_getSpecialFormatting(content));
+              if (Boolean(userMention?.length)) {
+                userMention.forEach((userMentionRef) => {
+                  const { userName } = userMap[userMentionRef.id] || {};
+                  content = content.replaceAll(
+                    userMentionRef.raw,
+                    `@${userName}`
+                  );
+                });
+              }
+              return Object.assign(message, { content });
+            })
+          ),
+        ],
+        {
+          type: "text/plain",
+        }
+      ),
+      `${entityMainDirectory}/${getSafeExportName(
+        entityName
+      )}_page_${currentPage}.json`
+    );
+  };
 
 const _compressMessages =
   (messages, format, entityName, entityMainDirectory, bulk, exportUtils) =>
@@ -698,12 +717,14 @@ const _compressMessages =
       );
 
       if (format === "json") {
-        await _exportJson(
-          exportUtils,
-          exportMessages,
-          entityMainDirectory,
-          entityName,
-          currentPage
+        await dispatch(
+          _exportJson(
+            exportUtils,
+            exportMessages,
+            entityMainDirectory,
+            entityName,
+            currentPage
+          )
         );
       } else {
         await _exportHtml(
