@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.11.4",
+    "changes": [
+      "Paginate exported JSON messages.",
+      "Restore username parsing for User mentions in JSON exports."
+    ]
+  },
+  {
     "version": "1.11.3",
     "changes": [
       "Show Server role colors and icons on message authors when applicable.",
