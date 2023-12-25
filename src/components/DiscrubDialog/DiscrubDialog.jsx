@@ -115,7 +115,7 @@ function DiscrubDialog() {
           justifyContent="center"
           spacing={1}
         >
-          <Typography variant="body2">1.11.3</Typography>
+          <Typography variant="body2">1.11.4</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />

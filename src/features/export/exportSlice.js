@@ -627,11 +627,64 @@ const _processMessages =
     }
   };
 
+const _exportHtml = async (
+  exportUtils,
+  messages,
+  entityMainDirectory,
+  entityName,
+  currentPage
+) => {
+  // TODO: Do we still need to reference messages in case of error?
+  // HTML Exports actually are using ExportMessages component ref, NOT the messages passed to _exportHtml
+  exportUtils.setExportMessages(messages); // This is purely so that we can reference the messages in the case of an error!
+  const htmlBlob = await exportUtils.generateHTML();
+  await exportUtils.addToZip(
+    htmlBlob,
+    `${entityMainDirectory}/${getSafeExportName(
+      entityName
+    )}_page_${currentPage}.html`
+  );
+};
+
+const _exportJson =
+  (exportUtils, messages, entityMainDirectory, entityName, currentPage) =>
+  async (dispatch, getState) => {
+    const { userMap } = getState().export.exportMaps;
+
+    return exportUtils.addToZip(
+      new Blob(
+        [
+          JSON.stringify(
+            messages.map((message) => {
+              let { content } = message;
+              // We are currently only parsing User mentions, using username, in JSON exports.
+              const { userMention } = dispatch(_getSpecialFormatting(content));
+              if (Boolean(userMention?.length)) {
+                userMention.forEach((userMentionRef) => {
+                  const { userName } = userMap[userMentionRef.id] || {};
+                  content = content.replaceAll(
+                    userMentionRef.raw,
+                    `@${userName}`
+                  );
+                });
+              }
+              return Object.assign(message.getSafeCopy(), { content });
+            })
+          ),
+        ],
+        {
+          type: "text/plain",
+        }
+      ),
+      `${entityMainDirectory}/${getSafeExportName(
+        entityName
+      )}_page_${currentPage}.json`
+    );
+  };
+
 const _compressMessages =
   (messages, format, entityName, entityMainDirectory, bulk, exportUtils) =>
   async (dispatch, getState) => {
-    const { sortOverride, messagesPerPage } = getState().export;
-
     // TODO: Combine the setStatusText and wait calls within exportSlice.
     dispatch(
       setStatusText(
@@ -642,61 +695,49 @@ const _compressMessages =
     );
     await wait(5);
 
-    // TODO: Break this up into two new private functions.
-    if (format === "json") {
-      return await exportUtils.addToZip(
-        new Blob(
-          [
-            JSON.stringify(
-              bulk
-                ? messages.toSorted((a, b) =>
-                    sortByProperty(
-                      Object.assign(a, { date: new Date(a.timestamp) }),
-                      Object.assign(b, { date: new Date(b.timestamp) }),
-                      "date",
-                      sortOverride
-                    )
-                  )
-                : messages
-            ),
-          ],
-          {
-            type: "text/plain",
-          }
-        ),
-        `${entityMainDirectory}/${getSafeExportName(entityName)}.json`
+    const { messagesPerPage } = getState().export;
+
+    const totalPages =
+      messages.length > messagesPerPage
+        ? Math.ceil(messages.length / messagesPerPage)
+        : 1;
+    while (getState().export.currentPage <= totalPages) {
+      const currentPage = getState().export.currentPage;
+      await dispatch(checkDiscrubPaused());
+      if (dispatch(getDiscrubCancelled())) break;
+      dispatch(
+        setStatusText(`Compressing - Page ${currentPage} of ${totalPages}`)
       );
-    } else {
-      const totalPages =
-        messages.length > messagesPerPage
-          ? Math.ceil(messages.length / messagesPerPage)
-          : 1;
-      while (
-        getState().export.currentPage <= totalPages &&
-        !dispatch(getDiscrubCancelled())
-      ) {
-        const currentPage = getState().export.currentPage;
-        await dispatch(checkDiscrubPaused());
-        dispatch(
-          setStatusText(`Compressing - Page ${currentPage} of ${totalPages}`)
+      await wait(2);
+      const startIndex =
+        currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
+      const exportMessages = messages?.slice(
+        startIndex,
+        startIndex + messagesPerPage
+      );
+
+      if (format === "json") {
+        await dispatch(
+          _exportJson(
+            exportUtils,
+            exportMessages,
+            entityMainDirectory,
+            entityName,
+            currentPage
+          )
         );
-        await wait(2);
-        const startIndex =
-          currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
-        exportUtils.setExportMessages(
-          messages?.slice(startIndex, startIndex + messagesPerPage)
+      } else {
+        await _exportHtml(
+          exportUtils,
+          exportMessages,
+          entityMainDirectory,
+          entityName,
+          currentPage
         );
-        const htmlBlob = await exportUtils.generateHTML();
-        await exportUtils.addToZip(
-          htmlBlob,
-          `${entityMainDirectory}/${getSafeExportName(
-            entityName
-          )}_page_${currentPage}.html`
-        );
-        await dispatch(setCurrentPage(currentPage + 1));
       }
-      return dispatch(setCurrentPage(1));
+      dispatch(setCurrentPage(currentPage + 1));
     }
+    dispatch(setCurrentPage(1));
   };
 
 export const exportMessages =
@@ -704,7 +745,7 @@ export const exportMessages =
   async (dispatch, getState) => {
     const { messages: contextMessages, filteredMessages } = getState().message;
     const { selectedGuild, preFilterUserId } = getState().guild;
-    const { messagesPerPage } = getState().export;
+    const { messagesPerPage, sortOverride } = getState().export;
     const { preFilterUserId: dmPreFilterUserId } = getState().dm;
 
     for (const entity of selectedChannels) {
@@ -718,37 +759,44 @@ export const exportMessages =
         dispatch(setChannel(entity.id));
       }
 
-      // TODO: Refactor this.
-      const { messages } = bulk
-        ? await dispatch(
-            getMessageData(
-              selectedGuild?.id,
-              entity.id,
-              preFilterUserId || dmPreFilterUserId
-            )
+      let exportMessages = [];
+      if (bulk) {
+        const { messages } = await dispatch(
+          getMessageData(
+            selectedGuild?.id,
+            entity.id,
+            preFilterUserId || dmPreFilterUserId
           )
-        : {
-            messages: filteredMessages.length
-              ? filteredMessages
-              : contextMessages,
-          };
-      //
+        );
+        exportMessages = messages.toSorted((a, b) =>
+          sortByProperty(
+            Object.assign(a, { date: new Date(a.timestamp) }),
+            Object.assign(b, { date: new Date(b.timestamp) }),
+            "date",
+            sortOverride
+          )
+        );
+      } else {
+        exportMessages = filteredMessages.length
+          ? filteredMessages
+          : contextMessages;
+      }
 
       const mediaPath = `${entityMainDirectory}/${safeEntityName}_media`;
       const nonMediaPath = `${entityMainDirectory}/${safeEntityName}_non_media`;
       const paths = { media: mediaPath, non_media: nonMediaPath };
 
-      await dispatch(_processMessages(messages, paths, exportUtils));
+      await dispatch(_processMessages(exportMessages, paths, exportUtils));
 
       if (messagesPerPage === null || messagesPerPage === 0)
-        await dispatch(setMessagesPerPage(messages.length));
+        await dispatch(setMessagesPerPage(exportMessages.length));
 
-      if (messages.length > 0) {
+      if (exportMessages.length > 0) {
         if (dispatch(getDiscrubCancelled())) break;
         await dispatch(checkDiscrubPaused());
         await dispatch(
           _compressMessages(
-            messages,
+            exportMessages,
             format,
             entity.name,
             entityMainDirectory,
