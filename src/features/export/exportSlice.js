@@ -668,7 +668,7 @@ const _exportJson =
                   );
                 });
               }
-              return Object.assign(message, { content });
+              return Object.assign(message.getSafeCopy(), { content });
             })
           ),
         ],
