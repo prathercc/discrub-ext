@@ -40,6 +40,7 @@ import {
   getSpecialFormatting,
   selectExport,
 } from "../../features/export/exportSlice";
+import SkipReplies from "./components/SkipReplies";
 
 function Tags() {
   const classes = TagsStyles();
@@ -68,12 +69,12 @@ function Tags() {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [noTagsFound, setNoTagsFound] = useState(false);
+  const [skipReplies, setSkipReplies] = useState(true);
 
   const pauseCancelDisabled = !messagesLoading;
   const guildFieldDisabled = messagesLoading || discrubCancelled;
   const channelFieldDisabled =
     selectedGuild.id === null || messagesLoading || discrubCancelled;
-  const dateFieldsDisabled = messagesLoading;
   const generateBtnDisabled =
     !selectedGuild.id ||
     messagesLoading ||
@@ -119,10 +120,14 @@ function Tags() {
 
   const handleGenerate = async (type = Tag.TAGS_MADE_BY_USER) => {
     setAnchorEl(null);
-    const { messages } = await dispatch(
+    let { messages } = await dispatch(
       getMessageData(selectedGuild.id, selectedChannel.id)
     );
     let mentionMap = {};
+
+    if (skipReplies) {
+      messages = messages.filter((message) => !message.isReply());
+    }
 
     if (type === Tag.TAGS_MADE_BY_USER) {
       messages.forEach((message) => {
@@ -275,7 +280,7 @@ function Tags() {
               />
             </Stack>
             <BeforeAndAfterFields
-              disabled={dateFieldsDisabled}
+              disabled={messagesLoading}
               afterProps={{
                 toolTipTitle: "Tags Starting From",
                 toolTipDescription:
@@ -288,6 +293,12 @@ function Tags() {
                 label: "Tags Ending On",
               }}
             />
+            <SkipReplies
+              messagesLoading={messagesLoading}
+              setSkipReplies={setSkipReplies}
+              skipReplies={skipReplies}
+            />
+
             <Stack
               alignItems="center"
               direction="row"
