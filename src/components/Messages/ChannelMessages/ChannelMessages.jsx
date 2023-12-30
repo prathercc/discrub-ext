@@ -43,6 +43,16 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import DiscordTooltip from "../../DiscordComponents/DiscordTooltip/DiscordToolTip";
 
+export const getGuildIcon = (guild) => {
+  return (
+    <img
+      style={{ width: "24px", height: "24px", borderRadius: "50px" }}
+      src={guild.getIconUrl()}
+      alt="guild-icon"
+    />
+  );
+};
+
 function ChannelMessages({ closeAnnouncement }) {
   const dispatch = useDispatch();
   const { token, isLoading: userLoading } = useSelector(selectUser);
@@ -158,16 +168,6 @@ function ChannelMessages({ closeAnnouncement }) {
           </>
         )}
       </>
-    );
-  };
-
-  const getGuildIcon = (guild) => {
-    return (
-      <img
-        style={{ width: "24px", height: "24px", borderRadius: "50px" }}
-        src={guild.getIconUrl()}
-        alt="guild-icon"
-      />
     );
   };
 

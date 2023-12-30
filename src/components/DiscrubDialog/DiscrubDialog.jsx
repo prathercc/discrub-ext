@@ -29,6 +29,7 @@ import { resetDm } from "../../features/dm/dmSlice";
 import { resetChannel } from "../../features/channel/channelSlice";
 import { resetGuild } from "../../features/guild/guildSlice";
 import { setDiscrubPaused } from "../../features/app/appSlice";
+import Tags from "../../containers/Tags/Tags";
 
 function DiscrubDialog() {
   const classes = DiscrubDialogStyles();
@@ -63,23 +64,14 @@ function DiscrubDialog() {
 
   return (
     <Box className={classes.boxContainer}>
-      <img
-        style={{ position: "absolute", bottom: 56, left: 883, width: 90 }}
-        src="heart.png"
-        alt="heart"
-      />
-      <img
-        style={{ position: "absolute", top: 7, left: 768, width: 125 }}
-        src="holiday_build.png"
-        alt="holiday_build"
-      />
       <DonationComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && (
         <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
       )}
       {menuIndex === 1 && <DirectMessages />}
-      {menuIndex === 2 && <About />}
+      {menuIndex === 2 && <Tags />}
+      {menuIndex === 3 && <About />}
       {announcement && (
         <Box className={classes.alertBox}>
           {!alertOpen && (
@@ -115,7 +107,7 @@ function DiscrubDialog() {
           justifyContent="center"
           spacing={1}
         >
-          <Typography variant="body2">1.11.4</Typography>
+          <Typography variant="body2">1.11.5</Typography>
         </Stack>
       </Box>
       <CloseWindowButton />

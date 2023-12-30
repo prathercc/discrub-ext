@@ -17,6 +17,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import RedditIcon from "@mui/icons-material/Reddit";
+import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import { useSelector } from "react-redux";
 import { selectExport } from "../../../features/export/exportSlice";
 import { selectApp } from "../../../features/app/appSlice";
@@ -37,6 +38,7 @@ const MenuBar = ({ menuIndex, setMenuIndex }) => {
   const menuItems = [
     { name: "Channel Messages", icon: <ChatIcon /> },
     { name: "Direct Messages", icon: <EmailIcon /> },
+    { name: "Tags", icon: <LoyaltyIcon /> },
     { name: "Change Log", icon: <DataObjectIcon /> },
   ];
 
