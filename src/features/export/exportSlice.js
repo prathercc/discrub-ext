@@ -236,7 +236,7 @@ const _downloadAvatarFromMessage =
  * @param {String} content String content to parse Discord special formatting
  * @returns An Object of special formatting
  */
-const _getSpecialFormatting = (content) => (dispatch, getState) => {
+export const getSpecialFormatting = (content) => (dispatch, getState) => {
   const { userMap } = getState().export.exportMaps;
   const { selectedGuild } = getState().guild;
   const guildRoles = selectedGuild.getRoles() || [];
@@ -359,7 +359,7 @@ export const getFormattedInnerHtml =
     const { selectedGuild } = getState().guild;
     let rawHtml = content || "";
 
-    const { emoji } = dispatch(_getSpecialFormatting(rawHtml));
+    const { emoji } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(emoji?.length)) {
       emoji.forEach((emojiRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -369,7 +369,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { link } = dispatch(_getSpecialFormatting(rawHtml));
+    const { link } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(link?.length)) {
       link.forEach((linkRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -393,7 +393,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { hyperLink } = dispatch(_getSpecialFormatting(rawHtml));
+    const { hyperLink } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(hyperLink?.length)) {
       hyperLink.forEach((hyperLinkRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -417,7 +417,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { bold } = dispatch(_getSpecialFormatting(rawHtml));
+    const { bold } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(bold?.length)) {
       bold.forEach((boldRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -429,7 +429,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { code } = dispatch(_getSpecialFormatting(rawHtml));
+    const { code } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(code?.length)) {
       code.forEach((codeRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -453,7 +453,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { quote } = dispatch(_getSpecialFormatting(rawHtml));
+    const { quote } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(quote?.length)) {
       quote.forEach((quoteRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -472,7 +472,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { underLine } = dispatch(_getSpecialFormatting(rawHtml));
+    const { underLine } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(underLine?.length)) {
       underLine.forEach((underLineRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -489,7 +489,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { italics } = dispatch(_getSpecialFormatting(rawHtml));
+    const { italics } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(italics?.length)) {
       italics.forEach((italicsRef) => {
         rawHtml = rawHtml.replaceAll(
@@ -506,7 +506,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { channel } = dispatch(_getSpecialFormatting(rawHtml));
+    const { channel } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(channel?.length)) {
       channel.forEach((channelRef) => {
         const { channels } = getState().channel;
@@ -529,7 +529,7 @@ export const getFormattedInnerHtml =
       });
     }
 
-    const { userMention } = dispatch(_getSpecialFormatting(rawHtml));
+    const { userMention } = dispatch(getSpecialFormatting(rawHtml));
     if (Boolean(userMention?.length)) {
       userMention.forEach((userMentionRef) => {
         const { guilds, userName, displayName } =
@@ -573,7 +573,7 @@ export const getFormattedInnerHtml =
 const _downloadEmojisFromMessage =
   (message, exportUtils) => async (dispatch, getState) => {
     const { emoji: emojiReferences } = dispatch(
-      _getSpecialFormatting(message.getContent())
+      getSpecialFormatting(message.getContent())
     );
     if (Boolean(emojiReferences?.length)) {
       for (const { id, name } of emojiReferences) {
@@ -658,7 +658,7 @@ const _exportJson =
             messages.map((message) => {
               let { content } = message;
               // We are currently only parsing User mentions, using username, in JSON exports.
-              const { userMention } = dispatch(_getSpecialFormatting(content));
+              const { userMention } = dispatch(getSpecialFormatting(content));
               if (Boolean(userMention?.length)) {
                 userMention.forEach((userMentionRef) => {
                   const { userName } = userMap[userMentionRef.id] || {};
