@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.11.5",
+    "changes": ["Add the ability to generate Channel tag data spreadsheets."]
+  },
+  {
     "version": "1.11.4",
     "changes": [
       "Paginate exported JSON messages.",
