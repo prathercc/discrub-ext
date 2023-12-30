@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Alert,
   Autocomplete,
@@ -59,6 +59,10 @@ function Tags() {
   const { token, isLoading: userLoading } = useSelector(selectUser);
   const { exportMaps } = useSelector(selectExport);
   const { userMap } = exportMaps;
+
+  // TODO: Create a tagSlice, so that we don't need to do this!
+  const userMapRef = useRef();
+  userMapRef.current = userMap;
 
   const { messageCount } = fetchProgress || {};
 
@@ -125,7 +129,8 @@ function Tags() {
         const { userMention } = dispatch(getSpecialFormatting(message.content));
         const author = message.getAuthor();
         const guildNickName =
-          userMap[author.getUserId()]?.guilds[selectedGuild.getId()]?.nick;
+          userMapRef.current[author.getUserId()]?.guilds[selectedGuild.getId()]
+            ?.nick;
 
         const displayName =
           guildNickName || author.getDisplayName() || author.getUserName();
@@ -140,9 +145,10 @@ function Tags() {
         const { userMention } = dispatch(getSpecialFormatting(message.content));
         if (Boolean(userMention?.length)) {
           userMention.forEach((mention) => {
-            const { userId, userName } = mention;
+            const { id: userId, userName } = mention;
             const guildNickName =
-              userMap[userId]?.guilds[selectedGuild.getId()]?.nick;
+              userMapRef.current[userId]?.guilds[selectedGuild.getId()]?.nick;
+
             const displayName = guildNickName || userName;
             mentionMap[displayName] = Number(mentionMap[displayName] || 0) + 1;
           });
