@@ -9,7 +9,19 @@ import {
   setSearchBeforeDate,
 } from "../../../features/message/messageSlice";
 
-function BeforeAndAfterFields({ disabled }) {
+function BeforeAndAfterFields({
+  disabled,
+  afterProps = {
+    toolTipTitle: "Messages After",
+    toolTipDescription: "Search messages from after the provided date",
+    label: "Messages After",
+  },
+  beforeProps = {
+    toolTipTitle: "Messages Before",
+    toolTipDescription: "Search messages from before the provided date",
+    label: "Messages Before",
+  },
+}) {
   const dispatch = useDispatch();
   const { searchAfterDate, searchBeforeDate } = useSelector(selectMessage);
 
@@ -22,26 +34,26 @@ function BeforeAndAfterFields({ disabled }) {
     >
       <Tooltip
         arrow
-        title="Messages After"
-        description="Search messages from after the provided date"
+        title={afterProps.toolTipTitle}
+        description={afterProps.toolTipDescription}
         placement="top"
       >
         <DiscordDateTimePicker
           onChange={(e) => dispatch(setSearchAfterDate(e))}
-          label="Messages After"
+          label={afterProps.label}
           disabled={disabled}
           value={searchAfterDate}
         />
       </Tooltip>
       <Tooltip
         arrow
-        title="Messages Before"
-        description="Search messages from before the provided date"
+        title={beforeProps.toolTipTitle}
+        description={beforeProps.toolTipDescription}
         placement="top"
       >
         <DiscordDateTimePicker
           onChange={(e) => dispatch(setSearchBeforeDate(e))}
-          label="Messages Before"
+          label={beforeProps.label}
           disabled={disabled}
           value={searchBeforeDate}
         />
