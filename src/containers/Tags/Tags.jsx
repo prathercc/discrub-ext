@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Alert,
   Autocomplete,
@@ -40,6 +40,7 @@ import {
   getSpecialFormatting,
   selectExport,
 } from "../../features/export/exportSlice";
+import SkipReplies from "./components/SkipReplies";
 
 function Tags() {
   const classes = TagsStyles();
@@ -60,16 +61,20 @@ function Tags() {
   const { exportMaps } = useSelector(selectExport);
   const { userMap } = exportMaps;
 
+  // TODO: Create a tagSlice, so that we don't need to do this!
+  const userMapRef = useRef();
+  userMapRef.current = userMap;
+
   const { messageCount } = fetchProgress || {};
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [noTagsFound, setNoTagsFound] = useState(false);
+  const [skipReplies, setSkipReplies] = useState(true);
 
   const pauseCancelDisabled = !messagesLoading;
   const guildFieldDisabled = messagesLoading || discrubCancelled;
   const channelFieldDisabled =
     selectedGuild.id === null || messagesLoading || discrubCancelled;
-  const dateFieldsDisabled = messagesLoading;
   const generateBtnDisabled =
     !selectedGuild.id ||
     messagesLoading ||
@@ -115,17 +120,22 @@ function Tags() {
 
   const handleGenerate = async (type = Tag.TAGS_MADE_BY_USER) => {
     setAnchorEl(null);
-    const { messages } = await dispatch(
+    let { messages } = await dispatch(
       getMessageData(selectedGuild.id, selectedChannel.id)
     );
     let mentionMap = {};
+
+    if (skipReplies) {
+      messages = messages.filter((message) => !message.isReply());
+    }
 
     if (type === Tag.TAGS_MADE_BY_USER) {
       messages.forEach((message) => {
         const { userMention } = dispatch(getSpecialFormatting(message.content));
         const author = message.getAuthor();
         const guildNickName =
-          userMap[author.getUserId()]?.guilds[selectedGuild.getId()]?.nick;
+          userMapRef.current[author.getUserId()]?.guilds[selectedGuild.getId()]
+            ?.nick;
 
         const displayName =
           guildNickName || author.getDisplayName() || author.getUserName();
@@ -140,9 +150,10 @@ function Tags() {
         const { userMention } = dispatch(getSpecialFormatting(message.content));
         if (Boolean(userMention?.length)) {
           userMention.forEach((mention) => {
-            const { userId, userName } = mention;
+            const { id: userId, userName } = mention;
             const guildNickName =
-              userMap[userId]?.guilds[selectedGuild.getId()]?.nick;
+              userMapRef.current[userId]?.guilds[selectedGuild.getId()]?.nick;
+
             const displayName = guildNickName || userName;
             mentionMap[displayName] = Number(mentionMap[displayName] || 0) + 1;
           });
@@ -269,7 +280,7 @@ function Tags() {
               />
             </Stack>
             <BeforeAndAfterFields
-              disabled={dateFieldsDisabled}
+              disabled={messagesLoading}
               afterProps={{
                 toolTipTitle: "Tags Starting From",
                 toolTipDescription:
@@ -282,6 +293,12 @@ function Tags() {
                 label: "Tags Ending On",
               }}
             />
+            <SkipReplies
+              messagesLoading={messagesLoading}
+              setSkipReplies={setSkipReplies}
+              skipReplies={skipReplies}
+            />
+
             <Stack
               alignItems="center"
               direction="row"
