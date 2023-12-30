@@ -29,6 +29,7 @@ import { resetDm } from "../../features/dm/dmSlice";
 import { resetChannel } from "../../features/channel/channelSlice";
 import { resetGuild } from "../../features/guild/guildSlice";
 import { setDiscrubPaused } from "../../features/app/appSlice";
+import Tags from "../../containers/Tags/Tags";
 
 function DiscrubDialog() {
   const classes = DiscrubDialogStyles();
@@ -69,7 +70,8 @@ function DiscrubDialog() {
         <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
       )}
       {menuIndex === 1 && <DirectMessages />}
-      {menuIndex === 2 && <About />}
+      {menuIndex === 2 && <Tags />}
+      {menuIndex === 3 && <About />}
       {announcement && (
         <Box className={classes.alertBox}>
           {!alertOpen && (
