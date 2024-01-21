@@ -1,0 +1,3 @@
+Container components that exist here should consist of a main 'container' component and any amount of inner 'child' components.
+The container component should be within a folder of the same name, and any child components should go into subdirectory called 'components'.
+Child components can use redux state, but ideally the container components should be passing as many props as possible, in order to keep redux state usage at a top level.

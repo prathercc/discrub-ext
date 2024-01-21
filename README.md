@@ -1,21 +1,30 @@
+# React + TypeScript + Vite
 
-# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/master/public/discrub2.png"> Discrub
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-**Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML and JSON supported) Discord messages.
+Currently, two official plugins are available:
 
-<a href="https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj"><img src="https://img.shields.io:/chrome-web-store/users/plhdclenpaecffbcefjmpkkbdpkmhhbj?style=plastic&label=Discrub on Chrome&logo=javascript&logoColor=38bdae&color=1a1b27&labelColor=404040"></a>
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-📼 Instructional Video: https://www.youtube.com/watch?v=MIRUy9-v3SU
+## Expanding the ESLint configuration
 
-‎             |  ‎
-:-------------------------:|:-------------------------:
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z2.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z3.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z4.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z5.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z7.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z8.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z9.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z11.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z12.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png)    
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-## Contributing
+- Configure the top-level `parserOptions` property like this:
 
-Feel free to create an [Issue](https://github.com/prathercc/discrub-ext/issues) if you have any ideas for improvement or notice any bugs that need to addressed.
+```js
+export default {
+  // other rules...
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: ['./tsconfig.json', './tsconfig.node.json'],
+    tsconfigRootDir: __dirname,
+  },
+}
+```
+
+- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
+- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list

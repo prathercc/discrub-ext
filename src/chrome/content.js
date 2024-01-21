@@ -4,6 +4,7 @@ if (!chrome.runtime.onMessage.hasListeners())
     const { message } = request;
     switch (message) {
       case "INJECT_BUTTON":
+        // eslint-disable-next-line no-case-declarations
         const element =
           document.querySelector('[aria-label="Inbox"]')?.parentElement ||
           document.querySelector('[aria-label="Help"]')?.parentElement;
@@ -14,7 +15,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           element.style.justifyContent = "center";
           const iframe = document.createElement("iframe");
           iframe.id = "injected_iframe_button";
-          iframe.src = chrome.runtime.getURL("injected_button.html");
+          iframe.src = chrome.runtime.getURL("button_injection.html");
           iframe.scrolling = "no";
           iframe.width = 30;
           iframe.height = 30;
@@ -33,7 +34,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           modal.style.overflow = "auto";
           const iframe = document.createElement("iframe");
           iframe.id = "injected_dialog_iframe";
-          iframe.src = chrome.runtime.getURL("injected_dialog.html");
+          iframe.src = chrome.runtime.getURL("index.html");
           iframe.height = "675px";
           iframe.width = "1250px";
           // iframe.style.border = "1px dotted gray";
@@ -50,6 +51,7 @@ if (!chrome.runtime.onMessage.hasListeners())
         break;
       case "GET_TOKEN":
         window.dispatchEvent(new Event("beforeunload"));
+        // eslint-disable-next-line no-case-declarations
         const storage = document.body.appendChild(
           document.createElement("iframe")
         ).contentWindow.localStorage;
