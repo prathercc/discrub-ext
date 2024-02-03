@@ -3,13 +3,6 @@ import {
   DialogContentText,
   IconButton,
   Stack,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemButton,
-  ListItemIcon,
-  Checkbox,
-  Box,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -22,6 +15,7 @@ import PreviewImageToggle from "./preview-image-toggle";
 import PerPage from "./per-page";
 import SortDirectionToggle from "./sort-direction-toggle";
 import Channel from "../../../classes/channel";
+import ChannelSelection from "./channel-selection";
 
 type BulkContentProps = {
   isDm?: boolean;
@@ -62,7 +56,13 @@ const BulkContent = ({
       {!isExporting && !isDm && (
         <>
           <DialogContentText>
-            <Typography variant="body2">Select Channel(s) to export</Typography>
+            <Typography variant="body2">
+              {selectedExportChannels.length
+                ? `${selectedExportChannels.length} Channel${
+                    selectedExportChannels.length === 1 ? "" : "s"
+                  } selected`
+                : "Select Channel(s) to export"}
+            </Typography>
           </DialogContentText>
           <Stack
             direction="column"
@@ -70,32 +70,11 @@ const BulkContent = ({
             alignItems="center"
             spacing={3}
           >
-            <Box sx={{ width: 350, height: 200, overflow: "auto" }}>
-              <List disablePadding dense>
-                {channels.map((channel) => (
-                  <ListItem key={channel.id} value={channel.id} dense>
-                    <ListItemButton
-                      role={undefined}
-                      onClick={() => handleChannelSelect(channel.id)}
-                      dense
-                    >
-                      <ListItemIcon>
-                        <Checkbox
-                          size="small"
-                          edge="start"
-                          checked={selectedExportChannels.some(
-                            (cId) => cId === channel.id
-                          )}
-                          tabIndex={-1}
-                          disableRipple
-                        />
-                      </ListItemIcon>
-                      <ListItemText primary={channel.name} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
+            <ChannelSelection
+              channels={channels}
+              selectedExportChannels={selectedExportChannels}
+              handleChannelSelect={handleChannelSelect}
+            />
             <Stack
               sx={{ width: "100%" }}
               direction="row"
