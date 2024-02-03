@@ -71,7 +71,7 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
           poster={
             mediaMap[attachment.proxy_url]
               ? undefined
-              : "resources/media/discrub2.png"
+              : "resources/media/discrub.png"
           }
         />
       )}

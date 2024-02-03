@@ -61,7 +61,7 @@ const WebhookEmbedMock = ({
               variant="subtitle2"
               dangerouslySetInnerHTML={{
                 __html: getFormattedInnerHtml({
-                  content: String(name),
+                  content: name || "",
                   isReply: false,
                   exportView: alwaysExpanded,
                 }),
@@ -75,7 +75,7 @@ const WebhookEmbedMock = ({
             variant="subtitle2"
             dangerouslySetInnerHTML={{
               __html: getFormattedInnerHtml({
-                content: String(name),
+                content: name || "",
                 isReply: false,
                 exportView: alwaysExpanded,
               }),
@@ -125,7 +125,7 @@ const WebhookEmbedMock = ({
               }}
               dangerouslySetInnerHTML={{
                 __html: getFormattedInnerHtml({
-                  content: String(title),
+                  content: title || "",
                   isReply: false,
                   exportView: alwaysExpanded,
                 }),
@@ -138,7 +138,7 @@ const WebhookEmbedMock = ({
             sx={{ display: "block", whiteSpace: "pre-line" }}
             dangerouslySetInnerHTML={{
               __html: getFormattedInnerHtml({
-                content: String(title),
+                content: title || "",
                 isReply: false,
                 exportView: alwaysExpanded,
               }),
@@ -157,7 +157,7 @@ const WebhookEmbedMock = ({
         variant="body2"
         dangerouslySetInnerHTML={{
           __html: getFormattedInnerHtml({
-            content: String(description),
+            content: description || "",
             isReply: false,
             exportView: alwaysExpanded,
           }),

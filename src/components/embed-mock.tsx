@@ -41,7 +41,7 @@ const EmbedMock = ({ embed, index }: EmbedMockProps) => {
           controls
           playsInline
           autoPlay={false}
-          poster={embed.thumbnail?.proxy_url || "resources/media/discrub2.png"}
+          poster={embed.thumbnail?.proxy_url || "resources/media/discrub.png"}
         />
       )}
       {previewImages &&

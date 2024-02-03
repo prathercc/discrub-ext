@@ -10,7 +10,7 @@ function DiscrubButton() {
       >
         <img
           style={{ width: "24px", height: "24px" }}
-          src="resources/media/discrub2.png"
+          src="resources/media/discrub.png"
           alt="Discrub Logo"
         />
       </IconButton>

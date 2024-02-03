@@ -23,6 +23,7 @@
       "matches": ["*://discord.com/*"],
       "resources": [
         "resources/html/mitm.html",
+        "resources/media/*",
         "index.html",
         "button_injection.html",
         "*/*.zip"
@@ -30,9 +31,9 @@
     }
   ],
   "icons": {
-    "16": "src/assets/png/discrub2.png",
-    "32": "src/assets/png/discrub2.png",
-    "48": "src/assets/png/discrub2.png",
-    "128": "src/assets/png/discrub2.png"
+    "16": "public/resources/media/discrub.png",
+    "32": "public/resources/media/discrub.png",
+    "48": "public/resources/media/discrub.png",
+    "128": "public/resources/media/discrub.png"
   }
 }

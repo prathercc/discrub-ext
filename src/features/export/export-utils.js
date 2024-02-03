@@ -29,10 +29,10 @@ export default class ExportUtils {
     this.html = null;
     this.callback(true);
     // Wait for contentRef to obtain value
-    while (!this.contentRef.current) await wait(2);
+    while (!this.contentRef.current) await wait(1);
     this._generateHTMLHelperFunc();
     // Wait for html to be generated
-    while (!this.html) await wait(2);
+    while (!this.html) await wait(1);
     this.callback(false);
     return new Blob([this.html], { type: "text/html" });
   };

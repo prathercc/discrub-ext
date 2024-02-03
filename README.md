@@ -1,4 +1,4 @@
-# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/master/public/discrub2.png"> Discrub
+# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/master/public/resources/media/discrub.png"> Discrub
 
 **Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML and JSON supported) Discord messages.
 

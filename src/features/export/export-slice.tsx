@@ -47,6 +47,7 @@ import { downloadFile } from "../../services/discord-service";
 import { ReactElement } from "react";
 import { Typography } from "@mui/material";
 import ImgEmoji from "./styled/img-emoji";
+import Guild from "../../classes/guild";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -186,7 +187,11 @@ export const {
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
-  ({ message, exportUtils, paths }: FilesFromMessagesProps): AppThunk =>
+  ({
+    message,
+    exportUtils,
+    paths,
+  }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { downloadImages } = getState().export;
     let embeds = message.embeds;
@@ -231,35 +236,32 @@ const _downloadFilesFromMessage =
   };
 
 const _downloadRoles =
-  (exportUtils: ExportUtils): AppThunk =>
+  (exportUtils: ExportUtils, guild: Guild): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    const { selectedGuild } = getState().guild;
-    if (selectedGuild) {
-      const guildRoles = selectedGuild.roles || [];
-      for (const role of guildRoles) {
-        const { exportMaps } = getState().export;
-        const iconUrl = getIconUrl(role);
-        if (iconUrl) {
-          const { success, data } = await downloadFile(iconUrl);
-          if (success && data) {
-            const fileExt = data.type.split("/")?.[1] || "webp";
-            const fileName = getExportFileName(role, fileExt);
-            const roleFilePath = `roles/${fileName}.${fileExt}`;
-            await exportUtils.addToZip(data, roleFilePath);
-            dispatch(
-              setExportRoleMap({
-                ...exportMaps.roleMap,
-                [iconUrl]: `../${roleFilePath}`,
-              })
-            );
-          }
+    const guildRoles = guild.roles || [];
+    for (const role of guildRoles) {
+      const { exportMaps } = getState().export;
+      const iconUrl = getIconUrl(role);
+      if (iconUrl) {
+        const { success, data } = await downloadFile(iconUrl);
+        if (success && data) {
+          const fileExt = data.type.split("/")?.[1] || "webp";
+          const fileName = getExportFileName(role, fileExt);
+          const roleFilePath = `roles/${fileName}.${fileExt}`;
+          await exportUtils.addToZip(data, roleFilePath);
+          dispatch(
+            setExportRoleMap({
+              ...exportMaps.roleMap,
+              [iconUrl]: `../${roleFilePath}`,
+            })
+          );
         }
       }
     }
   };
 
 const _downloadAvatarFromMessage =
-  ({ message, exportUtils }: AvatarFromMessageProps): AppThunk =>
+  ({ message, exportUtils }: AvatarFromMessageProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { exportMaps } = getState().export;
     const { id: userId, avatar: avatarId } = message.author || {};
@@ -627,7 +629,7 @@ export const getFormattedInnerHtml =
   };
 
 const _downloadEmojisFromMessage =
-  ({ message, exportUtils }: EmojisFromMessageProps): AppThunk =>
+  ({ message, exportUtils }: EmojisFromMessageProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { emoji: emojiReferences } = dispatch(
       getSpecialFormatting(message.content)
@@ -662,10 +664,24 @@ const _downloadEmojisFromMessage =
     }
   };
 
+const _downloadDiscrubMedia = async (exportUtils: ExportUtils) => {
+  const media = [{ url: "resources/media/discrub.png", name: "discrub.png" }];
+  for (const m of media) {
+    const { success, data } = await downloadFile(m.url);
+
+    if (success && data) {
+      await exportUtils.addToZip(data, `discrub_media/${m.name}`);
+    }
+  }
+};
+
 const _processMessages =
-  ({ messages, paths, exportUtils }: ProcessMessagesProps): AppThunk =>
+  ({
+    messages,
+    paths,
+    exportUtils,
+  }: ProcessMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    await dispatch(_downloadRoles(exportUtils));
     for (const [i, message] of messages.entries()) {
       await wait(!i ? 3 : 0);
       const { discrubCancelled } = getState().app;
@@ -713,7 +729,7 @@ const _exportJson =
     entityMainDirectory,
     entityName,
     currentPage,
-  }: ExportJsonProps): AppThunk =>
+  }: ExportJsonProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { userMap } = getState().export.exportMaps;
 
@@ -755,7 +771,7 @@ const _compressMessages =
     entityName,
     entityMainDirectory,
     exportUtils,
-  }: CompressMessagesProps): AppThunk =>
+  }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     // TODO: Combine the setStatusText and wait calls within exportSlice.
     // TODO: Use a service worker to reduce the load of the compression step.
@@ -766,7 +782,7 @@ const _compressMessages =
         }`
       )
     );
-    await wait(5);
+    await wait(1);
 
     const { messagesPerPage } = getState().export;
 
@@ -826,6 +842,10 @@ export const exportMessages =
     const { selectedGuild, preFilterUserId } = getState().guild;
     const { messagesPerPage, sortOverride } = getState().export;
     const { preFilterUserId: dmPreFilterUserId } = getState().dm;
+
+    if (selectedGuild)
+      await dispatch(_downloadRoles(exportUtils, selectedGuild));
+    if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
 
     for (const entity of selectedChannels) {
       if (getState().app.discrubCancelled) break;

@@ -121,7 +121,7 @@ const MessageTitleMock = ({
         <img
           draggable={false}
           style={{ width: "24px", height: "24px" }}
-          src="https://i92.servimg.com/u/f92/11/29/62/29/discru10.png"
+          src="../discrub_media/discrub.png"
           alt="Discrub Logo"
         />
       </Stack>
