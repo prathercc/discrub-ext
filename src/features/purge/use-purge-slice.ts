@@ -12,8 +12,12 @@ const usePurgeSlice = () => {
   const useIsLoading = (): boolean | Maybe =>
     useAppSelector((state: RootState) => state.purge.isLoading);
 
+  const usePurgeChannel = (): Channel | null =>
+    useAppSelector((state: RootState) => state.purge.purgeChannel);
+
   const state = {
-    isLoading: useIsLoading, // TODO: We should not need this!
+    isLoading: useIsLoading,
+    purgeChannel: usePurgeChannel,
   };
 
   const setIsLoading = (value: boolean): void => {

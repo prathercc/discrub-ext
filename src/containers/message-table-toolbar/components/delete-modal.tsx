@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import MessageChip from "../../../components/message-chip";
-import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import SouthIcon from "@mui/icons-material/South";
 import Box from "@mui/material/Box";
 import ModalDebugMessage from "../../../components/modal-debug-message";
 import {
@@ -11,18 +10,19 @@ import {
   Button,
   Checkbox,
   Stack,
-  CircularProgress,
   Dialog,
   DialogTitle,
   DialogActions,
   DialogContent,
+  useTheme,
+  LinearProgress,
 } from "@mui/material";
 import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
 import { isMessage } from "../../../app/guards";
 import { DeleteConfiguration } from "../../../features/message/message-types";
 import { Modify } from "../../../features/app/app-types";
-import { getAvatarUrl } from "../../../utils";
+import MessageMock from "../../../components/message-mock";
 
 type DeleteModalProps = {
   open: boolean;
@@ -39,6 +39,7 @@ const DeleteModal = ({
   modify,
   handleDeleteMessage,
 }: DeleteModalProps) => {
+  const theme = useTheme();
   const { active, entity, statusText } = modify;
 
   const [deleteConfig, setDeleteConfig] = useState<DeleteConfiguration>({
@@ -51,14 +52,14 @@ const DeleteModal = ({
   }, [open]);
 
   useEffect(() => {
-    if (selectedRows.length === 0) {
+    if (open && selectedRows.length === 0) {
       handleClose();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRows]);
+  }, [open, selectedRows]);
 
   return (
-    <Dialog fullWidth open={open}>
+    <Dialog hideBackdrop fullWidth open={open}>
       <DialogTitle>
         <Typography variant="h5">Delete Data</Typography>
         <Typography variant="caption">
@@ -104,23 +105,27 @@ const DeleteModal = ({
               <Box
                 my={1}
                 sx={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  display: "flex",
+                  minHeight: "50px",
+                  maxHeight: "50px",
+                  overflowX: "hidden",
+                  overflowY: "auto",
+                  width: "100%",
                 }}
               >
-                <MessageChip
-                  avatarSrc={getAvatarUrl(entity.author)}
-                  username={entity.author.username}
-                  content={entity.content}
-                />
-                <ArrowRightAltIcon />
-                <DeleteSweepIcon sx={{ color: "red" }} />
+                <MessageMock browserView index={entity.id} message={entity} />
               </Box>
-              <ModalDebugMessage debugMessage={statusText} />
-              <Stack justifyContent="center" alignItems="center">
-                <CircularProgress />
+              <Stack
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                gap="5px"
+                width="100%"
+              >
+                <LinearProgress sx={{ width: "100%" }} />
+                <SouthIcon />
+                <DeleteSweepIcon sx={{ color: theme.palette.error.main }} />
               </Stack>
+              <ModalDebugMessage debugMessage={statusText} />
               <Typography sx={{ display: "block" }} variant="caption">
                 {`Message ${entity._index} of ${entity._total}`}
               </Typography>

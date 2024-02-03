@@ -62,11 +62,18 @@ const ExportButton = ({
 
   const exportType = isDm ? "DM" : "Server";
 
-  const contentRef = useRef<HTMLDivElement | undefined>();
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   const entity: Guild | Channel | Maybe = isDm
     ? selectedDm
     : selectedChannel || selectedGuild;
+
+  const zipName = String(isDm ? selectedDm?.name : selectedGuild?.name);
+  const exportUtils = new ExportUtils(
+    contentRef,
+    (e: boolean) => setIsGenerating(e),
+    zipName
+  );
 
   const handleDialogClose = () => {
     if (isGenerating || isExporting) {
@@ -81,24 +88,15 @@ const ExportButton = ({
   };
 
   const handleExportSelected = async (format: ExportType = ExportType.JSON) => {
-    const zipName = String(isDm ? selectedDm?.name : selectedGuild?.name);
-    const exportUtils = new ExportUtils(
-      contentRef,
-      (e: boolean) => setIsGenerating(e),
-      zipName
-    );
-
     let selectedChannels: Channel[] = [];
     if (isDm && selectedDm) {
       selectedChannels = [selectedDm];
+    } else if (bulk) {
+      selectedChannels = channels.filter((c) =>
+        selectedExportChannels.some((id) => id === c.id)
+      );
     } else if (selectedChannel) {
-      if (bulk) {
-        selectedChannels = channels.filter((c) =>
-          selectedExportChannels.some((id) => id === c.id)
-        );
-      } else {
-        selectedChannels = [selectedChannel];
-      }
+      selectedChannels = [selectedChannel];
     }
 
     exportMessages({ selectedChannels, exportUtils, bulk, format });

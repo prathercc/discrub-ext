@@ -32,6 +32,8 @@ type TableProps<T> = {
   rows: TableRow<T>[];
   orderProps: OrderProps<T>;
   renderToolbarComponent?: (selectedRows: string[]) => React.ReactNode;
+  selectedRows?: string[];
+  setSelectedRows?: (rowIds: string[]) => void;
 };
 
 export default function Table<T>({
@@ -39,16 +41,23 @@ export default function Table<T>({
   rows,
   orderProps,
   renderToolbarComponent,
+  selectedRows = [],
+  setSelectedRows = () => {},
 }: TableProps<T>) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [internalSelections, setInternalSelections] =
+    useState<string[]>(selectedRows);
   const [order, setOrder] = useState<SortDirection>(orderProps.order);
   const [orderBy, setOrderBy] = useState<keyof T>(orderProps.orderBy);
 
   useEffect(() => {
     setPage(0);
   }, [rows.length]);
+
+  useEffect(() => {
+    setInternalSelections(selectedRows);
+  }, [selectedRows]);
 
   const handleRequestSort = (_: unknown, property: keyof T) => {
     const isAsc = orderBy === property && order === SortDirection.ASCENDING;
@@ -63,22 +72,29 @@ export default function Table<T>({
   };
 
   const isSelected = (id: string): boolean =>
-    selectedRows.some((selectedId) => selectedId === id);
+    internalSelections.some((selectedId) => selectedId === id);
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      setSelectedRows(rows.map((row) => row.data.id));
+      const mappedRowIds = rows.map((row) => row.data.id);
+      setInternalSelections(mappedRowIds);
+      setSelectedRows(mappedRowIds);
     } else {
+      setInternalSelections([]);
       setSelectedRows([]);
     }
   };
   const handleClick = (_: unknown, id: Snowflake) => {
     if (isSelected(id)) {
-      setSelectedRows((prevState) =>
-        prevState.filter((selectedId) => selectedId !== id)
+      const filteredSelections = internalSelections.filter(
+        (selectedId) => selectedId !== id
       );
+      setInternalSelections(filteredSelections);
+      setSelectedRows(filteredSelections);
     } else {
-      setSelectedRows((prevState) => [...prevState, id]);
+      const updatedSelections = [...internalSelections, id];
+      setInternalSelections(updatedSelections);
+      setSelectedRows(updatedSelections);
     }
   };
 
@@ -99,7 +115,7 @@ export default function Table<T>({
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", marginBottom: 2, borderRadius: "6px" }}>
-        {renderToolbarComponent?.(selectedRows)}
+        {renderToolbarComponent?.(internalSelections)}
         <TableContainer sx={{ overflowX: "hidden" }}>
           <Tbl sx={{ maxWidth: "774px" }} size="small">
             <TableHead
@@ -109,7 +125,7 @@ export default function Table<T>({
               handleSelectAllClick={handleSelectAllClick}
               handleRequestSort={handleRequestSort}
               rowCount={rows.length}
-              selectedRows={selectedRows}
+              selectedRows={internalSelections}
             />
             <TableBody>
               {rows

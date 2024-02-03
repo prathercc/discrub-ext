@@ -6,6 +6,7 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import MessageMock from "./message-mock";
 import Message from "../classes/message";
 import { EmbedType } from "../enum/embed-type";
+import { TableCell } from "@mui/material";
 
 type TableMessageProps = {
   row: Message;
@@ -25,28 +26,14 @@ export default function TableMessage({
   );
 
   return (
-    <>
-      <td
-        style={{
-          textAlign: "left",
-          verticalAlign: "middle",
-          borderBottom: "1px solid rgba(79,84,92,0.48)",
-          paddingTop: "5px",
-          paddingLeft: "5px",
-        }}
-        colSpan={4}
-      >
+    <TableCell colSpan={5}>
+      <Stack direction="row" justifyContent="center" alignItems="center">
         <MessageMock browserView message={row} index={row.id} />
-      </td>
-      <td
-        colSpan={1}
-        style={{
-          textAlign: "center",
-          verticalAlign: "middle",
-          borderBottom: "1px solid rgba(79,84,92,0.48)",
-        }}
-      >
-        <Stack direction="column" justifyContent="center" alignItems="center">
+        <Stack
+          direction="column"
+          justifyContent="flex-start"
+          alignItems="center"
+        >
           {row.attachments.length > 0 && (
             <Tooltip
               arrow
@@ -80,7 +67,7 @@ export default function TableMessage({
             </Tooltip>
           )}
         </Stack>
-      </td>
-    </>
+      </Stack>
+    </TableCell>
   );
 }

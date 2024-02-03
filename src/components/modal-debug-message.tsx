@@ -1,11 +1,12 @@
 import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 
 const ModalDebugMessage = ({
   debugMessage,
 }: {
   debugMessage: string | Maybe;
 }) => {
+  const theme = useTheme();
   return (
     <Box
       my={1}
@@ -13,11 +14,11 @@ const ModalDebugMessage = ({
         alignItems: "center",
         justifyContent: "center",
         display: "flex",
-        opacity: debugMessage?.length === 0 ? 0 : 1,
+        opacity: debugMessage?.length ? 1 : 0,
       }}
     >
-      <Typography variant="caption" sx={{ color: "orange" }}>
-        {debugMessage?.length === 0 ? "An Error Occurred!" : debugMessage}
+      <Typography variant="caption" sx={{ color: theme.palette.warning.main }}>
+        {debugMessage || "An error occurred"}
       </Typography>
     </Box>
   );

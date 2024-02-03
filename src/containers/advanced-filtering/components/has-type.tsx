@@ -33,7 +33,7 @@ function HasType({ disabled }: HasTypeProps) {
     <Tooltip
       arrow
       title="Messages Containing"
-      description="Search messages by contained type(s)"
+      description="Search messages that contain the following type(s)"
       placement="top"
     >
       <FormControl sx={{ width: 400 }}>

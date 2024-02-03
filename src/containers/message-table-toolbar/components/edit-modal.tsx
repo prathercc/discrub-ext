@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
-import MessageChip from "../../../components/message-chip";
-import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import SouthIcon from "@mui/icons-material/South";
 import ModalDebugMessage from "../../../components/modal-debug-message";
 import {
   Typography,
   Button,
   Stack,
-  CircularProgress,
   Dialog,
   DialogTitle,
   DialogActions,
   DialogContent,
   TextField,
+  LinearProgress,
 } from "@mui/material";
 import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
 import { Modify } from "../../../features/app/app-types";
 import { isMessage } from "../../../app/guards";
-import { getAvatarUrl } from "../../../utils";
+import MessageMock from "../../../components/message-mock";
+import Message from "../../../classes/message";
 
 type EditModalProps = {
   open: boolean;
@@ -44,7 +44,7 @@ const EditModal = ({
   }, [open]);
 
   return (
-    <Dialog fullWidth open={open}>
+    <Dialog hideBackdrop fullWidth open={open}>
       <DialogTitle>
         <Typography variant="h5">Edit Data</Typography>
         <Typography variant="caption">
@@ -62,33 +62,43 @@ const EditModal = ({
         />
         {active && isMessage(entity) && (
           <>
-            <Box
+            <Stack
               my={1}
-              sx={{
-                alignItems: "center",
-                justifyContent: "center",
-                display: "flex",
-              }}
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              gap="5px"
             >
-              <MessageChip
-                avatarSrc={getAvatarUrl(entity.author)}
-                username={entity.author.username}
-                content={entity.content}
-              />
-              <ArrowRightAltIcon />
-              <MessageChip
-                avatarSrc={getAvatarUrl(entity.author)}
-                username={entity.author.username}
-                content={updateText}
-              />
-            </Box>
-            <ModalDebugMessage debugMessage={statusText} />
-            <Stack justifyContent="center" alignItems="center">
-              <CircularProgress />
+              <Box
+                sx={{
+                  minHeight: "50px",
+                  maxHeight: "50px",
+                  overflowX: "hidden",
+                  overflowY: "auto",
+                  width: "100%",
+                }}
+              >
+                <MessageMock browserView index={entity.id} message={entity} />
+              </Box>
+              <LinearProgress sx={{ width: "100%" }} />
+              <SouthIcon />
+              <Box
+                sx={{
+                  minHeight: "50px",
+                  maxHeight: "50px",
+                  overflowX: "hidden",
+                  overflowY: "auto",
+                  width: "100%",
+                }}
+              >
+                <MessageMock
+                  browserView
+                  index={entity.id}
+                  message={new Message({ ...entity, content: updateText })}
+                />
+              </Box>
             </Stack>
-            <Typography sx={{ display: "block" }} variant="caption">
-              {entity.id}
-            </Typography>
+            <ModalDebugMessage debugMessage={statusText} />
           </>
         )}
       </DialogContent>

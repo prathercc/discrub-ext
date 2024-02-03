@@ -8,7 +8,6 @@ import {
   getExportFileName,
   getIconUrl,
   getMediaUrls,
-  getPercent,
   getRoleNames,
   getSafeExportName,
   isDm,
@@ -219,9 +218,10 @@ const _downloadFilesFromMessage =
               const fileName = getExportFileName(entity, blobType);
               await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
 
-              const updatedMediaMap = Object.assign(map, {
+              const updatedMediaMap = {
+                ...map,
                 [downloadUrl]: `${mediaPath.split("/")[1]}/${fileName}`,
-              });
+              };
               dispatch(setExportMediaMap(updatedMediaMap));
             }
           }
@@ -247,11 +247,10 @@ const _downloadRoles =
             const roleFilePath = `roles/${fileName}.${fileExt}`;
             await exportUtils.addToZip(data, roleFilePath);
             dispatch(
-              setExportRoleMap(
-                Object.assign(exportMaps.roleMap, {
-                  [iconUrl]: `../${roleFilePath}`,
-                })
-              )
+              setExportRoleMap({
+                ...exportMaps.roleMap,
+                [iconUrl]: `../${roleFilePath}`,
+              })
             );
           }
         }
@@ -276,11 +275,10 @@ const _downloadAvatarFromMessage =
         await exportUtils.addToZip(data, avatarFilePath);
 
         dispatch(
-          setExportAvatarMap(
-            Object.assign(exportMaps.avatarMap, {
-              [idAndAvatar]: avatarFilePath,
-            })
-          )
+          setExportAvatarMap({
+            ...exportMaps.avatarMap,
+            [idAndAvatar]: avatarFilePath,
+          })
         );
       }
     }
@@ -495,7 +493,7 @@ export const getFormattedInnerHtml =
           renderToString(
             <div
               style={{
-                backgroundColor: "#2b2d31",
+                backgroundColor: "#282b30",
                 borderRadius: 5,
                 padding: "7px",
                 border: "1px solid #1e1f22",
@@ -639,24 +637,26 @@ const _downloadEmojisFromMessage =
         const { discrubCancelled } = getState().app;
         if (discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
-
-        const { success, data } = await downloadFile(
-          `https://cdn.discordapp.com/emojis/${id}`
-        );
-
-        if (success && data) {
-          const fileExt = data.type?.split("/")?.[1] || "gif";
-          const emojiFilePath = `emojis/${getSafeExportName(
-            name
-          )}_${id}.${fileExt}`;
-          await exportUtils.addToZip(data, emojiFilePath);
-          const { exportMaps } = getState().export;
-          dispatch(
-            setExportEmojiMap({
-              ...exportMaps.emojiMap,
-              [id]: emojiFilePath,
-            })
+        const { exportMaps } = getState().export;
+        if (!exportMaps.emojiMap[id]) {
+          const { success, data } = await downloadFile(
+            `https://cdn.discordapp.com/emojis/${id}`
           );
+
+          if (success && data) {
+            const fileExt = data.type?.split("/")?.[1] || "gif";
+            const emojiFilePath = `emojis/${getSafeExportName(
+              name
+            )}_${id}.${fileExt}`;
+            await exportUtils.addToZip(data, emojiFilePath);
+
+            dispatch(
+              setExportEmojiMap({
+                ...exportMaps.emojiMap,
+                [id]: emojiFilePath,
+              })
+            );
+          }
         }
       }
     }
@@ -678,9 +678,10 @@ const _processMessages =
       await dispatch(_downloadEmojisFromMessage({ message, exportUtils }));
       await dispatch(_downloadAvatarFromMessage({ message, exportUtils }));
 
-      if (i % 100 === 0) {
-        const percent = getPercent(i, messages.length);
-        dispatch(setStatusText(`Processing - ${percent}%`));
+      if (i % 10 === 0) {
+        dispatch(
+          setStatusText(`Processing - Message ${i} of ${messages.length}`)
+        );
         await wait(0.1);
       }
     }
@@ -757,6 +758,7 @@ const _compressMessages =
   }: CompressMessagesProps): AppThunk =>
   async (dispatch, getState) => {
     // TODO: Combine the setStatusText and wait calls within exportSlice.
+    // TODO: Use a service worker to reduce the load of the compression step.
     dispatch(
       setStatusText(
         `Compressing${

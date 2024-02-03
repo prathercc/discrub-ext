@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import MenuBar from "./components/menu-bar";
-// import ChannelMessages from "../Messages/ChannelMessages/ChannelMessages";
-// import DirectMessages from "../Messages/DirectMessages/DirectMessages";
 import About from "./components/about";
 import CloseWindowButton from "./components/close-window-button";
 import {
@@ -28,6 +26,8 @@ import { useAppSlice } from "../../features/app/use-app-slice";
 import { useUserSlice } from "../../features/user/use-user-slice";
 import { useTheme } from "@mui/material";
 import Tags from "../tags/tags";
+import ChannelMessages from "../channel-messages/channel-messages";
+import DirectMessages from "../direct-messages/direct-messages";
 
 function DiscrubDialog() {
   const palette = useTheme().palette;
@@ -89,10 +89,10 @@ function DiscrubDialog() {
     >
       <DonationComponent closeAnnouncement={closeAnnouncement} />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
-      {/* {menuIndex === 0 && (
+      {menuIndex === 0 && (
         <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
-      )} */}
-      {/* {menuIndex === 1 && <DirectMessages />} */}
+      )}
+      {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <Tags />}
       {menuIndex === 3 && <About />}
       {announcement && (

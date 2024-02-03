@@ -65,6 +65,9 @@ export const checkDiscrubPaused =
     while (getState().app.discrubPaused) await wait(2);
   };
 
+/**
+ * Used for temporary status updates regarding the modify object
+ */
 export const setTimeoutMessage =
   ({ message, timeout }: Timeout): AppThunk<Promise<void>> =>
   async (dispatch) => {

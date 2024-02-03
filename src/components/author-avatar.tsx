@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Alert, Avatar, Box, Snackbar } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
+import { Alert, Box, Snackbar } from "@mui/material";
 import copy from "copy-to-clipboard";
 import Message from "../classes/message";
 import { useGuildSlice } from "../features/guild/use-guild-slice";
 import { useExportSlice } from "../features/export/use-export-slice";
 import { getAvatarUrl } from "../utils";
+import MuiImg from "../common-components/mui-img/mui-img";
 
 type AuthorAvatarProps = {
   message: Message;
@@ -57,9 +57,13 @@ const AuthorAvatar = ({
           minWidth: isReply ? "15px !important" : "40px",
         }}
       >
-        <Avatar
-          onClick={handleAvatarClick}
+        <MuiImg
+          props={{
+            onClick: handleAvatarClick,
+            src: avatarUrl,
+          }}
           sx={{
+            borderRadius: "50%",
             position: "absolute",
             width: isReply ? "15px !important" : "40px",
             height: isReply ? "15px !important" : "40px",
@@ -78,10 +82,7 @@ const AuthorAvatar = ({
               cursor: !isReply && browserView ? "pointer" : undefined,
             },
           }}
-          src={avatarUrl}
-        >
-          <PersonIcon />
-        </Avatar>
+        />
       </Box>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}

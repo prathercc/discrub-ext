@@ -22,7 +22,7 @@
     {
       "matches": ["*://discord.com/*"],
       "resources": [
-        "public/resources/html/mitm.html",
+        "resources/html/mitm.html",
         "index.html",
         "button_injection.html",
         "*/*.zip"

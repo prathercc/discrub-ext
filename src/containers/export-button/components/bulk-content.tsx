@@ -123,7 +123,7 @@ const BulkContent = ({
               </Tooltip>
               <Stack
                 sx={{
-                  backgroundColor: theme.palette.primary.main,
+                  border: `1px solid ${theme.palette.divider}`,
                   borderRadius: "15px",
                   padding: "5px",
                 }}
@@ -133,7 +133,7 @@ const BulkContent = ({
                 alignItems="center"
               >
                 <Typography variant="body2">Export Options</Typography>
-                <Stack sx={{ width: "100%" }} direction="row" spacing={1}>
+                <Stack direction="row" spacing={1}>
                   <SortDirectionToggle />
                   <PreviewImageToggle />
                   <ImageToggle />
@@ -153,13 +153,10 @@ const BulkContent = ({
       )}
       {!isExporting && isDm && (
         <>
-          <DialogContentText>
-            <Typography variant="body2">Exporting DM</Typography>
-          </DialogContentText>
           <Stack direction="row" justifyContent="flex-end" mt={1} mb={1}>
             <Stack
               sx={{
-                backgroundColor: theme.palette.primary.main,
+                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: "15px",
                 padding: "5px",
               }}
@@ -168,7 +165,7 @@ const BulkContent = ({
               alignItems="center"
             >
               <Typography variant="body2">Export Options</Typography>
-              <Stack sx={{ width: "100%" }} direction="row" spacing={1}>
+              <Stack direction="row" spacing={1}>
                 <SortDirectionToggle />
                 <PreviewImageToggle />
                 <ImageToggle />

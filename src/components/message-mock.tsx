@@ -171,6 +171,7 @@ const MessageMock = ({
             : theme.palette.text.secondary,
           whiteSpace: isReply ? "nowrap" : "pre-line",
           overflow: isReply ? "hidden" : undefined,
+          wordBreak: "break-word",
         }}
         dangerouslySetInnerHTML={{ __html: rawHtml }}
       />
@@ -302,7 +303,7 @@ const MessageMock = ({
       <Box
         title={longDateTime}
         sx={{
-          width: "40px",
+          width: "fit-content",
           height: "20px",
           display: "flex",
           alignItems: "center",

@@ -45,7 +45,7 @@ const Tooltip = (
         </Box>
       }
     >
-      <span>{children}</span>
+      {children}
     </MuiTooltip>
   );
 };

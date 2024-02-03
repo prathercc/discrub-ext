@@ -115,7 +115,7 @@ export const messageSlice = createSlice({
       state,
       { payload }: { payload: { order: SortDirection; orderBy: keyof Message } }
     ): void => {
-      const { order, orderBy } = payload; // Ensure params are passed as a single object
+      const { order, orderBy } = payload;
       state.order = order;
       state.orderBy = orderBy;
       state.messages = state.messages.sort(
@@ -561,24 +561,22 @@ export const editMessages =
   (messages: Message[], updateText: string): AppThunk =>
   async (dispatch, getState) => {
     dispatch(setIsModifying(true));
-    let count = 0;
     let noPermissionThreadIds: Snowflake[] = [];
-    while (count < messages.length) {
+    for (const message of messages) {
       if (getState().app.discrubCancelled) break;
       await dispatch(checkDiscrubPaused());
-      const currentMessage = messages[count];
 
       noPermissionThreadIds = await dispatch(
         liftThreadRestrictions({
-          channelId: currentMessage.channel_id,
+          channelId: message.channel_id,
           noPermissionThreadIds,
         })
       );
 
-      dispatch(setModifyEntity(currentMessage));
+      dispatch(setModifyEntity(message));
 
       const isMissingPermission = noPermissionThreadIds.some(
-        (tId) => tId === currentMessage.channel_id
+        (tId) => tId === message.channel_id
       );
       if (isMissingPermission) {
         await dispatch(
@@ -587,30 +585,26 @@ export const editMessages =
             timeout: 1,
           })
         );
-        count++;
       } else {
         let success = false;
 
         if (!getState().app.discrubCancelled) {
           success = await dispatch(
             updateMessage(
-              Object.assign(new Message({ ...currentMessage }), {
+              Object.assign(new Message({ ...message }), {
                 content: updateText,
               })
             )
           );
         }
 
-        if (success) {
-          count++;
-        } else {
+        if (!success) {
           await dispatch(
             notify({
               message: "You do not have permission to modify this message!",
               timeout: 2,
             })
           );
-          count++;
         }
       }
     }
@@ -659,12 +653,10 @@ export const deleteMessages =
   ): AppThunk =>
   async (dispatch, getState) => {
     dispatch(setIsModifying(true));
-    let count = 0;
     let noPermissionThreadIds: Snowflake[] = [];
-    while (count < messages.length) {
+    for (const [count, currentRow] of messages.entries()) {
       if (getState().app.discrubCancelled) break;
       await dispatch(checkDiscrubPaused());
-      const currentRow = messages[count];
 
       noPermissionThreadIds = await dispatch(
         liftThreadRestrictions({
@@ -691,7 +683,6 @@ export const deleteMessages =
             timeout: 1,
           })
         );
-        count++;
       } else {
         const shouldDelete =
           (deleteConfig.attachments && deleteConfig.messages) ||
@@ -704,16 +695,13 @@ export const deleteMessages =
             deleteMessage(new Message({ ...currentRow }))
           );
 
-          if (success) {
-            count++;
-          } else {
+          if (!success) {
             await dispatch(
               notify({
                 message: "You do not have permission to modify this message!",
                 timeout: 2,
               })
             );
-            count++;
           }
         } else if (shouldEdit && !getState().app.discrubCancelled) {
           const success = await dispatch(
@@ -724,16 +712,13 @@ export const deleteMessages =
               )
             )
           );
-          if (success) {
-            count++;
-          } else {
+          if (!success) {
             await dispatch(
               notify({
                 message: "You do not have permission to modify this message!",
                 timeout: 2,
               })
             );
-            count++;
           }
         } else break;
       }
@@ -750,7 +735,7 @@ export const resetMessageData = (): AppThunk => (dispatch) => {
 export const getMessageData =
   (
     guildId: Snowflake | Maybe,
-    channelId: Snowflake,
+    channelId: Snowflake | Maybe,
     preFilterUserId: Snowflake | Maybe
   ): AppThunk<Promise<MessageData | void>> =>
   async (dispatch, getState) => {
@@ -766,8 +751,8 @@ export const getMessageData =
     if (token) {
       dispatch(setIsLoading(true));
 
-      let retArr = [];
-      let retThreads = [];
+      let retArr: Message[] = [];
+      let retThreads: Channel[] = [];
 
       const criteriaExists = [
         preFilterUserId,
@@ -787,7 +772,7 @@ export const getMessageData =
             selectedHasTypes,
           })
         ));
-      } else {
+      } else if (channelId) {
         ({ messages: retArr, threads: retThreads } = await dispatch(
           _getMessages(channelId)
         ));
@@ -894,12 +879,9 @@ const _collectUserNames =
     const updateMap = { ...userMap };
 
     if (token) {
-      let count = 0;
-      const keys = Object.keys(updateMap);
-      while (count < keys.length) {
+      for (const userId of Object.keys(updateMap)) {
         if (getState().app.discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
-        const userId = keys[count];
         const mapping = existingUserMap[userId] || updateMap[userId];
         const { userName, displayName } = mapping;
         if (!userName && !displayName) {
@@ -911,14 +893,10 @@ const _collectUserNames =
               userName: data.username,
               displayName: data.global_name,
             };
-            count++;
           } else {
             const errorMsg = `Unable to retrieve data from userId: ${userId}`;
             console.error(errorMsg);
-            count++;
           }
-        } else {
-          count++;
         }
       }
 
@@ -934,12 +912,9 @@ const _collectUserGuildData =
     const updateMap = { ...userMap };
 
     if (token) {
-      let count = 0;
-      const keys = Object.keys(updateMap);
-      while (count < keys.length) {
+      for (const userId of Object.keys(updateMap)) {
         if (getState().app.discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
-        const userId = keys[count];
         const userMapping = existingUserMap[userId] || updateMap[userId];
         const userGuilds = userMapping.guilds;
         if (!userGuilds[guildId]) {
@@ -962,7 +937,6 @@ const _collectUserGuildData =
                 },
               },
             };
-            count++;
           } else {
             const errorMsg = `Unable to retrieve guild user data from userId ${userId} and guildId ${guildId}`;
             console.error(errorMsg);
@@ -973,10 +947,7 @@ const _collectUserGuildData =
                 [guildId]: { roles: [], nick: null, joinedAt: null },
               },
             };
-            count++;
           }
-        } else {
-          count++;
         }
       }
 
@@ -986,7 +957,7 @@ const _collectUserGuildData =
 
 const _getSearchMessages =
   (
-    channelId: Snowflake,
+    channelId: Snowflake | Maybe,
     guildId: Snowflake | Maybe,
     searchCriteria: SearchMessageProps
   ): AppThunk<Promise<MessageData>> =>

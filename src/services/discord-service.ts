@@ -276,7 +276,7 @@ type SearchMessageResult = {
 export const fetchSearchMessageData = (
   authorization: string,
   offset: number,
-  channelId: string,
+  channelId: string | Maybe,
   guildId: string | Maybe,
   searchCriteria: SearchMessageProps
 ) => {

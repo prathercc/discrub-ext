@@ -57,7 +57,7 @@ function DonationComponent({
               setStartIndex(startIndex - 3);
             }
           }}
-          color="secondary"
+          color="primary"
         >
           <ArrowBackIcon />
         </IconButton>
@@ -70,7 +70,7 @@ function DonationComponent({
               setStartIndex(startIndex + 3);
             }
           }}
-          color="secondary"
+          color="primary"
         >
           <ArrowForwardIcon />
         </IconButton>

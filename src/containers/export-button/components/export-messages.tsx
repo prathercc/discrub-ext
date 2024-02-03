@@ -8,7 +8,7 @@ import MessageMock from "../../../components/message-mock";
 import { MessageType } from "../../../enum/message-type";
 
 type ExportMessagesProps = {
-  componentRef: React.RefObject<HTMLDivElement | undefined>;
+  componentRef: React.MutableRefObject<HTMLDivElement | null>;
   isExporting: boolean;
   messages: Message[];
   entity: Channel | Guild | Maybe;
@@ -28,7 +28,7 @@ const ExportMessages = ({
         direction="column"
         alignItems="center"
         justifyContent="center"
-        ref={componentRef as React.RefObject<HTMLDivElement>}
+        ref={componentRef}
       >
         <MessageTitleMock
           entity={entity}

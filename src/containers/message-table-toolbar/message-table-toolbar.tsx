@@ -94,7 +94,9 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
     setEditModalOpen(false);
   };
 
-  const handleFilterMessages = debounce(() => filterMessages(), 600);
+  const handleFilterMessages = debounce(() => {
+    filterMessages();
+  }, 600);
 
   const handleFilterUpdate = (filter: Filter) => {
     updateFilters(filter);
@@ -138,7 +140,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
         >
           <Stack
             sx={{ width: "100%" }}
-            mt="20px"
+            mt="20px !important"
             direction="row"
             justifyContent="space-between"
             zIndex={2} // This ensures that the Export options show over FilterComponent
@@ -173,15 +175,16 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
           </Collapse>
         </Stack>
 
-        {selectedRows.length > 0 && (
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography variant="subtitle1" component="div">
-              {selectedRows.length} selected
-            </Typography>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ opacity: selectedRows.length > 0 ? 1 : 0, minHeight: "40px" }}
+        >
+          <Typography variant="subtitle1" component="div">
+            {selectedRows.length} selected
+          </Typography>
+          {selectedRows.length > 0 && (
             <Stack justifyContent="flex-end" direction="row">
               <Tooltip arrow title="Delete">
                 <IconButton
@@ -200,8 +203,8 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
                 </IconButton>
               </Tooltip>
             </Stack>
-          </Stack>
-        )}
+          )}
+        </Stack>
       </Stack>
     </Toolbar>
   );

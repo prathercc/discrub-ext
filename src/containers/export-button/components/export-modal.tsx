@@ -23,7 +23,11 @@ const ExportModal = ({
   dialogTitle,
 }: ExportModalProps) => {
   return (
-    <Dialog PaperProps={{ sx: { minWidth: "398px" } }} open={dialogOpen}>
+    <Dialog
+      hideBackdrop
+      PaperProps={{ sx: { minWidth: "398px" } }}
+      open={dialogOpen}
+    >
       <DialogTitle>{dialogTitle}</DialogTitle>
       {ContentComponent}
       <ExportModalActions

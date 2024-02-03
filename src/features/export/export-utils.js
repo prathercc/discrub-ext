@@ -12,7 +12,7 @@ export default class ExportUtils {
     this.writable = writable;
     this.writer = this.writable.getWriter();
     this.zipName = zipName;
-    streamSaver.mitm = "mitm.html";
+    streamSaver.mitm = "resources/html/mitm.html";
     this.fileStream = null;
     this.exportMessages = [];
     this.unknownError = {
@@ -28,7 +28,10 @@ export default class ExportUtils {
   generateHTML = async () => {
     this.html = null;
     this.callback(true);
+    // Wait for contentRef to obtain value
+    while (!this.contentRef.current) await wait(2);
     this._generateHTMLHelperFunc();
+    // Wait for html to be generated
     while (!this.html) await wait(2);
     this.callback(false);
     return new Blob([this.html], { type: "text/html" });

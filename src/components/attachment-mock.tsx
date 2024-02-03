@@ -4,7 +4,11 @@ import bytes from "bytes";
 import { useExportSlice } from "../features/export/use-export-slice";
 import Attachment from "../classes/attachment";
 import MuiImg from "../common-components/mui-img/mui-img";
-import { entityContainsMedia } from "../utils";
+import {
+  attachmentIsImage,
+  attachmentIsVideo,
+  entityContainsMedia,
+} from "../utils";
 
 type AttachmentMockProps = {
   attachment: Attachment;
@@ -17,13 +21,9 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
   const mediaMap = exportState.mediaMap();
   const previewImages = exportState.previewImages();
 
-  const isImg = Boolean(
-    attachment.content_type?.includes("image") ||
-      ["png", "jpg", "jpeg", "gif"].some((sit) =>
-        attachment.filename.includes(sit)
-      )
-  );
-  const isVid = Boolean(attachment.content_type?.includes("video"));
+  const isImg = attachmentIsImage(attachment);
+  const isVid = attachmentIsVideo(attachment);
+
   const url = entityContainsMedia(attachment)
     ? mediaMap[attachment.proxy_url] || attachment.proxy_url
     : attachment.url;

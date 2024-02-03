@@ -8,9 +8,9 @@ import Table, {
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
-  Stack,
   Typography,
   Paper,
+  Stack,
   CircularProgress,
   TextField,
   Button,
@@ -18,8 +18,8 @@ import {
   IconButton,
   Collapse,
 } from "@mui/material";
-import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
+import PurgeButton from "../purge-button/purge-button";
 import AdvancedFiltering from "../advanced-filtering/advanced-filtering";
 import TokenNotFound from "../../components/token-not-found";
 import { sortByProperty } from "../../utils";
@@ -30,13 +30,11 @@ import Tooltip from "../../common-components/tooltip/tooltip";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import { useUserSlice } from "../../features/user/use-user-slice";
-import { useGuildSlice } from "../../features/guild/use-guild-slice";
-import { useChannelSlice } from "../../features/channel/use-channel-slice";
+import { useDmSlice } from "../../features/dm/use-dm-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
-import { EntityIcon } from "../../components/entity-icon";
 import Channel from "../../classes/channel";
-import Guild from "../../classes/guild";
+import { EntityIcon } from "../../components/entity-icon";
 import Message from "../../classes/message";
 import { SortDirection } from "../../enum/sort-direction";
 import TableMessage from "../../components/table-message";
@@ -44,23 +42,15 @@ import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
 
-type ChannelMessagesProps = {
-  closeAnnouncement: () => void;
-};
-
-function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
+function DirectMessages() {
   const { state: userState } = useUserSlice();
-  const userLoading = userState.isLoading();
   const token = userState.token();
+  const userLoading = userState.isLoading();
 
-  const { state: guildState, changeGuild, getGuilds } = useGuildSlice();
-  const guilds = guildState.guilds();
-  const selectedGuild = guildState.selectedGuild();
-  const preFilterUserId = guildState.preFilterUserId();
-
-  const { state: channelState, changeChannel } = useChannelSlice();
-  const channels = channelState.channels();
-  const selectedChannel = channelState.selectedChannel();
+  const { state: dmState, changeDm, getDms } = useDmSlice();
+  const selectedDm = dmState.selectedDm();
+  const dms = dmState.dms();
+  const preFilterUserId = dmState.preFilterUserId();
 
   const {
     state: messageState,
@@ -69,29 +59,29 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     deleteAttachment,
     setSelected,
   } = useMessageSlice();
-  const messages = messageState.messages();
-  const messagesLoading = messageState.isLoading();
-  const fetchProgress = messageState.fetchProgress();
   const lookupUserId = messageState.lookupUserId();
+  const fetchProgress = messageState.fetchProgress();
+  const messagesLoading = messageState.isLoading();
+  const messages = messageState.messages();
   const searchBeforeDate = messageState.searchBeforeDate();
   const searchAfterDate = messageState.searchAfterDate();
   const searchMessageContent = messageState.searchMessageContent();
   const selectedHasTypes = messageState.selectedHasTypes();
   const totalSearchMessages = messageState.totalSearchMessages();
+  const selectedMessages = messageState.selectedMessages();
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
-  const selectedMessages = messageState.selectedMessages();
 
   const { state: appState, setModifyEntity } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
   const modify = appState.modify();
 
-  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
-
   const [searchTouched, setSearchTouched] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
+
+  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
 
   const columns: TableColumn<Message>[] = [
     {
@@ -133,21 +123,28 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     },
   };
 
-  const fetchChannelData = () => {
-    getMessageData(selectedGuild?.id, selectedChannel?.id, preFilterUserId);
-    setSearchTouched(true);
-    setExpanded(false);
+  const fetchDmData = async () => {
+    if (selectedDm) {
+      getMessageData(null, selectedDm.id, preFilterUserId);
+      setSearchTouched(true);
+      setExpanded(false);
+    }
   };
 
-  const handleGuildChange = (id: Snowflake | null) => {
-    changeGuild(id);
+  const handleChangeDm = async (id: Snowflake | null) => {
+    changeDm(id);
     setSearchTouched(false);
   };
 
-  const handleChannelChange = (id: Snowflake | null) => {
-    changeChannel(id);
-    setSearchTouched(false);
-  };
+  const sortedDms = dms
+    .map((d) => new Channel({ ...d }))
+    .sort((a, b) =>
+      sortByProperty(
+        { name: String(a.name).toLowerCase() },
+        { name: String(b.name).toLowerCase() },
+        "name"
+      )
+    );
 
   const advancedFilterActive = [
     preFilterUserId,
@@ -157,45 +154,18 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     selectedHasTypes.length,
   ].some((c) => c);
 
+  const dmFieldDisabled = messagesLoading || discrubCancelled;
+  const searchDisabled = !selectedDm?.id || messagesLoading || discrubCancelled;
   const pauseCancelDisabled = !messagesLoading;
-  const guildFieldDisabled = messagesLoading || discrubCancelled;
-  const channelFieldDisabled =
-    selectedGuild?.id === null || messagesLoading || discrubCancelled;
-  const searchBtnDisabled =
-    !selectedGuild?.id ||
+  const exportAndPurgeDisabled =
+    !selectedDm?.id ||
     messagesLoading ||
-    (!advancedFilterActive && !selectedChannel?.id) ||
+    messages.length > 0 ||
+    advancedFilterActive ||
     discrubCancelled;
-  const exportAndPurgeDisabled = Boolean(
-    !selectedGuild?.id ||
-      messagesLoading ||
-      selectedChannel?.id ||
-      messages.length > 0 ||
-      advancedFilterActive ||
-      discrubCancelled
-  );
-
-  const sortedGuilds = guilds
-    .map((g) => new Guild({ ...g }))
-    .sort((a, b) =>
-      sortByProperty(
-        { name: a.name.toLowerCase() },
-        { name: b.name.toLowerCase() },
-        "name"
-      )
-    );
-  const sortedChannels = channels
-    .map((c) => new Channel({ ...c }))
-    .sort((a, b) =>
-      sortByProperty(
-        { name: String(a.name).toLowerCase() },
-        { name: String(b.name).toLowerCase() },
-        "name"
-      )
-    );
 
   useEffect(() => {
-    if (token) getGuilds();
+    if (token) getDms();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
@@ -237,16 +207,16 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
         handleClose={() => setEmbedModalOpen(false)}
         open={embedModalOpen}
       />
-      {token && guilds && (
+      {token && dms && (
         <Stack spacing={2}>
           <Paper sx={{ padding: "10px" }}>
             <Stack spacing={2}>
               <Stack
+                direction="row"
                 justifyContent="space-between"
                 alignItems="center"
-                direction="row"
               >
-                <Typography variant="body1">Channel Messages</Typography>
+                <Typography variant="body1">Direct Messages</Typography>
                 <Tooltip title={expanded ? "Collapse" : "Expand"}>
                   <IconButton
                     onClick={() => {
@@ -269,21 +239,19 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                   >
                     <Autocomplete
                       clearIcon={<ClearIcon />}
-                      onChange={(_, val) => handleGuildChange(val)}
-                      options={sortedGuilds.map((guild) => {
-                        return guild.id;
+                      onChange={(_, val) => handleChangeDm(val)}
+                      options={sortedDms.map((directMessage) => {
+                        return directMessage.id;
                       })}
                       getOptionLabel={(id) =>
-                        String(guilds.find((guild) => guild.id === id)?.name)
+                        String(dms.find((dm) => dm.id === id)?.name)
                       }
                       renderOption={(params, id) => {
-                        const foundGuild = guilds.find(
-                          (guild) => guild.id === id
-                        );
+                        const foundDm = dms.find((dm) => dm.id === id);
                         return (
                           <Typography gap="4px" {...params}>
-                            {foundGuild && <EntityIcon entity={foundGuild} />}
-                            {foundGuild?.name}
+                            {foundDm && <EntityIcon entity={foundDm} />}
+                            {foundDm?.name}
                           </Typography>
                         );
                       }}
@@ -293,70 +261,33 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                           variant="filled"
                           fullWidth
                           size="small"
-                          label="Server"
-                          onFocus={closeAnnouncement}
-                          sx={{ width: "330px !important" }}
+                          label="DM"
+                          sx={{ width: "670px !important" }}
                           InputProps={{
                             ...params.InputProps,
                             startAdornment: (
                               <>
                                 <CopyAdornment
-                                  copyValue={sortedGuilds
-                                    .map((guild) => guild.name)
+                                  copyValue={sortedDms
+                                    .map((dm) => dm.name)
                                     .join("\r\n")}
-                                  copyName="Server List"
-                                  disabled={guildFieldDisabled}
+                                  copyName="DM List"
+                                  disabled={dmFieldDisabled}
                                 />
-                                {selectedGuild?.id && (
-                                  <EntityIcon entity={selectedGuild} />
+                                {selectedDm && (
+                                  <EntityIcon entity={selectedDm} />
                                 )}
                               </>
                             ),
                           }}
                         />
                       )}
-                      value={selectedGuild?.id}
-                      disabled={guildFieldDisabled}
-                    />
-
-                    <Autocomplete
-                      clearIcon={<ClearIcon />}
-                      onChange={(_, val) => handleChannelChange(val)}
-                      options={sortedChannels.map((channel) => {
-                        return channel.id;
-                      })}
-                      getOptionLabel={(id) =>
-                        channels.find((channel) => channel.id === id)?.name ||
-                        ""
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="filled"
-                          fullWidth
-                          size="small"
-                          label="Channel"
-                          sx={{ width: "330px !important" }}
-                          InputProps={{
-                            ...params.InputProps,
-                            startAdornment: (
-                              <CopyAdornment
-                                copyValue={sortedChannels
-                                  .map((channel) => channel.name)
-                                  .join("\r\n")}
-                                copyName="Channel List"
-                                disabled={channelFieldDisabled}
-                              />
-                            ),
-                          }}
-                        />
-                      )}
-                      value={selectedChannel?.id}
-                      disabled={channelFieldDisabled}
+                      value={selectedDm?.id}
+                      disabled={dmFieldDisabled}
                     />
                   </Stack>
 
-                  <AdvancedFiltering closeAnnouncement={closeAnnouncement} />
+                  <AdvancedFiltering isDm />
                 </Stack>
               </Collapse>
               <Stack
@@ -365,22 +296,24 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <ExportButton bulk disabled={exportAndPurgeDisabled} />
-                <PurgeButton disabled={exportAndPurgeDisabled} />
+                <ExportButton bulk disabled={exportAndPurgeDisabled} isDm />
+                <PurgeButton disabled={exportAndPurgeDisabled} isDm />
                 <PauseButton disabled={pauseCancelDisabled} />
                 <Button
-                  disabled={searchBtnDisabled}
-                  onClick={fetchChannelData}
+                  disabled={searchDisabled}
+                  onClick={() => selectedDm?.id && fetchDmData()}
                   variant="contained"
                 >
                   Search
                 </Button>
+
                 <CancelButton disabled={pauseCancelDisabled} />
               </Stack>
             </Stack>
           </Paper>
         </Stack>
       )}
+
       <>
         {!messagesLoading && (
           <>
@@ -398,7 +331,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                 />
               </Box>
             )}
-            {messages.length === 0 && selectedGuild?.id && searchTouched && (
+            {messages.length === 0 && selectedDm?.id && searchTouched && (
               <Paper sx={{ padding: "10px" }}>
                 <Box
                   sx={{
@@ -416,6 +349,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
             )}
           </>
         )}
+
         {(userLoading || messagesLoading) && (
           <Paper sx={{ justifyContent: "center", padding: "10px" }}>
             <Box
@@ -438,4 +372,4 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
   );
 }
 
-export default ChannelMessages;
+export default DirectMessages;

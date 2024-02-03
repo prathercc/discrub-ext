@@ -11,6 +11,7 @@ import {
   setIsModifying,
   setModifyEntity,
   setTimeoutMessage as notify,
+  resetModify,
 } from "../app/app-slice";
 import { PurgeState } from "./purge-types";
 import { AppThunk } from "../../app/store";
@@ -20,6 +21,7 @@ import { isDm } from "../../utils";
 
 const initialState: PurgeState = {
   isLoading: null,
+  purgeChannel: null,
 };
 
 export const purgeSlice = createSlice({
@@ -29,10 +31,16 @@ export const purgeSlice = createSlice({
     setIsLoading: (state, { payload }: { payload: boolean }): void => {
       state.isLoading = payload;
     },
+    setPurgeChannel: (
+      state,
+      { payload }: { payload: Channel | null }
+    ): void => {
+      state.purgeChannel = payload;
+    },
   },
 });
 
-export const { setIsLoading } = purgeSlice.actions;
+export const { setIsLoading, setPurgeChannel } = purgeSlice.actions;
 
 export const purge =
   (channels: Channel[]): AppThunk =>
@@ -45,6 +53,7 @@ export const purge =
         const { discrubCancelled } = getState().app;
         if (discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
+        dispatch(setPurgeChannel(entity));
         dispatch(setModifyEntity(null));
         await dispatch(
           notify({ message: "Searching for messages...", timeout: 1 })
@@ -57,7 +66,6 @@ export const purge =
             isDm(entity) ? currentUser.id : preFilterUserId // Discrub can only delete messages from the current user
           )
         );
-        let count = 0;
         const selectedMessages: Message[] = getState().message.messages;
         const selectedCount = selectedMessages.length;
         if (selectedCount === 0) {
@@ -65,11 +73,10 @@ export const purge =
         }
 
         let threadIds: Snowflake[] = []; // Thread Id's that we do NOT have permission to modify
-        while (count < selectedCount) {
+        for (const [count, currentRow] of selectedMessages.entries()) {
           const { discrubCancelled } = getState().app;
           if (discrubCancelled) break;
           await dispatch(checkDiscrubPaused());
-          const currentRow: Message = selectedMessages[count];
 
           threadIds = await dispatch(
             liftThreadRestrictions({
@@ -95,7 +102,6 @@ export const purge =
                 timeout: 1,
               })
             );
-            count++;
           } else {
             const success = await dispatch(deleteMessage(currentRow));
             if (!success) {
@@ -106,14 +112,13 @@ export const purge =
                 })
               );
             }
-            count++;
           }
         }
       }
-      dispatch(setIsModifying(false));
-      dispatch(setModifyEntity(null));
+      dispatch(resetModify());
       dispatch(resetMessageData());
       dispatch(setDiscrubCancelled(false));
+      dispatch(setPurgeChannel(null));
     }
   };
 

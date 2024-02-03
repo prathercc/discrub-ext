@@ -62,7 +62,7 @@ const useDmSlice = () => {
     dispatch(getDmsAction());
   };
 
-  const changeDm = (dmId: Snowflake) => {
+  const changeDm = (dmId: Snowflake | null) => {
     dispatch(changeDmAction(dmId));
   };
 

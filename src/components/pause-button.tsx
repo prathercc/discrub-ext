@@ -28,7 +28,9 @@ const PauseButton = ({ disabled = false }: PauseButtonProps) => {
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={discrubPaused}
       >
-        <Alert severity="warning">Paused</Alert>
+        <Alert variant="filled" severity="warning">
+          Paused
+        </Alert>
       </Snackbar>
     </>
   );

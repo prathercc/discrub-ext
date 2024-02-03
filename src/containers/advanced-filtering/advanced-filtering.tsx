@@ -41,9 +41,9 @@ function AdvancedFiltering({
   const getChildrenDisabled = (): boolean => {
     if (messagesLoading) return true;
     if (isDm) {
-      return Boolean(selectedDm && selectedDm.id);
+      return !selectedDm;
     } else {
-      return Boolean(selectedGuild && selectedGuild.id);
+      return !selectedGuild;
     }
   };
 

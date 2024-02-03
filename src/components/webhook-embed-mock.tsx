@@ -56,6 +56,7 @@ const WebhookEmbedMock = ({
                 display: "block",
                 whiteSpace: "pre-line",
                 cursor: "pointer !important",
+                color: "rgb(0, 168, 252)",
               }}
               variant="subtitle2"
               dangerouslySetInnerHTML={{

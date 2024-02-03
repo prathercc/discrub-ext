@@ -2,6 +2,7 @@ import AttachmentMock from "./attachment-mock";
 import Attachment from "../classes/attachment";
 import Embed from "../classes/embed";
 import { useExportSlice } from "../features/export/use-export-slice";
+import { EmbedType } from "../enum/embed-type";
 
 type EmbedMockProps = {
   embed: Embed;
@@ -64,7 +65,7 @@ const EmbedMock = ({ embed, index }: EmbedMockProps) => {
             allowFullScreen
           ></iframe>
         )}
-      {previewImages && type === "image" && thumbnail && (
+      {previewImages && type === EmbedType.IMAGE && thumbnail && (
         <AttachmentMock
           attachment={
             new Attachment({

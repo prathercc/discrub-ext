@@ -30,7 +30,7 @@ const DefaultContent = ({ isExporting, messageCount }: DefaultContentProps) => {
           <Stack direction="row" justifyContent="flex-end" mt={1} mb={1}>
             <Stack
               sx={{
-                backgroundColor: theme.palette.primary.main,
+                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: "15px",
                 padding: "5px",
               }}
@@ -39,12 +39,7 @@ const DefaultContent = ({ isExporting, messageCount }: DefaultContentProps) => {
               alignItems="center"
             >
               <Typography variant="body2">Export Options</Typography>
-              <Stack
-                sx={{ minWidth: "300px" }}
-                direction="row"
-                alignItems="center"
-                spacing={1}
-              >
+              <Stack direction="row" alignItems="center" spacing={1}>
                 <PreviewImageToggle />
                 <ImageToggle />
               </Stack>

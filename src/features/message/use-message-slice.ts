@@ -190,7 +190,7 @@ const useMessageSlice = () => {
 
   const getMessageData = (
     guildId: string | Maybe,
-    channelId: string,
+    channelId: string | Maybe,
     preFilterUserId?: string | Maybe
   ) => {
     return dispatch(getMessageDataAction(guildId, channelId, preFilterUserId));

@@ -64,7 +64,8 @@ export const getTimeZone = (date = new Date()) => {
  * @param total The total number that to check the percentage from
  * @returns Percent value from `index` of `total`
  */
-export const getPercent = (index: number, total: number) => {
+export const getPercent = (index: number, total: number): string => {
+  if (index === 0 && total === 0) return "0";
   return ((index / total) * 100).toString().split(".")[0];
 };
 
@@ -164,38 +165,46 @@ export const getColor = (value: number): string => {
 
 export const getIconUrl = (entity: Role | Channel | Guild) => {
   if (isRole(entity)) {
+    if (!entity.id || !entity.icon) return "";
     return `https://cdn.discordapp.com/role-icons/${entity.id}/${entity.icon}`;
   } else if (isGuild(entity)) {
     if (!entity.icon) {
-      return "default_group_chat_icon.png";
+      return "resources/media/default_group_chat_icon.png";
     }
     return `https://cdn.discordapp.com/icons/${entity.id}/${entity.icon}`;
   } else {
     if (entity.type === ChannelType.GROUP_DM) {
-      return "default_group_chat_icon.png";
+      return "resources/media/default_group_chat_icon.png";
     }
 
     if (entity.type === ChannelType.DM && entity.recipients?.[0]?.avatar) {
       return `https://cdn.discordapp.com/avatars/${entity.recipients[0].id}/${entity.recipients[0].avatar}`;
     }
 
-    return "default_dm_icon.png";
+    return "resources/media/default_dm_icon.png";
   }
+};
+
+export const attachmentIsVideo = (attachment: Attachment): boolean => {
+  return Boolean(attachment.content_type?.includes("video"));
+};
+
+export const attachmentIsImage = (attachment: Attachment): boolean => {
+  return Boolean(
+    attachment.content_type?.includes("image") ||
+      ["png", "jpg", "jpeg", "gif"].some((sit) =>
+        attachment.filename.includes(sit)
+      )
+  );
 };
 
 export const entityContainsMedia = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
-    return (
-      Boolean(entity.content_type?.includes("video")) ||
-      Boolean(
-        entity.content_type?.includes("image") ||
-          ["png", "jpg", "jpeg", "gif"].some((sit) =>
-            entity.filename.includes(sit)
-          )
-      )
-    );
+    return attachmentIsVideo(entity) || attachmentIsImage(entity);
   } else {
-    return ["gifv", "image", "rich"].some((type) => type === entity.type);
+    return [EmbedType.GIFV, EmbedType.IMAGE, EmbedType.RICH].some(
+      (type) => type === entity.type
+    );
   }
 };
 
@@ -203,15 +212,15 @@ export const getMediaUrls = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
     return [entity.proxy_url].filter(Boolean);
   } else {
-    if (entity.type === "gifv") {
+    if (entity.type === EmbedType.GIFV) {
       const url = entity.video?.proxy_url;
       if (url) return [url];
     }
-    if (entity.type === "image") {
+    if (entity.type === EmbedType.IMAGE) {
       const url = entity.thumbnail?.proxy_url;
       if (url) return [url];
     }
-    if (entity.type === "rich") {
+    if (entity.type === EmbedType.RICH) {
       const retArr: string[] = [];
       [
         entity.author?.proxy_icon_url,
@@ -221,6 +230,7 @@ export const getMediaUrls = (entity: Attachment | Embed) => {
       ].forEach((url) => {
         if (url) retArr.push(url);
       });
+      return retArr;
     }
     return [];
   }

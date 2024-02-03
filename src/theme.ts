@@ -66,5 +66,12 @@ export const theme: ThemeOptions = createTheme({
         },
       },
     },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          cursor: "default",
+        },
+      },
+    },
   },
 });

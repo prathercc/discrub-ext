@@ -76,7 +76,7 @@ export const getDms = (): AppThunk => async (dispatch, getState) => {
 };
 
 export const changeDm =
-  (dmId: Snowflake): AppThunk =>
+  (dmId: Snowflake | null): AppThunk =>
   (dispatch, getState) => {
     const { currentUser } = getState().user;
     if (currentUser) {

@@ -1,5 +1,4 @@
 // https://discord.com/developers/docs/resources/channel#attachment-object
-
 class Attachment {
   id: Snowflake;
   filename: string;

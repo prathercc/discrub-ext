@@ -8,14 +8,15 @@ import {
   DialogContentText,
   Stack,
   Typography,
-  CircularProgress,
+  Box,
+  LinearProgress,
+  useTheme,
 } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
+import SouthIcon from "@mui/icons-material/South";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import ModalDebugMessage from "../../../components/modal-debug-message";
-import MessageChip from "../../../components/message-chip";
 import PrefilterUser from "../../../components/prefilter-user";
 import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
@@ -27,7 +28,7 @@ import { useUserSlice } from "../../../features/user/use-user-slice";
 import { useAppSlice } from "../../../features/app/use-app-slice";
 import { isMessage } from "../../../app/guards";
 import { usePurgeSlice } from "../../../features/purge/use-purge-slice";
-import { getAvatarUrl, getPercent } from "../../../utils";
+import MessageMock from "../../../components/message-mock";
 
 type PurgeModalProps = {
   dialogOpen: boolean;
@@ -40,6 +41,8 @@ const PurgeModal = ({
   setDialogOpen,
   isDm = false,
 }: PurgeModalProps) => {
+  const theme = useTheme();
+
   const { state: messageState } = useMessageSlice();
   const fetchProgress = messageState.fetchProgress();
   const totalSearchMessages = messageState.totalSearchMessages();
@@ -48,7 +51,6 @@ const PurgeModal = ({
 
   const { state: channelState, resetChannel } = useChannelSlice();
   const channels = channelState.channels();
-  const selectedChannel = channelState.selectedChannel();
 
   const { state: guildState, setPreFilterUserId } = useGuildSlice();
   const preFilterUserId = guildState.preFilterUserId();
@@ -69,7 +71,8 @@ const PurgeModal = ({
   } = useAppSlice();
   const modify = appState.modify();
 
-  const { purge } = usePurgeSlice();
+  const { state: purgeState, purge } = usePurgeSlice();
+  const purgeChannel = purgeState.purgeChannel();
 
   const { active, entity, statusText } = modify;
   const { messageCount, threadCount, parsingThreads } = fetchProgress;
@@ -117,9 +120,9 @@ const PurgeModal = ({
   const getProgressText = (): string => {
     if (parsingThreads) {
       return `Found ${threadCount} Threads`;
-    } else if (!parsingThreads && !lookupUserId) {
-      return `Found ${getPercent(messageCount, totalSearchMessages)}% of ${
-        selectedChannel?.name
+    } else if (!parsingThreads && !lookupUserId && totalSearchMessages) {
+      return `Found ${messageCount}/${totalSearchMessages} of ${
+        purgeChannel?.name || ""
       } messages`;
     } else if (lookupUserId) {
       return `User Lookup ${lookupUserId}`;
@@ -136,7 +139,7 @@ const PurgeModal = ({
   };
 
   return (
-    <Dialog open={dialogOpen}>
+    <Dialog hideBackdrop open={dialogOpen}>
       <DialogTitle>
         {active && entity && `Purging ${deleteType}`}
         {finishedPurge && `${deleteType} Purged`}
@@ -156,7 +159,10 @@ const PurgeModal = ({
             spacing={2}
           >
             {!finishedPurge && (
-              <WarningAmberIcon sx={{ color: "#f44336" }} fontSize="large" />
+              <WarningAmberIcon
+                sx={{ color: theme.palette.warning.main }}
+                fontSize="large"
+              />
             )}
             {finishedPurge && <ThumbUpIcon fontSize="large" />}
             <DialogContentText>
@@ -175,29 +181,29 @@ const PurgeModal = ({
           )}
           {active && isMessage(entity) && (
             <>
-              {entity.id && (
-                <Stack
-                  direction="row"
-                  justifyContent="center"
-                  alignItems="center"
-                  spacing={2}
-                >
-                  <MessageChip
-                    avatarSrc={getAvatarUrl(entity.author)}
-                    username={entity.author.username}
-                    content={entity.content}
-                  />
-                  <ArrowRightAltIcon color="secondary" />
-                  <DeleteSweepIcon color="error" />
-                </Stack>
-              )}
+              <Box
+                my={1}
+                sx={{
+                  minHeight: "50px",
+                  maxHeight: "50px",
+                  overflowX: "hidden",
+                  overflowY: "auto",
+                  width: "100%",
+                }}
+              >
+                <MessageMock browserView index={entity.id} message={entity} />
+              </Box>
 
-              <ModalDebugMessage
-                debugMessage={messagesLoading ? getProgressText() : statusText}
-              />
-
-              <Stack justifyContent="center" alignItems="center">
-                <CircularProgress />
+              <Stack
+                flexDirection="column"
+                justifyContent="center"
+                alignItems="center"
+                gap="5px"
+                width="100%"
+              >
+                <LinearProgress sx={{ width: "100%" }} />
+                <SouthIcon />
+                <DeleteSweepIcon sx={{ color: theme.palette.error.main }} />
               </Stack>
               <Typography sx={{ display: "block" }} variant="caption">
                 {entity?._index
@@ -206,6 +212,9 @@ const PurgeModal = ({
               </Typography>
             </>
           )}
+          <ModalDebugMessage
+            debugMessage={messagesLoading ? getProgressText() : statusText}
+          />
         </Stack>
       </DialogContent>
       <DialogActions>
