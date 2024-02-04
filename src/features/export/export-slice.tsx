@@ -46,7 +46,6 @@ import { AppThunk } from "../../app/store";
 import { downloadFile } from "../../services/discord-service";
 import { ReactElement } from "react";
 import { Typography } from "@mui/material";
-import ImgEmoji from "./styled/img-emoji";
 import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
@@ -406,11 +405,16 @@ const _getEmoji =
     }
 
     return (
-      <ImgEmoji
-        isReply={isReply}
-        title={!isReply ? name : undefined}
+      <img
+        style={{
+          display: "inline-flex",
+          verticalAlign: "middle",
+          width: isReply ? "16px" : "25px",
+          height: isReply ? "16px" : "25px",
+        }}
+        title={isReply ? undefined : name}
         id={name}
-        src={`${emojiUrl}`}
+        src={emojiUrl}
         alt={name}
       />
     );
