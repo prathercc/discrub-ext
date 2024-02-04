@@ -370,9 +370,7 @@ const _filterText = (
 ): boolean => {
   const messagePropertyValue = message[filterName];
   if (typeof messagePropertyValue === "string") {
-    const textContainsValue = messagePropertyValue
-      ?.toLowerCase()
-      ?.includes(filterValue?.toLowerCase());
+    const textContainsValue = messagePropertyValue.includes(filterValue);
     const criteriaMet =
       (!inverseActive && !textContainsValue) ||
       (inverseActive && textContainsValue);
@@ -402,14 +400,11 @@ const _filterAttachmentName = (
 };
 
 const _filterMessageContent = (
-  fv: string,
+  filterValue: string,
   message: Message,
   inverseActive: boolean
 ) => {
-  const filterValue = fv.toLowerCase();
-  const contentContainsValue = message.content
-    ?.toLowerCase()
-    ?.includes(filterValue);
+  const contentContainsValue = message.content.includes(filterValue);
   const embedsContainValue =
     message.embeds &&
     message.embeds.some((embed) => {
@@ -423,10 +418,10 @@ const _filterMessageContent = (
           footer?.text,
           title,
           url,
-        ].some((prop) => prop?.toLowerCase()?.includes(filterValue)) ||
+        ].some((prop) => prop?.includes(filterValue)) ||
           fields?.some((field) =>
-            [field?.name, field?.value].some((fieldProp) =>
-              fieldProp?.toLowerCase()?.includes(filterValue)
+            [field.name, field.value].some((fieldProp) =>
+              fieldProp?.includes(filterValue)
             )
           ))
       );
