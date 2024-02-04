@@ -7,6 +7,7 @@ import {
   setSelectedExportChannels as setSelectedExportChannelsAction,
   getChannels as getChannelsAction,
   changeChannel as changeChannelAction,
+  loadChannel as loadChannelAction,
 } from "./channel-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import Channel from "../../classes/channel";
@@ -39,7 +40,7 @@ const useChannelSlice = () => {
   const setChannels = (channels: Channel[]): void => {
     dispatch(setChannelsAction(channels));
   };
-  const setChannel = (channelId: string): void => {
+  const setChannel = (channelId: Snowflake): void => {
     dispatch(setChannelAction(channelId));
   };
   const resetChannel = (): void => {
@@ -48,12 +49,16 @@ const useChannelSlice = () => {
   const setSelectedExportChannels = (channelIds: string[]): void => {
     dispatch(setSelectedExportChannelsAction(channelIds));
   };
-  const getChannels = (guildId: string): void => {
+  const getChannels = (guildId: Snowflake): void => {
     dispatch(getChannelsAction(guildId));
   };
 
-  const changeChannel = (channelId: string | null): void => {
+  const changeChannel = (channelId: Snowflake | null): void => {
     dispatch(changeChannelAction(channelId));
+  };
+
+  const loadChannel = (channelId: Snowflake): void => {
+    dispatch(loadChannelAction(channelId));
   };
 
   return {
@@ -65,6 +70,7 @@ const useChannelSlice = () => {
     setSelectedExportChannels,
     getChannels,
     changeChannel,
+    loadChannel,
   };
 };
 

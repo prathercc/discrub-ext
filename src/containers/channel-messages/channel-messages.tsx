@@ -58,7 +58,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
   const selectedGuild = guildState.selectedGuild();
   const preFilterUserId = guildState.preFilterUserId();
 
-  const { state: channelState, changeChannel } = useChannelSlice();
+  const { state: channelState, changeChannel, loadChannel } = useChannelSlice();
   const channels = channelState.channels();
   const selectedChannel = channelState.selectedChannel();
 
@@ -322,12 +322,19 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                     <Autocomplete
                       clearIcon={<ClearIcon />}
                       onChange={(_, val) => handleChannelChange(val)}
+                      onPaste={async (e) => {
+                        e.preventDefault();
+                        if (selectedGuild) {
+                          const clipboardData = e.clipboardData.getData("text");
+                          loadChannel(clipboardData);
+                        }
+                      }}
                       options={sortedChannels.map((channel) => {
                         return channel.id;
                       })}
                       getOptionLabel={(id) =>
                         channels.find((channel) => channel.id === id)?.name ||
-                        ""
+                        id
                       }
                       renderInput={(params) => (
                         <TextField

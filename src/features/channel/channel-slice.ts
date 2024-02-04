@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchChannels } from "../../services/discord-service";
+import { fetchChannel, fetchChannels } from "../../services/discord-service";
 import {
   resetAdvancedFilters,
   resetFilters,
@@ -82,6 +82,21 @@ export const changeChannel =
     dispatch(resetFilters());
     dispatch(resetMessageData());
     dispatch(setChannel(channelId));
+  };
+
+export const loadChannel =
+  (channelId: Snowflake): AppThunk =>
+  async (dispatch, getState) => {
+    const { selectedGuild } = getState().guild;
+    const { token } = getState().user;
+    const { channels } = getState().channel;
+
+    if (token && channelId && !channels.map((c) => c.id).includes(channelId)) {
+      const { data, success } = await fetchChannel(token, channelId);
+      if (success && data && data.guild_id === selectedGuild?.id) {
+        dispatch(setChannels([...channels, data]));
+      }
+    }
   };
 
 export default channelSlice.reducer;

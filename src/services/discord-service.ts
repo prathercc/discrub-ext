@@ -152,6 +152,18 @@ export const fetchChannels = (authorization: string, guildId: string) =>
     })
   );
 
+export const fetchChannel = (authorization: string, channelId: string) =>
+  withRetry<Channel>(
+    fetch(`${DISCORD_CHANNELS_ENDPOINT}/${channelId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: authorization,
+        "user-agent": userAgent,
+      },
+    })
+  );
+
 type GuildChannelModify = {
   name?: string;
   type?: number;
