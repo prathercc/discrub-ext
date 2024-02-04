@@ -48,6 +48,8 @@ import { ReactElement } from "react";
 import { Typography } from "@mui/material";
 import ImgEmoji from "./styled/img-emoji";
 import Guild from "../../classes/guild";
+import Papa from "papaparse";
+import { flatten } from "flat";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -775,6 +777,23 @@ const _exportJson =
     );
   };
 
+const _exportCsv = async ({
+  exportUtils,
+  messages,
+  entityMainDirectory,
+  entityName,
+  currentPage,
+}: ExportHtmlProps) => {
+  const csvData: unknown[] = messages.map((m) => flatten(m));
+
+  await exportUtils.addToZip(
+    Papa.unparse(csvData),
+    `${entityMainDirectory}/${getSafeExportName(
+      entityName
+    )}_page_${currentPage}.csv`
+  );
+};
+
 const _compressMessages =
   ({
     messages,
@@ -834,6 +853,14 @@ const _compressMessages =
         );
       } else if (format === ExportType.HTML) {
         await _exportHtml({
+          exportUtils,
+          messages: exportMessages,
+          entityMainDirectory,
+          entityName,
+          currentPage,
+        });
+      } else if (format === ExportType.CSV) {
+        await _exportCsv({
           exportUtils,
           messages: exportMessages,
           entityMainDirectory,

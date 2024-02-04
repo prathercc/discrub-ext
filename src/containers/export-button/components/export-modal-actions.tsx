@@ -53,33 +53,19 @@ const ExportModalActions = ({
       </Button>
 
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <Tooltip
-          placement={tooltipPlacement}
-          title={tooltipTitle}
-          description={getTooltipDescription(ExportType.HTML)}
-        >
-          <MenuItem dense onClick={() => handleExport(ExportType.HTML)}>
-            HTML
-          </MenuItem>
-        </Tooltip>
-        <Tooltip
-          placement={tooltipPlacement}
-          title={tooltipTitle}
-          description={getTooltipDescription(ExportType.JSON)}
-        >
-          <MenuItem dense onClick={() => handleExport(ExportType.JSON)}>
-            JSON
-          </MenuItem>
-        </Tooltip>
-        <Tooltip
-          placement={tooltipPlacement}
-          title={tooltipTitle}
-          description={getTooltipDescription(ExportType.MEDIA)}
-        >
-          <MenuItem dense onClick={() => handleExport(ExportType.MEDIA)}>
-            Media Only
-          </MenuItem>
-        </Tooltip>
+        {Object.values(ExportType).map((exportType) => (
+          <Tooltip
+            placement={tooltipPlacement}
+            title={tooltipTitle}
+            description={getTooltipDescription(exportType)}
+          >
+            <MenuItem dense onClick={() => handleExport(exportType)}>
+              {exportType === ExportType.MEDIA
+                ? "Media Only"
+                : exportType.toUpperCase()}
+            </MenuItem>
+          </Tooltip>
+        ))}
       </Menu>
     </DialogActions>
   );

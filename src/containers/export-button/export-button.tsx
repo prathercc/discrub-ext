@@ -41,6 +41,7 @@ const ExportButton = ({
   const messagesPerPage = exportState.messagesPerPage();
   const downloadImages = exportState.downloadImages();
   const previewImages = exportState.previewImages();
+  const artistMode = exportState.artistMode();
 
   const { setDiscrubCancelled, setDiscrubPaused } = useAppSlice();
 
@@ -165,7 +166,7 @@ const ExportButton = ({
         `${exportType.toUpperCase()} Format`,
       ];
 
-      if (previewImages) {
+      if (previewImages && exportType === ExportType.HTML) {
         exportAccessories.push("Media Previewed");
       }
 
@@ -173,7 +174,9 @@ const ExportButton = ({
       descriptionArr.push(`Messages ${accessories}`);
     }
     if (downloadImages) {
-      descriptionArr.push("Attached & Embedded Media");
+      descriptionArr.push(
+        `Attached & Embedded Media${artistMode ? " (Artist Mode)" : ""}`
+      );
     }
     if (!isDm) {
       descriptionArr.push("Roles");
