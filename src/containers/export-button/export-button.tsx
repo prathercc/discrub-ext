@@ -39,6 +39,8 @@ const ExportButton = ({
   const sortOverride = exportState.sortOverride();
   const currentPage = exportState.currentPage();
   const messagesPerPage = exportState.messagesPerPage();
+  const downloadImages = exportState.downloadImages();
+  const previewImages = exportState.previewImages();
 
   const { setDiscrubCancelled, setDiscrubPaused } = useAppSlice();
 
@@ -155,6 +157,32 @@ const ExportButton = ({
     )}`;
   };
 
+  const getTooltipDescription = (exportType: ExportType): string => {
+    const descriptionArr: string[] = [];
+
+    if (exportType !== ExportType.MEDIA) {
+      const exportAccessories: string[] = [
+        `${exportType.toUpperCase()} Format`,
+      ];
+
+      if (previewImages) {
+        exportAccessories.push("Media Previewed");
+      }
+
+      const accessories = `(${exportAccessories.join(" and ")})`;
+      descriptionArr.push(`Messages ${accessories}`);
+    }
+    if (downloadImages) {
+      descriptionArr.push("Attached & Embedded Media");
+    }
+    if (!isDm) {
+      descriptionArr.push("Roles");
+    }
+    return `${descriptionArr.join(", ")}${
+      descriptionArr.length ? ", " : ""
+    }Emojis, and Avatars`;
+  };
+
   return (
     <>
       <Button
@@ -184,6 +212,7 @@ const ExportButton = ({
         pauseDisabled={pauseDisabled}
         ContentComponent={getContentComponent()}
         dialogTitle={exportTitle}
+        getTooltipDescription={getTooltipDescription}
       />
     </>
   );

@@ -795,10 +795,15 @@ const _compressMessages =
       const { discrubCancelled } = getState().app;
       await dispatch(checkDiscrubPaused());
       if (discrubCancelled) break;
-      dispatch(
-        setStatusText(`Compressing - Page ${currentPage} of ${totalPages}`)
-      );
-      await wait(2);
+      if (format === ExportType.MEDIA) {
+        dispatch(setStatusText("Cleaning up..."));
+      } else {
+        dispatch(
+          setStatusText(`Compressing - Page ${currentPage} of ${totalPages}`)
+        );
+      }
+
+      await wait(1);
       const startIndex =
         currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
       const exportMessages = messages?.slice(

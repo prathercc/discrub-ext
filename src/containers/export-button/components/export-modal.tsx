@@ -11,6 +11,7 @@ type ExportModalProps = {
   pauseDisabled: boolean;
   ContentComponent: React.ReactNode;
   dialogTitle: string;
+  getTooltipDescription: (exportType: ExportType) => string;
 };
 
 const ExportModal = ({
@@ -21,6 +22,7 @@ const ExportModal = ({
   onCancel,
   ContentComponent,
   dialogTitle,
+  getTooltipDescription,
 }: ExportModalProps) => {
   return (
     <Dialog
@@ -35,6 +37,7 @@ const ExportModal = ({
         exportDisabled={exportDisabled}
         pauseDisabled={pauseDisabled}
         onCancel={onCancel}
+        getTooltipDescription={getTooltipDescription}
       />
     </Dialog>
   );

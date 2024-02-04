@@ -4,12 +4,14 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
 import { ExportType } from "../../../enum/export-type";
+import Tooltip from "../../../common-components/tooltip/tooltip";
 
 type ActionsProps = {
   handleExportSelected: (val: ExportType) => void;
   onCancel: () => void;
   exportDisabled: boolean;
   pauseDisabled: boolean;
+  getTooltipDescription: (exportType: ExportType) => string;
 };
 
 const ExportModalActions = ({
@@ -17,6 +19,7 @@ const ExportModalActions = ({
   onCancel,
   exportDisabled,
   pauseDisabled,
+  getTooltipDescription,
 }: ActionsProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = !!anchorEl;
@@ -31,6 +34,9 @@ const ExportModalActions = ({
     handleClose();
     handleExportSelected(val);
   };
+
+  const tooltipTitle = "Export Includes:";
+  const tooltipPlacement = "left";
 
   return (
     <DialogActions>
@@ -47,12 +53,33 @@ const ExportModalActions = ({
       </Button>
 
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem dense onClick={() => handleExport(ExportType.HTML)}>
-          HTML
-        </MenuItem>
-        <MenuItem dense onClick={() => handleExport(ExportType.JSON)}>
-          JSON
-        </MenuItem>
+        <Tooltip
+          placement={tooltipPlacement}
+          title={tooltipTitle}
+          description={getTooltipDescription(ExportType.HTML)}
+        >
+          <MenuItem dense onClick={() => handleExport(ExportType.HTML)}>
+            HTML
+          </MenuItem>
+        </Tooltip>
+        <Tooltip
+          placement={tooltipPlacement}
+          title={tooltipTitle}
+          description={getTooltipDescription(ExportType.JSON)}
+        >
+          <MenuItem dense onClick={() => handleExport(ExportType.JSON)}>
+            JSON
+          </MenuItem>
+        </Tooltip>
+        <Tooltip
+          placement={tooltipPlacement}
+          title={tooltipTitle}
+          description={getTooltipDescription(ExportType.MEDIA)}
+        >
+          <MenuItem dense onClick={() => handleExport(ExportType.MEDIA)}>
+            Media Only
+          </MenuItem>
+        </Tooltip>
       </Menu>
     </DialogActions>
   );
