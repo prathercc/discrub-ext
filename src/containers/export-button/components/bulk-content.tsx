@@ -16,6 +16,7 @@ import PerPage from "./per-page";
 import SortDirectionToggle from "./sort-direction-toggle";
 import Channel from "../../../classes/channel";
 import ChannelSelection from "./channel-selection";
+import ArtistModeToggle from "./artist-mode-toggle";
 
 type BulkContentProps = {
   isDm?: boolean;
@@ -113,6 +114,7 @@ const BulkContent = ({
               >
                 <Typography variant="body2">Export Options</Typography>
                 <Stack direction="row" spacing={1}>
+                  <ArtistModeToggle />
                   <SortDirectionToggle />
                   <PreviewImageToggle />
                   <ImageToggle />
@@ -145,6 +147,7 @@ const BulkContent = ({
             >
               <Typography variant="body2">Export Options</Typography>
               <Stack direction="row" spacing={1}>
+                <ArtistModeToggle />
                 <SortDirectionToggle />
                 <PreviewImageToggle />
                 <ImageToggle />

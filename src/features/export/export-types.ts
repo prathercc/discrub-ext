@@ -8,6 +8,7 @@ export type ExportState = {
   isExporting: boolean;
   downloadImages: boolean;
   previewImages: boolean;
+  artistMode: boolean;
   name: string;
   statusText: string;
   isGenerating: boolean;

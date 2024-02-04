@@ -13,6 +13,7 @@ import {
   setIsExporting as setIsExportingAction,
   setPreviewImages as setPreviewImagesAction,
   setDownloadImages as setDownloadImagesAction,
+  setArtistMode as setArtistModeAction,
   setName as setNameAction,
   setStatusText as setStatusTextAction,
   resetExportSettings as resetExportSettingsAction,
@@ -44,6 +45,9 @@ const useExportSlice = () => {
 
   const usePreviewImages = (): boolean =>
     useAppSelector((state: RootState) => state.export.previewImages);
+
+  const useArtistMode = (): boolean =>
+    useAppSelector((state: RootState) => state.export.artistMode);
 
   const useName = (): string =>
     useAppSelector((state: RootState) => state.export.name);
@@ -82,6 +86,7 @@ const useExportSlice = () => {
     isExporting: useIsExporting,
     downloadImages: useDownloadImages,
     previewImages: usePreviewImages,
+    artistMode: useArtistMode,
     name: useName,
     statusText: useStatusText,
     isGenerating: useIsGenerating,
@@ -147,6 +152,10 @@ const useExportSlice = () => {
     dispatch(setDownloadImagesAction(value));
   };
 
+  const setArtistMode = (value: boolean): void => {
+    dispatch(setArtistModeAction(value));
+  };
+
   const setName = (value: string): void => {
     dispatch(setNameAction(value));
   };
@@ -199,6 +208,7 @@ const useExportSlice = () => {
     setIsExporting,
     setPreviewImages,
     setDownloadImages,
+    setArtistMode,
     setName,
     setStatusText,
     resetExportSettings,

@@ -61,6 +61,7 @@ const initialState: ExportState = {
   isExporting: false,
   downloadImages: false,
   previewImages: false,
+  artistMode: false,
   name: "",
   statusText: "",
   isGenerating: false,
@@ -152,6 +153,9 @@ export const exportSlice = createSlice({
     setDownloadImages: (state, { payload }: { payload: boolean }): void => {
       state.downloadImages = payload;
     },
+    setArtistMode: (state, { payload }: { payload: boolean }): void => {
+      state.artistMode = payload;
+    },
     setName: (state, { payload }: { payload: string }): void => {
       state.name = payload;
     },
@@ -161,6 +165,7 @@ export const exportSlice = createSlice({
     resetExportSettings: (state): void => {
       state.downloadImages = false;
       state.previewImages = false;
+      state.artistMode = false;
       state.sortOverride = SortDirection.DESCENDING;
       state.messagesPerPage = 1000;
     },
@@ -184,6 +189,7 @@ export const {
   setExportEmojiMap,
   setExportMediaMap,
   setExportRoleMap,
+  setArtistMode,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -193,7 +199,7 @@ const _downloadFilesFromMessage =
     paths,
   }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    const { downloadImages } = getState().export;
+    const { downloadImages, artistMode } = getState().export;
     let embeds = message.embeds;
     let attachments = message.attachments;
     if (!downloadImages) {
@@ -203,7 +209,10 @@ const _downloadFilesFromMessage =
       );
     }
 
-    const { media: mediaPath } = paths;
+    let mediaPath = paths.media;
+    if (artistMode && message.userName) {
+      mediaPath = `${mediaPath}/${message.userName}`;
+    }
 
     for (const entity of [...embeds, ...attachments]) {
       const isMedia = entityContainsMedia(entity);
@@ -223,9 +232,11 @@ const _downloadFilesFromMessage =
               const fileName = getExportFileName(entity, blobType);
               await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
 
+              const sliceIdx = mediaPath.indexOf("/");
+
               const updatedMediaMap = {
                 ...map,
-                [downloadUrl]: `${mediaPath.split("/")[1]}/${fileName}`,
+                [downloadUrl]: `${mediaPath.slice(sliceIdx + 1)}/${fileName}`,
               };
               dispatch(setExportMediaMap(updatedMediaMap));
             }

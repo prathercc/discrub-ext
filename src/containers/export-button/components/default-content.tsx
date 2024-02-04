@@ -9,6 +9,7 @@ import ImageToggle from "./image-toggle";
 import Progress from "./progress";
 import PreviewImageToggle from "./preview-image-toggle";
 import PerPage from "./per-page";
+import ArtistModeToggle from "./artist-mode-toggle";
 
 type DefaultContentProps = {
   isExporting: boolean;
@@ -40,6 +41,7 @@ const DefaultContent = ({ isExporting, messageCount }: DefaultContentProps) => {
             >
               <Typography variant="body2">Export Options</Typography>
               <Stack direction="row" alignItems="center" spacing={1}>
+                <ArtistModeToggle />
                 <PreviewImageToggle />
                 <ImageToggle />
               </Stack>
