@@ -34,7 +34,7 @@ import { useGuildSlice } from "../../features/guild/use-guild-slice";
 import { useChannelSlice } from "../../features/channel/use-channel-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
-import { EntityIcon } from "../../components/entity-icon";
+import EntityIcon from "../../components/entity-icon";
 import Channel from "../../classes/channel";
 import Guild from "../../classes/guild";
 import Message from "../../classes/message";

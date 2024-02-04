@@ -13,7 +13,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-// import { getGuildIcon } from "../../components/Messages/ChannelMessages/ChannelMessages";
 import ClearIcon from "@mui/icons-material/Clear";
 import { getSafeExportName, sortByProperty } from "../../utils";
 import BeforeAndAfterFields from "../../components/before-and-after-fields";
@@ -34,6 +33,7 @@ import { ExportUserMap } from "../../features/export/export-types";
 import { MessageType } from "../../enum/message-type";
 import Channel from "../../classes/channel";
 import Guild from "../../classes/guild";
+import EntityIcon from "../../components/entity-icon";
 
 function Tags() {
   const { state: guildState, changeGuild, getGuilds } = useGuildSlice();
@@ -260,8 +260,12 @@ function Tags() {
                   const foundGuild = guilds.find((guild) => guild.id === id);
                   return (
                     <Typography gap="4px" {...params}>
-                      {/* {getGuildIcon(foundGuild)} */}
-                      {foundGuild?.name}
+                      {foundGuild ? (
+                        <>
+                          <EntityIcon entity={foundGuild} />
+                          {foundGuild.name}
+                        </>
+                      ) : null}
                     </Typography>
                   );
                 }}
@@ -277,8 +281,9 @@ function Tags() {
                       ...params.InputProps,
                       startAdornment: (
                         <>
-                          {/* {selectedGuild?.id &&
-                            getGuildIcon(selectedGuild)} */}
+                          {selectedGuild && (
+                            <EntityIcon entity={selectedGuild} />
+                          )}
                         </>
                       ),
                     }}

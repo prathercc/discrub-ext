@@ -34,7 +34,7 @@ import { useDmSlice } from "../../features/dm/use-dm-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
 import Channel from "../../classes/channel";
-import { EntityIcon } from "../../components/entity-icon";
+import EntityIcon from "../../components/entity-icon";
 import Message from "../../classes/message";
 import { SortDirection } from "../../enum/sort-direction";
 import TableMessage from "../../components/table-message";

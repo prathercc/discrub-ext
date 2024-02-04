@@ -5,7 +5,7 @@ import Channel from "../classes/channel";
 type EntityIconProps = {
   entity: Guild | Channel;
 };
-export const EntityIcon = ({ entity }: EntityIconProps) => {
+const EntityIcon = ({ entity }: EntityIconProps) => {
   return (
     <img
       style={{ width: "24px", height: "24px", borderRadius: "50px" }}
@@ -14,3 +14,5 @@ export const EntityIcon = ({ entity }: EntityIconProps) => {
     />
   );
 };
+
+export default EntityIcon;
