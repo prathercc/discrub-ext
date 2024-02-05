@@ -78,7 +78,7 @@ function PrefilterUser({
         clearIcon={<ClearIcon />}
         freeSolo={!isDm}
         onInputChange={handleChange}
-        options={users?.map((user) => user.name)}
+        options={users?.map((user) => user.name || user.id)}
         renderInput={(params) => (
           <TextField
             {...params}
