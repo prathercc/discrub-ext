@@ -334,7 +334,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                       })}
                       getOptionLabel={(id) =>
                         channels.find((channel) => channel.id === id)?.name ||
-                        id
+                        ""
                       }
                       renderInput={(params) => (
                         <TextField
