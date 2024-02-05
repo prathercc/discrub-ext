@@ -1,5 +1,16 @@
 [
   {
+    "version": "1.11.7",
+    "changes": [
+      "Add Channel filter for the Server Export dialog.",
+      "Add the 'Media Only' and 'CSV' export options.",
+      "Show an export summary when hovering over an export option.",
+      "Fix critical bug with exporting multiple Server Channels.",
+      "Add an Artist Mode export toggle to store Attached and Embedded Media into folders named after their Author's username.",
+      "Add the ability to paste Thread Id's into the Channel field within the Channel Messages screen."
+    ]
+  },
+  {
     "version": "1.11.6",
     "changes": [
       "Add optional skip for Message Reply Tags in the Tags screen (toggled by default).",
