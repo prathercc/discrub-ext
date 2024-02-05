@@ -1,5 +1,4 @@
-
-# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/master/public/discrub2.png"> Discrub
+# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/master/public/resources/media/discrub.png"> Discrub
 
 **Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML and JSON supported) Discord messages.
 
@@ -7,14 +6,14 @@
 
 📼 Instructional Video: https://www.youtube.com/watch?v=MIRUy9-v3SU
 
-‎             |  ‎
-:-------------------------:|:-------------------------:
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z2.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z3.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z4.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z5.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z7.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z8.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z9.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z11.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z12.png)
-![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png)  |  ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png)    
+|                                                ‎                                                |                                                ‎                                                |
+| :---------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------: |
+| ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z2.png)  | ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z3.png)  |
+| ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z4.png)  | ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z5.png)  |
+| ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z6.png)  | ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z7.png)  |
+| ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z8.png)  | ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z9.png)  |
+| ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z11.png) | ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z12.png) |
+| ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z13.png) | ![](https://raw.githubusercontent.com/prathercc/discrub-ext/master/discrub_screenshots/z14.png) |
 
 ## Contributing
 

@@ -1,0 +1,1 @@
+Components that are stored here can optionally use redux state and can be reused throughout the application.
