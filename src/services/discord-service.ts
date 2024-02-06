@@ -25,14 +25,14 @@ const generateSnowflake = (date: Date = new Date()): string =>
   ((BigInt(date.valueOf()) - BigInt(1420070400000)) << BigInt(22)).toString();
 
 const withRetry = async <T = void>(
-  promise: Promise<Response>,
+  promise: () => Promise<Response>, // Perhaps this could be a function that returns a promise?
   isBlob: boolean = false
 ): Promise<DiscordApiResponse<T>> => {
   let apiResponse: DiscordApiResponse<T> = { success: false };
   try {
     let requestComplete = false;
     while (!requestComplete) {
-      const response = await promise;
+      const response = await promise();
       const { status, ok } = response;
       if (ok) {
         // Request was successful
@@ -65,7 +65,7 @@ const withRetry = async <T = void>(
 };
 
 export const getUser = (authorization: string, userId: string) =>
-  withRetry<User>(
+  withRetry<User>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/${userId}`, {
       method: "GET",
       headers: {
@@ -77,7 +77,7 @@ export const getUser = (authorization: string, userId: string) =>
   );
 
 export const fetchUserData = (authorization: string) =>
-  withRetry<User>(
+  withRetry<User>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/@me`, {
       method: "GET",
       headers: {
@@ -93,7 +93,7 @@ export const fetchGuildUser = (
   userId: string,
   authorization: string
 ) =>
-  withRetry<GuildMemberObject>(
+  withRetry<GuildMemberObject>(() =>
     fetch(`${DISCORD_GUILDS_ENDPOINT}/${guildId}/members/${userId}`, {
       method: "GET",
       headers: {
@@ -105,7 +105,7 @@ export const fetchGuildUser = (
   );
 
 export const fetchDirectMessages = (authorization: string) =>
-  withRetry<Channel[]>(
+  withRetry<Channel[]>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/@me/channels`, {
       method: "GET",
       headers: {
@@ -117,7 +117,7 @@ export const fetchDirectMessages = (authorization: string) =>
   );
 
 export const fetchGuilds = (authorization: string) =>
-  withRetry<Guild[]>(
+  withRetry<Guild[]>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/@me/guilds`, {
       method: "GET",
       headers: {
@@ -129,7 +129,7 @@ export const fetchGuilds = (authorization: string) =>
   );
 
 export const fetchRoles = (guildId: string, authorization: string) =>
-  withRetry<Role[]>(
+  withRetry<Role[]>(() =>
     fetch(`${DISCORD_GUILDS_ENDPOINT}/${guildId}/roles`, {
       method: "GET",
       headers: {
@@ -141,7 +141,7 @@ export const fetchRoles = (guildId: string, authorization: string) =>
   );
 
 export const fetchChannels = (authorization: string, guildId: string) =>
-  withRetry<Channel[]>(
+  withRetry<Channel[]>(() =>
     fetch(`${DISCORD_GUILDS_ENDPOINT}/${guildId}/channels`, {
       method: "GET",
       headers: {
@@ -153,7 +153,7 @@ export const fetchChannels = (authorization: string, guildId: string) =>
   );
 
 export const fetchChannel = (authorization: string, channelId: string) =>
-  withRetry<Channel>(
+  withRetry<Channel>(() =>
     fetch(`${DISCORD_CHANNELS_ENDPOINT}/${channelId}`, {
       method: "GET",
       headers: {
@@ -202,7 +202,7 @@ export const editChannel = (
   channelId: string,
   updateObj: ThreadModify | GuildChannelModify
 ) =>
-  withRetry<Channel>(
+  withRetry<Channel>(() =>
     fetch(`${DISCORD_CHANNELS_ENDPOINT}/${channelId}`, {
       method: "PATCH",
       headers: {
@@ -230,7 +230,7 @@ export const editMessage = (
   updateProps: MessageModify,
   channelId: string
 ) =>
-  withRetry<Message>(
+  withRetry<Message>(() =>
     fetch(`${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}`, {
       method: "PATCH",
       headers: {
@@ -247,7 +247,7 @@ export const deleteMessage = (
   messageId: string,
   channelId: string
 ) =>
-  withRetry(
+  withRetry(() =>
     fetch(`${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}`, {
       method: "DELETE",
       headers: {
@@ -263,7 +263,7 @@ export const fetchMessageData = (
   lastId: string,
   channelId: string
 ) =>
-  withRetry<Message[]>(
+  withRetry<Message[]>(() =>
     fetch(
       `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages?limit=100${
         lastId.length > 0 ? `&before=${lastId}` : ""
@@ -320,7 +320,7 @@ export const fetchSearchMessageData = (
     urlSearchParams.delete(key);
   });
 
-  return withRetry<SearchMessageResult>(
+  return withRetry<SearchMessageResult>(() =>
     fetch(
       `${guildId ? DISCORD_GUILDS_ENDPOINT : DISCORD_CHANNELS_ENDPOINT}/${
         guildId || channelId
@@ -340,7 +340,7 @@ export const fetchSearchMessageData = (
 };
 
 export const fetchPrivateThreads = (authorization: string, channelId: string) =>
-  withRetry<Channel[]>(
+  withRetry<Channel[]>(() =>
     fetch(
       `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/threads/archived/private`,
       {
@@ -355,7 +355,7 @@ export const fetchPrivateThreads = (authorization: string, channelId: string) =>
   );
 
 export const fetchPublicThreads = (authorization: string, channelId: string) =>
-  withRetry<Channel[]>(
+  withRetry<Channel[]>(() =>
     fetch(`${DISCORD_CHANNELS_ENDPOINT}/${channelId}/threads/archived/public`, {
       method: "GET",
       headers: {
@@ -367,7 +367,7 @@ export const fetchPublicThreads = (authorization: string, channelId: string) =>
   );
 
 export const createDm = (authorization: string, recipient_id: string) =>
-  withRetry<unknown>(
+  withRetry<unknown>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/@me/channels`, {
       method: "POST",
       headers: {
@@ -383,7 +383,7 @@ export const sendFriendRequest = (
   authorization: string,
   props: { username: string; discriminator: string }
 ) =>
-  withRetry<unknown>(
+  withRetry<unknown>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/@me/relationships`, {
       method: "POST",
       headers: {
@@ -396,7 +396,7 @@ export const sendFriendRequest = (
   );
 
 export const deleteFriendRequest = (authorization: string, userId: string) =>
-  withRetry<unknown>(
+  withRetry<unknown>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/@me/relationships/${userId}`, {
       method: "DELETE",
       headers: {
@@ -408,7 +408,7 @@ export const deleteFriendRequest = (authorization: string, userId: string) =>
   );
 
 export const getRelationships = (authorization: string) =>
-  withRetry<unknown[]>(
+  withRetry<unknown[]>(() =>
     fetch(`${DISCORD_USERS_ENDPOINT}/@me/relationships`, {
       method: "GET",
       headers: {
@@ -420,4 +420,4 @@ export const getRelationships = (authorization: string) =>
   );
 
 export const downloadFile = (downloadUrl: string) =>
-  withRetry<Blob>(fetch(downloadUrl), true);
+  withRetry<Blob>(() => fetch(downloadUrl), true);
