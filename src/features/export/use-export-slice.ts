@@ -20,19 +20,23 @@ import {
   getSpecialFormatting as getSpecialFormattingAction,
   getFormattedInnerHtml as getFormattedInnerHtmlAction,
   exportMessages as exportMessagesAction,
+  exportChannels as exportChannelsAction,
 } from "./export-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   ExportAvatarMap,
   ExportEmojiMap,
   ExportMediaMap,
-  ExportMessagesProps,
   ExportRoleMap,
   ExportUserMap,
   FormattedInnerHtmlProps,
   SpecialFormatting,
 } from "./export-types";
 import { SortDirection } from "../../enum/sort-direction";
+import Channel from "../../classes/channel";
+import ExportUtils from "./export-utils";
+import { ExportType } from "../../enum/export-type";
+import Message from "../../classes/message";
 
 const useExportSlice = () => {
   const dispatch = useAppDispatch();
@@ -182,15 +186,22 @@ const useExportSlice = () => {
     );
   };
 
-  const exportMessages = ({
-    bulk,
-    exportUtils,
-    format,
-    selectedChannels,
-  }: ExportMessagesProps): void => {
-    dispatch(
-      exportMessagesAction({ bulk, exportUtils, format, selectedChannels })
-    );
+  const exportMessages = (
+    messages: Message[],
+    entityName: string,
+    exportUtils: ExportUtils,
+    format: ExportType
+  ): void => {
+    dispatch(exportMessagesAction(messages, entityName, exportUtils, format));
+  };
+
+  const exportChannels = (
+    channels: Channel[],
+    exportUtils: ExportUtils,
+    format: ExportType,
+    userId?: Snowflake
+  ) => {
+    dispatch(exportChannelsAction(channels, exportUtils, format, userId));
   };
 
   return {
@@ -215,6 +226,7 @@ const useExportSlice = () => {
     getSpecialFormatting,
     getFormattedInnerHtml,
     exportMessages,
+    exportChannels,
   };
 };
 

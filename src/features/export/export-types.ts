@@ -1,4 +1,3 @@
-import Channel from "../../classes/channel";
 import Message from "../../classes/message";
 import { ExportType } from "../../enum/export-type";
 import { SortDirection } from "../../enum/sort-direction";
@@ -151,11 +150,4 @@ export type CompressMessagesProps = {
   entityName: string;
   entityMainDirectory: string;
   exportUtils: ExportUtils;
-};
-
-export type ExportMessagesProps = {
-  selectedChannels: Channel[];
-  exportUtils: ExportUtils;
-  bulk: boolean;
-  format: ExportType;
 };

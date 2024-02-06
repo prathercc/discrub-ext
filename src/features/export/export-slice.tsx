@@ -28,7 +28,6 @@ import {
   ExportJsonProps,
   ExportMap,
   ExportMediaMap,
-  ExportMessagesProps,
   ExportRoleMap,
   ExportState,
   ExportUserMap,
@@ -49,6 +48,7 @@ import { Typography } from "@mui/material";
 import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
+import Channel from "../../classes/channel";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -298,7 +298,7 @@ const _downloadAvatarFromMessage =
     }
   };
 
-/** MOVE TO CUSTOM HOOK
+/**
  *
  * @param {String} content String content to parse Discord special formatting
  * @returns An Object of special formatting
@@ -808,7 +808,6 @@ const _compressMessages =
   }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     // TODO: Combine the setStatusText and wait calls within exportSlice.
-    // TODO: Use a service worker to reduce the load of the compression step.
     dispatch(
       setStatusText(
         `Compressing${
@@ -878,59 +877,105 @@ const _compressMessages =
   };
 
 export const exportMessages =
-  ({
-    selectedChannels,
-    exportUtils,
-    bulk = false,
-    format = ExportType.JSON,
-  }: ExportMessagesProps): AppThunk =>
+  (
+    messages: Message[],
+    entityName: string,
+    exportUtils: ExportUtils,
+    format: ExportType
+  ): AppThunk =>
   async (dispatch, getState) => {
-    const { messages: contextMessages, filteredMessages } = getState().message;
-    const { selectedGuild, preFilterUserId } = getState().guild;
-    const { messagesPerPage, sortOverride } = getState().export;
-    const { preFilterUserId: dmPreFilterUserId } = getState().dm;
+    const { selectedGuild } = getState().guild;
+    const { messagesPerPage } = getState().export;
 
     if (selectedGuild)
       await dispatch(_downloadRoles(exportUtils, selectedGuild));
     if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
 
-    for (const entity of selectedChannels) {
+    const safeEntityName = getSafeExportName(entityName);
+    const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
+    dispatch(setIsExporting(true));
+    dispatch(setName(safeEntityName));
+
+    const mediaPath = `${entityMainDirectory}/${safeEntityName}_media`;
+    const paths = { media: mediaPath };
+
+    await dispatch(_processMessages({ messages, paths, exportUtils }));
+
+    if (messagesPerPage === null || messagesPerPage === 0)
+      await dispatch(setMessagesPerPage(exportMessages.length));
+
+    if (messages.length > 0 && !getState().app.discrubCancelled) {
+      await dispatch(checkDiscrubPaused());
+      await dispatch(
+        _compressMessages({
+          messages,
+          format,
+          entityName: safeEntityName,
+          entityMainDirectory,
+          exportUtils,
+        })
+      );
+    }
+
+    await dispatch(checkDiscrubPaused());
+    if (!getState().app.discrubCancelled) {
+      dispatch(setStatusText("Preparing Archive"));
+      await exportUtils.generateZip();
+    }
+
+    dispatch(setIsGenerating(false));
+    dispatch(setIsExporting(false));
+    dispatch(setName(""));
+    await exportUtils.resetZip();
+    dispatch(setStatusText(""));
+    dispatch(setCurrentPage(1));
+    dispatch(setDiscrubCancelled(false));
+    dispatch(resetExportMaps(["emojiMap", "avatarMap", "mediaMap", "roleMap"]));
+  };
+
+export const exportChannels =
+  (
+    channels: Channel[],
+    exportUtils: ExportUtils,
+    format: ExportType,
+    userId?: Snowflake
+  ): AppThunk =>
+  async (dispatch, getState) => {
+    const { selectedGuild } = getState().guild;
+    const { messagesPerPage, sortOverride } = getState().export;
+
+    if (selectedGuild)
+      await dispatch(_downloadRoles(exportUtils, selectedGuild));
+    if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
+
+    for (const entity of channels) {
       if (getState().app.discrubCancelled) break;
       dispatch(setStatusText(""));
       const safeEntityName = getSafeExportName(entity.name || entity.id);
       const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
       dispatch(setIsExporting(true));
       dispatch(setName(safeEntityName));
-      if (bulk && !isDm(entity)) {
+      if (!isDm(entity)) {
         dispatch(setChannel(entity.id));
       }
 
       let exportMessages: Message[] = [];
-      if (bulk) {
-        const messageData = await dispatch(
-          getMessageData(
-            selectedGuild?.id,
-            entity.id,
-            preFilterUserId || dmPreFilterUserId
-          )
-        );
 
-        if (messageData) {
-          exportMessages = messageData.messages
-            .map((m) => new Message({ ...m }))
-            .sort((a, b) =>
-              sortByProperty(
-                Object.assign(a, { date: new Date(a.timestamp) }),
-                Object.assign(b, { date: new Date(b.timestamp) }),
-                "date",
-                sortOverride
-              )
-            );
-        }
-      } else {
-        exportMessages = filteredMessages.length
-          ? filteredMessages
-          : contextMessages;
+      const messageData = await dispatch(
+        getMessageData(selectedGuild?.id, entity.id, userId)
+      );
+
+      if (messageData) {
+        exportMessages = messageData.messages
+          .map((m) => new Message({ ...m }))
+          .sort((a, b) =>
+            sortByProperty(
+              Object.assign(a, { date: new Date(a.timestamp) }),
+              Object.assign(b, { date: new Date(b.timestamp) }),
+              "date",
+              sortOverride
+            )
+          );
       }
 
       const mediaPath = `${entityMainDirectory}/${safeEntityName}_media`;
@@ -966,13 +1011,8 @@ export const exportMessages =
       await exportUtils.generateZip();
     }
 
-    /*
-     * We need to ensure that the Selected Channel and Message Data gets reset if we are bulk exporting.
-     * Keep in mind, only Guilds can be bulk exported at the moment! The resetChannel call may need to moved.
-     */
-    if (bulk) dispatch(resetChannel());
-    if (bulk) dispatch(resetMessageData());
-    /* */
+    dispatch(resetChannel());
+    dispatch(resetMessageData());
 
     dispatch(setIsGenerating(false));
     dispatch(setIsExporting(false));

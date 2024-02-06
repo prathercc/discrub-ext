@@ -33,6 +33,7 @@ const ExportButton = ({
     resetExportSettings,
     setIsGenerating,
     exportMessages,
+    exportChannels,
   } = useExportSlice();
   const isGenerating = exportState.isGenerating();
   const isExporting = exportState.isExporting();
@@ -91,18 +92,31 @@ const ExportButton = ({
   };
 
   const handleExportSelected = async (format: ExportType = ExportType.JSON) => {
-    let selectedChannels: Channel[] = [];
-    if (isDm && selectedDm) {
-      selectedChannels = [selectedDm];
-    } else if (bulk) {
-      selectedChannels = channels.filter((c) =>
-        selectedExportChannels.some((id) => id === c.id)
-      );
-    } else if (selectedChannel) {
-      selectedChannels = [selectedChannel];
+    if (bulk) {
+      let entity = isDm ? selectedDm : selectedGuild;
+      let channelsToExport: Channel[] = [];
+      if (isDm && selectedDm) {
+        channelsToExport = [selectedDm];
+      } else if (selectedGuild) {
+        channelsToExport = channels.filter((c) =>
+          selectedExportChannels.some((id) => id === c.id)
+        );
+      }
+      if (entity && exportChannels.length) {
+        exportChannels(channelsToExport, exportUtils, format);
+      }
+    } else {
+      const entity = isDm ? selectedDm : selectedChannel || selectedGuild;
+      const messagesToExport = filters.length ? filteredMessages : messages;
+      if (entity && messagesToExport.length) {
+        exportMessages(
+          messagesToExport,
+          entity.name || entity.id,
+          exportUtils,
+          format
+        );
+      }
     }
-
-    exportMessages({ selectedChannels, exportUtils, bulk, format });
   };
 
   const exportDisabled =
