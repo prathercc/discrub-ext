@@ -219,7 +219,10 @@ const MessageMock = ({
                 color: "inherit",
                 textDecoration: "inherit",
               },
-              color: "#a0a1a4 !important",
+              "& span": {
+                color: "#FFF !important",
+              },
+              color: "#a0a1a4",
               whiteSpace: "nowrap",
             }}
             variant="caption"
