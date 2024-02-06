@@ -25,7 +25,7 @@ const generateSnowflake = (date: Date = new Date()): string =>
   ((BigInt(date.valueOf()) - BigInt(1420070400000)) << BigInt(22)).toString();
 
 const withRetry = async <T = void>(
-  promise: () => Promise<Response>, // Perhaps this could be a function that returns a promise?
+  promise: () => Promise<Response>,
   isBlob: boolean = false
 ): Promise<DiscordApiResponse<T>> => {
   let apiResponse: DiscordApiResponse<T> = { success: false };
