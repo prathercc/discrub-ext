@@ -612,7 +612,7 @@ export const getFormattedInnerHtml =
         let nick, roles, joinedAt: string | Maybe;
         let roleNames: string[] = [];
         if (selectedGuild) {
-          ({ nick, roles, joinedAt } = guilds[selectedGuild.id]) || {};
+          ({ nick, roles, joinedAt } = guilds[selectedGuild.id] || {});
           roleNames = getRoleNames(roles, selectedGuild);
         }
 
