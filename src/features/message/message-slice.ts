@@ -26,7 +26,7 @@ import {
   setTimeoutMessage as notify,
 } from "../app/app-slice";
 import { MessageRegex } from "../../enum/message-regex";
-import { setExportUserMap } from "../export/export-slice";
+import { resetExportMaps, setExportUserMap } from "../export/export-slice";
 import { getPreFilterUsers } from "../guild/guild-slice";
 import { format, isDate, parseISO } from "date-fns";
 import {
@@ -140,6 +140,7 @@ export const messageSlice = createSlice({
       state.messages = [];
       state.selectedMessages = [];
       state.lookupUserId = null;
+      state.lookupReactionMessageId = null;
       state.fetchProgress = defaultFetchProgress;
       state.totalSearchMessages = 0;
       state.isLoading = null;
@@ -733,6 +734,7 @@ export const deleteMessages =
 export const resetMessageData = (): AppThunk => (dispatch) => {
   dispatch(_resetMessageData());
   dispatch(resetThreads());
+  dispatch(resetExportMaps(["reactionMap"]));
 };
 
 export const getMessageData =

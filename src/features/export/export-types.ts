@@ -18,12 +18,17 @@ export type ExportState = {
 };
 
 export type ExportMap = {
+  /** Cleared at the end of an export **/
   userMap: ExportUserMap;
   emojiMap: ExportEmojiMap;
   avatarMap: ExportAvatarMap;
   mediaMap: ExportMediaMap;
   roleMap: ExportRoleMap;
+  /*************************************/
+
+  /** Cleared when messages are reset **/
   reactionMap: ExportReactionMap;
+  /*************************************/
 };
 
 /**
