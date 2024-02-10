@@ -2,6 +2,7 @@ import { isAttachment, isGuild, isRole } from "./app/guards";
 import Attachment from "./classes/attachment";
 import Channel from "./classes/channel";
 import Embed from "./classes/embed";
+import { Emoji } from "./classes/emoji";
 import Guild from "./classes/guild";
 import Message from "./classes/message";
 import Role from "./classes/role";
@@ -311,4 +312,10 @@ const _getApplicableRoles = (roleIds: string[] = [], guild: Guild): Role[] => {
       (role) => roleIds.some((id) => id === role.id) && Boolean(role.position)
     ) || []
   );
+};
+
+export const getEncodedEmoji = (emoji: Emoji): string | null => {
+  const { name, id } = emoji;
+  const emojiString = id ? `${name}:${id}` : name;
+  return emojiString || null;
 };

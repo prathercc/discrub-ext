@@ -6,8 +6,9 @@ import {
   fetchSearchMessageData,
   fetchMessageData,
   fetchGuildUser,
+  getReactions,
 } from "../../services/discord-service";
-import { isDm, sortByProperty } from "../../utils";
+import { getEncodedEmoji, isDm, sortByProperty } from "../../utils";
 import Message from "../../classes/message";
 import { MessageType } from "../../enum/message-type";
 import {
@@ -26,7 +27,11 @@ import {
   setTimeoutMessage as notify,
 } from "../app/app-slice";
 import { MessageRegex } from "../../enum/message-regex";
-import { resetExportMaps, setExportUserMap } from "../export/export-slice";
+import {
+  resetExportMaps,
+  setExportReactionMap,
+  setExportUserMap,
+} from "../export/export-slice";
 import { getPreFilterUsers } from "../guild/guild-slice";
 import { format, isDate, parseISO } from "date-fns";
 import {
@@ -44,7 +49,7 @@ import { FilterName } from "../../enum/filter-name";
 import Attachment from "../../classes/attachment";
 import { AppThunk } from "../../app/store";
 import { isMessage } from "../../app/guards";
-import { ExportUserMap } from "../export/export-types";
+import { ExportReactionMap, ExportUserMap } from "../export/export-types";
 import Channel from "../../classes/channel";
 import { ChannelType } from "../../enum/channel-type";
 
@@ -737,6 +742,39 @@ export const resetMessageData = (): AppThunk => (dispatch) => {
   dispatch(resetExportMaps(["reactionMap"]));
 };
 
+const _generateReactionMap =
+  (messages: Message[]): AppThunk<Promise<void>> =>
+  async (dispatch, getState) => {
+    const reactionMap: ExportReactionMap = {};
+    const { token } = getState().user;
+    for (const message of messages) {
+      reactionMap[message.id] = {};
+      if (getState().app.discrubCancelled) break;
+      await dispatch(checkDiscrubPaused());
+
+      if (message.reactions?.length && token) {
+        dispatch(setLookupReactionMessageId(message.id));
+        for (const reaction of message.reactions) {
+          const encodedEmoji = getEncodedEmoji(reaction.emoji);
+          if (getState().app.discrubCancelled || !encodedEmoji) break;
+          await dispatch(checkDiscrubPaused());
+
+          const { success, data } = await getReactions(
+            token,
+            message.channel_id,
+            message.id,
+            encodedEmoji
+          );
+          if (success && data) {
+            reactionMap[message.id][encodedEmoji] = data.map((user) => user.id);
+          }
+        }
+      }
+    }
+    dispatch(setLookupReactionMessageId(null));
+    dispatch(setExportReactionMap(reactionMap));
+  };
+
 export const getMessageData =
   (
     guildId: Snowflake | Maybe,
@@ -795,6 +833,8 @@ export const getMessageData =
           await dispatch(_collectUserGuildData(userMap, guildId));
           dispatch(getPreFilterUsers(guildId));
         }
+
+        await dispatch(_generateReactionMap(retArr));
 
         if (!getState().app.discrubCancelled) {
           payload = {
@@ -877,7 +917,7 @@ const _getUserMap =
   };
 
 const _collectUserNames =
-  (userMap: ExportUserMap): AppThunk =>
+  (userMap: ExportUserMap): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
@@ -910,7 +950,7 @@ const _collectUserNames =
   };
 
 const _collectUserGuildData =
-  (userMap: ExportUserMap, guildId: Snowflake): AppThunk =>
+  (userMap: ExportUserMap, guildId: Snowflake): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
