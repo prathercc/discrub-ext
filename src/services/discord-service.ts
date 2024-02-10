@@ -421,3 +421,43 @@ export const getRelationships = (authorization: string) =>
 
 export const downloadFile = (downloadUrl: string) =>
   withRetry<Blob>(() => fetch(downloadUrl), true);
+
+export const getReactions = (
+  authorization: string,
+  channelId: Snowflake,
+  messageId: Snowflake,
+  emoji: string
+) =>
+  withRetry<User[]>(() =>
+    fetch(
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: authorization,
+          "user-agent": userAgent,
+        },
+      }
+    )
+  );
+
+export const deleteReaction = (
+  authorization: string,
+  channelId: Snowflake,
+  messageId: Snowflake,
+  emoji: string
+) =>
+  withRetry(() =>
+    fetch(
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}/@me`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: authorization,
+          "user-agent": userAgent,
+        },
+      }
+    )
+  );
