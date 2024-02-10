@@ -5,6 +5,7 @@ import { useExportSlice } from "../features/export/use-export-slice";
 import Attachment from "../classes/attachment";
 import MuiImg from "../common-components/mui-img/mui-img";
 import {
+  attachmentIsAudio,
   attachmentIsImage,
   attachmentIsVideo,
   entityContainsMedia,
@@ -23,6 +24,7 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
 
   const isImg = attachmentIsImage(attachment);
   const isVid = attachmentIsVideo(attachment);
+  const isAudio = attachmentIsAudio(attachment);
 
   const url = entityContainsMedia(attachment)
     ? mediaMap[attachment.proxy_url] || attachment.proxy_url
@@ -75,7 +77,12 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
           }
         />
       )}
-      {((!isVid && !isImg) || !previewImages) && (
+      {previewImages && isAudio && (
+        <audio controls>
+          <source src={url} />
+        </audio>
+      )}
+      {(!entityContainsMedia(attachment) || !previewImages) && (
         <Stack
           sx={{
             backgroundColor: theme.palette.background.paper,

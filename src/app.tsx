@@ -1,6 +1,7 @@
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "./theme";
 import { GlobalStyles } from "@mui/material";
+import { scrollbarOverrides, audioOverrides } from "./theme";
 import DiscrubDialog from "./containers/discrub-dialog/discrub-dialog";
 
 function App() {
@@ -8,15 +9,8 @@ function App() {
     <>
       <GlobalStyles
         styles={{
-          "&::-webkit-scrollbar": {
-            width: "5px",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: "#f1f1f1",
-          },
-          "&::-webkit-scrollbar-track": {
-            background: "#888",
-          },
+          ...scrollbarOverrides,
+          ...audioOverrides,
         }}
       />
       <ThemeProvider theme={theme}>

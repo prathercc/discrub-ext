@@ -198,9 +198,20 @@ export const attachmentIsImage = (attachment: Attachment): boolean => {
   );
 };
 
+export const attachmentIsAudio = (attachment: Attachment): boolean => {
+  return Boolean(
+    attachment.content_type?.includes("audio") ||
+      ["ogg"].some((sit) => attachment.filename.includes(sit))
+  );
+};
+
 export const entityContainsMedia = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
-    return attachmentIsVideo(entity) || attachmentIsImage(entity);
+    return (
+      attachmentIsVideo(entity) ||
+      attachmentIsImage(entity) ||
+      attachmentIsAudio(entity)
+    );
   } else {
     return [EmbedType.GIFV, EmbedType.IMAGE, EmbedType.RICH].some(
       (type) => type === entity.type
