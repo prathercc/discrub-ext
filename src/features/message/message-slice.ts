@@ -70,6 +70,7 @@ const initialState: MessageState = {
   filters: [],
   fetchProgress: defaultFetchProgress,
   lookupUserId: null,
+  lookupReactionMessageId: null,
   isLoading: null,
   order: SortDirection.ASCENDING,
   orderBy: "timestamp",
@@ -148,6 +149,12 @@ export const messageSlice = createSlice({
       { payload }: { payload: Snowflake | Maybe }
     ): void => {
       state.lookupUserId = payload;
+    },
+    setLookupReactionMessageId: (
+      state,
+      { payload }: { payload: Snowflake | Maybe }
+    ): void => {
+      state.lookupReactionMessageId = payload;
     },
     setFetchProgress: (
       state,
@@ -451,6 +458,7 @@ export const {
   setFilteredMessages,
   _resetMessageData,
   setLookupUserId,
+  setLookupReactionMessageId,
   setFetchProgress,
   resetFetchProgress,
   setTotalSearchMessages,

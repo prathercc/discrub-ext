@@ -12,6 +12,7 @@ export type MessageState = {
   filters: Filter[]; // Array of object filters
   fetchProgress: FetchProgress;
   lookupUserId: Snowflake | Maybe; // The userId being looked up (during message fetch process)
+  lookupReactionMessageId: Snowflake | Maybe; // The message id of the message getting reaction data looked up
   isLoading: boolean | Maybe;
   order: SortDirection;
   orderBy: keyof Message;

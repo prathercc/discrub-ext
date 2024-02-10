@@ -10,6 +10,7 @@ import {
   setMessages as setMessagesAction,
   setFilteredMessages as setFilteredMessagesAction,
   setLookupUserId as setLookupUserIdAction,
+  setLookupReactionMessageId as setLookupReactionMessageIdAction,
   setFetchProgress as setFetchProgressAction,
   resetFetchProgress as resetFetchProgressAction,
   setTotalSearchMessages as setTotalSearchMessagesAction,
@@ -53,6 +54,9 @@ const useMessageSlice = () => {
   const useLookupUserId = (): Snowflake | Maybe =>
     useAppSelector((state: RootState) => state.message.lookupUserId);
 
+  const useLookupReactionMessageId = (): Snowflake | Maybe =>
+    useAppSelector((state: RootState) => state.message.lookupReactionMessageId);
+
   const useIsLoading = (): boolean | Maybe =>
     useAppSelector((state: RootState) => state.message.isLoading);
 
@@ -84,6 +88,7 @@ const useMessageSlice = () => {
     filters: useFilters,
     fetchProgress: useFetchProgress,
     lookupUserId: useLookupUserId,
+    lookupReactionMessageId: useLookupReactionMessageId,
     isLoading: useIsLoading,
     order: useOrder,
     orderBy: useOrderBy,
@@ -135,6 +140,10 @@ const useMessageSlice = () => {
 
   const setLookupUserId = (userId: Snowflake | Maybe) => {
     dispatch(setLookupUserIdAction(userId));
+  };
+
+  const setLookupReactionMessageId = (messageId: Snowflake | Maybe) => {
+    dispatch(setLookupReactionMessageIdAction(messageId));
   };
 
   const setFetchProgress = (progress: Partial<FetchProgress>) => {
@@ -212,6 +221,7 @@ const useMessageSlice = () => {
     setMessages,
     setFilteredMessages,
     setLookupUserId,
+    setLookupReactionMessageId,
     setFetchProgress,
     resetFetchProgress,
     setTotalSearchMessages,
