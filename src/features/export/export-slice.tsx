@@ -28,6 +28,7 @@ import {
   ExportJsonProps,
   ExportMap,
   ExportMediaMap,
+  ExportReactionMap,
   ExportRoleMap,
   ExportState,
   ExportUserMap,
@@ -56,6 +57,7 @@ const initialMaps: ExportMap = {
   avatarMap: {},
   mediaMap: {},
   roleMap: {},
+  reactionMap: {},
 };
 
 const initialState: ExportState = {
@@ -106,6 +108,12 @@ export const exportSlice = createSlice({
     ): void => {
       state.exportMaps.roleMap = payload;
     },
+    setExportReactionMap: (
+      state,
+      { payload }: { payload: ExportReactionMap }
+    ): void => {
+      state.exportMaps.reactionMap = payload;
+    },
     resetExportMaps: (state, { payload }: { payload: string[] }): void => {
       if (payload.length) {
         payload.forEach((mapName) => {
@@ -124,6 +132,9 @@ export const exportSlice = createSlice({
               break;
             case "roleMap":
               state.exportMaps.roleMap = initialMaps.roleMap;
+              break;
+            case "reactionMap":
+              state.exportMaps.reactionMap = initialMaps.reactionMap;
               break;
             default:
               break;
@@ -190,6 +201,7 @@ export const {
   setExportEmojiMap,
   setExportMediaMap,
   setExportRoleMap,
+  setExportReactionMap,
   setArtistMode,
 } = exportSlice.actions;
 

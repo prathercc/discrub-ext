@@ -5,6 +5,7 @@ import {
   setExportAvatarMap as setExportAvatarMapAction,
   setExportMediaMap as setExportMediaMapAction,
   setExportRoleMap as setExportRoleMapAction,
+  setExportReactionMap as setExportReactionMapAction,
   resetExportMaps as resetExportMapsAction,
   setSortOverride as setSortOverrideAction,
   setMessagesPerPage as setMessagesPerPageAction,
@@ -27,6 +28,7 @@ import {
   ExportAvatarMap,
   ExportEmojiMap,
   ExportMediaMap,
+  ExportReactionMap,
   ExportRoleMap,
   ExportUserMap,
   FormattedInnerHtmlProps,
@@ -86,6 +88,9 @@ const useExportSlice = () => {
   const useRoleMap = (): ExportRoleMap =>
     useAppSelector((state: RootState) => state.export.exportMaps.roleMap);
 
+  const useReactionMap = (): ExportReactionMap =>
+    useAppSelector((state: RootState) => state.export.exportMaps.reactionMap);
+
   const state = {
     isExporting: useIsExporting,
     downloadImages: useDownloadImages,
@@ -102,6 +107,7 @@ const useExportSlice = () => {
     avatarMap: useAvatarMap,
     mediaMap: useMediaMap,
     roleMap: useRoleMap,
+    reactionMap: useReactionMap,
   };
 
   const setExportUserMap = (map: ExportUserMap): void => {
@@ -122,6 +128,10 @@ const useExportSlice = () => {
 
   const setExportRoleMap = (map: ExportRoleMap): void => {
     dispatch(setExportRoleMapAction(map));
+  };
+
+  const setExportReactionMap = (map: ExportReactionMap): void => {
+    dispatch(setExportReactionMapAction(map));
   };
 
   const resetExportMaps = (maps: string[]): void => {
@@ -211,6 +221,7 @@ const useExportSlice = () => {
     setExportAvatarMap,
     setExportMediaMap,
     setExportRoleMap,
+    setExportReactionMap,
     resetExportMaps,
     setSortOverride,
     setMessagesPerPage,

@@ -23,6 +23,16 @@ export type ExportMap = {
   avatarMap: ExportAvatarMap;
   mediaMap: ExportMediaMap;
   roleMap: ExportRoleMap;
+  reactionMap: ExportReactionMap;
+};
+
+/**
+ * This is a 'Message Id & emoji -> UserId Reaction List' map.
+ */
+export type ExportReactionMap = {
+  [id: Snowflake]: {
+    [emoji: string]: Snowflake[];
+  };
 };
 
 /**
