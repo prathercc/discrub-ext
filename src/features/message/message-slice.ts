@@ -742,6 +742,35 @@ export const resetMessageData = (): AppThunk => (dispatch) => {
   dispatch(resetExportMaps(["reactionMap"]));
 };
 
+const _fetchReactingUserIds =
+  (message: Message, encodedEmoji: string): AppThunk<Promise<Snowflake[]>> =>
+  async (dispatch, getState) => {
+    const userIds: Snowflake[] = [];
+    let reachedEnd = false;
+    let lastId = null;
+
+    const { token } = getState().user;
+    while (!reachedEnd) {
+      if (getState().app.discrubCancelled || !token) break;
+      await dispatch(checkDiscrubPaused());
+      const { success, data } = await getReactions(
+        token,
+        message.channel_id,
+        message.id,
+        encodedEmoji,
+        lastId
+      );
+      if (success && data && data.length) {
+        data.forEach((u) => userIds.push(u.id));
+        lastId = data[data.length - 1].id;
+      } else {
+        reachedEnd = true;
+      }
+    }
+
+    return userIds;
+  };
+
 const _generateReactionMap =
   (messages: Message[]): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
@@ -759,15 +788,9 @@ const _generateReactionMap =
           if (getState().app.discrubCancelled || !encodedEmoji) break;
           await dispatch(checkDiscrubPaused());
 
-          const { success, data } = await getReactions(
-            token,
-            message.channel_id,
-            message.id,
-            encodedEmoji
+          reactionMap[message.id][encodedEmoji] = await dispatch(
+            _fetchReactingUserIds(message, encodedEmoji)
           );
-          if (success && data) {
-            reactionMap[message.id][encodedEmoji] = data.map((user) => user.id);
-          }
         }
       }
     }

@@ -426,11 +426,14 @@ export const getReactions = (
   authorization: string,
   channelId: Snowflake,
   messageId: Snowflake,
-  emoji: string
+  emoji: string,
+  lastId?: Snowflake | null
 ) =>
   withRetry<User[]>(() =>
     fetch(
-      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}`,
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}?limit=100${
+        lastId ? `&after=${lastId}` : ""
+      }`,
       {
         method: "GET",
         headers: {
