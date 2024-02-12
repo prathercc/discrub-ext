@@ -910,7 +910,12 @@ const _getUserMap =
   (messages: Message[]): AppThunk<ExportUserMap> =>
   (_, getState) => {
     const { userMap: existingUserMap } = getState().export.exportMaps;
-    const defaultMapping = { userName: null, displayName: null, guilds: {} };
+    const defaultMapping = {
+      userName: null,
+      displayName: null,
+      avatar: null,
+      guilds: {},
+    };
     const userMap: ExportUserMap = {};
 
     messages.forEach((message) => {
@@ -923,6 +928,7 @@ const _getUserMap =
           ...defaultMapping,
           userName: author.username,
           displayName: author.global_name,
+          avatar: author.avatar,
         };
       }
 
@@ -960,6 +966,7 @@ const _collectUserNames =
               ...mapping,
               userName: data.username,
               displayName: data.global_name,
+              avatar: data.avatar,
             };
           } else {
             const errorMsg = `Unable to retrieve data from userId: ${userId}`;

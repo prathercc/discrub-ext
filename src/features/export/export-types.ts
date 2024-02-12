@@ -47,6 +47,7 @@ export type ExportUserMap = {
   [id: Snowflake]: {
     userName: string | Maybe;
     displayName: string | Maybe;
+    avatar: string | Maybe;
     guilds: {
       [guildId: Snowflake]: {
         roles: Snowflake[];
