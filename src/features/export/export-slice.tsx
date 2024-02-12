@@ -293,7 +293,7 @@ const _downloadAvatarFromMessage =
 
     if (!exportMaps.avatarMap[idAndAvatar]) {
       const { success, data } = await downloadFile(
-        getAvatarUrl(message.author)
+        getAvatarUrl(message.author.id, message.author.avatar)
       );
       if (success && data) {
         const fileExt = data.type.split("/")?.[1] || "webp";

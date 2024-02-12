@@ -42,7 +42,7 @@ const AuthorAvatar = ({
   };
 
   const idAndAvatar = `${userId}/${avatarId}`;
-  let avatarUrl = getAvatarUrl(message.author);
+  let avatarUrl = getAvatarUrl(message.author.id, message.author.avatar);
   if (avatarMap && avatarMap[idAndAvatar] && !browserView) {
     avatarUrl = `../${avatarMap[idAndAvatar]}`;
   }

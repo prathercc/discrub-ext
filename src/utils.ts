@@ -6,7 +6,6 @@ import { Emoji } from "./classes/emoji";
 import Guild from "./classes/guild";
 import Message from "./classes/message";
 import Role from "./classes/role";
-import { User } from "./classes/user";
 import { ChannelType } from "./enum/channel-type";
 import { EmbedType } from "./enum/embed-type";
 import { MessageRegex } from "./enum/message-regex";
@@ -134,9 +133,9 @@ export const formatUserData = ({
   }`;
 };
 
-export const getAvatarUrl = (user: User) => {
-  if (user.avatar) {
-    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}`;
+export const getAvatarUrl = (userId: Snowflake, avatar?: string | Maybe) => {
+  if (avatar) {
+    return `https://cdn.discordapp.com/avatars/${userId}/${avatar}`;
   } else {
     return "resources/media/default_avatar.png";
   }
@@ -179,7 +178,7 @@ export const getIconUrl = (entity: Role | Channel | Guild) => {
     }
 
     if (entity.type === ChannelType.DM && entity.recipients?.[0]?.avatar) {
-      return `https://cdn.discordapp.com/avatars/${entity.recipients[0].id}/${entity.recipients[0].avatar}`;
+      return getAvatarUrl(entity.recipients[0].id, entity.recipients[0].avatar);
     }
 
     return "resources/media/default_dm_icon.png";
