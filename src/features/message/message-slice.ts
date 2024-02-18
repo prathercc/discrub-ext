@@ -868,9 +868,17 @@ const _generateReactionMap =
       await dispatch(checkDiscrubPaused());
 
       if (message.reactions?.length && token) {
-        dispatch(setLookupReactionMessageId(message.id));
-        for (const reaction of message.reactions) {
-          const encodedEmoji = getEncodedEmoji(reaction.emoji);
+        for (const [i, reaction] of message.reactions.entries()) {
+          const { emoji } = reaction;
+          const encodedEmoji = getEncodedEmoji(emoji);
+          const brackets = emoji.id ? ":" : "";
+          dispatch(
+            setLookupReactionMessageId(
+              `(${i + 1} of ${message.reactions.length}): ${
+                message.id
+              }_${brackets}${emoji.name}${brackets}`
+            )
+          );
           if (getState().app.discrubCancelled || !encodedEmoji) break;
           await dispatch(checkDiscrubPaused());
 
