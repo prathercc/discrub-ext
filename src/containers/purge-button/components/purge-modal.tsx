@@ -47,6 +47,7 @@ const PurgeModal = ({
   const fetchProgress = messageState.fetchProgress();
   const totalSearchMessages = messageState.totalSearchMessages();
   const lookupUserId = messageState.lookupUserId();
+  const lookupReactionMessageId = messageState.lookupReactionMessageId();
   const messagesLoading = messageState.isLoading();
 
   const { state: channelState, resetChannel } = useChannelSlice();
@@ -126,6 +127,8 @@ const PurgeModal = ({
       } messages`;
     } else if (lookupUserId) {
       return `User Lookup ${lookupUserId}`;
+    } else if (lookupReactionMessageId) {
+      return `Reaction Lookup ${lookupReactionMessageId}`;
     }
     return "";
   };

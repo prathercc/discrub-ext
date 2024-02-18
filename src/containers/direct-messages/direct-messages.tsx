@@ -60,6 +60,7 @@ function DirectMessages() {
     setSelected,
   } = useMessageSlice();
   const lookupUserId = messageState.lookupUserId();
+  const lookupReactionMessageId = messageState.lookupReactionMessageId();
   const fetchProgress = messageState.fetchProgress();
   const messagesLoading = messageState.isLoading();
   const messages = messageState.messages();
@@ -175,6 +176,8 @@ function DirectMessages() {
     } else if (!parsingThreads) {
       if (lookupUserId) {
         return `User Lookup ${lookupUserId}`;
+      } else if (lookupReactionMessageId) {
+        return `Reaction Lookup ${lookupReactionMessageId}`;
       } else if (messageCount > 0) {
         return `Fetched ${messageCount}${
           totalSearchMessages ? ` of ${totalSearchMessages}` : ""

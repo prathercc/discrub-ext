@@ -51,6 +51,7 @@ function Tags() {
   const fetchProgress = messageState.fetchProgress();
   const totalSearchMessages = messageState.totalSearchMessages();
   const lookupUserId = messageState.lookupUserId();
+  const lookupReactionMessageId = messageState.lookupReactionMessageId();
 
   const { state: appState } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
@@ -208,6 +209,9 @@ function Tags() {
   const getProgressText = () => {
     if (lookupUserId) {
       return `User Lookup: ${lookupUserId}`;
+    }
+    if (lookupReactionMessageId) {
+      return `Reaction Lookup ${lookupReactionMessageId}`;
     }
     if (messageCount > 0) {
       return `Fetched ${messageCount} of ${totalSearchMessages} Messages`;

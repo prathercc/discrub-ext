@@ -73,6 +73,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
   const messagesLoading = messageState.isLoading();
   const fetchProgress = messageState.fetchProgress();
   const lookupUserId = messageState.lookupUserId();
+  const lookupReactionMessageId = messageState.lookupReactionMessageId();
   const searchBeforeDate = messageState.searchBeforeDate();
   const searchAfterDate = messageState.searchAfterDate();
   const searchMessageContent = messageState.searchMessageContent();
@@ -205,6 +206,8 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     } else if (!parsingThreads) {
       if (lookupUserId) {
         return `User Lookup ${lookupUserId}`;
+      } else if (lookupReactionMessageId) {
+        return `Reaction Lookup ${lookupReactionMessageId}`;
       } else if (messageCount > 0) {
         return `Fetched ${messageCount}${
           totalSearchMessages ? ` of ${totalSearchMessages}` : ""

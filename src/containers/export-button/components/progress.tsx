@@ -10,6 +10,7 @@ const Progress = () => {
   const { state: messageState } = useMessageSlice();
   const fetchProgress = messageState.fetchProgress();
   const lookupUserId = messageState.lookupUserId();
+  const lookupReactionMessageId = messageState.lookupReactionMessageId();
   const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
 
   const getProgressText = (): string => {
@@ -23,6 +24,8 @@ const Progress = () => {
       }
     } else if (lookupUserId) {
       return `User Lookup ${lookupUserId}`;
+    } else if (lookupReactionMessageId) {
+      return `Reaction Lookup ${lookupReactionMessageId}`;
     } else {
       return "";
     }
