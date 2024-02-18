@@ -43,6 +43,7 @@ import TableMessage from "../../components/table-message";
 import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
+import ReactionModal from "../../components/reaction-modal";
 
 type ChannelMessagesProps = {
   closeAnnouncement: () => void;
@@ -68,6 +69,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     setOrder,
     deleteAttachment,
     setSelected,
+    deleteReaction,
   } = useMessageSlice();
   const messages = messageState.messages();
   const messagesLoading = messageState.isLoading();
@@ -93,6 +95,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
   const [expanded, setExpanded] = useState(true);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
+  const [reactionModalOpen, setReactionModalOpen] = useState(false);
 
   const columns: TableColumn<Message>[] = [
     {
@@ -122,6 +125,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
         setModifyEntity={setModifyEntity}
         openAttachmentModal={() => setAttachmentModalOpen(true)}
         openEmbedModal={() => setEmbedModalOpen(true)}
+        openReactionModal={() => setReactionModalOpen(true)}
       />
     ),
   }));
@@ -229,6 +233,12 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
         overflow: "hidden",
       }}
     >
+      <ReactionModal
+        modify={modify}
+        handleClose={() => setReactionModalOpen(false)}
+        open={reactionModalOpen}
+        handleReactionDelete={deleteReaction}
+      />
       <AttachmentModal
         modify={modify}
         onDeleteAttachment={deleteAttachment}

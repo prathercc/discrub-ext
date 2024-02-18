@@ -41,6 +41,7 @@ import TableMessage from "../../components/table-message";
 import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
+import ReactionModal from "../../components/reaction-modal";
 
 function DirectMessages() {
   const { state: userState } = useUserSlice();
@@ -58,6 +59,7 @@ function DirectMessages() {
     setOrder,
     deleteAttachment,
     setSelected,
+    deleteReaction,
   } = useMessageSlice();
   const lookupUserId = messageState.lookupUserId();
   const lookupReactionMessageId = messageState.lookupReactionMessageId();
@@ -81,6 +83,7 @@ function DirectMessages() {
   const [expanded, setExpanded] = useState(true);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
+  const [reactionModalOpen, setReactionModalOpen] = useState(false);
 
   const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
 
@@ -112,6 +115,7 @@ function DirectMessages() {
         setModifyEntity={setModifyEntity}
         openAttachmentModal={() => setAttachmentModalOpen(true)}
         openEmbedModal={() => setEmbedModalOpen(true)}
+        openReactionModal={() => setReactionModalOpen(true)}
       />
     ),
   }));
@@ -199,6 +203,12 @@ function DirectMessages() {
         overflow: "hidden",
       }}
     >
+      <ReactionModal
+        modify={modify}
+        handleClose={() => setReactionModalOpen(false)}
+        open={reactionModalOpen}
+        handleReactionDelete={deleteReaction}
+      />
       <AttachmentModal
         modify={modify}
         onDeleteAttachment={deleteAttachment}
