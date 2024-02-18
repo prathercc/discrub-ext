@@ -861,6 +861,7 @@ export const getMessageData =
       };
 
       if (!getState().app.discrubCancelled) {
+        await dispatch(_generateReactionMap(retArr));
         const userMap = dispatch(_getUserMap(retArr));
         await dispatch(_collectUserNames(userMap));
         if (guildId) {
@@ -920,7 +921,8 @@ export const getMessageData =
 const _getUserMap =
   (messages: Message[]): AppThunk<ExportUserMap> =>
   (_, getState) => {
-    const { userMap: existingUserMap } = getState().export.exportMaps;
+    const { userMap: existingUserMap, reactionMap } =
+      getState().export.exportMaps;
     const defaultMapping = {
       userName: null,
       displayName: null,
@@ -951,6 +953,17 @@ const _getUserMap =
           }
         }
       );
+
+      for (const reaction of message.reactions || []) {
+        const encodedEmoji = getEncodedEmoji(reaction.emoji);
+        if (encodedEmoji) {
+          const exportReactions = reactionMap[message.id][encodedEmoji] || [];
+          exportReactions.forEach(({ id: uId }) => {
+            if (!userMap[uId])
+              userMap[uId] = existingUserMap[userId] || defaultMapping;
+          });
+        }
+      }
     });
 
     return userMap;
