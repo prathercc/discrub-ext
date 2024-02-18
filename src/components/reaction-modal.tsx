@@ -4,12 +4,12 @@ import {
   Typography,
   Button,
   Stack,
-  CircularProgress,
   Dialog,
   DialogTitle,
   DialogActions,
   DialogContent,
   List,
+  LinearProgress,
 } from "@mui/material";
 import { Modify } from "../features/app/app-types";
 import { isMessage } from "../app/guards";
@@ -135,7 +135,7 @@ const ReactionModal = ({
           alignItems="center"
           spacing={2}
         >
-          {active && <CircularProgress />}
+          {active && <LinearProgress sx={{ width: "100%", m: 1 }} />}
           <Button
             disabled={active}
             variant="contained"

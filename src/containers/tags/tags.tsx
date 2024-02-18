@@ -4,7 +4,7 @@ import {
   Autocomplete,
   Box,
   Button,
-  CircularProgress,
+  LinearProgress,
   Menu,
   MenuItem,
   Paper,
@@ -397,7 +397,7 @@ function Tags() {
               flexDirection: "column",
             }}
           >
-            <CircularProgress />
+            <LinearProgress sx={{ width: "100%", m: 1 }} />
             <Typography variant="caption">{getProgressText()}</Typography>
           </Box>
         </Paper>

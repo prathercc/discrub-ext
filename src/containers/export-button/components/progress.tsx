@@ -1,4 +1,4 @@
-import { Stack, CircularProgress, Typography } from "@mui/material";
+import { Stack, Typography, LinearProgress } from "@mui/material";
 import { useExportSlice } from "../../../features/export/use-export-slice";
 import { useMessageSlice } from "../../../features/message/use-message-slice";
 
@@ -40,7 +40,7 @@ const Progress = () => {
       sx={{ minWidth: "300px" }}
     >
       <Typography>{name}</Typography>
-      <CircularProgress />
+      <LinearProgress sx={{ width: "100%", m: 1 }} />
       <Typography variant="caption">
         {statusText || getProgressText()}
       </Typography>

@@ -11,12 +11,12 @@ import {
   Stack,
   Typography,
   Paper,
-  CircularProgress,
   TextField,
   Button,
   Autocomplete,
   IconButton,
   Collapse,
+  LinearProgress,
 } from "@mui/material";
 import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
@@ -447,7 +447,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                 flexDirection: "column",
               }}
             >
-              <CircularProgress />
+              <LinearProgress sx={{ width: "100%", m: 1 }} />
               <Typography variant="caption">{getProgressText()}</Typography>
             </Box>
           </Paper>
