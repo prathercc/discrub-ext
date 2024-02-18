@@ -25,6 +25,7 @@ import {
   deleteMessages as deleteMessagesAction,
   getMessageData as getMessageDataAction,
   resetMessageData as resetMessageDataAction,
+  deleteReaction as deleteReactionAction,
 } from "./message-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { DeleteConfiguration, FetchProgress, Filter } from "./message-types";
@@ -190,6 +191,14 @@ const useMessageSlice = () => {
     dispatch(deleteMessageAction(message));
   };
 
+  const deleteReaction = (
+    channelId: Snowflake,
+    messageId: Snowflake,
+    emoji: string
+  ) => {
+    dispatch(deleteReactionAction(channelId, messageId, emoji));
+  };
+
   const deleteMessages = (
     messages: Message[],
     deleteConfig?: DeleteConfiguration
@@ -236,6 +245,7 @@ const useMessageSlice = () => {
     deleteMessages,
     getMessageData,
     resetMessageData,
+    deleteReaction,
   };
 };
 

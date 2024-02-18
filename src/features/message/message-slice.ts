@@ -7,6 +7,7 @@ import {
   fetchMessageData,
   fetchGuildUser,
   getReactions,
+  deleteReaction as delReaction,
 } from "../../services/discord-service";
 import { getEncodedEmoji, isDm, sortByProperty } from "../../utils";
 import Message from "../../classes/message";
@@ -49,9 +50,16 @@ import { FilterName } from "../../enum/filter-name";
 import Attachment from "../../classes/attachment";
 import { AppThunk } from "../../app/store";
 import { isMessage } from "../../app/guards";
-import { ExportReactionMap, ExportUserMap } from "../export/export-types";
+import {
+  ExportReaction,
+  ExportReactionMap,
+  ExportUserMap,
+} from "../export/export-types";
 import Channel from "../../classes/channel";
 import { ChannelType } from "../../enum/channel-type";
+import { QueryStringParam } from "../../enum/query-string-param";
+import { Reaction } from "../../classes/reaction";
+import { ReactionType } from "../../enum/reaction-type";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -474,8 +482,71 @@ export const {
   filterMessages,
 } = messageSlice.actions;
 
+export const deleteReaction =
+  (
+    channelId: Snowflake,
+    messageId: Snowflake,
+    emoji: string
+  ): AppThunk<Promise<void>> =>
+  async (dispatch, getState) => {
+    const { token, currentUser } = getState().user;
+    const { reactionMap } = getState().export.exportMaps;
+    const { messages } = getState().message;
+    const message = messages.find((m) => m.id === messageId);
+    const reaction = message?.reactions?.find(
+      (r) => getEncodedEmoji(r.emoji) === emoji
+    );
+    const isBurst = !!reactionMap[messageId]?.[emoji]?.find(
+      (r) => r.id === currentUser?.id
+    )?.burst;
+
+    if (token && message && reaction) {
+      dispatch(setIsModifying(true));
+      const { success } = await delReaction(token, channelId, messageId, emoji);
+      if (success) {
+        const updatedMessage = {
+          ...message,
+          reactions: message.reactions
+            ?.map((r) => {
+              if (getEncodedEmoji(r.emoji) === emoji) {
+                return {
+                  ...r,
+                  count_details: {
+                    ...r.count_details,
+                    normal: r.count_details.normal - (isBurst ? 0 : 1),
+                    burst: r.count_details.burst - (isBurst ? 1 : 0),
+                  },
+                };
+              }
+              return r;
+            })
+            ?.filter((r) => r.count_details.normal || r.count_details.burst),
+        };
+        const updatedMessages = messages.map((m) => {
+          if (m.id === messageId) {
+            return updatedMessage;
+          }
+          return m;
+        });
+        const updatedReactionMap = {
+          ...reactionMap,
+          [messageId]: {
+            ...reactionMap[messageId],
+            [emoji]: reactionMap[messageId][emoji].filter(
+              (er) => er.id !== currentUser?.id
+            ),
+          },
+        };
+        dispatch(setModifyEntity(updatedMessage));
+        dispatch(setMessages(updatedMessages));
+        dispatch(setExportReactionMap(updatedReactionMap));
+      }
+      dispatch(setIsModifying(false));
+    }
+  };
+
 export const deleteAttachment =
-  (attachment: Attachment): AppThunk =>
+  (attachment: Attachment): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const message = getState().app.modify.entity;
     if (isMessage(message)) {
@@ -752,29 +823,29 @@ const _fetchReactingUserIds =
     const { token } = getState().user;
 
     for (const type of [ReactionType.NORMAL, ReactionType.BURST]) {
-    let reachedEnd = false;
-    let lastId = null;
-    while (!reachedEnd) {
-      if (getState().app.discrubCancelled || !token) break;
-      await dispatch(checkDiscrubPaused());
-      const { success, data } = await getReactions(
-        token,
-        message.channel_id,
-        message.id,
-        encodedEmoji,
+      let reachedEnd = false;
+      let lastId = null;
+      while (!reachedEnd) {
+        if (getState().app.discrubCancelled || !token) break;
+        await dispatch(checkDiscrubPaused());
+        const { success, data } = await getReactions(
+          token,
+          message.channel_id,
+          message.id,
+          encodedEmoji,
           type,
-        lastId
-      );
-      if (success && data && data.length) {
+          lastId
+        );
+        if (success && data && data.length) {
           data.forEach((u) =>
             exportReactions.push({
               id: u.id,
               burst: type === ReactionType.BURST,
             })
           );
-        lastId = data[data.length - 1].id;
-      } else {
-        reachedEnd = true;
+          lastId = data[data.length - 1].id;
+        } else {
+          reachedEnd = true;
         }
       }
     }
@@ -868,8 +939,6 @@ export const getMessageData =
           await dispatch(_collectUserGuildData(userMap, guildId));
           dispatch(getPreFilterUsers(guildId));
         }
-
-        await dispatch(_generateReactionMap(retArr));
 
         if (!getState().app.discrubCancelled) {
           payload = {
