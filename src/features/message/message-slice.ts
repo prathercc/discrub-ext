@@ -491,7 +491,7 @@ export const deleteReaction =
   async (dispatch, getState) => {
     const { token, currentUser } = getState().user;
     const { reactionMap } = getState().export.exportMaps;
-    const { messages } = getState().message;
+    const { messages, filteredMessages } = getState().message;
     const message = messages.find((m) => m.id === messageId);
     const reaction = message?.reactions?.find(
       (r) => getEncodedEmoji(r.emoji) === emoji
@@ -528,6 +528,9 @@ export const deleteReaction =
           }
           return m;
         });
+        const updatedFilterMessages = filteredMessages.map((message) =>
+          message.id === updatedMessage.id ? updatedMessage : message
+        );
         const updatedReactionMap = {
           ...reactionMap,
           [messageId]: {
@@ -539,6 +542,7 @@ export const deleteReaction =
         };
         dispatch(setModifyEntity(updatedMessage));
         dispatch(setMessages(updatedMessages));
+        dispatch(setFilteredMessages(updatedFilterMessages));
         dispatch(setExportReactionMap(updatedReactionMap));
       }
       dispatch(setIsModifying(false));
