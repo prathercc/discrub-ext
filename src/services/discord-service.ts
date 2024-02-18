@@ -5,6 +5,8 @@ import Guild from "../classes/guild";
 import Message from "../classes/message";
 import Role from "../classes/role";
 import { User } from "../classes/user";
+import { QueryStringParam } from "../enum/query-string-param";
+import { ReactionType } from "../enum/reaction-type";
 import { SearchMessageProps } from "../features/message/message-types";
 import { AllowedMentionObject } from "../types/allowed-mention-object";
 import { ComponentObject } from "../types/component-object";
@@ -261,13 +263,14 @@ export const deleteMessage = (
 export const fetchMessageData = (
   authorization: string,
   lastId: string,
-  channelId: string
+  channelId: string,
+  queryParam: QueryStringParam = QueryStringParam.BEFORE
 ) =>
   withRetry<Message[]>(() =>
     fetch(
-      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages?limit=100${
-        lastId.length > 0 ? `&before=${lastId}` : ""
-      }`,
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages?limit=${
+        queryParam === QueryStringParam.AROUND ? "50" : "100"
+      }${lastId.length > 0 ? `&${queryParam}=${lastId}` : ""}`,
       {
         method: "GET",
         headers: {
@@ -427,11 +430,12 @@ export const getReactions = (
   channelId: Snowflake,
   messageId: Snowflake,
   emoji: string,
+  type: ReactionType,
   lastId?: Snowflake | null
 ) =>
   withRetry<User[]>(() =>
     fetch(
-      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}?limit=100${
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}?limit=100&type=${type}${
         lastId ? `&after=${lastId}` : ""
       }`,
       {
