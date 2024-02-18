@@ -81,7 +81,7 @@ const ReactionListItemButton = ({
 
   return (
     <>
-      <ListItemButton onClick={handleClick}>
+      <ListItemButton dense onClick={handleClick}>
         <Tooltip title={emoji.id ? `:${emoji.name}:` : `${emoji.name}`}>
           <ListItemIcon onClick={handleEmojiClick}>
             {emoji.id ? getCustomEmoji() : emoji.name}
@@ -98,7 +98,7 @@ const ReactionListItemButton = ({
         <List disablePadding>
           {reactingUsers.map((rUser) => {
             return (
-              <ListItem sx={{ pl: 4 }}>
+              <ListItem dense sx={{ pl: 4 }}>
                 <ListItemIcon>{getReactingUserAvatar(rUser)}</ListItemIcon>
                 <ListItemText
                   primary={rUser.displayName || "Missing Display Name"}
