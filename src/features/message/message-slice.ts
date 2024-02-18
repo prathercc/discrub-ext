@@ -743,13 +743,17 @@ export const resetMessageData = (): AppThunk => (dispatch) => {
 };
 
 const _fetchReactingUserIds =
-  (message: Message, encodedEmoji: string): AppThunk<Promise<Snowflake[]>> =>
+  (
+    message: Message,
+    encodedEmoji: string
+  ): AppThunk<Promise<ExportReaction[]>> =>
   async (dispatch, getState) => {
-    const userIds: Snowflake[] = [];
+    const exportReactions: ExportReaction[] = [];
+    const { token } = getState().user;
+
+    for (const type of [ReactionType.NORMAL, ReactionType.BURST]) {
     let reachedEnd = false;
     let lastId = null;
-
-    const { token } = getState().user;
     while (!reachedEnd) {
       if (getState().app.discrubCancelled || !token) break;
       await dispatch(checkDiscrubPaused());
@@ -758,17 +762,24 @@ const _fetchReactingUserIds =
         message.channel_id,
         message.id,
         encodedEmoji,
+          type,
         lastId
       );
       if (success && data && data.length) {
-        data.forEach((u) => userIds.push(u.id));
+          data.forEach((u) =>
+            exportReactions.push({
+              id: u.id,
+              burst: type === ReactionType.BURST,
+            })
+          );
         lastId = data[data.length - 1].id;
       } else {
         reachedEnd = true;
+        }
       }
     }
 
-    return userIds;
+    return exportReactions;
   };
 
 const _generateReactionMap =

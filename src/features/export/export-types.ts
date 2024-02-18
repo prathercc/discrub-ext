@@ -31,12 +31,17 @@ export type ExportMap = {
   /*************************************/
 };
 
+export type ExportReaction = {
+  id: Snowflake;
+  burst: boolean;
+};
+
 /**
- * This is a 'Message Id & emoji -> UserId Reaction List' map.
+ * This is a 'Message Id & emoji -> Export Reaction List' map.
  */
 export type ExportReactionMap = {
   [id: Snowflake]: {
-    [emoji: string]: Snowflake[];
+    [emoji: string]: ExportReaction[];
   };
 };
 
