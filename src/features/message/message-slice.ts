@@ -1041,6 +1041,42 @@ const _collectUserGuildData =
     }
   };
 
+const _resolveMessageReactions =
+  (messages: Message[]): AppThunk<Promise<Message[]>> =>
+  async (dispatch, getState) => {
+    const { token } = getState().user;
+    const trackMap: Record<Snowflake, Reaction[]> = {};
+    let retArr: Message[] = [...messages];
+
+    if (token) {
+      for (const message of messages) {
+        if (getState().app.discrubCancelled) break;
+        await dispatch(checkDiscrubPaused());
+
+        if (!trackMap[message.id]) {
+          const { success, data } = await fetchMessageData(
+            token,
+            message.id,
+            message.channel_id,
+            QueryStringParam.AROUND
+          );
+
+          if (success && data) {
+            data.forEach((m) => {
+              trackMap[m.id] = m.reactions || [];
+            });
+          }
+        }
+      }
+      retArr = messages.map((message) => ({
+        ...message,
+        reactions: trackMap[message.id],
+      }));
+    }
+
+    return retArr;
+  };
+
 const _getSearchMessages =
   (
     channelId: Snowflake | Maybe,
@@ -1049,7 +1085,7 @@ const _getSearchMessages =
   ): AppThunk<Promise<MessageData>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
-    const retArr: Message[] = [];
+    let retArr: Message[] = [];
     const retThreads: Channel[] = [];
 
     if (token) {
@@ -1102,6 +1138,8 @@ const _getSearchMessages =
           reachedEnd = true;
         }
       }
+
+      retArr = await dispatch(_resolveMessageReactions(retArr));
     }
     return {
       messages: retArr,
