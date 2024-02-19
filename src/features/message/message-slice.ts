@@ -825,7 +825,8 @@ const _generateReactionMap =
   async (dispatch, getState) => {
     const reactionMap: ExportReactionMap = {};
     const { token } = getState().user;
-    for (const [mI, message] of messages.entries()) {
+    const filteredMessages = messages.filter((m) => !!m.reactions?.length);
+    for (const [mI, message] of filteredMessages.entries()) {
       reactionMap[message.id] = {};
       if (getState().app.discrubCancelled) break;
       await dispatch(checkDiscrubPaused());
@@ -836,11 +837,11 @@ const _generateReactionMap =
           const encodedEmoji = getEncodedEmoji(emoji);
           const brackets = emoji.id ? ":" : "";
 
-          const status = `[${mI + 1}/${messages.length}] Reaction Lookup (${
-            i + 1
-          } of ${message.reactions.length}): ${message.id} ${brackets}${
-            emoji.name
-          }${brackets}`;
+          const status = `[${mI + 1}/${
+            filteredMessages.length
+          }] Reaction Lookup (${i + 1} of ${message.reactions.length}): ${
+            message.id
+          } ${brackets}${emoji.name}${brackets}`;
           dispatch(setStatus(status));
 
           if (getState().app.discrubCancelled || !encodedEmoji) break;
