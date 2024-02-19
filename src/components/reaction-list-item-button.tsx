@@ -4,7 +4,6 @@ import {
   ListItemButton,
   ListItemIcon,
   Collapse,
-  List,
   ListItem,
   Snackbar,
   Alert,
@@ -20,6 +19,7 @@ import { getAvatarUrl } from "../utils";
 import copy from "copy-to-clipboard";
 import Tooltip from "../common-components/tooltip/tooltip";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { FixedSizeList, ListChildComponentProps } from "react-window";
 
 export type ReactingUser = {
   displayName: string | Maybe;
@@ -79,6 +79,41 @@ const ReactionListItemButton = ({
     );
   };
 
+  const getUserListItem = (props: ListChildComponentProps) => {
+    const { style, index } = props;
+    const rUser = reactingUsers[index];
+    return (
+      <ListItem style={style} key={index} dense sx={{ pl: 4 }}>
+        <ListItemIcon>{getReactingUserAvatar(rUser)}</ListItemIcon>
+        <ListItemText
+          primary={rUser.displayName || "Missing Display Name"}
+          secondary={rUser.userName || "Missing User Name"}
+        />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "5px",
+          }}
+        >
+          {rUser.burst && (
+            <Tooltip title="Super Reaction">
+              <VerifiedIcon sx={{ color: theme.palette.secondary.main }} />
+            </Tooltip>
+          )}
+          {currentUserId === rUser.id && (
+            <Tooltip title="Delete Reaction">
+              <IconButton disabled={disabled} onClick={onReactionDelete}>
+                <DeleteForeverIcon color="error" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      </ListItem>
+    );
+  };
+
   return (
     <>
       <ListItemButton dense onClick={handleClick}>
@@ -95,45 +130,14 @@ const ReactionListItemButton = ({
         {expanded ? <ExpandLess /> : <ExpandMore />}
       </ListItemButton>
       <Collapse in={expanded} unmountOnExit>
-        <List disablePadding>
-          {reactingUsers.map((rUser) => {
-            return (
-              <ListItem dense sx={{ pl: 4 }}>
-                <ListItemIcon>{getReactingUserAvatar(rUser)}</ListItemIcon>
-                <ListItemText
-                  primary={rUser.displayName || "Missing Display Name"}
-                  secondary={rUser.userName || "Missing User Name"}
-                />
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "5px",
-                  }}
-                >
-                  {rUser.burst && (
-                    <Tooltip title="Super Reaction">
-                      <VerifiedIcon
-                        sx={{ color: theme.palette.secondary.main }}
-                      />
-                    </Tooltip>
-                  )}
-                  {currentUserId === rUser.id && (
-                    <Tooltip title="Delete Reaction">
-                      <IconButton
-                        disabled={disabled}
-                        onClick={onReactionDelete}
-                      >
-                        <DeleteForeverIcon color="error" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Box>
-              </ListItem>
-            );
-          })}
-        </List>
+        <FixedSizeList
+          height={200}
+          width="100%"
+          itemSize={60}
+          itemCount={reactingUsers.length}
+        >
+          {getUserListItem}
+        </FixedSizeList>
       </Collapse>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
