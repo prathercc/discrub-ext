@@ -954,6 +954,8 @@ export const exportChannels =
     const { selectedGuild } = getState().guild;
     const { messagesPerPage, sortOverride } = getState().export;
 
+    dispatch(setIsExporting(true));
+
     if (selectedGuild)
       await dispatch(_downloadRoles(exportUtils, selectedGuild));
     if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
@@ -963,7 +965,6 @@ export const exportChannels =
       dispatch(resetStatus());
       const safeEntityName = getSafeExportName(entity.name || entity.id);
       const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
-      dispatch(setIsExporting(true));
       dispatch(setName(safeEntityName));
       if (!isDm(entity)) {
         dispatch(setChannel(entity.id));
