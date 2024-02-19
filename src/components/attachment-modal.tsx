@@ -14,7 +14,7 @@ import {
   useTheme,
   LinearProgress,
 } from "@mui/material";
-import { Modify } from "../features/app/app-types";
+import { AppTask } from "../features/app/app-types";
 import Attachment from "../classes/attachment";
 import { isMessage } from "../app/guards";
 import Tooltip from "../common-components/tooltip/tooltip";
@@ -22,20 +22,20 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { attachmentIsImage } from "../utils";
 
 type AttachmentModalProps = {
-  modify: Modify;
+  task: AppTask;
   open: boolean;
   handleClose: () => void;
   onDeleteAttachment: (attachment: Attachment) => void;
 };
 
 const AttachmentModal = ({
-  modify,
+  task,
   open,
   handleClose,
   onDeleteAttachment,
 }: AttachmentModalProps) => {
   const theme = useTheme();
-  const { entity, active, statusText } = modify || {};
+  const { entity, active, statusText } = task || {};
 
   const handleDeleteAttachment = async (attachment: Attachment) => {
     onDeleteAttachment(attachment);

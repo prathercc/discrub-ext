@@ -48,13 +48,11 @@ function Tags() {
   const messagesLoading = messageState.isLoading();
   const searchBeforeDate = messageState.searchBeforeDate();
   const searchAfterDate = messageState.searchAfterDate();
-  const fetchProgress = messageState.fetchProgress();
-  const totalSearchMessages = messageState.totalSearchMessages();
-  const lookupUserId = messageState.lookupUserId();
-  const lookupReactionMessageId = messageState.lookupReactionMessageId();
 
   const { state: appState } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
+  const task = appState.task();
+  const { statusText } = task || {};
 
   const { state: userState } = useUserSlice();
   const token = userState.token();
@@ -66,8 +64,6 @@ function Tags() {
   // TODO: Create a tagSlice, so that we don't need to do this!
   const userMapRef = useRef<ExportUserMap | Maybe>();
   userMapRef.current = userMap;
-
-  const { messageCount } = fetchProgress || {};
 
   const [anchorEl, setAnchorEl] = useState<
     (EventTarget & HTMLButtonElement) | Maybe
@@ -204,18 +200,6 @@ function Tags() {
 
   const handleChannelChange = async (id: Snowflake | null) => {
     changeChannel(id);
-  };
-
-  const getProgressText = () => {
-    if (lookupUserId) {
-      return `User Lookup: ${lookupUserId}`;
-    }
-    if (lookupReactionMessageId) {
-      return `Reaction Lookup ${lookupReactionMessageId}`;
-    }
-    if (messageCount > 0) {
-      return `Fetched ${messageCount} of ${totalSearchMessages} Messages`;
-    }
   };
 
   useEffect(() => {
@@ -398,7 +382,7 @@ function Tags() {
             }}
           >
             <LinearProgress sx={{ width: "100%", m: 1 }} />
-            <Typography variant="caption">{getProgressText()}</Typography>
+            <Typography variant="caption">{statusText}</Typography>
           </Box>
         </Paper>
       )}

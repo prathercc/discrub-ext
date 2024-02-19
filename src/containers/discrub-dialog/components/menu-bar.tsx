@@ -33,8 +33,8 @@ const MenuBar = ({
   const isGenerating = exportState.isGenerating();
 
   const { state: appState } = useAppSlice();
-  const modify = appState.modify();
-  const { active } = modify || {};
+  const task = appState.task();
+  const { active } = task || {};
 
   const { state: messageState } = useMessageSlice();
   const isLoading = messageState.isLoading();

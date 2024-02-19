@@ -16,7 +16,6 @@ import {
   setDownloadImages as setDownloadImagesAction,
   setArtistMode as setArtistModeAction,
   setName as setNameAction,
-  setStatusText as setStatusTextAction,
   resetExportSettings as resetExportSettingsAction,
   getSpecialFormatting as getSpecialFormattingAction,
   getFormattedInnerHtml as getFormattedInnerHtmlAction,
@@ -58,9 +57,6 @@ const useExportSlice = () => {
   const useName = (): string =>
     useAppSelector((state: RootState) => state.export.name);
 
-  const useStatusText = (): string =>
-    useAppSelector((state: RootState) => state.export.statusText);
-
   const useIsGenerating = (): boolean =>
     useAppSelector((state: RootState) => state.export.isGenerating);
 
@@ -97,7 +93,6 @@ const useExportSlice = () => {
     previewImages: usePreviewImages,
     artistMode: useArtistMode,
     name: useName,
-    statusText: useStatusText,
     isGenerating: useIsGenerating,
     currentPage: useCurrentPage,
     messagesPerPage: useMessagesPerPage,
@@ -174,10 +169,6 @@ const useExportSlice = () => {
     dispatch(setNameAction(value));
   };
 
-  const setStatusText = (value: string): void => {
-    dispatch(setStatusTextAction(value));
-  };
-
   const resetExportSettings = (): void => {
     dispatch(resetExportSettingsAction());
   };
@@ -232,7 +223,6 @@ const useExportSlice = () => {
     setDownloadImages,
     setArtistMode,
     setName,
-    setStatusText,
     resetExportSettings,
     getSpecialFormatting,
     getFormattedInnerHtml,

@@ -15,7 +15,12 @@ import {
   wait,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
-import { checkDiscrubPaused, setDiscrubCancelled } from "../app/app-slice";
+import {
+  checkDiscrubPaused,
+  resetStatus,
+  setDiscrubCancelled,
+  setStatus,
+} from "../app/app-slice";
 import { renderToString } from "react-dom/server";
 import { MessageRegex } from "../../enum/message-regex";
 import {
@@ -66,7 +71,6 @@ const initialState: ExportState = {
   previewImages: false,
   artistMode: false,
   name: "",
-  statusText: "",
   isGenerating: false,
   currentPage: 1,
   messagesPerPage: 1000,
@@ -171,9 +175,6 @@ export const exportSlice = createSlice({
     setName: (state, { payload }: { payload: string }): void => {
       state.name = payload;
     },
-    setStatusText: (state, { payload }: { payload: string }): void => {
-      state.statusText = payload;
-    },
     resetExportSettings: (state): void => {
       state.downloadImages = false;
       state.previewImages = false;
@@ -193,7 +194,6 @@ export const {
   setPreviewImages,
   setDownloadImages,
   setName,
-  setStatusText,
   resetExportSettings,
   resetExportMaps,
   setExportUserMap,
@@ -724,9 +724,8 @@ const _processMessages =
       await dispatch(_downloadAvatarFromMessage({ message, exportUtils }));
 
       if (i % 10 === 0) {
-        dispatch(
-          setStatusText(`Processing - Message ${i} of ${messages.length}`)
-        );
+        const status = `Processing - Message ${i} of ${messages.length}`;
+        dispatch(setStatus(status));
         await wait(0.1);
       }
     }
@@ -819,14 +818,7 @@ const _compressMessages =
     exportUtils,
   }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    // TODO: Combine the setStatusText and wait calls within exportSlice.
-    dispatch(
-      setStatusText(
-        `Compressing${
-          messages.length > 2000 ? " - This may take a while..." : ""
-        }`
-      )
-    );
+    dispatch(setStatus("Compressing"));
     await wait(1);
 
     const { messagesPerPage } = getState().export;
@@ -841,11 +833,10 @@ const _compressMessages =
       await dispatch(checkDiscrubPaused());
       if (discrubCancelled) break;
       if (format === ExportType.MEDIA) {
-        dispatch(setStatusText("Cleaning up..."));
+        dispatch(setStatus("Cleaning up..."));
       } else {
-        dispatch(
-          setStatusText(`Compressing - Page ${currentPage} of ${totalPages}`)
-        );
+        const status = `Compressing - Page ${currentPage} of ${totalPages}`;
+        dispatch(setStatus(status));
       }
 
       await wait(1);
@@ -931,7 +922,7 @@ export const exportMessages =
 
     await dispatch(checkDiscrubPaused());
     if (!getState().app.discrubCancelled) {
-      dispatch(setStatusText("Preparing Archive"));
+      dispatch(setStatus("Preparing Archive"));
       await exportUtils.generateZip();
     }
 
@@ -939,7 +930,7 @@ export const exportMessages =
     dispatch(setIsExporting(false));
     dispatch(setName(""));
     await exportUtils.resetZip();
-    dispatch(setStatusText(""));
+    dispatch(resetStatus());
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
     dispatch(resetExportMaps(["emojiMap", "avatarMap", "mediaMap", "roleMap"]));
@@ -962,7 +953,7 @@ export const exportChannels =
 
     for (const entity of channels) {
       if (getState().app.discrubCancelled) break;
-      dispatch(setStatusText(""));
+      dispatch(resetStatus());
       const safeEntityName = getSafeExportName(entity.name || entity.id);
       const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
       dispatch(setIsExporting(true));
@@ -1019,7 +1010,7 @@ export const exportChannels =
     }
     await dispatch(checkDiscrubPaused());
     if (!getState().app.discrubCancelled) {
-      dispatch(setStatusText("Preparing Archive"));
+      dispatch(setStatus("Preparing Archive"));
       await exportUtils.generateZip();
     }
 
@@ -1030,7 +1021,7 @@ export const exportChannels =
     dispatch(setIsExporting(false));
     dispatch(setName(""));
     await exportUtils.resetZip();
-    dispatch(setStatusText(""));
+    dispatch(resetStatus());
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
     dispatch(resetExportMaps(["emojiMap", "avatarMap", "mediaMap", "roleMap"]));

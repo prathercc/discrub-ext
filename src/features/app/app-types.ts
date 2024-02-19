@@ -11,10 +11,10 @@ import { User } from "../../classes/user";
 export type AppState = {
   discrubPaused: boolean;
   discrubCancelled: boolean;
-  modify: Modify;
+  task: AppTask;
 };
 
-export type Modify = {
+export type AppTask = {
   active: boolean;
   entity:
     | (Message & { _index?: number; _total?: number })

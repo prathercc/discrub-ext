@@ -61,23 +61,19 @@ function DirectMessages() {
     setSelected,
     deleteReaction,
   } = useMessageSlice();
-  const lookupUserId = messageState.lookupUserId();
-  const lookupReactionMessageId = messageState.lookupReactionMessageId();
-  const fetchProgress = messageState.fetchProgress();
   const messagesLoading = messageState.isLoading();
   const messages = messageState.messages();
   const searchBeforeDate = messageState.searchBeforeDate();
   const searchAfterDate = messageState.searchAfterDate();
   const searchMessageContent = messageState.searchMessageContent();
   const selectedHasTypes = messageState.selectedHasTypes();
-  const totalSearchMessages = messageState.totalSearchMessages();
   const selectedMessages = messageState.selectedMessages();
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
 
   const { state: appState, setModifyEntity } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
-  const modify = appState.modify();
+  const task = appState.task();
 
   const [searchTouched, setSearchTouched] = useState(false);
   const [expanded, setExpanded] = useState(true);
@@ -85,7 +81,7 @@ function DirectMessages() {
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
   const [reactionModalOpen, setReactionModalOpen] = useState(false);
 
-  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
+  const { statusText } = task || {};
 
   const columns: TableColumn<Message>[] = [
     {
@@ -174,25 +170,6 @@ function DirectMessages() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const getProgressText = (): string => {
-    if (parsingThreads) {
-      return `Fetched ${threadCount} Threads`;
-    } else if (!parsingThreads) {
-      if (lookupUserId) {
-        return `User Lookup ${lookupUserId}`;
-      } else if (lookupReactionMessageId) {
-        return `Reaction Lookup ${lookupReactionMessageId}`;
-      } else if (messageCount > 0) {
-        return `Fetched ${messageCount}${
-          totalSearchMessages ? ` of ${totalSearchMessages}` : ""
-        } Messages`;
-      } else {
-        return "Fetching Data";
-      }
-    }
-    return "";
-  };
-
   return (
     <Stack
       spacing={2}
@@ -204,19 +181,19 @@ function DirectMessages() {
       }}
     >
       <ReactionModal
-        modify={modify}
+        task={task}
         handleClose={() => setReactionModalOpen(false)}
         open={reactionModalOpen}
         handleReactionDelete={deleteReaction}
       />
       <AttachmentModal
-        modify={modify}
+        task={task}
         onDeleteAttachment={deleteAttachment}
         handleClose={() => setAttachmentModalOpen(false)}
         open={attachmentModalOpen}
       />
       <EmbedModal
-        modify={modify}
+        task={task}
         handleClose={() => setEmbedModalOpen(false)}
         open={embedModalOpen}
       />
@@ -375,7 +352,7 @@ function DirectMessages() {
               }}
             >
               <LinearProgress sx={{ width: "100%", m: 1 }} />
-              <Typography variant="caption">{getProgressText()}</Typography>
+              <Typography variant="caption">{statusText}</Typography>
             </Box>
           </Paper>
         )}

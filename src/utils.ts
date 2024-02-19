@@ -318,3 +318,12 @@ export const getEncodedEmoji = (emoji: Emoji): string | null => {
   const emojiString = id ? `${name}:${id}` : name;
   return emojiString || null;
 };
+
+export const isGuildForum = (channel: Channel | Maybe) => {
+  return !!(
+    channel &&
+    [ChannelType.GUILD_FORUM, ChannelType.GUILD_MEDIA].some(
+      (type) => type === channel.type
+    )
+  );
+};

@@ -11,7 +11,7 @@ import {
   List,
   LinearProgress,
 } from "@mui/material";
-import { Modify } from "../features/app/app-types";
+import { AppTask } from "../features/app/app-types";
 import { isMessage } from "../app/guards";
 import ReactionListItemButton, {
   ReactingUser,
@@ -22,7 +22,7 @@ import { useGuildSlice } from "../features/guild/use-guild-slice";
 import { useUserSlice } from "../features/user/use-user-slice";
 
 type ReactionModalProps = {
-  modify: Modify;
+  task: AppTask;
   open: boolean;
   handleClose: () => void;
   handleReactionDelete: (
@@ -33,7 +33,7 @@ type ReactionModalProps = {
 };
 
 const ReactionModal = ({
-  modify,
+  task,
   open,
   handleClose,
   handleReactionDelete,
@@ -48,7 +48,7 @@ const ReactionModal = ({
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
 
-  const { entity, active, statusText } = modify || {};
+  const { entity, active, statusText } = task || {};
 
   useEffect(() => {
     if (!entity || (isMessage(entity) && entity.reactions?.length === 0)) {

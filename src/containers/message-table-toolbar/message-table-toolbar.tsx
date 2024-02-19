@@ -39,7 +39,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
     setDiscrubPaused,
   } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
-  const modify = appState.modify();
+  const task = appState.task();
 
   const {
     state: messageState,
@@ -64,7 +64,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   };
 
   const handleDeleteModalClose = () => {
-    if (modify.active) {
+    if (task.active) {
       // We are actively deleting, we need to send a cancel request
       setDiscrubCancelled(true);
     }
@@ -86,7 +86,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   };
 
   const handleEditModalClose = () => {
-    if (modify.active) {
+    if (task.active) {
       // We are actively editing, we need to send a cancel request
       setDiscrubCancelled(true);
     }
@@ -121,11 +121,11 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
         selectedRows={selectedRows}
         open={deleteModalOpen}
         handleClose={handleDeleteModalClose}
-        modify={modify}
+        task={task}
         handleDeleteMessage={handleDeleteMessage}
       />
       <EditModal
-        modify={modify}
+        task={task}
         handleClose={handleEditModalClose}
         handleEditMessage={handleEditMessage}
         open={editModalOpen}

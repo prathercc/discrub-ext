@@ -21,7 +21,7 @@ import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
 import { isMessage } from "../../../app/guards";
 import { DeleteConfiguration } from "../../../features/message/message-types";
-import { Modify } from "../../../features/app/app-types";
+import { AppTask } from "../../../features/app/app-types";
 import MessageMock from "../../../components/message-mock";
 
 type DeleteModalProps = {
@@ -29,18 +29,18 @@ type DeleteModalProps = {
   handleClose: () => void;
   handleDeleteMessage: (deleteConfig: DeleteConfiguration) => void;
   selectedRows: string[];
-  modify: Modify;
+  task: AppTask;
 };
 
 const DeleteModal = ({
   open,
   handleClose,
   selectedRows,
-  modify,
+  task,
   handleDeleteMessage,
 }: DeleteModalProps) => {
   const theme = useTheme();
-  const { active, entity, statusText } = modify;
+  const { active, entity, statusText } = task;
 
   const [deleteConfig, setDeleteConfig] = useState<DeleteConfiguration>({
     attachments: true,

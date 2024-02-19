@@ -44,10 +44,6 @@ const PurgeModal = ({
   const theme = useTheme();
 
   const { state: messageState } = useMessageSlice();
-  const fetchProgress = messageState.fetchProgress();
-  const totalSearchMessages = messageState.totalSearchMessages();
-  const lookupUserId = messageState.lookupUserId();
-  const lookupReactionMessageId = messageState.lookupReactionMessageId();
   const messagesLoading = messageState.isLoading();
 
   const { state: channelState, resetChannel } = useChannelSlice();
@@ -70,13 +66,11 @@ const PurgeModal = ({
     resetModify,
     setIsModifying,
   } = useAppSlice();
-  const modify = appState.modify();
+  const task = appState.task();
 
-  const { state: purgeState, purge } = usePurgeSlice();
-  const purgeChannel = purgeState.purgeChannel();
+  const { purge } = usePurgeSlice();
 
-  const { active, entity, statusText } = modify;
-  const { messageCount, threadCount, parsingThreads } = fetchProgress;
+  const { active, entity, statusText } = task;
 
   const finishedPurge = !active && entity;
 
@@ -117,21 +111,6 @@ const PurgeModal = ({
 
   const guildDialogText =
     "Are you sure you want to purge this Server? All messages in every Channel will be deleted for yourself or a given User Id.";
-
-  const getProgressText = (): string => {
-    if (parsingThreads) {
-      return `Found ${threadCount} Threads`;
-    } else if (!parsingThreads && !lookupUserId && totalSearchMessages) {
-      return `Found ${messageCount}/${totalSearchMessages} of ${
-        purgeChannel?.name || ""
-      } messages`;
-    } else if (lookupUserId) {
-      return `User Lookup ${lookupUserId}`;
-    } else if (lookupReactionMessageId) {
-      return `Reaction Lookup ${lookupReactionMessageId}`;
-    }
-    return "";
-  };
 
   const handlePurge = () => {
     if (isDm && selectedDm) {
@@ -215,9 +194,7 @@ const PurgeModal = ({
               </Typography>
             </>
           )}
-          <ModalDebugMessage
-            debugMessage={messagesLoading ? getProgressText() : statusText}
-          />
+          <ModalDebugMessage debugMessage={statusText} />
         </Stack>
       </DialogContent>
       <DialogActions>

@@ -9,7 +9,6 @@ export type ExportState = {
   previewImages: boolean;
   artistMode: boolean;
   name: string;
-  statusText: string;
   isGenerating: boolean;
   currentPage: number;
   messagesPerPage: number;
