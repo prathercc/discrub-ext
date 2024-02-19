@@ -126,7 +126,7 @@ function DirectMessages() {
 
   const fetchDmData = async () => {
     if (selectedDm) {
-      getMessageData(null, selectedDm.id, preFilterUserId);
+      getMessageData(null, selectedDm.id, { preFilterUserId });
       setSearchTouched(true);
       setExpanded(false);
     }

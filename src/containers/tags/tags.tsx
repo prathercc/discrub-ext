@@ -136,7 +136,8 @@ function Tags() {
       setAnchorEl(null);
       let { messages } = (await getMessageData(
         selectedGuild.id,
-        selectedChannel.id
+        selectedChannel.id,
+        { excludeReactions: true }
       )) || { messages: [] };
       const mentionMap: MentionMap = {};
 

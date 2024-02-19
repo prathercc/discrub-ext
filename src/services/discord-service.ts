@@ -293,7 +293,7 @@ export const fetchSearchMessageData = (
   offset: number,
   channelId: string | Maybe,
   guildId: string | Maybe,
-  searchCriteria: SearchMessageProps
+  searchCriteria: Partial<SearchMessageProps>
 ) => {
   const {
     preFilterUserId,

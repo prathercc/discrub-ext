@@ -23,7 +23,11 @@ import {
   deleteReaction as deleteReactionAction,
 } from "./message-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { DeleteConfiguration, Filter } from "./message-types";
+import {
+  DeleteConfiguration,
+  Filter,
+  MessageSearchOptions,
+} from "./message-types";
 import { HasType } from "../../enum/has-type";
 import { SortDirection } from "../../enum/sort-direction";
 import Message from "../../classes/message";
@@ -168,9 +172,9 @@ const useMessageSlice = () => {
   const getMessageData = (
     guildId: string | Maybe,
     channelId: string | Maybe,
-    preFilterUserId?: string | Maybe
+    options: Partial<MessageSearchOptions> = {}
   ) => {
-    return dispatch(getMessageDataAction(guildId, channelId, preFilterUserId));
+    return dispatch(getMessageDataAction(guildId, channelId, options));
   };
 
   const resetMessageData = () => {

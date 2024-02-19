@@ -135,7 +135,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
   };
 
   const fetchChannelData = () => {
-    getMessageData(selectedGuild?.id, selectedChannel?.id, preFilterUserId);
+    getMessageData(selectedGuild?.id, selectedChannel?.id, { preFilterUserId });
     setSearchTouched(true);
     setExpanded(false);
   };

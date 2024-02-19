@@ -46,6 +46,7 @@ import {
   DeleteConfiguration,
   Filter,
   MessageData,
+  MessageSearchOptions,
   MessageState,
   SearchMessageProps,
 } from "./message-types";
@@ -859,7 +860,7 @@ export const getMessageData =
   (
     guildId: Snowflake | Maybe,
     channelId: Snowflake | Maybe,
-    preFilterUserId: Snowflake | Maybe
+    options: Partial<MessageSearchOptions> = {}
   ): AppThunk<Promise<MessageData | void>> =>
   async (dispatch, getState) => {
     dispatch(resetMessageData());
@@ -878,7 +879,7 @@ export const getMessageData =
       let retThreads: Channel[] = [];
 
       const criteriaExists = [
-        preFilterUserId,
+        options.preFilterUserId,
         searchBeforeDate,
         searchAfterDate,
         searchMessageContent,
@@ -887,13 +888,18 @@ export const getMessageData =
 
       if (criteriaExists) {
         ({ messages: retArr, threads: retThreads } = await dispatch(
-          _getSearchMessages(channelId, guildId, {
-            preFilterUserId,
-            searchBeforeDate,
-            searchAfterDate,
-            searchMessageContent,
-            selectedHasTypes,
-          })
+          _getSearchMessages(
+            channelId,
+            guildId,
+            {
+              preFilterUserId: options.preFilterUserId,
+              searchBeforeDate,
+              searchAfterDate,
+              searchMessageContent,
+              selectedHasTypes,
+            },
+            options
+          )
         ));
       } else if (channelId) {
         ({ messages: retArr, threads: retThreads } = await dispatch(
@@ -907,7 +913,9 @@ export const getMessageData =
       };
 
       if (!getState().app.discrubCancelled) {
-        await dispatch(_generateReactionMap(retArr));
+        if (!options.excludeReactions) {
+          await dispatch(_generateReactionMap(retArr));
+        }
         const userMap = dispatch(_getUserMap(retArr));
         await dispatch(_collectUserNames(userMap));
         if (guildId) {
@@ -1155,7 +1163,8 @@ const _getSearchMessages =
   (
     channelId: Snowflake | Maybe,
     guildId: Snowflake | Maybe,
-    searchCriteria: SearchMessageProps
+    searchCriteria: Partial<SearchMessageProps>,
+    { excludeReactions }: Partial<MessageSearchOptions> = {}
   ): AppThunk<Promise<MessageData>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
@@ -1215,8 +1224,8 @@ const _getSearchMessages =
           reachedEnd = true;
         }
       }
-
-      retArr = await dispatch(_resolveMessageReactions(retArr));
+      if (!excludeReactions)
+        retArr = await dispatch(_resolveMessageReactions(retArr));
     }
     dispatch(resetStatus());
     return {

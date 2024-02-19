@@ -965,7 +965,9 @@ export const exportChannels =
       let exportMessages: Message[] = [];
 
       const messageData = await dispatch(
-        getMessageData(selectedGuild?.id, entity.id, userId)
+        getMessageData(selectedGuild?.id, entity.id, {
+          preFilterUserId: userId,
+        })
       );
 
       if (messageData) {
