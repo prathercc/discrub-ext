@@ -663,6 +663,13 @@ const _downloadEmojisFromMessage =
     const { emoji: emojiReferences } = dispatch(
       getSpecialFormatting(message.content)
     );
+    if (message.reactions) {
+      message.reactions.forEach((r) => {
+        const { id, name } = r.emoji || {};
+        if (id && name) emojiReferences.push({ id, name, raw: "" });
+      });
+    }
+
     if (emojiReferences.length) {
       for (const { id, name } of emojiReferences) {
         const { discrubCancelled } = getState().app;
