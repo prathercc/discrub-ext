@@ -964,11 +964,6 @@ export const getMessageData =
     }
   };
 
-/**
- *
- * @param {Array} messages Array of Message entities
- * @returns Object mapping of the relevant Users from the messages param
- */
 const _getUserMap =
   (messages: Message[]): AppThunk<ExportUserMap> =>
   (_, getState) => {
@@ -998,9 +993,9 @@ const _getUserMap =
 
       Array.from(content.matchAll(MessageRegex.USER_MENTION))?.forEach(
         ({ groups: userMentionGroups }) => {
-          const userId = userMentionGroups?.user_id;
-          if (userId && !userMap[userId]) {
-            userMap[userId] = existingUserMap[userId] || defaultMapping;
+          const mentionId = userMentionGroups?.user_id;
+          if (mentionId && !userMap[mentionId]) {
+            userMap[mentionId] = existingUserMap[mentionId] || defaultMapping;
           }
         }
       );
@@ -1009,9 +1004,10 @@ const _getUserMap =
         const encodedEmoji = getEncodedEmoji(reaction.emoji);
         if (encodedEmoji) {
           const exportReactions = reactionMap[message.id][encodedEmoji] || [];
-          exportReactions.forEach(({ id: uId }) => {
-            if (!userMap[uId])
-              userMap[uId] = existingUserMap[userId] || defaultMapping;
+          exportReactions.forEach(({ id: reactingUserId }) => {
+            if (!userMap[reactingUserId])
+              userMap[reactingUserId] =
+                existingUserMap[reactingUserId] || defaultMapping;
           });
         }
       }
