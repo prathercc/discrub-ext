@@ -2,6 +2,7 @@ import { useState } from "react";
 import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
 import DataObjectIcon from "@mui/icons-material/DataObject";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import {
   Box,
   Button,
@@ -49,6 +50,7 @@ const MenuBar = ({
     { name: "Direct Messages", icon: <EmailIcon /> },
     { name: "Tags", icon: <LoyaltyIcon /> },
     { name: "Change Log", icon: <DataObjectIcon /> },
+    { name: "Settings", icon: <ManageAccountsIcon /> },
   ];
 
   return (

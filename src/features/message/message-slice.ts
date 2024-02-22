@@ -66,6 +66,7 @@ import Channel from "../../classes/channel";
 import { QueryStringParam } from "../../enum/query-string-param";
 import { Reaction } from "../../classes/reaction";
 import { ReactionType } from "../../enum/reaction-type";
+import { getReactionsEnabled } from "../../services/chrome-service";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -914,10 +915,11 @@ export const getMessageData =
       };
 
       if (!getState().app.discrubCancelled) {
-        if (!options.excludeReactions) {
+        const reactionsEnabled = await getReactionsEnabled();
+        if (!options.excludeReactions && reactionsEnabled) {
           await dispatch(_generateReactionMap(retArr));
         }
-        const userMap = dispatch(_getUserMap(retArr));
+        const userMap = await dispatch(_getUserMap(retArr));
         await dispatch(_collectUserNames(userMap));
         if (guildId) {
           await dispatch(_collectUserGuildData(userMap, guildId));
@@ -965,8 +967,8 @@ export const getMessageData =
   };
 
 const _getUserMap =
-  (messages: Message[]): AppThunk<ExportUserMap> =>
-  (_, getState) => {
+  (messages: Message[]): AppThunk<Promise<ExportUserMap>> =>
+  async (_, getState) => {
     const { userMap: existingUserMap, reactionMap } =
       getState().export.exportMaps;
     const defaultMapping = {
@@ -976,7 +978,7 @@ const _getUserMap =
       guilds: {},
     };
     const userMap: ExportUserMap = {};
-
+    const reactionsEnabled = await getReactionsEnabled();
     messages.forEach((message) => {
       const content = message.content;
       const author = message.author;
@@ -1000,15 +1002,17 @@ const _getUserMap =
         }
       );
 
-      for (const reaction of message.reactions || []) {
-        const encodedEmoji = getEncodedEmoji(reaction.emoji);
-        if (encodedEmoji) {
-          const exportReactions = reactionMap[message.id][encodedEmoji] || [];
-          exportReactions.forEach(({ id: reactingUserId }) => {
-            if (!userMap[reactingUserId])
-              userMap[reactingUserId] =
-                existingUserMap[reactingUserId] || defaultMapping;
-          });
+      if (reactionsEnabled) {
+        for (const reaction of message.reactions || []) {
+          const encodedEmoji = getEncodedEmoji(reaction.emoji);
+          if (encodedEmoji) {
+            const exportReactions = reactionMap[message.id][encodedEmoji] || [];
+            exportReactions.forEach(({ id: reactingUserId }) => {
+              if (!userMap[reactingUserId])
+                userMap[reactingUserId] =
+                  existingUserMap[reactingUserId] || defaultMapping;
+            });
+          }
         }
       }
     });
@@ -1221,7 +1225,8 @@ const _getSearchMessages =
           reachedEnd = true;
         }
       }
-      if (!excludeReactions)
+      const reactionsEnabled = await getReactionsEnabled();
+      if (!excludeReactions && reactionsEnabled)
         retArr = await dispatch(_resolveMessageReactions(retArr));
     }
     dispatch(resetStatus());

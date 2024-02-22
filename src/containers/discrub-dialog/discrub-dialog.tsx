@@ -28,6 +28,8 @@ import { useTheme } from "@mui/material";
 import Tags from "../tags/tags";
 import ChannelMessages from "../channel-messages/channel-messages";
 import DirectMessages from "../direct-messages/direct-messages";
+import Settings from "./components/settings";
+import { initializeSettings } from "../../services/chrome-service";
 
 function DiscrubDialog() {
   const palette = useTheme().palette;
@@ -67,6 +69,7 @@ function DiscrubDialog() {
     };
     getAnnouncementData();
     getUserData();
+    initializeSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -95,6 +98,7 @@ function DiscrubDialog() {
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <Tags />}
       {menuIndex === 3 && <About />}
+      {menuIndex === 4 && <Settings />}
       {announcement && (
         <Box
           sx={{

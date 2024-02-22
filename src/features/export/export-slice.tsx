@@ -55,6 +55,7 @@ import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
 import Channel from "../../classes/channel";
+import { getReactionsEnabled } from "../../services/chrome-service";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -663,7 +664,8 @@ const _downloadEmojisFromMessage =
     const { emoji: emojiReferences } = dispatch(
       getSpecialFormatting(message.content)
     );
-    if (message.reactions) {
+    const reactionsEnabled = await getReactionsEnabled();
+    if (message.reactions && reactionsEnabled) {
       message.reactions.forEach((r) => {
         const { id, name } = r.emoji || {};
         if (id && name) emojiReferences.push({ id, name, raw: "" });

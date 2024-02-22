@@ -8,6 +8,8 @@ import Message from "../classes/message";
 import { EmbedType } from "../enum/embed-type";
 import { TableCell } from "@mui/material";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
+import { getReactionsEnabled } from "../services/chrome-service";
+import { useEffect, useState } from "react";
 
 type TableMessageProps = {
   row: Message;
@@ -24,10 +26,19 @@ export default function TableMessage({
   openEmbedModal = () => {},
   setModifyEntity,
 }: TableMessageProps) {
+  const [reactionsEnabled, setReactionsEnabled] = useState(false);
   const hasValidEmbed = row?.embeds?.some(
     (embed) => embed?.type === EmbedType.RICH
   );
   const hasAttachments = row.attachments.length > 0;
+  const hasReactions = !!row.reactions?.length && reactionsEnabled;
+
+  useEffect(() => {
+    const checkSettings = async () => {
+      setReactionsEnabled(await getReactionsEnabled());
+    };
+    checkSettings();
+  }, []);
 
   return (
     <TableCell colSpan={5}>
@@ -38,7 +49,7 @@ export default function TableMessage({
           justifyContent="flex-start"
           alignItems="center"
         >
-          {!!row.reactions?.length && (
+          {hasReactions && (
             <Tooltip
               arrow
               placement={hasAttachments || hasValidEmbed ? "top" : "bottom"}
