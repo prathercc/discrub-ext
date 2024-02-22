@@ -32,7 +32,7 @@ import Settings from "./components/settings";
 import { initializeSettings } from "../../services/chrome-service";
 
 function DiscrubDialog() {
-  const palette = useTheme().palette;
+  const { palette } = useTheme();
   const [menuIndex, setMenuIndex] = useState(0);
   const [alertOpen, setAlertOpen] = useState(true);
   const [announcement, setAnnouncement] = useState<Announcement | Maybe>(null);
@@ -90,8 +90,12 @@ function DiscrubDialog() {
         m: 0,
       }}
     >
-      <DonationComponent closeAnnouncement={closeAnnouncement} />
-      <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
+      <DonationComponent />
+      <MenuBar
+        menuIndex={menuIndex}
+        setMenuIndex={handleChangeMenuIndex}
+        closeAnnouncement={closeAnnouncement}
+      />
       {menuIndex === 0 && (
         <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
       )}

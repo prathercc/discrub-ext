@@ -25,9 +25,11 @@ import { useMessageSlice } from "../../../features/message/use-message-slice";
 const MenuBar = ({
   menuIndex,
   setMenuIndex,
+  closeAnnouncement,
 }: {
   menuIndex: number;
   setMenuIndex: (index: number) => Promise<void>;
+  closeAnnouncement: () => void;
 }) => {
   const { state: exportState } = useExportSlice();
   const isExporting = exportState.isExporting();
@@ -53,6 +55,11 @@ const MenuBar = ({
     { name: "Settings", icon: <ManageAccountsIcon /> },
   ];
 
+  const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+    closeAnnouncement();
+  };
+
   return (
     <Box
       sx={{ marginLeft: "5px !important", marginTop: "5px !important" }}
@@ -62,7 +69,7 @@ const MenuBar = ({
         disabled={menuDisabled}
         color="secondary"
         startIcon={menuOpen ? <MenuOpenIcon /> : <MenuIcon />}
-        onClick={(e) => setAnchorEl(e.currentTarget)}
+        onClick={handleMenuClick}
       >
         Menu
       </Button>
@@ -109,17 +116,20 @@ const MenuBar = ({
         onClose={() => setAnchorEl(null)}
       >
         {menuItems.map((menuItem, i) => (
-          <MenuItem
-            key={menuItem.name}
-            disabled={menuIndex === i}
-            onClick={() => {
-              setMenuIndex(i);
-              setAnchorEl(null);
-            }}
-          >
-            <ListItemIcon>{menuItem.icon}</ListItemIcon>
-            <ListItemText>{menuItem.name}</ListItemText>
-          </MenuItem>
+          <>
+            {menuItem.name === "Settings" ? <Divider /> : null}
+            <MenuItem
+              key={menuItem.name}
+              disabled={menuIndex === i}
+              onClick={() => {
+                setMenuIndex(i);
+                setAnchorEl(null);
+              }}
+            >
+              <ListItemIcon>{menuItem.icon}</ListItemIcon>
+              <ListItemText>{menuItem.name}</ListItemText>
+            </MenuItem>
+          </>
         ))}
         <Divider />
         <MenuItem
