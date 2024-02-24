@@ -131,7 +131,7 @@ const ReactionListItemButton = ({
       </ListItemButton>
       <Collapse in={expanded} unmountOnExit>
         <FixedSizeList
-          height={200}
+          height={reactingUsers.length > 3 ? 200 : reactingUsers.length * 60}
           width="100%"
           itemSize={60}
           itemCount={reactingUsers.length}
