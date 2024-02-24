@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import GitHubIcon from "@mui/icons-material/GitHub";
 import RedditIcon from "@mui/icons-material/Reddit";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import { useExportSlice } from "../../../features/export/use-export-slice";
@@ -114,7 +113,7 @@ const MenuBar = ({
       >
         {menuItems.map((menuItem, i) => (
           <>
-            {menuItem.name === "Settings" ? <Divider /> : null}
+            {menuItem.name === "Change Log" ? <Divider /> : null}
             <MenuItem
               key={menuItem.name}
               disabled={menuIndex === i}
@@ -129,17 +128,6 @@ const MenuBar = ({
           </>
         ))}
         <Divider />
-        <MenuItem
-          onClick={() => {
-            window.open("https://github.com/prathercc/discrub-ext", "_blank");
-            setAnchorEl(null);
-          }}
-        >
-          <ListItemIcon>
-            <GitHubIcon />
-          </ListItemIcon>
-          <ListItemText>GitHub</ListItemText>
-        </MenuItem>
         <MenuItem
           onClick={() => {
             window.open("https://www.reddit.com/r/discrub/", "_blank");
