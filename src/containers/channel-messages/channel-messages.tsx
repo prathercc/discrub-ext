@@ -45,11 +45,7 @@ import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
 import ReactionModal from "../../components/reaction-modal";
 
-type ChannelMessagesProps = {
-  closeAnnouncement: () => void;
-};
-
-function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
+function ChannelMessages() {
   const { state: userState } = useUserSlice();
   const userLoading = userState.isLoading();
   const token = userState.token();
@@ -284,7 +280,6 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                           fullWidth
                           size="small"
                           label="Server"
-                          onFocus={closeAnnouncement}
                           sx={{ width: "330px !important" }}
                           InputProps={{
                             ...params.InputProps,
@@ -353,7 +348,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                     />
                   </Stack>
 
-                  <AdvancedFiltering closeAnnouncement={closeAnnouncement} />
+                  <AdvancedFiltering />
                 </Stack>
               </Collapse>
               <Stack

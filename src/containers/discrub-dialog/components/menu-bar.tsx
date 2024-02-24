@@ -25,11 +25,9 @@ import { useMessageSlice } from "../../../features/message/use-message-slice";
 const MenuBar = ({
   menuIndex,
   setMenuIndex,
-  closeAnnouncement,
 }: {
   menuIndex: number;
   setMenuIndex: (index: number) => Promise<void>;
-  closeAnnouncement: () => void;
 }) => {
   const { state: exportState } = useExportSlice();
   const isExporting = exportState.isExporting();
@@ -57,7 +55,6 @@ const MenuBar = ({
 
   const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
-    closeAnnouncement();
   };
 
   return (
