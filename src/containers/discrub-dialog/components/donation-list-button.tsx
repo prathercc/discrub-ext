@@ -25,16 +25,16 @@ function DonationListButton({ donation }: { donation: Donation }) {
   const getBackgroundColor = (): string => {
     const { dollars } = donation;
     if (dollars >= 75) {
-      return "rgba(230, 78, 207, 0.1)";
+      return "rgba(142, 160, 225, 0.25)";
     }
     if (dollars >= 50) {
-      return "rgba(233, 237, 109, 0.15)";
+      return "rgba(142, 160, 225, 0.2)";
     }
     if (dollars < 50 && dollars >= 20) {
-      return "rgba(15, 166, 45, 0.1)";
+      return "rgba(142, 160, 225, 0.1)";
     }
     if (dollars < 20 && dollars >= 10) {
-      return "rgba(96, 240, 125, 0.05)";
+      return "rgba(142, 160, 225, 0.05)";
     }
     return "transparent";
   };

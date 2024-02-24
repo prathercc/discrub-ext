@@ -40,7 +40,16 @@ function DonationComponent() {
           padding: "3px",
         }}
       >
-        <Stack flexDirection="row" gap="15px">
+        <Stack
+          sx={{
+            flexDirection: "row",
+            gap: "15px",
+            borderRadius: "5px",
+            width: "100%",
+            backgroundColor: "primary.dark",
+            justifyContent: "center",
+          }}
+        >
           {Array.from(Array(3)).map((_) => (
             <Icon>
               <img
