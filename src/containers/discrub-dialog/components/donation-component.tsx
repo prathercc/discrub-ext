@@ -53,9 +53,11 @@ function DonationComponent() {
             flexDirection: "row",
             gap: "15px",
             width: "100%",
+            borderRadius: "5px",
             backgroundColor: "primary.dark",
             justifyContent: "center",
             alignItems: "center",
+            boxShadow: "rgba(232, 217, 217, 0.75) 2px 2px 5px -2px",
           }}
         >
           <Icon>

@@ -46,9 +46,19 @@ function AnnouncementComponent() {
       >
         {announcement ? (
           <Stack sx={{ flexDirection: "column" }}>
-            <Typography sx={{ fontWeight: "bold" }} variant="body1">
-              {announcement.title}
-            </Typography>
+            <Stack
+              sx={{
+                width: "100%",
+                borderRadius: "5px",
+                backgroundColor: "primary.dark",
+                justifyContent: "center",
+                alignItems: "center",
+                boxShadow: "rgba(232, 217, 217, 0.75) 2px 2px 5px -2px",
+                marginBottom: "15px",
+              }}
+            >
+              <Typography variant="body1">{announcement.title}</Typography>
+            </Stack>
             <Typography variant="caption">{announcement.date}</Typography>
             <Typography variant="caption">{announcement.message}</Typography>
           </Stack>

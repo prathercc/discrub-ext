@@ -57,6 +57,24 @@ const MenuBar = ({
     setAnchorEl(e.currentTarget);
   };
 
+  const redirects = [
+    {
+      title: "Star on GitHub",
+      img: "github-logo.svg",
+      url: "https://github.com/prathercc/discrub-ext",
+    },
+    {
+      title: "Review on Webstore",
+      img: "chromestore.svg",
+      url: "https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj",
+    },
+    {
+      title: "Donate with Ko-Fi",
+      img: "kofi.svg",
+      url: "https://ko-fi.com/prathercc",
+    },
+  ];
+
   return (
     <Box
       sx={{ marginLeft: "5px !important", marginTop: "5px !important" }}
@@ -70,41 +88,23 @@ const MenuBar = ({
       >
         Menu
       </Button>
-      <Button
-        onClick={() =>
-          window.open(
-            "https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj",
-            "_blank"
-          )
-        }
-        color="secondary"
-        startIcon={
-          <Icon>
-            <img
-              style={{ display: "flex", height: "inherit", width: "inherit" }}
-              src="resources/media/chromestore.svg"
-              alt="chrome store"
-            />
-          </Icon>
-        }
-      >
-        Review on Webstore
-      </Button>
-      <Button
-        onClick={() => window.open("https://ko-fi.com/prathercc", "_blank")}
-        color="secondary"
-        startIcon={
-          <Icon>
-            <img
-              style={{ display: "flex", height: "inherit", width: "inherit" }}
-              src="resources/media/kofi.svg"
-              alt="kofi"
-            />
-          </Icon>
-        }
-      >
-        Donate with Ko-Fi
-      </Button>
+      {redirects.map((redirect) => (
+        <Button
+          onClick={() => window.open(redirect.url, "_blank")}
+          color="secondary"
+          startIcon={
+            <Icon>
+              <img
+                style={{ display: "flex", height: "inherit", width: "inherit" }}
+                src={`resources/media/${redirect.img}`}
+                alt={redirect.title}
+              />
+            </Icon>
+          }
+        >
+          {redirect.title}
+        </Button>
+      ))}
 
       <Menu
         sx={{ textTransform: "none" }}
