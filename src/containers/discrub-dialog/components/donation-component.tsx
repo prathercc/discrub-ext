@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { Stack, useTheme, List, Box, Icon, Skeleton } from "@mui/material";
+import {
+  Stack,
+  useTheme,
+  List,
+  Box,
+  Icon,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import { Donation, fetchDonationData } from "../../../services/github-service";
 import DonationListButton from "./donation-list-button";
 
@@ -44,21 +52,27 @@ function DonationComponent() {
           sx={{
             flexDirection: "row",
             gap: "15px",
-            borderRadius: "5px",
             width: "100%",
             backgroundColor: "primary.dark",
             justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          {Array.from(Array(3)).map((_) => (
-            <Icon>
-              <img
-                style={{ display: "flex", height: "inherit", width: "inherit" }}
-                src="resources/media/kofi.svg"
-                alt="kofi"
-              />
-            </Icon>
-          ))}
+          <Icon>
+            <img
+              style={{ display: "flex", height: "inherit", width: "inherit" }}
+              src="resources/media/kofi.svg"
+              alt="kofi"
+            />
+          </Icon>
+          <Typography variant="body1">Ko-Fi Feed</Typography>
+          <Icon>
+            <img
+              style={{ display: "flex", height: "inherit", width: "inherit" }}
+              src="resources/media/kofi.svg"
+              alt="kofi"
+            />
+          </Icon>
         </Stack>
 
         {donations.length ? (
