@@ -11,7 +11,7 @@ import {
   Typography,
   Paper,
   Stack,
-  CircularProgress,
+  LinearProgress,
   TextField,
   Button,
   Autocomplete,
@@ -41,6 +41,7 @@ import TableMessage from "../../components/table-message";
 import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
+import ReactionModal from "../../components/reaction-modal";
 
 function DirectMessages() {
   const { state: userState } = useUserSlice();
@@ -58,30 +59,30 @@ function DirectMessages() {
     setOrder,
     deleteAttachment,
     setSelected,
+    deleteReaction,
   } = useMessageSlice();
-  const lookupUserId = messageState.lookupUserId();
-  const fetchProgress = messageState.fetchProgress();
   const messagesLoading = messageState.isLoading();
   const messages = messageState.messages();
   const searchBeforeDate = messageState.searchBeforeDate();
   const searchAfterDate = messageState.searchAfterDate();
   const searchMessageContent = messageState.searchMessageContent();
   const selectedHasTypes = messageState.selectedHasTypes();
-  const totalSearchMessages = messageState.totalSearchMessages();
   const selectedMessages = messageState.selectedMessages();
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
 
   const { state: appState, setModifyEntity } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
-  const modify = appState.modify();
+  const task = appState.task();
+  const settings = appState.settings();
 
   const [searchTouched, setSearchTouched] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
+  const [reactionModalOpen, setReactionModalOpen] = useState(false);
 
-  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
+  const { statusText } = task || {};
 
   const columns: TableColumn<Message>[] = [
     {
@@ -107,10 +108,12 @@ function DirectMessages() {
     data: m,
     renderRow: (row) => (
       <TableMessage
+        settings={settings}
         row={row}
         setModifyEntity={setModifyEntity}
         openAttachmentModal={() => setAttachmentModalOpen(true)}
         openEmbedModal={() => setEmbedModalOpen(true)}
+        openReactionModal={() => setReactionModalOpen(true)}
       />
     ),
   }));
@@ -125,7 +128,7 @@ function DirectMessages() {
 
   const fetchDmData = async () => {
     if (selectedDm) {
-      getMessageData(null, selectedDm.id, preFilterUserId);
+      getMessageData(null, selectedDm.id, { preFilterUserId });
       setSearchTouched(true);
       setExpanded(false);
     }
@@ -169,23 +172,6 @@ function DirectMessages() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const getProgressText = (): string => {
-    if (parsingThreads) {
-      return `Fetched ${threadCount} Threads`;
-    } else if (!parsingThreads) {
-      if (lookupUserId) {
-        return `User Lookup ${lookupUserId}`;
-      } else if (messageCount > 0) {
-        return `Fetched ${messageCount}${
-          totalSearchMessages ? ` of ${totalSearchMessages}` : ""
-        } Messages`;
-      } else {
-        return "Fetching Data";
-      }
-    }
-    return "";
-  };
-
   return (
     <Stack
       spacing={2}
@@ -196,14 +182,20 @@ function DirectMessages() {
         overflow: "hidden",
       }}
     >
+      <ReactionModal
+        task={task}
+        handleClose={() => setReactionModalOpen(false)}
+        open={reactionModalOpen}
+        handleReactionDelete={deleteReaction}
+      />
       <AttachmentModal
-        modify={modify}
+        task={task}
         onDeleteAttachment={deleteAttachment}
         handleClose={() => setAttachmentModalOpen(false)}
         open={attachmentModalOpen}
       />
       <EmbedModal
-        modify={modify}
+        task={task}
         handleClose={() => setEmbedModalOpen(false)}
         open={embedModalOpen}
       />
@@ -361,8 +353,8 @@ function DirectMessages() {
                 flexDirection: "column",
               }}
             >
-              <CircularProgress />
-              <Typography variant="caption">{getProgressText()}</Typography>
+              <LinearProgress sx={{ width: "100%", m: 1 }} />
+              <Typography variant="caption">{statusText}</Typography>
             </Box>
           </Paper>
         )}

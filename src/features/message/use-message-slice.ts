@@ -9,10 +9,6 @@ import {
   setOrder as setOrderAction,
   setMessages as setMessagesAction,
   setFilteredMessages as setFilteredMessagesAction,
-  setLookupUserId as setLookupUserIdAction,
-  setFetchProgress as setFetchProgressAction,
-  resetFetchProgress as resetFetchProgressAction,
-  setTotalSearchMessages as setTotalSearchMessagesAction,
   resetFilters as resetFiltersAction,
   resetAdvancedFilters as resetAdvancedFiltersAction,
   updateFilters as updateFiltersAction,
@@ -24,9 +20,14 @@ import {
   deleteMessages as deleteMessagesAction,
   getMessageData as getMessageDataAction,
   resetMessageData as resetMessageDataAction,
+  deleteReaction as deleteReactionAction,
 } from "./message-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { DeleteConfiguration, FetchProgress, Filter } from "./message-types";
+import {
+  DeleteConfiguration,
+  Filter,
+  MessageSearchOptions,
+} from "./message-types";
 import { HasType } from "../../enum/has-type";
 import { SortDirection } from "../../enum/sort-direction";
 import Message from "../../classes/message";
@@ -47,12 +48,6 @@ const useMessageSlice = () => {
   const useFilters = (): Filter[] =>
     useAppSelector((state: RootState) => state.message.filters);
 
-  const useFetchProgress = (): FetchProgress =>
-    useAppSelector((state: RootState) => state.message.fetchProgress);
-
-  const useLookupUserId = (): Snowflake | Maybe =>
-    useAppSelector((state: RootState) => state.message.lookupUserId);
-
   const useIsLoading = (): boolean | Maybe =>
     useAppSelector((state: RootState) => state.message.isLoading);
 
@@ -68,9 +63,6 @@ const useMessageSlice = () => {
   const useSearchAfterDate = (): Date | Maybe =>
     useAppSelector((state: RootState) => state.message.searchAfterDate);
 
-  const useTotalSearchMessages = (): number =>
-    useAppSelector((state: RootState) => state.message.totalSearchMessages);
-
   const useSearchMessageContent = (): string | Maybe =>
     useAppSelector((state: RootState) => state.message.searchMessageContent);
 
@@ -82,14 +74,11 @@ const useMessageSlice = () => {
     selectedMessages: useSelectedMessages,
     filteredMessages: useFilteredMessages,
     filters: useFilters,
-    fetchProgress: useFetchProgress,
-    lookupUserId: useLookupUserId,
     isLoading: useIsLoading,
     order: useOrder,
     orderBy: useOrderBy,
     searchBeforeDate: useSearchBeforeDate,
     searchAfterDate: useSearchAfterDate,
-    totalSearchMessages: useTotalSearchMessages,
     searchMessageContent: useSearchMessageContent,
     selectedHasTypes: useSelectedHasTypes,
   };
@@ -133,22 +122,6 @@ const useMessageSlice = () => {
     dispatch(setFilteredMessagesAction(messages));
   };
 
-  const setLookupUserId = (userId: Snowflake | Maybe) => {
-    dispatch(setLookupUserIdAction(userId));
-  };
-
-  const setFetchProgress = (progress: Partial<FetchProgress>) => {
-    dispatch(setFetchProgressAction(progress));
-  };
-
-  const resetFetchProgress = () => {
-    dispatch(resetFetchProgressAction());
-  };
-
-  const setTotalSearchMessages = (value: number) => {
-    dispatch(setTotalSearchMessagesAction(value));
-  };
-
   const resetFilters = () => {
     dispatch(resetFiltersAction());
   };
@@ -181,6 +154,14 @@ const useMessageSlice = () => {
     dispatch(deleteMessageAction(message));
   };
 
+  const deleteReaction = (
+    channelId: Snowflake,
+    messageId: Snowflake,
+    emoji: string
+  ) => {
+    dispatch(deleteReactionAction(channelId, messageId, emoji));
+  };
+
   const deleteMessages = (
     messages: Message[],
     deleteConfig?: DeleteConfiguration
@@ -191,9 +172,9 @@ const useMessageSlice = () => {
   const getMessageData = (
     guildId: string | Maybe,
     channelId: string | Maybe,
-    preFilterUserId?: string | Maybe
+    options: Partial<MessageSearchOptions> = {}
   ) => {
-    return dispatch(getMessageDataAction(guildId, channelId, preFilterUserId));
+    return dispatch(getMessageDataAction(guildId, channelId, options));
   };
 
   const resetMessageData = () => {
@@ -211,10 +192,6 @@ const useMessageSlice = () => {
     setOrder,
     setMessages,
     setFilteredMessages,
-    setLookupUserId,
-    setFetchProgress,
-    resetFetchProgress,
-    setTotalSearchMessages,
     resetFilters,
     resetAdvancedFilters,
     updateFilters,
@@ -226,6 +203,7 @@ const useMessageSlice = () => {
     deleteMessages,
     getMessageData,
     resetMessageData,
+    deleteReaction,
   };
 };
 

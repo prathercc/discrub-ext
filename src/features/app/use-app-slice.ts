@@ -4,13 +4,14 @@ import {
   setDiscrubCancelled as setDiscrubCancelledAction,
   setIsModifying as setIsModifyingAction,
   setModifyEntity as setModifyEntityAction,
-  setModifyStatusText as setModifyStatusTextAction,
-  resetModifyStatusText as resetModifyStatusTextAction,
+  setStatus as setStatusAction,
+  resetStatus as resetStatusAction,
   resetModify as resetModifyAction,
   checkDiscrubPaused as checkDiscrubPausedAction,
   setTimeoutMessage as setTimeoutMessageAction,
+  setSettings as setSettingsAction,
 } from "./app-slice";
-import { Modify } from "./app-types";
+import { AppSettings, AppTask } from "./app-types";
 import Message from "../../classes/message";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
@@ -23,13 +24,17 @@ const useAppSlice = () => {
   const useDiscrubPaused = (): boolean =>
     useAppSelector((state: RootState) => state.app.discrubPaused);
 
-  const useModify = (): Modify =>
-    useAppSelector((state: RootState) => state.app.modify);
+  const useTask = (): AppTask =>
+    useAppSelector((state: RootState) => state.app.task);
+
+  const useSettings = (): AppSettings =>
+    useAppSelector((state: RootState) => state.app.settings);
 
   const state = {
     discrubCancelled: useDiscrubCancelled,
     discrubPaused: useDiscrubPaused,
-    modify: useModify,
+    task: useTask,
+    settings: useSettings,
   };
 
   const setDiscrubPaused = (value: boolean): void => {
@@ -48,15 +53,19 @@ const useAppSlice = () => {
     dispatch(setModifyEntityAction(value));
   };
 
-  const setModifyStatusText = (value: string): void => {
-    dispatch(setModifyStatusTextAction(value));
+  const setStatus = (value: string): void => {
+    dispatch(setStatusAction(value));
   };
 
-  const resetModifyStatusText = (): void => {
-    dispatch(resetModifyStatusTextAction());
+  const resetStatus = (): void => {
+    dispatch(resetStatusAction());
   };
   const resetModify = (): void => {
     dispatch(resetModifyAction());
+  };
+
+  const setSettings = (settings: AppSettings): void => {
+    dispatch(setSettingsAction(settings));
   };
 
   const checkDiscrubPaused = async (): Promise<void> => {
@@ -82,11 +91,12 @@ const useAppSlice = () => {
     setDiscrubCancelled,
     setIsModifying,
     setModifyEntity,
-    setModifyStatusText,
-    resetModifyStatusText,
+    setStatus,
+    resetStatus,
     resetModify,
     checkDiscrubPaused,
     setTimeoutMessage,
+    setSettings,
   };
 };
 

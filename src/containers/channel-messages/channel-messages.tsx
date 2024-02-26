@@ -11,12 +11,12 @@ import {
   Stack,
   Typography,
   Paper,
-  CircularProgress,
   TextField,
   Button,
   Autocomplete,
   IconButton,
   Collapse,
+  LinearProgress,
 } from "@mui/material";
 import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
@@ -43,12 +43,9 @@ import TableMessage from "../../components/table-message";
 import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
+import ReactionModal from "../../components/reaction-modal";
 
-type ChannelMessagesProps = {
-  closeAnnouncement: () => void;
-};
-
-function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
+function ChannelMessages() {
   const { state: userState } = useUserSlice();
   const userLoading = userState.isLoading();
   const token = userState.token();
@@ -68,30 +65,30 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     setOrder,
     deleteAttachment,
     setSelected,
+    deleteReaction,
   } = useMessageSlice();
   const messages = messageState.messages();
   const messagesLoading = messageState.isLoading();
-  const fetchProgress = messageState.fetchProgress();
-  const lookupUserId = messageState.lookupUserId();
   const searchBeforeDate = messageState.searchBeforeDate();
   const searchAfterDate = messageState.searchAfterDate();
   const searchMessageContent = messageState.searchMessageContent();
   const selectedHasTypes = messageState.selectedHasTypes();
-  const totalSearchMessages = messageState.totalSearchMessages();
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
   const selectedMessages = messageState.selectedMessages();
 
   const { state: appState, setModifyEntity } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
-  const modify = appState.modify();
+  const task = appState.task();
+  const settings = appState.settings();
 
-  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
+  const { statusText } = task || {};
 
   const [searchTouched, setSearchTouched] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
+  const [reactionModalOpen, setReactionModalOpen] = useState(false);
 
   const columns: TableColumn<Message>[] = [
     {
@@ -117,10 +114,12 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     data: m,
     renderRow: (row) => (
       <TableMessage
+        settings={settings}
         row={row}
         setModifyEntity={setModifyEntity}
         openAttachmentModal={() => setAttachmentModalOpen(true)}
         openEmbedModal={() => setEmbedModalOpen(true)}
+        openReactionModal={() => setReactionModalOpen(true)}
       />
     ),
   }));
@@ -134,7 +133,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
   };
 
   const fetchChannelData = () => {
-    getMessageData(selectedGuild?.id, selectedChannel?.id, preFilterUserId);
+    getMessageData(selectedGuild?.id, selectedChannel?.id, { preFilterUserId });
     setSearchTouched(true);
     setExpanded(false);
   };
@@ -199,23 +198,6 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  const getProgressText = (): string => {
-    if (parsingThreads) {
-      return `Fetched ${threadCount} Threads`;
-    } else if (!parsingThreads) {
-      if (lookupUserId) {
-        return `User Lookup ${lookupUserId}`;
-      } else if (messageCount > 0) {
-        return `Fetched ${messageCount}${
-          totalSearchMessages ? ` of ${totalSearchMessages}` : ""
-        } Messages`;
-      } else {
-        return "Fetching Data";
-      }
-    }
-    return "";
-  };
-
   return (
     <Stack
       spacing={2}
@@ -226,14 +208,20 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
         overflow: "hidden",
       }}
     >
+      <ReactionModal
+        task={task}
+        handleClose={() => setReactionModalOpen(false)}
+        open={reactionModalOpen}
+        handleReactionDelete={deleteReaction}
+      />
       <AttachmentModal
-        modify={modify}
+        task={task}
         onDeleteAttachment={deleteAttachment}
         handleClose={() => setAttachmentModalOpen(false)}
         open={attachmentModalOpen}
       />
       <EmbedModal
-        modify={modify}
+        task={task}
         handleClose={() => setEmbedModalOpen(false)}
         open={embedModalOpen}
       />
@@ -294,7 +282,6 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                           fullWidth
                           size="small"
                           label="Server"
-                          onFocus={closeAnnouncement}
                           sx={{ width: "330px !important" }}
                           InputProps={{
                             ...params.InputProps,
@@ -363,7 +350,7 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                     />
                   </Stack>
 
-                  <AdvancedFiltering closeAnnouncement={closeAnnouncement} />
+                  <AdvancedFiltering />
                 </Stack>
               </Collapse>
               <Stack
@@ -434,8 +421,8 @@ function ChannelMessages({ closeAnnouncement }: ChannelMessagesProps) {
                 flexDirection: "column",
               }}
             >
-              <CircularProgress />
-              <Typography variant="caption">{getProgressText()}</Typography>
+              <LinearProgress sx={{ width: "100%", m: 1 }} />
+              <Typography variant="caption">{statusText}</Typography>
             </Box>
           </Paper>
         )}

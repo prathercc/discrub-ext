@@ -2,14 +2,20 @@ import { isAttachment, isGuild, isRole } from "./app/guards";
 import Attachment from "./classes/attachment";
 import Channel from "./classes/channel";
 import Embed from "./classes/embed";
+import { Emoji } from "./classes/emoji";
 import Guild from "./classes/guild";
 import Message from "./classes/message";
 import Role from "./classes/role";
-import { User } from "./classes/user";
 import { ChannelType } from "./enum/channel-type";
 import { EmbedType } from "./enum/embed-type";
 import { MessageRegex } from "./enum/message-regex";
 import { v4 as uuidv4 } from "uuid";
+import {
+  ExportEmojiMap,
+  ExportReaction,
+  ExportUserMap,
+} from "./features/export/export-types";
+import { ReactingUser } from "./components/reaction-list-item-button";
 
 /**
  *
@@ -133,9 +139,9 @@ export const formatUserData = ({
   }`;
 };
 
-export const getAvatarUrl = (user: User) => {
-  if (user.avatar) {
-    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}`;
+export const getAvatarUrl = (userId: Snowflake, avatar?: string | Maybe) => {
+  if (avatar) {
+    return `https://cdn.discordapp.com/avatars/${userId}/${avatar}`;
   } else {
     return "resources/media/default_avatar.png";
   }
@@ -178,7 +184,7 @@ export const getIconUrl = (entity: Role | Channel | Guild) => {
     }
 
     if (entity.type === ChannelType.DM && entity.recipients?.[0]?.avatar) {
-      return `https://cdn.discordapp.com/avatars/${entity.recipients[0].id}/${entity.recipients[0].avatar}`;
+      return getAvatarUrl(entity.recipients[0].id, entity.recipients[0].avatar);
     }
 
     return "resources/media/default_dm_icon.png";
@@ -198,9 +204,20 @@ export const attachmentIsImage = (attachment: Attachment): boolean => {
   );
 };
 
+export const attachmentIsAudio = (attachment: Attachment): boolean => {
+  return Boolean(
+    attachment.content_type?.includes("audio") ||
+      ["ogg"].some((sit) => attachment.filename.includes(sit))
+  );
+};
+
 export const entityContainsMedia = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
-    return attachmentIsVideo(entity) || attachmentIsImage(entity);
+    return (
+      attachmentIsVideo(entity) ||
+      attachmentIsImage(entity) ||
+      attachmentIsAudio(entity)
+    );
   } else {
     return [EmbedType.GIFV, EmbedType.IMAGE, EmbedType.RICH].some(
       (type) => type === entity.type
@@ -300,4 +317,55 @@ const _getApplicableRoles = (roleIds: string[] = [], guild: Guild): Role[] => {
       (role) => roleIds.some((id) => id === role.id) && Boolean(role.position)
     ) || []
   );
+};
+
+export const getEncodedEmoji = (emoji: Emoji): string | null => {
+  const { name, id } = emoji;
+  const emojiString = id ? `${name}:${id}` : name;
+  return emojiString || null;
+};
+
+export const isGuildForum = (channel: Channel | Maybe) => {
+  return !!(
+    channel &&
+    [ChannelType.GUILD_FORUM, ChannelType.GUILD_MEDIA].some(
+      (type) => type === channel.type
+    )
+  );
+};
+
+export const resolveEmojiUrl = (
+  emojiMap: ExportEmojiMap | null,
+  id: Snowflake | Maybe
+) => {
+  return {
+    remote: `https://cdn.discordapp.com/emojis/${id}`,
+    local: id && emojiMap && emojiMap[id] ? `../${emojiMap[id]}` : null,
+  };
+};
+
+export const stringToBool = (str: string): boolean =>
+  str.toLowerCase() === "true";
+
+export const getReactingUsers = (
+  exportReactions: ExportReaction[],
+  userMap: ExportUserMap,
+  selectedGuild: Guild | Maybe
+): ReactingUser[] => {
+  return exportReactions
+    .filter(({ id: userId }) => userMap[userId])
+    .map(({ id: userId, burst }) => {
+      const mapping = userMap[userId];
+      const guildNickName = selectedGuild
+        ? mapping?.guilds?.[selectedGuild.id]?.nick
+        : null;
+
+      return {
+        displayName: guildNickName || mapping.displayName,
+        userName: mapping.userName,
+        id: userId,
+        avatar: mapping.avatar,
+        burst,
+      };
+    });
 };

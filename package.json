@@ -1,7 +1,7 @@
 {
   "name": "discrub-ext",
   "private": true,
-  "version": "1.11.7",
+  "version": "1.11.8",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -28,6 +28,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^9.0.4",
     "react-to-print": "^2.14.15",
+    "react-window": "^1.8.10",
     "streamsaver": "^2.0.6",
     "uuid": "^9.0.1"
   },
@@ -37,6 +38,7 @@
     "@types/papaparse": "^5.3.14",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.17",
+    "@types/react-window": "^1.8.8",
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",

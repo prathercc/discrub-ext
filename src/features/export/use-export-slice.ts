@@ -5,6 +5,7 @@ import {
   setExportAvatarMap as setExportAvatarMapAction,
   setExportMediaMap as setExportMediaMapAction,
   setExportRoleMap as setExportRoleMapAction,
+  setExportReactionMap as setExportReactionMapAction,
   resetExportMaps as resetExportMapsAction,
   setSortOverride as setSortOverrideAction,
   setMessagesPerPage as setMessagesPerPageAction,
@@ -15,7 +16,6 @@ import {
   setDownloadImages as setDownloadImagesAction,
   setArtistMode as setArtistModeAction,
   setName as setNameAction,
-  setStatusText as setStatusTextAction,
   resetExportSettings as resetExportSettingsAction,
   getSpecialFormatting as getSpecialFormattingAction,
   getFormattedInnerHtml as getFormattedInnerHtmlAction,
@@ -27,6 +27,7 @@ import {
   ExportAvatarMap,
   ExportEmojiMap,
   ExportMediaMap,
+  ExportReactionMap,
   ExportRoleMap,
   ExportUserMap,
   FormattedInnerHtmlProps,
@@ -56,9 +57,6 @@ const useExportSlice = () => {
   const useName = (): string =>
     useAppSelector((state: RootState) => state.export.name);
 
-  const useStatusText = (): string =>
-    useAppSelector((state: RootState) => state.export.statusText);
-
   const useIsGenerating = (): boolean =>
     useAppSelector((state: RootState) => state.export.isGenerating);
 
@@ -86,13 +84,15 @@ const useExportSlice = () => {
   const useRoleMap = (): ExportRoleMap =>
     useAppSelector((state: RootState) => state.export.exportMaps.roleMap);
 
+  const useReactionMap = (): ExportReactionMap =>
+    useAppSelector((state: RootState) => state.export.exportMaps.reactionMap);
+
   const state = {
     isExporting: useIsExporting,
     downloadImages: useDownloadImages,
     previewImages: usePreviewImages,
     artistMode: useArtistMode,
     name: useName,
-    statusText: useStatusText,
     isGenerating: useIsGenerating,
     currentPage: useCurrentPage,
     messagesPerPage: useMessagesPerPage,
@@ -102,6 +102,7 @@ const useExportSlice = () => {
     avatarMap: useAvatarMap,
     mediaMap: useMediaMap,
     roleMap: useRoleMap,
+    reactionMap: useReactionMap,
   };
 
   const setExportUserMap = (map: ExportUserMap): void => {
@@ -122,6 +123,10 @@ const useExportSlice = () => {
 
   const setExportRoleMap = (map: ExportRoleMap): void => {
     dispatch(setExportRoleMapAction(map));
+  };
+
+  const setExportReactionMap = (map: ExportReactionMap): void => {
+    dispatch(setExportReactionMapAction(map));
   };
 
   const resetExportMaps = (maps: string[]): void => {
@@ -162,10 +167,6 @@ const useExportSlice = () => {
 
   const setName = (value: string): void => {
     dispatch(setNameAction(value));
-  };
-
-  const setStatusText = (value: string): void => {
-    dispatch(setStatusTextAction(value));
   };
 
   const resetExportSettings = (): void => {
@@ -211,6 +212,7 @@ const useExportSlice = () => {
     setExportAvatarMap,
     setExportMediaMap,
     setExportRoleMap,
+    setExportReactionMap,
     resetExportMaps,
     setSortOverride,
     setMessagesPerPage,
@@ -221,7 +223,6 @@ const useExportSlice = () => {
     setDownloadImages,
     setArtistMode,
     setName,
-    setStatusText,
     resetExportSettings,
     getSpecialFormatting,
     getFormattedInnerHtml,

@@ -10,23 +10,13 @@ export type MessageState = {
   selectedMessages: Snowflake[]; // Array of id
   filteredMessages: Message[]; // Message objects
   filters: Filter[]; // Array of object filters
-  fetchProgress: FetchProgress;
-  lookupUserId: Snowflake | Maybe; // The userId being looked up (during message fetch process)
   isLoading: boolean | Maybe;
   order: SortDirection;
   orderBy: keyof Message;
   searchBeforeDate: Date | Maybe;
   searchAfterDate: Date | Maybe;
-  totalSearchMessages: number;
   searchMessageContent: string | Maybe;
   selectedHasTypes: HasType[];
-};
-
-export type FetchProgress = {
-  messageCount: number;
-  channelId: Snowflake | Maybe;
-  threadCount: number;
-  parsingThreads: boolean;
 };
 
 export type Filter =
@@ -65,9 +55,14 @@ export type MessageData = {
 };
 
 export type SearchMessageProps = {
-  preFilterUserId?: string | Maybe;
-  searchAfterDate?: Date | Maybe;
-  searchBeforeDate?: Date | Maybe;
-  searchMessageContent?: string | Maybe;
-  selectedHasTypes?: string[];
+  preFilterUserId: string | Maybe;
+  searchAfterDate: Date | Maybe;
+  searchBeforeDate: Date | Maybe;
+  searchMessageContent: string | Maybe;
+  selectedHasTypes: string[];
+};
+
+export type MessageSearchOptions = {
+  preFilterUserId: string | Maybe;
+  excludeReactions: boolean | Maybe;
 };

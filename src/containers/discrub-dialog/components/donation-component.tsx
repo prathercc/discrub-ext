@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import { Avatar, Stack, Typography, IconButton, useTheme } from "@mui/material";
+import {
+  Stack,
+  useTheme,
+  List,
+  Box,
+  Icon,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import { Donation, fetchDonationData } from "../../../services/github-service";
-import { differenceInDays, parseISO } from "date-fns";
-import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
-import Tooltip from "../../../common-components/tooltip/tooltip";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DonationListButton from "./donation-list-button";
 
-function DonationComponent({
-  closeAnnouncement,
-}: {
-  closeAnnouncement: () => void;
-}) {
-  const theme = useTheme();
+function DonationComponent() {
+  const { palette } = useTheme();
   const [donations, setDonations] = useState<Donation[]>([]);
-  const [startIndex, setStartIndex] = useState(0);
   useEffect(() => {
     const getDonationData = async () => {
       const data = await fetchDonationData();
@@ -29,105 +27,76 @@ function DonationComponent({
       spacing={2}
       sx={{
         position: "fixed",
-        bottom: "2px",
-        right: "27px",
-        width: "1200px",
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: theme.spacing(1),
+        bottom: "53px",
+        left: "55px",
+        width: "200px",
+        height: "611px",
+        backgroundColor: palette.background.default,
+        border: `1px solid ${palette.secondary.dark}`,
       }}
     >
       <Box
         sx={{
-          position: "fixed",
-          bottom: "46px",
-          right: "221px",
+          height: "100%",
+          overflowY: "scroll",
+          bgcolor: "background.paper",
+          color: "text.primary",
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
           alignItems: "center",
-          width: "803px",
-          justifyContent: "space-between",
+          margin: "6px !important",
+          padding: "3px",
         }}
       >
-        <IconButton
-          disabled={startIndex === 0}
-          onClick={() => {
-            if (startIndex > 0) {
-              setStartIndex(startIndex - 3);
-            }
+        <Stack
+          sx={{
+            flexDirection: "row",
+            gap: "15px",
+            width: "100%",
+            borderRadius: "5px",
+            backgroundColor: "primary.dark",
+            justifyContent: "center",
+            alignItems: "center",
+            boxShadow: "rgba(232, 217, 217, 0.75) 2px 2px 5px -2px",
           }}
-          color="primary"
         >
-          <ArrowBackIcon />
-        </IconButton>
-        <IconButton
-          disabled={
-            startIndex === donations.length - 1 || !donations[startIndex + 3]
-          }
-          onClick={() => {
-            if (startIndex < donations.length - 1) {
-              setStartIndex(startIndex + 3);
-            }
-          }}
-          color="primary"
-        >
-          <ArrowForwardIcon />
-        </IconButton>
+          <Icon>
+            <img
+              style={{ display: "flex", height: "inherit", width: "inherit" }}
+              src="resources/media/kofi.svg"
+              alt="kofi"
+            />
+          </Icon>
+          <Typography variant="body1">Ko-Fi Feed</Typography>
+          <Icon>
+            <img
+              style={{ display: "flex", height: "inherit", width: "inherit" }}
+              src="resources/media/kofi.svg"
+              alt="kofi"
+            />
+          </Icon>
+        </Stack>
+
+        {donations.length ? (
+          <List>
+            {donations.map((donation) => (
+              <DonationListButton donation={donation} />
+            ))}
+          </List>
+        ) : (
+          <>
+            {Array.from(Array(9)).map((_) => (
+              <Skeleton
+                animation="wave"
+                sx={{ mt: 1 }}
+                variant="rounded"
+                height="90%"
+                width="90%"
+              />
+            ))}
+          </>
+        )}
       </Box>
-      {donations.slice(startIndex, startIndex + 3).map((donation) => {
-        const daysSince = differenceInDays(new Date(), parseISO(donation.date));
-        return (
-          <Tooltip title={donation.name} description={donation.message}>
-            <Box
-              onMouseOver={closeAnnouncement}
-              sx={{
-                border: `1px solid ${theme.palette.background.default}`,
-                backgroundColor: theme.palette.primary.dark,
-                padding: "0px 5px 0px 5px",
-                borderRadius: "10px",
-                boxShadow: "4px 2px 5px 1px rgb(0 0 0 / 41%)",
-              }}
-            >
-              <Stack
-                direction="column"
-                justifyContent="center"
-                alignItems="flex-start"
-                spacing={2}
-              >
-                <Stack
-                  direction="row"
-                  justifyContent="center"
-                  alignItems="center"
-                  spacing={1}
-                >
-                  <Avatar
-                    sx={{
-                      backgroundColor: "transparent",
-                      color: "text.primary",
-                    }}
-                  >
-                    <LocalCafeOutlinedIcon />
-                  </Avatar>
-                  <Typography
-                    color="text.primary"
-                    variant="body2"
-                    sx={{ userSelect: "none" }}
-                  >
-                    <strong>{donation.name}</strong> donated{" "}
-                    <strong>${donation.dollars}</strong> ·{" "}
-                    <i>
-                      {daysSince > 0
-                        ? `${daysSince} Day${daysSince === 1 ? "" : "s"} Ago`
-                        : "Today"}
-                    </i>
-                  </Typography>
-                </Stack>
-              </Stack>
-            </Box>
-          </Tooltip>
-        );
-      })}
     </Stack>
   );
 }

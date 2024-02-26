@@ -6,18 +6,18 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import WebhookEmbedMock from "./webhook-embed-mock";
-import { Modify } from "../features/app/app-types";
+import { AppTask } from "../features/app/app-types";
 import { getRichEmbeds } from "../utils";
 import { isMessage } from "../app/guards";
 
 type EmbedModalProps = {
-  modify: Modify;
+  task: AppTask;
   open: boolean;
   handleClose: () => void;
 };
 
-const EmbedModal = ({ modify, open, handleClose }: EmbedModalProps) => {
-  const { entity } = modify || {};
+const EmbedModal = ({ task, open, handleClose }: EmbedModalProps) => {
+  const { entity } = task || {};
 
   return (
     <Dialog hideBackdrop fullWidth open={open} onClose={handleClose}>

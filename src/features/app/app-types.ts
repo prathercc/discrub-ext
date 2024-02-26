@@ -7,14 +7,16 @@ import Message from "../../classes/message";
 import { Reaction } from "../../classes/reaction";
 import Role from "../../classes/role";
 import { User } from "../../classes/user";
+import { DiscrubSetting } from "../../enum/discrub-setting";
 
 export type AppState = {
   discrubPaused: boolean;
   discrubCancelled: boolean;
-  modify: Modify;
+  task: AppTask;
+  settings: AppSettings;
 };
 
-export type Modify = {
+export type AppTask = {
   active: boolean;
   entity:
     | (Message & { _index?: number; _total?: number })
@@ -34,3 +36,5 @@ export type Timeout = {
   message: string;
   timeout: number;
 };
+
+export type AppSettings = Record<DiscrubSetting, string>;

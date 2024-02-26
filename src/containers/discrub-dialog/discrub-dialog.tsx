@@ -2,21 +2,7 @@ import { useState, useEffect } from "react";
 import MenuBar from "./components/menu-bar";
 import About from "./components/about";
 import CloseWindowButton from "./components/close-window-button";
-import {
-  Alert,
-  AlertTitle,
-  Collapse,
-  IconButton,
-  Stack,
-  Typography,
-  Box,
-} from "@mui/material";
-import Tooltip from "../../common-components/tooltip/tooltip";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import {
-  Announcement,
-  fetchAnnouncementData,
-} from "../../services/github-service";
+import { Stack, Typography, Box } from "@mui/material";
 import DonationComponent from "./components/donation-component";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useGuildSlice } from "../../features/guild/use-guild-slice";
@@ -28,16 +14,13 @@ import { useTheme } from "@mui/material";
 import Tags from "../tags/tags";
 import ChannelMessages from "../channel-messages/channel-messages";
 import DirectMessages from "../direct-messages/direct-messages";
+import Settings from "./components/settings";
+import { initializeSettings } from "../../services/chrome-service";
+import AnnouncementComponent from "./components/announcement-component";
 
 function DiscrubDialog() {
-  const palette = useTheme().palette;
+  const { palette } = useTheme();
   const [menuIndex, setMenuIndex] = useState(0);
-  const [alertOpen, setAlertOpen] = useState(true);
-  const [announcement, setAnnouncement] = useState<Announcement | Maybe>(null);
-
-  const closeAnnouncement = () => {
-    setAlertOpen(false);
-  };
 
   const { resetAdvancedFilters, resetMessageData, resetFilters } =
     useMessageSlice();
@@ -45,7 +28,8 @@ function DiscrubDialog() {
   const { resetGuild } = useGuildSlice();
   const { resetDm } = useDmSlice();
   const { resetChannel } = useChannelSlice();
-  const { setDiscrubPaused } = useAppSlice();
+  const { setDiscrubPaused, setSettings, state: appState } = useAppSlice();
+  const settings = appState.settings();
   const { getUserData } = useUserSlice();
 
   const handleChangeMenuIndex = async (index: number) => {
@@ -57,16 +41,15 @@ function DiscrubDialog() {
     resetFilters();
     setDiscrubPaused(false);
     setMenuIndex(index);
-    closeAnnouncement();
   };
 
   useEffect(() => {
-    const getAnnouncementData = async () => {
-      const data = await fetchAnnouncementData();
-      setAnnouncement(data);
+    const init = async () => {
+      const settings = await initializeSettings();
+      setSettings(settings);
     };
-    getAnnouncementData();
     getUserData();
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -87,47 +70,15 @@ function DiscrubDialog() {
         m: 0,
       }}
     >
-      <DonationComponent closeAnnouncement={closeAnnouncement} />
+      <DonationComponent />
+      <AnnouncementComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
-      {menuIndex === 0 && (
-        <ChannelMessages closeAnnouncement={() => setAlertOpen(false)} />
-      )}
+      {menuIndex === 0 && <ChannelMessages />}
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <Tags />}
       {menuIndex === 3 && <About />}
-      {announcement && (
-        <Box
-          sx={{
-            position: "fixed",
-            bottom: "54px",
-            left: "268px",
-            width: "714px",
-          }}
-        >
-          {!alertOpen && (
-            <Stack direction="row" justifyContent="center" alignItems="center">
-              <Tooltip arrow title="Show Announcement">
-                <IconButton
-                  onClick={() => setAlertOpen(true)}
-                  color="secondary"
-                >
-                  <ExpandLessIcon />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          )}
-          <Collapse in={alertOpen}>
-            <Alert variant="filled" severity="info" onClose={closeAnnouncement}>
-              <AlertTitle>
-                <strong>
-                  {announcement.title}
-                  {announcement.date && ` - ${announcement.date}`}
-                </strong>
-              </AlertTitle>
-              {announcement.message}
-            </Alert>
-          </Collapse>
-        </Box>
+      {menuIndex === 4 && (
+        <Settings settings={settings} onChangeSettings={setSettings} />
       )}
 
       <Box sx={{ position: "fixed", top: "23px", right: "310px", opacity: 1 }}>
@@ -138,7 +89,7 @@ function DiscrubDialog() {
           spacing={1}
         >
           <Typography color="primary.main" variant="body2">
-            1.11.7
+            1.11.8
           </Typography>
         </Stack>
       </Box>

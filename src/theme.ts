@@ -75,3 +75,56 @@ export const theme: ThemeOptions = createTheme({
     },
   },
 });
+
+export const scrollbarOverrides = {
+  "&::-webkit-scrollbar": {
+    width: "5px",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "#f1f1f1",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "#888",
+  },
+};
+
+export const audioOverrides = {
+  "audio::-webkit-media-controls-panel": {
+    backgroundColor: backgroundPaper,
+    borderRadius: 0,
+  },
+  "audio::-webkit-media-controls-enclosure": {
+    backgroundColor: backgroundPaper,
+  },
+  "audio::-webkit-media-controls-mute-button": {
+    backgroundColor: secondaryMain,
+    borderRadius: "50%",
+  },
+  "audio::-webkit-media-controls-play-button ": {
+    backgroundColor: primaryMain,
+    borderRadius: "50%",
+  },
+  "audio::-webkit-media-controls-play-button:hover": {
+    backgroundColor: primaryDark,
+  },
+  "audio::-webkit-media-controls-current-time-display": {
+    color: secondaryMain,
+    textShadow: "none",
+  },
+  "audio::-webkit-media-controls-time-remaining-display": {
+    color: secondaryMain,
+    textShadow: "none",
+  },
+  "audio::-webkit-media-controls-timeline": {
+    backgroundColor: secondaryMain,
+    borderRadius: "25px",
+    marginLeft: "10px",
+    marginRight: "10px",
+  },
+  "audio::-webkit-media-controls-volume-slider ": {
+    backgroundColor: secondaryMain,
+    borderRadius: "25px",
+    paddingLeft: "8px",
+    paddingRight: "8px",
+  },
+};

@@ -11,11 +11,18 @@ import {
   getRoleNames,
   getSafeExportName,
   isDm,
+  resolveEmojiUrl,
   sortByProperty,
+  stringToBool,
   wait,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
-import { checkDiscrubPaused, setDiscrubCancelled } from "../app/app-slice";
+import {
+  checkDiscrubPaused,
+  resetStatus,
+  setDiscrubCancelled,
+  setStatus,
+} from "../app/app-slice";
 import { renderToString } from "react-dom/server";
 import { MessageRegex } from "../../enum/message-regex";
 import {
@@ -28,6 +35,7 @@ import {
   ExportJsonProps,
   ExportMap,
   ExportMediaMap,
+  ExportReactionMap,
   ExportRoleMap,
   ExportState,
   ExportUserMap,
@@ -56,6 +64,7 @@ const initialMaps: ExportMap = {
   avatarMap: {},
   mediaMap: {},
   roleMap: {},
+  reactionMap: {},
 };
 
 const initialState: ExportState = {
@@ -64,7 +73,6 @@ const initialState: ExportState = {
   previewImages: false,
   artistMode: false,
   name: "",
-  statusText: "",
   isGenerating: false,
   currentPage: 1,
   messagesPerPage: 1000,
@@ -106,6 +114,12 @@ export const exportSlice = createSlice({
     ): void => {
       state.exportMaps.roleMap = payload;
     },
+    setExportReactionMap: (
+      state,
+      { payload }: { payload: ExportReactionMap }
+    ): void => {
+      state.exportMaps.reactionMap = payload;
+    },
     resetExportMaps: (state, { payload }: { payload: string[] }): void => {
       if (payload.length) {
         payload.forEach((mapName) => {
@@ -124,6 +138,9 @@ export const exportSlice = createSlice({
               break;
             case "roleMap":
               state.exportMaps.roleMap = initialMaps.roleMap;
+              break;
+            case "reactionMap":
+              state.exportMaps.reactionMap = initialMaps.reactionMap;
               break;
             default:
               break;
@@ -160,9 +177,6 @@ export const exportSlice = createSlice({
     setName: (state, { payload }: { payload: string }): void => {
       state.name = payload;
     },
-    setStatusText: (state, { payload }: { payload: string }): void => {
-      state.statusText = payload;
-    },
     resetExportSettings: (state): void => {
       state.downloadImages = false;
       state.previewImages = false;
@@ -182,7 +196,6 @@ export const {
   setPreviewImages,
   setDownloadImages,
   setName,
-  setStatusText,
   resetExportSettings,
   resetExportMaps,
   setExportUserMap,
@@ -190,6 +203,7 @@ export const {
   setExportEmojiMap,
   setExportMediaMap,
   setExportRoleMap,
+  setExportReactionMap,
   setArtistMode,
 } = exportSlice.actions;
 
@@ -281,7 +295,7 @@ const _downloadAvatarFromMessage =
 
     if (!exportMaps.avatarMap[idAndAvatar]) {
       const { success, data } = await downloadFile(
-        getAvatarUrl(message.author)
+        getAvatarUrl(message.author.id, message.author.avatar)
       );
       if (success && data) {
         const fileExt = data.type.split("/")?.[1] || "webp";
@@ -399,10 +413,13 @@ const _getEmoji =
   (_, getState) => {
     const { id, name } = emojiRef;
     const { emojiMap } = getState().export.exportMaps;
-    let emojiUrl = `https://cdn.discordapp.com/emojis/${id}`;
-    if (emojiMap && emojiMap[id] && exportView) {
-      emojiUrl = `../${emojiMap[id]}`;
-    }
+
+    const { local: localPath, remote: remotePath } = resolveEmojiUrl(
+      emojiMap,
+      id
+    );
+
+    const emojiUrl = exportView && localPath ? localPath : remotePath;
 
     return (
       <img
@@ -651,6 +668,15 @@ const _downloadEmojisFromMessage =
     const { emoji: emojiReferences } = dispatch(
       getSpecialFormatting(message.content)
     );
+    const { settings } = getState().app;
+    const reactionsEnabled = stringToBool(settings.reactionsEnabled);
+    if (message.reactions && reactionsEnabled) {
+      message.reactions.forEach((r) => {
+        const { id, name } = r.emoji || {};
+        if (id && name) emojiReferences.push({ id, name, raw: "" });
+      });
+    }
+
     if (emojiReferences.length) {
       for (const { id, name } of emojiReferences) {
         const { discrubCancelled } = getState().app;
@@ -712,9 +738,8 @@ const _processMessages =
       await dispatch(_downloadAvatarFromMessage({ message, exportUtils }));
 
       if (i % 10 === 0) {
-        dispatch(
-          setStatusText(`Processing - Message ${i} of ${messages.length}`)
-        );
+        const status = `Processing - Message ${i} of ${messages.length}`;
+        dispatch(setStatus(status));
         await wait(0.1);
       }
     }
@@ -807,14 +832,7 @@ const _compressMessages =
     exportUtils,
   }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    // TODO: Combine the setStatusText and wait calls within exportSlice.
-    dispatch(
-      setStatusText(
-        `Compressing${
-          messages.length > 2000 ? " - This may take a while..." : ""
-        }`
-      )
-    );
+    dispatch(setStatus("Compressing"));
     await wait(1);
 
     const { messagesPerPage } = getState().export;
@@ -829,11 +847,10 @@ const _compressMessages =
       await dispatch(checkDiscrubPaused());
       if (discrubCancelled) break;
       if (format === ExportType.MEDIA) {
-        dispatch(setStatusText("Cleaning up..."));
+        dispatch(setStatus("Cleaning up..."));
       } else {
-        dispatch(
-          setStatusText(`Compressing - Page ${currentPage} of ${totalPages}`)
-        );
+        const status = `Compressing - Page ${currentPage} of ${totalPages}`;
+        dispatch(setStatus(status));
       }
 
       await wait(1);
@@ -919,7 +936,7 @@ export const exportMessages =
 
     await dispatch(checkDiscrubPaused());
     if (!getState().app.discrubCancelled) {
-      dispatch(setStatusText("Preparing Archive"));
+      dispatch(setStatus("Preparing Archive"));
       await exportUtils.generateZip();
     }
 
@@ -927,7 +944,7 @@ export const exportMessages =
     dispatch(setIsExporting(false));
     dispatch(setName(""));
     await exportUtils.resetZip();
-    dispatch(setStatusText(""));
+    dispatch(resetStatus());
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
     dispatch(resetExportMaps(["emojiMap", "avatarMap", "mediaMap", "roleMap"]));
@@ -944,16 +961,17 @@ export const exportChannels =
     const { selectedGuild } = getState().guild;
     const { messagesPerPage, sortOverride } = getState().export;
 
+    dispatch(setIsExporting(true));
+
     if (selectedGuild)
       await dispatch(_downloadRoles(exportUtils, selectedGuild));
     if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
 
     for (const entity of channels) {
       if (getState().app.discrubCancelled) break;
-      dispatch(setStatusText(""));
+      dispatch(resetStatus());
       const safeEntityName = getSafeExportName(entity.name || entity.id);
       const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
-      dispatch(setIsExporting(true));
       dispatch(setName(safeEntityName));
       if (!isDm(entity)) {
         dispatch(setChannel(entity.id));
@@ -962,7 +980,9 @@ export const exportChannels =
       let exportMessages: Message[] = [];
 
       const messageData = await dispatch(
-        getMessageData(selectedGuild?.id, entity.id, userId)
+        getMessageData(selectedGuild?.id, entity.id, {
+          preFilterUserId: userId,
+        })
       );
 
       if (messageData) {
@@ -1007,7 +1027,7 @@ export const exportChannels =
     }
     await dispatch(checkDiscrubPaused());
     if (!getState().app.discrubCancelled) {
-      dispatch(setStatusText("Preparing Archive"));
+      dispatch(setStatus("Preparing Archive"));
       await exportUtils.generateZip();
     }
 
@@ -1018,7 +1038,7 @@ export const exportChannels =
     dispatch(setIsExporting(false));
     dispatch(setName(""));
     await exportUtils.resetZip();
-    dispatch(setStatusText(""));
+    dispatch(resetStatus());
     dispatch(setCurrentPage(1));
     dispatch(setDiscrubCancelled(false));
     dispatch(resetExportMaps(["emojiMap", "avatarMap", "mediaMap", "roleMap"]));

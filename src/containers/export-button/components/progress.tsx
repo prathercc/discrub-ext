@@ -1,32 +1,14 @@
-import { Stack, CircularProgress, Typography } from "@mui/material";
+import { Stack, Typography, LinearProgress } from "@mui/material";
 import { useExportSlice } from "../../../features/export/use-export-slice";
-import { useMessageSlice } from "../../../features/message/use-message-slice";
+import { useAppSlice } from "../../../features/app/use-app-slice";
 
 const Progress = () => {
+  const { state: appState } = useAppSlice();
+  const task = appState.task();
+  const { statusText } = task || {};
+
   const { state: exportState } = useExportSlice();
   const name = exportState.name();
-  const statusText = exportState.statusText();
-
-  const { state: messageState } = useMessageSlice();
-  const fetchProgress = messageState.fetchProgress();
-  const lookupUserId = messageState.lookupUserId();
-  const { messageCount, threadCount, parsingThreads } = fetchProgress || {};
-
-  const getProgressText = (): string => {
-    if (parsingThreads) {
-      return `${threadCount} Threads Found`;
-    } else if (!lookupUserId) {
-      if (messageCount) {
-        return `${messageCount} Messages Found`;
-      } else {
-        return "Processing";
-      }
-    } else if (lookupUserId) {
-      return `User Lookup ${lookupUserId}`;
-    } else {
-      return "";
-    }
-  };
 
   return (
     <Stack
@@ -37,10 +19,8 @@ const Progress = () => {
       sx={{ minWidth: "300px" }}
     >
       <Typography>{name}</Typography>
-      <CircularProgress />
-      <Typography variant="caption">
-        {statusText || getProgressText()}
-      </Typography>
+      <LinearProgress sx={{ width: "100%", m: 1 }} />
+      <Typography variant="caption">{statusText}</Typography>
     </Stack>
   );
 };

@@ -138,7 +138,9 @@ const ExportButton = ({
       return (
         <DefaultContent
           isExporting={isExporting}
-          messageCount={filteredMessages.length || messages.length}
+          messageCount={
+            filters.length ? filteredMessages?.length : messages.length
+          }
         />
       );
   };

@@ -4,7 +4,6 @@ import {
   Typography,
   Button,
   Stack,
-  CircularProgress,
   Dialog,
   DialogTitle,
   DialogActions,
@@ -13,8 +12,9 @@ import {
   Box,
   IconButton,
   useTheme,
+  LinearProgress,
 } from "@mui/material";
-import { Modify } from "../features/app/app-types";
+import { AppTask } from "../features/app/app-types";
 import Attachment from "../classes/attachment";
 import { isMessage } from "../app/guards";
 import Tooltip from "../common-components/tooltip/tooltip";
@@ -22,20 +22,20 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { attachmentIsImage } from "../utils";
 
 type AttachmentModalProps = {
-  modify: Modify;
+  task: AppTask;
   open: boolean;
   handleClose: () => void;
   onDeleteAttachment: (attachment: Attachment) => void;
 };
 
 const AttachmentModal = ({
-  modify,
+  task,
   open,
   handleClose,
   onDeleteAttachment,
 }: AttachmentModalProps) => {
   const theme = useTheme();
-  const { entity, active, statusText } = modify || {};
+  const { entity, active, statusText } = task || {};
 
   const handleDeleteAttachment = async (attachment: Attachment) => {
     onDeleteAttachment(attachment);
@@ -148,7 +148,7 @@ const AttachmentModal = ({
           alignItems="center"
           spacing={2}
         >
-          {active && <CircularProgress />}
+          {active && <LinearProgress sx={{ width: "100%", m: 1 }} />}
           <Button
             disabled={active}
             variant="contained"

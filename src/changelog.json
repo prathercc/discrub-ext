@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.11.8",
+    "changes": [
+      "Include voice/audio files in exports.",
+      "Preview voice/audio in HTML exports.",
+      "Add reaction support.",
+      "Improve status text during the various tasks performed by Discrub.",
+      "Add a 'Settings' menu option where reaction retrieval can be enabled or disabled."
+    ]
+  },
+  {
     "version": "1.11.7",
     "changes": [
       "Add Channel filter for the Server Export dialog.",

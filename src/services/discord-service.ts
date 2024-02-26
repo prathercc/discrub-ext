@@ -5,6 +5,8 @@ import Guild from "../classes/guild";
 import Message from "../classes/message";
 import Role from "../classes/role";
 import { User } from "../classes/user";
+import { QueryStringParam } from "../enum/query-string-param";
+import { ReactionType } from "../enum/reaction-type";
 import { SearchMessageProps } from "../features/message/message-types";
 import { AllowedMentionObject } from "../types/allowed-mention-object";
 import { ComponentObject } from "../types/component-object";
@@ -25,7 +27,7 @@ const generateSnowflake = (date: Date = new Date()): string =>
   ((BigInt(date.valueOf()) - BigInt(1420070400000)) << BigInt(22)).toString();
 
 const withRetry = async <T = void>(
-  promise: () => Promise<Response>, // Perhaps this could be a function that returns a promise?
+  promise: () => Promise<Response>,
   isBlob: boolean = false
 ): Promise<DiscordApiResponse<T>> => {
   let apiResponse: DiscordApiResponse<T> = { success: false };
@@ -261,13 +263,14 @@ export const deleteMessage = (
 export const fetchMessageData = (
   authorization: string,
   lastId: string,
-  channelId: string
+  channelId: string,
+  queryParam: QueryStringParam = QueryStringParam.BEFORE
 ) =>
   withRetry<Message[]>(() =>
     fetch(
-      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages?limit=100${
-        lastId.length > 0 ? `&before=${lastId}` : ""
-      }`,
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages?limit=${
+        queryParam === QueryStringParam.AROUND ? "50" : "100"
+      }${lastId.length > 0 ? `&${queryParam}=${lastId}` : ""}`,
       {
         method: "GET",
         headers: {
@@ -290,7 +293,7 @@ export const fetchSearchMessageData = (
   offset: number,
   channelId: string | Maybe,
   guildId: string | Maybe,
-  searchCriteria: SearchMessageProps
+  searchCriteria: Partial<SearchMessageProps>
 ) => {
   const {
     preFilterUserId,
@@ -421,3 +424,47 @@ export const getRelationships = (authorization: string) =>
 
 export const downloadFile = (downloadUrl: string) =>
   withRetry<Blob>(() => fetch(downloadUrl), true);
+
+export const getReactions = (
+  authorization: string,
+  channelId: Snowflake,
+  messageId: Snowflake,
+  emoji: string,
+  type: ReactionType,
+  lastId?: Snowflake | null
+) =>
+  withRetry<User[]>(() =>
+    fetch(
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}?limit=100&type=${type}${
+        lastId ? `&after=${lastId}` : ""
+      }`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: authorization,
+          "user-agent": userAgent,
+        },
+      }
+    )
+  );
+
+export const deleteReaction = (
+  authorization: string,
+  channelId: Snowflake,
+  messageId: Snowflake,
+  emoji: string
+) =>
+  withRetry(() =>
+    fetch(
+      `${DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}/@me`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: authorization,
+          "user-agent": userAgent,
+        },
+      }
+    )
+  );

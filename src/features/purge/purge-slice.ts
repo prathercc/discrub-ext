@@ -60,11 +60,10 @@ export const purge =
         );
         dispatch(resetMessageData());
         await dispatch(
-          getMessageData(
-            selectedGuild?.id,
-            entity.id,
-            isDm(entity) ? currentUser.id : preFilterUserId // Discrub can only delete messages from the current user
-          )
+          getMessageData(selectedGuild?.id, entity.id, {
+            preFilterUserId: isDm(entity) ? currentUser.id : preFilterUserId,
+            excludeReactions: true,
+          })
         );
         const selectedMessages: Message[] = getState().message.messages;
         const selectedCount = selectedMessages.length;

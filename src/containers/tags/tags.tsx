@@ -4,7 +4,7 @@ import {
   Autocomplete,
   Box,
   Button,
-  CircularProgress,
+  LinearProgress,
   Menu,
   MenuItem,
   Paper,
@@ -48,12 +48,11 @@ function Tags() {
   const messagesLoading = messageState.isLoading();
   const searchBeforeDate = messageState.searchBeforeDate();
   const searchAfterDate = messageState.searchAfterDate();
-  const fetchProgress = messageState.fetchProgress();
-  const totalSearchMessages = messageState.totalSearchMessages();
-  const lookupUserId = messageState.lookupUserId();
 
   const { state: appState } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
+  const task = appState.task();
+  const { statusText } = task || {};
 
   const { state: userState } = useUserSlice();
   const token = userState.token();
@@ -65,8 +64,6 @@ function Tags() {
   // TODO: Create a tagSlice, so that we don't need to do this!
   const userMapRef = useRef<ExportUserMap | Maybe>();
   userMapRef.current = userMap;
-
-  const { messageCount } = fetchProgress || {};
 
   const [anchorEl, setAnchorEl] = useState<
     (EventTarget & HTMLButtonElement) | Maybe
@@ -139,7 +136,8 @@ function Tags() {
       setAnchorEl(null);
       let { messages } = (await getMessageData(
         selectedGuild.id,
-        selectedChannel.id
+        selectedChannel.id,
+        { excludeReactions: true }
       )) || { messages: [] };
       const mentionMap: MentionMap = {};
 
@@ -203,15 +201,6 @@ function Tags() {
 
   const handleChannelChange = async (id: Snowflake | null) => {
     changeChannel(id);
-  };
-
-  const getProgressText = () => {
-    if (lookupUserId) {
-      return `User Lookup: ${lookupUserId}`;
-    }
-    if (messageCount > 0) {
-      return `Fetched ${messageCount} of ${totalSearchMessages} Messages`;
-    }
   };
 
   useEffect(() => {
@@ -393,8 +382,8 @@ function Tags() {
               flexDirection: "column",
             }}
           >
-            <CircularProgress />
-            <Typography variant="caption">{getProgressText()}</Typography>
+            <LinearProgress sx={{ width: "100%", m: 1 }} />
+            <Typography variant="caption">{statusText}</Typography>
           </Box>
         </Paper>
       )}

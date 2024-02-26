@@ -6,8 +6,16 @@ import {
   fetchSearchMessageData,
   fetchMessageData,
   fetchGuildUser,
+  getReactions,
+  deleteReaction as delReaction,
 } from "../../services/discord-service";
-import { isDm, sortByProperty } from "../../utils";
+import {
+  getEncodedEmoji,
+  isDm,
+  isGuildForum,
+  sortByProperty,
+  stringToBool,
+} from "../../utils";
 import Message from "../../classes/message";
 import { MessageType } from "../../enum/message-type";
 import {
@@ -24,16 +32,22 @@ import {
   setIsModifying,
   setModifyEntity,
   setTimeoutMessage as notify,
+  setStatus,
+  resetStatus,
 } from "../app/app-slice";
 import { MessageRegex } from "../../enum/message-regex";
-import { setExportUserMap } from "../export/export-slice";
+import {
+  resetExportMaps,
+  setExportReactionMap,
+  setExportUserMap,
+} from "../export/export-slice";
 import { getPreFilterUsers } from "../guild/guild-slice";
 import { format, isDate, parseISO } from "date-fns";
 import {
   DeleteConfiguration,
-  FetchProgress,
   Filter,
   MessageData,
+  MessageSearchOptions,
   MessageState,
   SearchMessageProps,
 } from "./message-types";
@@ -44,9 +58,15 @@ import { FilterName } from "../../enum/filter-name";
 import Attachment from "../../classes/attachment";
 import { AppThunk } from "../../app/store";
 import { isMessage } from "../../app/guards";
-import { ExportUserMap } from "../export/export-types";
+import {
+  ExportReaction,
+  ExportReactionMap,
+  ExportUserMap,
+} from "../export/export-types";
 import Channel from "../../classes/channel";
-import { ChannelType } from "../../enum/channel-type";
+import { QueryStringParam } from "../../enum/query-string-param";
+import { Reaction } from "../../classes/reaction";
+import { ReactionType } from "../../enum/reaction-type";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -56,26 +76,16 @@ const _descendingComparator = <Message>(
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
 };
 
-const defaultFetchProgress: FetchProgress = {
-  messageCount: 0,
-  channelId: null,
-  threadCount: 0,
-  parsingThreads: false,
-};
-
 const initialState: MessageState = {
   messages: [],
   selectedMessages: [],
   filteredMessages: [],
   filters: [],
-  fetchProgress: defaultFetchProgress,
-  lookupUserId: null,
   isLoading: null,
   order: SortDirection.ASCENDING,
   orderBy: "timestamp",
   searchBeforeDate: null,
   searchAfterDate: null,
-  totalSearchMessages: 0,
   searchMessageContent: null,
   selectedHasTypes: [],
 };
@@ -138,28 +148,7 @@ export const messageSlice = createSlice({
     _resetMessageData: (state): void => {
       state.messages = [];
       state.selectedMessages = [];
-      state.lookupUserId = null;
-      state.fetchProgress = defaultFetchProgress;
-      state.totalSearchMessages = 0;
       state.isLoading = null;
-    },
-    setLookupUserId: (
-      state,
-      { payload }: { payload: Snowflake | Maybe }
-    ): void => {
-      state.lookupUserId = payload;
-    },
-    setFetchProgress: (
-      state,
-      { payload }: { payload: Partial<FetchProgress> }
-    ): void => {
-      state.fetchProgress = { ...state.fetchProgress, ...payload };
-    },
-    resetFetchProgress: (state): void => {
-      state.fetchProgress = defaultFetchProgress;
-    },
-    setTotalSearchMessages: (state, { payload }: { payload: number }): void => {
-      state.totalSearchMessages = payload;
     },
     resetFilters: (state): void => {
       state.filters = [];
@@ -450,20 +439,83 @@ export const {
   setMessages,
   setFilteredMessages,
   _resetMessageData,
-  setLookupUserId,
-  setFetchProgress,
-  resetFetchProgress,
-  setTotalSearchMessages,
   resetFilters,
   resetAdvancedFilters,
   updateFilters,
   filterMessages,
 } = messageSlice.actions;
 
-export const deleteAttachment =
-  (attachment: Attachment): AppThunk =>
+export const deleteReaction =
+  (
+    channelId: Snowflake,
+    messageId: Snowflake,
+    emoji: string
+  ): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    const message = getState().app.modify.entity;
+    const { token, currentUser } = getState().user;
+    const { reactionMap } = getState().export.exportMaps;
+    const { messages, filteredMessages } = getState().message;
+    const message = messages.find((m) => m.id === messageId);
+    const reaction = message?.reactions?.find(
+      (r) => getEncodedEmoji(r.emoji) === emoji
+    );
+    const isBurst = !!reactionMap[messageId]?.[emoji]?.find(
+      (r) => r.id === currentUser?.id
+    )?.burst;
+
+    if (token && message && reaction) {
+      dispatch(setIsModifying(true));
+      const { success } = await delReaction(token, channelId, messageId, emoji);
+      if (success) {
+        const updatedMessage = {
+          ...message,
+          reactions: message.reactions
+            ?.map((r) => {
+              if (getEncodedEmoji(r.emoji) === emoji) {
+                return {
+                  ...r,
+                  count_details: {
+                    ...r.count_details,
+                    normal: r.count_details.normal - (isBurst ? 0 : 1),
+                    burst: r.count_details.burst - (isBurst ? 1 : 0),
+                  },
+                };
+              }
+              return r;
+            })
+            ?.filter((r) => r.count_details.normal || r.count_details.burst),
+        };
+        const updatedMessages = messages.map((m) => {
+          if (m.id === messageId) {
+            return updatedMessage;
+          }
+          return m;
+        });
+        const updatedFilterMessages = filteredMessages.map((message) =>
+          message.id === updatedMessage.id ? updatedMessage : message
+        );
+        const updatedReactionMap = {
+          ...reactionMap,
+          [messageId]: {
+            ...reactionMap[messageId],
+            [emoji]: reactionMap[messageId][emoji].filter(
+              (er) => er.id !== currentUser?.id
+            ),
+          },
+        };
+        dispatch(setModifyEntity(updatedMessage));
+        dispatch(setMessages(updatedMessages));
+        dispatch(setFilteredMessages(updatedFilterMessages));
+        dispatch(setExportReactionMap(updatedReactionMap));
+      }
+      dispatch(setIsModifying(false));
+    }
+  };
+
+export const deleteAttachment =
+  (attachment: Attachment): AppThunk<Promise<void>> =>
+  async (dispatch, getState) => {
+    const message = getState().app.task.entity;
     if (isMessage(message)) {
       const shouldEdit =
         (message.content && message.content.length > 0) ||
@@ -515,7 +567,7 @@ export const updateMessage =
   (message: Message): AppThunk<Promise<boolean>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
-    const { entity: modifyMessage } = getState().app.modify;
+    const { entity: modifyMessage } = getState().app.task;
 
     if (token && isMessage(modifyMessage)) {
       const { success, data } = await editMsg(
@@ -725,13 +777,92 @@ export const deleteMessages =
 export const resetMessageData = (): AppThunk => (dispatch) => {
   dispatch(_resetMessageData());
   dispatch(resetThreads());
+  dispatch(resetExportMaps(["reactionMap"]));
+  dispatch(resetStatus());
 };
+
+const _fetchReactingUserIds =
+  (
+    message: Message,
+    encodedEmoji: string
+  ): AppThunk<Promise<ExportReaction[]>> =>
+  async (dispatch, getState) => {
+    const exportReactions: ExportReaction[] = [];
+    const { token } = getState().user;
+
+    for (const type of [ReactionType.NORMAL, ReactionType.BURST]) {
+      let reachedEnd = false;
+      let lastId = null;
+      while (!reachedEnd) {
+        if (getState().app.discrubCancelled || !token) break;
+        await dispatch(checkDiscrubPaused());
+        const { success, data } = await getReactions(
+          token,
+          message.channel_id,
+          message.id,
+          encodedEmoji,
+          type,
+          lastId
+        );
+        if (success && data && data.length) {
+          data.forEach((u) =>
+            exportReactions.push({
+              id: u.id,
+              burst: type === ReactionType.BURST,
+            })
+          );
+          lastId = data[data.length - 1].id;
+        } else {
+          reachedEnd = true;
+        }
+      }
+    }
+
+    return exportReactions;
+  };
+
+const _generateReactionMap =
+  (messages: Message[]): AppThunk<Promise<void>> =>
+  async (dispatch, getState) => {
+    const reactionMap: ExportReactionMap = {};
+    const { token } = getState().user;
+    const filteredMessages = messages.filter((m) => !!m.reactions?.length);
+    for (const [mI, message] of filteredMessages.entries()) {
+      reactionMap[message.id] = {};
+      if (getState().app.discrubCancelled) break;
+      await dispatch(checkDiscrubPaused());
+
+      if (message.reactions?.length && token) {
+        for (const [i, reaction] of message.reactions.entries()) {
+          const { emoji } = reaction;
+          const encodedEmoji = getEncodedEmoji(emoji);
+          const brackets = emoji.id ? ":" : "";
+
+          const status = `[${mI + 1}/${
+            filteredMessages.length
+          }] Reaction Lookup (${i + 1} of ${message.reactions.length}): ${
+            message.id
+          } ${brackets}${emoji.name}${brackets}`;
+          dispatch(setStatus(status));
+
+          if (getState().app.discrubCancelled || !encodedEmoji) break;
+          await dispatch(checkDiscrubPaused());
+
+          reactionMap[message.id][encodedEmoji] = await dispatch(
+            _fetchReactingUserIds(message, encodedEmoji)
+          );
+        }
+      }
+    }
+    dispatch(resetStatus());
+    dispatch(setExportReactionMap(reactionMap));
+  };
 
 export const getMessageData =
   (
     guildId: Snowflake | Maybe,
     channelId: Snowflake | Maybe,
-    preFilterUserId: Snowflake | Maybe
+    options: Partial<MessageSearchOptions> = {}
   ): AppThunk<Promise<MessageData | void>> =>
   async (dispatch, getState) => {
     dispatch(resetMessageData());
@@ -742,6 +873,7 @@ export const getMessageData =
       searchMessageContent,
       selectedHasTypes,
     } = getState().message;
+    const { settings } = getState().app;
 
     if (token) {
       dispatch(setIsLoading(true));
@@ -750,7 +882,7 @@ export const getMessageData =
       let retThreads: Channel[] = [];
 
       const criteriaExists = [
-        preFilterUserId,
+        options.preFilterUserId,
         searchBeforeDate,
         searchAfterDate,
         searchMessageContent,
@@ -759,13 +891,18 @@ export const getMessageData =
 
       if (criteriaExists) {
         ({ messages: retArr, threads: retThreads } = await dispatch(
-          _getSearchMessages(channelId, guildId, {
-            preFilterUserId,
-            searchBeforeDate,
-            searchAfterDate,
-            searchMessageContent,
-            selectedHasTypes,
-          })
+          _getSearchMessages(
+            channelId,
+            guildId,
+            {
+              preFilterUserId: options.preFilterUserId,
+              searchBeforeDate,
+              searchAfterDate,
+              searchMessageContent,
+              selectedHasTypes,
+            },
+            options
+          )
         ));
       } else if (channelId) {
         ({ messages: retArr, threads: retThreads } = await dispatch(
@@ -779,7 +916,11 @@ export const getMessageData =
       };
 
       if (!getState().app.discrubCancelled) {
-        const userMap = dispatch(_getUserMap(retArr));
+        const reactionsEnabled = stringToBool(settings.reactionsEnabled);
+        if (!options.excludeReactions && reactionsEnabled) {
+          await dispatch(_generateReactionMap(retArr));
+        }
+        const userMap = await dispatch(_getUserMap(retArr));
         await dispatch(_collectUserNames(userMap));
         if (guildId) {
           await dispatch(_collectUserGuildData(userMap, guildId));
@@ -806,11 +947,9 @@ export const getMessageData =
       dispatch(setThreads(payload.threads));
       dispatch(setMessages(sortedMessages));
       dispatch(setIsLoading(false));
-      dispatch(setLookupUserId(null));
-      dispatch(resetFetchProgress());
-      dispatch(setTotalSearchMessages(0));
+      dispatch(resetStatus());
 
-      const { active, entity } = getState().app.modify;
+      const { active, entity } = getState().app.task;
       const { isGenerating, isExporting } = getState().export;
       const purgingOrExporting = [
         active,
@@ -828,18 +967,20 @@ export const getMessageData =
     }
   };
 
-/**
- *
- * @param {Array} messages Array of Message entities
- * @returns Object mapping of the relevant Users from the messages param
- */
 const _getUserMap =
-  (messages: Message[]): AppThunk<ExportUserMap> =>
-  (_, getState) => {
-    const { userMap: existingUserMap } = getState().export.exportMaps;
-    const defaultMapping = { userName: null, displayName: null, guilds: {} };
+  (messages: Message[]): AppThunk<Promise<ExportUserMap>> =>
+  async (_, getState) => {
+    const { userMap: existingUserMap, reactionMap } =
+      getState().export.exportMaps;
+    const { settings } = getState().app;
+    const defaultMapping = {
+      userName: null,
+      displayName: null,
+      avatar: null,
+      guilds: {},
+    };
     const userMap: ExportUserMap = {};
-
+    const reactionsEnabled = stringToBool(settings.reactionsEnabled);
     messages.forEach((message) => {
       const content = message.content;
       const author = message.author;
@@ -850,43 +991,65 @@ const _getUserMap =
           ...defaultMapping,
           userName: author.username,
           displayName: author.global_name,
+          avatar: author.avatar,
         };
       }
 
       Array.from(content.matchAll(MessageRegex.USER_MENTION))?.forEach(
         ({ groups: userMentionGroups }) => {
-          const userId = userMentionGroups?.user_id;
-          if (userId && !userMap[userId]) {
-            userMap[userId] = existingUserMap[userId] || defaultMapping;
+          const mentionId = userMentionGroups?.user_id;
+          if (mentionId && !userMap[mentionId]) {
+            userMap[mentionId] = existingUserMap[mentionId] || defaultMapping;
           }
         }
       );
+
+      if (reactionsEnabled) {
+        for (const reaction of message.reactions || []) {
+          const encodedEmoji = getEncodedEmoji(reaction.emoji);
+          if (encodedEmoji) {
+            const exportReactions = reactionMap[message.id][encodedEmoji] || [];
+            exportReactions.forEach(({ id: reactingUserId }) => {
+              if (!userMap[reactingUserId])
+                userMap[reactingUserId] =
+                  existingUserMap[reactingUserId] || defaultMapping;
+            });
+          }
+        }
+      }
     });
 
     return userMap;
   };
 
 const _collectUserNames =
-  (userMap: ExportUserMap): AppThunk =>
+  (userMap: ExportUserMap): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
 
     if (token) {
-      for (const userId of Object.keys(updateMap)) {
+      const userIds = Object.keys(updateMap);
+      for (const [i, userId] of userIds.entries()) {
         if (getState().app.discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
         const mapping = existingUserMap[userId] || updateMap[userId];
         const { userName, displayName } = mapping;
+
+        const status = `Alias Lookup (${i + 1} of ${
+          userIds.length
+        }): ${userId}`;
+        dispatch(setStatus(status));
+
         if (!userName && !displayName) {
-          dispatch(setLookupUserId(userId));
           const { success, data } = await getUser(token, userId);
           if (success && data) {
             updateMap[userId] = {
               ...mapping,
               userName: data.username,
               displayName: data.global_name,
+              avatar: data.avatar,
             };
           } else {
             const errorMsg = `Unable to retrieve data from userId: ${userId}`;
@@ -894,26 +1057,32 @@ const _collectUserNames =
           }
         }
       }
-
+      dispatch(resetStatus());
       dispatch(setExportUserMap({ ...existingUserMap, ...updateMap }));
     }
   };
 
 const _collectUserGuildData =
-  (userMap: ExportUserMap, guildId: Snowflake): AppThunk =>
+  (userMap: ExportUserMap, guildId: Snowflake): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
 
     if (token) {
-      for (const userId of Object.keys(updateMap)) {
+      const userIds = Object.keys(updateMap);
+      for (const [i, userId] of userIds.entries()) {
         if (getState().app.discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
         const userMapping = existingUserMap[userId] || updateMap[userId];
         const userGuilds = userMapping.guilds;
+
+        const status = `Guild User Lookup (${i + 1} of ${
+          userIds.length
+        }): ${userId}`;
+        dispatch(setStatus(status));
+
         if (!userGuilds[guildId]) {
-          dispatch(setLookupUserId(userId));
           const { success, data } = await fetchGuildUser(
             guildId,
             userId,
@@ -946,19 +1115,69 @@ const _collectUserGuildData =
         }
       }
 
+      dispatch(resetStatus());
       dispatch(setExportUserMap({ ...existingUserMap, ...updateMap }));
     }
+  };
+
+const _resolveMessageReactions =
+  (messages: Message[]): AppThunk<Promise<Message[]>> =>
+  async (dispatch, getState) => {
+    const { token } = getState().user;
+    const trackMap: Record<Snowflake, Reaction[]> = {};
+    let retArr: Message[] = [...messages];
+
+    if (token) {
+      for (const [i, message] of messages.entries()) {
+        if (getState().app.discrubCancelled) break;
+        await dispatch(checkDiscrubPaused());
+
+        const status = `Reaction Allocation (${i + 1} of ${messages.length}): ${
+          message.id
+        }`;
+        dispatch(setStatus(status));
+
+        if (!trackMap[message.id]) {
+          const { success, data } = await fetchMessageData(
+            token,
+            message.id,
+            message.channel_id,
+            QueryStringParam.AROUND
+          );
+
+          if (success && data) {
+            data.forEach((m) => {
+              trackMap[m.id] = m.reactions || [];
+            });
+          }
+        }
+      }
+      dispatch(resetStatus());
+      retArr = messages.map((message) => ({
+        ...message,
+        reactions: trackMap[message.id],
+      }));
+    }
+
+    return retArr;
   };
 
 const _getSearchMessages =
   (
     channelId: Snowflake | Maybe,
     guildId: Snowflake | Maybe,
-    searchCriteria: SearchMessageProps
+    searchCriteria: Partial<SearchMessageProps>,
+    { excludeReactions }: Partial<MessageSearchOptions> = {}
   ): AppThunk<Promise<MessageData>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
-    const retArr: Message[] = [];
+    const { channels } = getState().channel;
+    const { dms } = getState().dm;
+    const channel =
+      channels.find((c) => c.id === channelId) ||
+      dms.find((c) => c.id === channelId);
+    let retArr: Message[] = [];
     const retThreads: Channel[] = [];
 
     if (token) {
@@ -999,19 +1218,21 @@ const _getSearchMessages =
           for (const m of foundMessages) {
             if (_messageTypeAllowed(m.type)) retArr.push(m);
           }
-          dispatch(
-            setFetchProgress({
-              messageCount: retArr.length,
-              channelId,
-              threadCount: retThreads.length,
-            })
-          );
-          dispatch(setTotalSearchMessages(totalMessages));
+
+          const threadStatus = `Fetched ${retThreads.length} Threads`;
+          const status = `Fetched ${retArr.length}/${totalMessages} Messages ${
+            channel?.name ? `(${channel.name})` : ""
+          }`;
+          dispatch(setStatus(isGuildForum(channel) ? threadStatus : status));
         } else {
           reachedEnd = true;
         }
       }
+      const reactionsEnabled = stringToBool(settings.reactionsEnabled);
+      if (!excludeReactions && reactionsEnabled)
+        retArr = await dispatch(_resolveMessageReactions(retArr));
     }
+    dispatch(resetStatus());
     return {
       messages: retArr,
       threads: retThreads,
@@ -1049,17 +1270,10 @@ const _getMessages =
     const messages: Message[] = [];
 
     if (channel) {
-      const isGuildForum = [
-        ChannelType.GUILD_FORUM,
-        ChannelType.GUILD_MEDIA,
-      ].some((type) => type === channel.type);
-
-      if (isGuildForum) {
-        dispatch(setFetchProgress({ parsingThreads: true }));
+      if (isGuildForum(channel)) {
         const { threads } = await dispatch(
           _getSearchMessages(channelId, channel.guild_id, {})
         );
-        dispatch(resetFetchProgress());
         threads.forEach((t) => {
           if (!trackedThreads.some((tt) => tt.id === t.id)) {
             trackedThreads.push(t);
@@ -1121,23 +1335,19 @@ const _getMessagesFromChannel =
             data[0]?.content || data[0]?.attachments
           );
           if (hasValidMessages) {
-            const { fetchProgress } = getState().message;
-            const { messageCount } = fetchProgress;
-            dispatch(
-              setFetchProgress({
-                messageCount: data.length + messageCount,
-                channelId,
-              })
-            );
             data
               .filter((m) => _messageTypeAllowed(m.type))
               .forEach((m) => messages.push(m));
+
+            const status = `Fetched ${messages.length} Messages`;
+            dispatch(setStatus(status));
           }
         } else {
           break;
         }
       }
     }
+    dispatch(resetStatus());
 
     return messages;
   };

@@ -2,6 +2,7 @@ import { useState } from "react";
 import ChatIcon from "@mui/icons-material/Chat";
 import EmailIcon from "@mui/icons-material/Email";
 import DataObjectIcon from "@mui/icons-material/DataObject";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import {
   Box,
   Button,
@@ -14,7 +15,6 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import GitHubIcon from "@mui/icons-material/GitHub";
 import RedditIcon from "@mui/icons-material/Reddit";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import { useExportSlice } from "../../../features/export/use-export-slice";
@@ -33,8 +33,8 @@ const MenuBar = ({
   const isGenerating = exportState.isGenerating();
 
   const { state: appState } = useAppSlice();
-  const modify = appState.modify();
-  const { active } = modify || {};
+  const task = appState.task();
+  const { active } = task || {};
 
   const { state: messageState } = useMessageSlice();
   const isLoading = messageState.isLoading();
@@ -49,6 +49,29 @@ const MenuBar = ({
     { name: "Direct Messages", icon: <EmailIcon /> },
     { name: "Tags", icon: <LoyaltyIcon /> },
     { name: "Change Log", icon: <DataObjectIcon /> },
+    { name: "Settings", icon: <ManageAccountsIcon /> },
+  ];
+
+  const handleMenuClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const redirects = [
+    {
+      title: "Star on GitHub",
+      img: "github-logo.svg",
+      url: "https://github.com/prathercc/discrub-ext",
+    },
+    {
+      title: "Review on Webstore",
+      img: "chromestore.svg",
+      url: "https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj",
+    },
+    {
+      title: "Donate with Ko-Fi",
+      img: "kofi.svg",
+      url: "https://ko-fi.com/prathercc",
+    },
   ];
 
   return (
@@ -60,45 +83,27 @@ const MenuBar = ({
         disabled={menuDisabled}
         color="secondary"
         startIcon={menuOpen ? <MenuOpenIcon /> : <MenuIcon />}
-        onClick={(e) => setAnchorEl(e.currentTarget)}
+        onClick={handleMenuClick}
       >
         Menu
       </Button>
-      <Button
-        onClick={() =>
-          window.open(
-            "https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj",
-            "_blank"
-          )
-        }
-        color="secondary"
-        startIcon={
-          <Icon>
-            <img
-              style={{ display: "flex", height: "inherit", width: "inherit" }}
-              src="resources/media/chromestore.svg"
-              alt="chrome store"
-            />
-          </Icon>
-        }
-      >
-        Review on Webstore
-      </Button>
-      <Button
-        onClick={() => window.open("https://ko-fi.com/prathercc", "_blank")}
-        color="secondary"
-        startIcon={
-          <Icon>
-            <img
-              style={{ display: "flex", height: "inherit", width: "inherit" }}
-              src="resources/media/kofi.svg"
-              alt="kofi"
-            />
-          </Icon>
-        }
-      >
-        Donate with Ko-Fi
-      </Button>
+      {redirects.map((redirect) => (
+        <Button
+          onClick={() => window.open(redirect.url, "_blank")}
+          color="secondary"
+          startIcon={
+            <Icon>
+              <img
+                style={{ display: "flex", height: "inherit", width: "inherit" }}
+                src={`resources/media/${redirect.img}`}
+                alt={redirect.title}
+              />
+            </Icon>
+          }
+        >
+          {redirect.title}
+        </Button>
+      ))}
 
       <Menu
         sx={{ textTransform: "none" }}
@@ -107,30 +112,22 @@ const MenuBar = ({
         onClose={() => setAnchorEl(null)}
       >
         {menuItems.map((menuItem, i) => (
-          <MenuItem
-            key={menuItem.name}
-            disabled={menuIndex === i}
-            onClick={() => {
-              setMenuIndex(i);
-              setAnchorEl(null);
-            }}
-          >
-            <ListItemIcon>{menuItem.icon}</ListItemIcon>
-            <ListItemText>{menuItem.name}</ListItemText>
-          </MenuItem>
+          <>
+            {menuItem.name === "Change Log" ? <Divider /> : null}
+            <MenuItem
+              key={menuItem.name}
+              disabled={menuIndex === i}
+              onClick={() => {
+                setMenuIndex(i);
+                setAnchorEl(null);
+              }}
+            >
+              <ListItemIcon>{menuItem.icon}</ListItemIcon>
+              <ListItemText>{menuItem.name}</ListItemText>
+            </MenuItem>
+          </>
         ))}
         <Divider />
-        <MenuItem
-          onClick={() => {
-            window.open("https://github.com/prathercc/discrub-ext", "_blank");
-            setAnchorEl(null);
-          }}
-        >
-          <ListItemIcon>
-            <GitHubIcon />
-          </ListItemIcon>
-          <ListItemText>GitHub</ListItemText>
-        </MenuItem>
         <MenuItem
           onClick={() => {
             window.open("https://www.reddit.com/r/discrub/", "_blank");

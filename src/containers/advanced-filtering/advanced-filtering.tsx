@@ -11,14 +11,10 @@ import BeforeAndAfterFields from "../../components/before-and-after-fields";
 import PrefilterUser from "../../components/prefilter-user";
 
 type AdvancedFilteringProps = {
-  closeAnnouncement?: () => void;
   isDm?: boolean;
 };
 
-function AdvancedFiltering({
-  closeAnnouncement,
-  isDm = false,
-}: AdvancedFilteringProps) {
+function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
 
@@ -31,10 +27,6 @@ function AdvancedFiltering({
   const [show, setShow] = useState(false);
 
   const handleFilterButtonClick = () => {
-    if (closeAnnouncement) {
-      closeAnnouncement();
-    }
-
     setShow(!show);
   };
 

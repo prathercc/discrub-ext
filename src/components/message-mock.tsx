@@ -1,4 +1,4 @@
-import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import AttachmentMock from "./attachment-mock";
 import EmbedMock from "./embed-mock";
 import { format, parseISO } from "date-fns";
@@ -9,6 +9,11 @@ import {
   getTimeZone,
   getHighestRoles,
   getRoleNames,
+  resolveEmojiUrl,
+  stringToBool,
+  getEncodedEmoji,
+  getReactingUsers,
+  getAvatarUrl,
 } from "../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./webhook-embed-mock";
@@ -23,6 +28,9 @@ import AuthorAvatar from "./author-avatar";
 import { getRichEmbeds } from "../utils";
 import { MessageType } from "../enum/message-type";
 import Role from "../classes/role";
+import ServerEmoji from "./server-emoji";
+import { useAppSlice } from "../features/app/use-app-slice";
+import { ExportReaction } from "../features/export/export-types";
 
 type MessageMockProps = {
   message: Message;
@@ -38,6 +46,9 @@ const MessageMock = ({
   isChained = false,
 }: MessageMockProps) => {
   const theme = useTheme();
+
+  const { state: appState } = useAppSlice();
+  const settings = appState.settings();
 
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
@@ -55,6 +66,8 @@ const MessageMock = ({
   const { state: exportState, getFormattedInnerHtml } = useExportSlice();
   const userMap = exportState.userMap();
   const roleMap = exportState.roleMap();
+  const emojiMap = exportState.emojiMap();
+  const reactionMap = exportState.reactionMap();
 
   const messageDate = parseISO(message.timestamp);
   const tz = getTimeZone(messageDate);
@@ -327,6 +340,160 @@ const MessageMock = ({
     );
   };
 
+  const getReactions = () => {
+    return (
+      <Stack
+        sx={{
+          flexDirection: "row",
+          gap: "5px",
+          mb: "5px",
+          flexWrap: "wrap",
+        }}
+      >
+        {message.reactions?.map((r) => {
+          const { local: localPath } = resolveEmojiUrl(emojiMap, r.emoji.id);
+          return (
+            <Box
+              title={r.emoji.id ? `:${r.emoji.name}:` : String(r.emoji.name)}
+              component={"a"}
+              href={`#${message.id}-${getEncodedEmoji(r.emoji)}`}
+              sx={{
+                borderRadius: "5px",
+                minWidth: "50px",
+                minHeight: "25px",
+                backgroundColor: "#373a54",
+                boxShadow:
+                  "rgba(0, 0, 0, 0.2) 0px 2px 1px -1px, rgba(0, 0, 0, 0.14) 0px 1px 1px 0px, rgba(0, 0, 0, 0.12) 0px 1px 3px 0px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                cursor: "pointer",
+                padding: "1px",
+                flexDirection: "row",
+                gap: "5px",
+                border: "1px solid #7289da",
+                textDecoration: "none",
+                "& p": {
+                  cursor: "pointer",
+                },
+                "& img": {
+                  cursor: "pointer",
+                },
+              }}
+            >
+              {r.emoji.id && localPath ? (
+                <ServerEmoji url={localPath} />
+              ) : (
+                <Typography>{r.emoji.name}</Typography>
+              )}
+              <Typography sx={{ color: theme.palette.text.secondary }}>
+                {r.count}
+              </Typography>
+            </Box>
+          );
+        })}
+        {message.reactions?.map((r) => {
+          const { local: localPath } = resolveEmojiUrl(emojiMap, r.emoji.id);
+          const encodedEmoji = getEncodedEmoji(r.emoji);
+          const exportReactions: ExportReaction[] = encodedEmoji
+            ? reactionMap[message.id][encodedEmoji]
+            : [];
+          const reactingUsers = getReactingUsers(
+            exportReactions,
+            userMap,
+            selectedGuild
+          );
+
+          return (
+            <Stack
+              id={`${message.id}-${encodedEmoji}`}
+              sx={{
+                padding: "15px",
+                backgroundColor: "background.paper",
+                border: `1px solid ${theme.palette.secondary.dark}`,
+                borderRadius: "5px",
+                display: "none",
+                height: "500px",
+                "&:target": {
+                  display: "flex",
+                  gap: "5px",
+                  position: "fixed",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                },
+              }}
+            >
+              <Button
+                sx={{ minHeight: "42px", minWidth: "98px" }}
+                variant="contained"
+                startIcon={
+                  r.emoji.id && localPath ? (
+                    <ServerEmoji url={localPath} />
+                  ) : (
+                    <Typography>{r.emoji.name}</Typography>
+                  )
+                }
+                href="javascript:history.back()"
+              >
+                Close
+              </Button>
+
+              <Stack
+                sx={{
+                  maxHeight: "440px",
+                  overflowY: "auto",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "5px",
+                }}
+              >
+                {encodedEmoji
+                  ? exportReactions.map((exportReaction) => {
+                      const reactingUser = reactingUsers.find(
+                        (rU) => rU.id === exportReaction.id
+                      );
+                      return reactingUser ? (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                            flexDirection: "row",
+                            gap: "5px",
+                          }}
+                        >
+                          <img
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                            }}
+                            src={getAvatarUrl(
+                              reactingUser.id,
+                              reactingUser.avatar
+                            )}
+                            alt="avatar-icon"
+                          />
+                          <Typography sx={{ color: "text.primary" }}>
+                            {reactingUser.displayName}
+                          </Typography>
+                          <Typography sx={{ color: "text.disabled" }}>
+                            {reactingUser.userName}
+                          </Typography>
+                        </Box>
+                      ) : null;
+                    })
+                  : null}
+              </Stack>
+            </Stack>
+          );
+        })}
+      </Stack>
+    );
+  };
+
   return (
     <Stack
       direction="column"
@@ -407,6 +574,9 @@ const MessageMock = ({
           {getMessageContent(message.content, `message-data-${index}`)}
           {!browserView && getAttachments()}
           {!browserView && getEmbeds()}
+          {!browserView &&
+            stringToBool(settings.reactionsEnabled) &&
+            getReactions()}
         </Stack>
       </Stack>
     </Stack>

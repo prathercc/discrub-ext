@@ -9,7 +9,6 @@ export type ExportState = {
   previewImages: boolean;
   artistMode: boolean;
   name: string;
-  statusText: string;
   isGenerating: boolean;
   currentPage: number;
   messagesPerPage: number;
@@ -18,11 +17,31 @@ export type ExportState = {
 };
 
 export type ExportMap = {
+  /** Cleared at the end of an export **/
   userMap: ExportUserMap;
   emojiMap: ExportEmojiMap;
   avatarMap: ExportAvatarMap;
   mediaMap: ExportMediaMap;
   roleMap: ExportRoleMap;
+  /*************************************/
+
+  /** Cleared when messages are reset **/
+  reactionMap: ExportReactionMap;
+  /*************************************/
+};
+
+export type ExportReaction = {
+  id: Snowflake;
+  burst: boolean;
+};
+
+/**
+ * This is a 'Message Id & emoji -> Export Reaction List' map.
+ */
+export type ExportReactionMap = {
+  [id: Snowflake]: {
+    [emoji: string]: ExportReaction[];
+  };
 };
 
 /**
@@ -32,6 +51,7 @@ export type ExportUserMap = {
   [id: Snowflake]: {
     userName: string | Maybe;
     displayName: string | Maybe;
+    avatar: string | Maybe;
     guilds: {
       [guildId: Snowflake]: {
         roles: Snowflake[];
