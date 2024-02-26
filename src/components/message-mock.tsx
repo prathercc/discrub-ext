@@ -436,7 +436,7 @@ const MessageMock = ({
                     <Typography>{r.emoji.name}</Typography>
                   )
                 }
-                href="#"
+                href="javascript:history.back()"
               >
                 Close
               </Button>
