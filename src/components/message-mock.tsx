@@ -1,4 +1,4 @@
-import { Box, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import AttachmentMock from "./attachment-mock";
 import EmbedMock from "./embed-mock";
 import { format, parseISO } from "date-fns";
@@ -11,6 +11,9 @@ import {
   getRoleNames,
   resolveEmojiUrl,
   stringToBool,
+  getEncodedEmoji,
+  getReactingUsers,
+  getAvatarUrl,
 } from "../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./webhook-embed-mock";
@@ -27,6 +30,7 @@ import { MessageType } from "../enum/message-type";
 import Role from "../classes/role";
 import ServerEmoji from "./server-emoji";
 import { useAppSlice } from "../features/app/use-app-slice";
+import { ExportReaction } from "../features/export/export-types";
 
 type MessageMockProps = {
   message: Message;
@@ -63,6 +67,7 @@ const MessageMock = ({
   const userMap = exportState.userMap();
   const roleMap = exportState.roleMap();
   const emojiMap = exportState.emojiMap();
+  const reactionMap = exportState.reactionMap();
 
   const messageDate = parseISO(message.timestamp);
   const tz = getTimeZone(messageDate);
@@ -349,7 +354,10 @@ const MessageMock = ({
           const { local: localPath } = resolveEmojiUrl(emojiMap, r.emoji.id);
           return (
             <Box
-              style={{
+              title={r.emoji.id ? `:${r.emoji.name}:` : String(r.emoji.name)}
+              component={"a"}
+              href={`#${message.id}-${getEncodedEmoji(r.emoji)}`}
+              sx={{
                 borderRadius: "5px",
                 minWidth: "50px",
                 minHeight: "25px",
@@ -359,24 +367,127 @@ const MessageMock = ({
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                cursor: "default",
+                cursor: "pointer",
                 padding: "1px",
                 flexDirection: "row",
                 gap: "5px",
                 border: "1px solid #7289da",
+                textDecoration: "none",
+                "& p": {
+                  cursor: "pointer",
+                },
+                "& img": {
+                  cursor: "pointer",
+                },
               }}
             >
               {r.emoji.id && localPath ? (
                 <ServerEmoji url={localPath} />
               ) : (
-                <Typography sx={{ color: theme.palette.text.secondary }}>
-                  {r.emoji.name}
-                </Typography>
+                <Typography>{r.emoji.name}</Typography>
               )}
               <Typography sx={{ color: theme.palette.text.secondary }}>
                 {r.count}
               </Typography>
             </Box>
+          );
+        })}
+        {message.reactions?.map((r) => {
+          const { local: localPath } = resolveEmojiUrl(emojiMap, r.emoji.id);
+          const encodedEmoji = getEncodedEmoji(r.emoji);
+          const exportReactions: ExportReaction[] = encodedEmoji
+            ? reactionMap[message.id][encodedEmoji]
+            : [];
+          const reactingUsers = getReactingUsers(
+            exportReactions,
+            userMap,
+            selectedGuild
+          );
+
+          return (
+            <Stack
+              id={`${message.id}-${encodedEmoji}`}
+              sx={{
+                padding: "15px",
+                backgroundColor: "background.paper",
+                border: `1px solid ${theme.palette.secondary.dark}`,
+                borderRadius: "5px",
+                display: "none",
+                height: "500px",
+                "&:target": {
+                  display: "flex",
+                  gap: "5px",
+                  position: "fixed",
+                  justifyContent: "flex-start",
+                  alignItems: "center",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                },
+              }}
+            >
+              <Button
+                sx={{ minHeight: "42px", minWidth: "98px" }}
+                variant="contained"
+                startIcon={
+                  r.emoji.id && localPath ? (
+                    <ServerEmoji url={localPath} />
+                  ) : (
+                    <Typography>{r.emoji.name}</Typography>
+                  )
+                }
+                href="#"
+              >
+                Close
+              </Button>
+
+              <Stack
+                sx={{
+                  maxHeight: "440px",
+                  overflowY: "auto",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "5px",
+                }}
+              >
+                {encodedEmoji
+                  ? exportReactions.map((exportReaction) => {
+                      const reactingUser = reactingUsers.find(
+                        (rU) => rU.id === exportReaction.id
+                      );
+                      return reactingUser ? (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                            flexDirection: "row",
+                            gap: "5px",
+                          }}
+                        >
+                          <img
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                            }}
+                            src={getAvatarUrl(
+                              reactingUser.id,
+                              reactingUser.avatar
+                            )}
+                            alt="avatar-icon"
+                          />
+                          <Typography sx={{ color: "text.primary" }}>
+                            {reactingUser.displayName}
+                          </Typography>
+                          <Typography sx={{ color: "text.disabled" }}>
+                            {reactingUser.userName}
+                          </Typography>
+                        </Box>
+                      ) : null;
+                    })
+                  : null}
+              </Stack>
+            </Stack>
           );
         })}
       </Stack>
