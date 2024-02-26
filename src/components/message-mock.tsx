@@ -9,6 +9,8 @@ import {
   getTimeZone,
   getHighestRoles,
   getRoleNames,
+  resolveEmojiUrl,
+  stringToBool,
 } from "../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./webhook-embed-mock";
@@ -23,6 +25,8 @@ import AuthorAvatar from "./author-avatar";
 import { getRichEmbeds } from "../utils";
 import { MessageType } from "../enum/message-type";
 import Role from "../classes/role";
+import ServerEmoji from "./server-emoji";
+import { useAppSlice } from "../features/app/use-app-slice";
 
 type MessageMockProps = {
   message: Message;
@@ -38,6 +42,9 @@ const MessageMock = ({
   isChained = false,
 }: MessageMockProps) => {
   const theme = useTheme();
+
+  const { state: appState } = useAppSlice();
+  const settings = appState.settings();
 
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
@@ -55,6 +62,7 @@ const MessageMock = ({
   const { state: exportState, getFormattedInnerHtml } = useExportSlice();
   const userMap = exportState.userMap();
   const roleMap = exportState.roleMap();
+  const emojiMap = exportState.emojiMap();
 
   const messageDate = parseISO(message.timestamp);
   const tz = getTimeZone(messageDate);
@@ -327,6 +335,54 @@ const MessageMock = ({
     );
   };
 
+  const getReactions = () => {
+    return (
+      <Stack
+        sx={{
+          flexDirection: "row",
+          gap: "5px",
+          mb: "5px",
+          flexWrap: "wrap",
+        }}
+      >
+        {message.reactions?.map((r) => {
+          const { local: localPath } = resolveEmojiUrl(emojiMap, r.emoji.id);
+          return (
+            <Box
+              style={{
+                borderRadius: "5px",
+                minWidth: "50px",
+                minHeight: "25px",
+                backgroundColor: "#373a54",
+                boxShadow:
+                  "rgba(0, 0, 0, 0.2) 0px 2px 1px -1px, rgba(0, 0, 0, 0.14) 0px 1px 1px 0px, rgba(0, 0, 0, 0.12) 0px 1px 3px 0px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                cursor: "default",
+                padding: "1px",
+                flexDirection: "row",
+                gap: "5px",
+                border: "1px solid #7289da",
+              }}
+            >
+              {r.emoji.id && localPath ? (
+                <ServerEmoji url={localPath} />
+              ) : (
+                <Typography sx={{ color: theme.palette.text.secondary }}>
+                  {r.emoji.name}
+                </Typography>
+              )}
+              <Typography sx={{ color: theme.palette.text.secondary }}>
+                {r.count}
+              </Typography>
+            </Box>
+          );
+        })}
+      </Stack>
+    );
+  };
+
   return (
     <Stack
       direction="column"
@@ -407,6 +463,9 @@ const MessageMock = ({
           {getMessageContent(message.content, `message-data-${index}`)}
           {!browserView && getAttachments()}
           {!browserView && getEmbeds()}
+          {!browserView &&
+            stringToBool(settings.reactionsEnabled) &&
+            getReactions()}
         </Stack>
       </Stack>
     </Stack>
