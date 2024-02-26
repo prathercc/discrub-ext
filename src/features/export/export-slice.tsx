@@ -11,6 +11,7 @@ import {
   getRoleNames,
   getSafeExportName,
   isDm,
+  resolveEmojiUrl,
   sortByProperty,
   stringToBool,
   wait,
@@ -56,7 +57,6 @@ import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
 import Channel from "../../classes/channel";
-import { getReactionsEnabled } from "../../services/chrome-service";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -413,10 +413,13 @@ const _getEmoji =
   (_, getState) => {
     const { id, name } = emojiRef;
     const { emojiMap } = getState().export.exportMaps;
-    let emojiUrl = `https://cdn.discordapp.com/emojis/${id}`;
-    if (emojiMap && emojiMap[id] && exportView) {
-      emojiUrl = `../${emojiMap[id]}`;
-    }
+
+    const { local: localPath, remote: remotePath } = resolveEmojiUrl(
+      emojiMap,
+      id
+    );
+
+    const emojiUrl = exportView && localPath ? localPath : remotePath;
 
     return (
       <img

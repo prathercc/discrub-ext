@@ -15,11 +15,12 @@ import { Emoji } from "../classes/emoji";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import { getAvatarUrl } from "../utils";
+import { getAvatarUrl, resolveEmojiUrl } from "../utils";
 import copy from "copy-to-clipboard";
 import Tooltip from "../common-components/tooltip/tooltip";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
+import ServerEmoji from "./server-emoji";
 
 export type ReactingUser = {
   displayName: string | Maybe;
@@ -50,15 +51,6 @@ const ReactionListItemButton = ({
 
   const handleClick = () => {
     setExpanded((prevState) => !prevState);
-  };
-
-  const getCustomEmoji = () => {
-    return (
-      <img
-        style={{ width: "24px", height: "24px" }}
-        src={`https://cdn.discordapp.com/emojis/${emoji.id}`}
-      />
-    );
   };
 
   const handleEmojiClick = (e: React.MouseEvent<HTMLElement>) => {
@@ -119,7 +111,11 @@ const ReactionListItemButton = ({
       <ListItemButton dense onClick={handleClick}>
         <Tooltip title={emoji.id ? `:${emoji.name}:` : `${emoji.name}`}>
           <ListItemIcon onClick={handleEmojiClick}>
-            {emoji.id ? getCustomEmoji() : emoji.name}
+            {emoji.id ? (
+              <ServerEmoji url={resolveEmojiUrl(null, emoji.id).remote} />
+            ) : (
+              emoji.name
+            )}
           </ListItemIcon>
         </Tooltip>
         <ListItemText

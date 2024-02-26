@@ -10,6 +10,7 @@ import { ChannelType } from "./enum/channel-type";
 import { EmbedType } from "./enum/embed-type";
 import { MessageRegex } from "./enum/message-regex";
 import { v4 as uuidv4 } from "uuid";
+import { ExportEmojiMap } from "./features/export/export-types";
 
 /**
  *
@@ -327,5 +328,16 @@ export const isGuildForum = (channel: Channel | Maybe) => {
     )
   );
 };
+
+export const resolveEmojiUrl = (
+  emojiMap: ExportEmojiMap | null,
+  id: Snowflake | Maybe
+) => {
+  return {
+    remote: `https://cdn.discordapp.com/emojis/${id}`,
+    local: id && emojiMap && emojiMap[id] ? `../${emojiMap[id]}` : null,
+  };
+};
+
 export const stringToBool = (str: string): boolean =>
   str.toLowerCase() === "true";
