@@ -38,7 +38,7 @@ function DonationComponent() {
       <Box
         sx={{
           height: "100%",
-          overflowY: "auto",
+          overflowY: "scroll",
           bgcolor: "background.paper",
           color: "text.primary",
           display: "flex",
