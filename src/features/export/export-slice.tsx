@@ -12,6 +12,7 @@ import {
   getSafeExportName,
   isDm,
   sortByProperty,
+  stringToBool,
   wait,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
@@ -664,7 +665,8 @@ const _downloadEmojisFromMessage =
     const { emoji: emojiReferences } = dispatch(
       getSpecialFormatting(message.content)
     );
-    const reactionsEnabled = await getReactionsEnabled();
+    const { settings } = getState().app;
+    const reactionsEnabled = stringToBool(settings.reactionsEnabled);
     if (message.reactions && reactionsEnabled) {
       message.reactions.forEach((r) => {
         const { id, name } = r.emoji || {};

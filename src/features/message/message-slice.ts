@@ -14,6 +14,7 @@ import {
   isDm,
   isGuildForum,
   sortByProperty,
+  stringToBool,
 } from "../../utils";
 import Message from "../../classes/message";
 import { MessageType } from "../../enum/message-type";
@@ -66,7 +67,6 @@ import Channel from "../../classes/channel";
 import { QueryStringParam } from "../../enum/query-string-param";
 import { Reaction } from "../../classes/reaction";
 import { ReactionType } from "../../enum/reaction-type";
-import { getReactionsEnabled } from "../../services/chrome-service";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -873,6 +873,7 @@ export const getMessageData =
       searchMessageContent,
       selectedHasTypes,
     } = getState().message;
+    const { settings } = getState().app;
 
     if (token) {
       dispatch(setIsLoading(true));
@@ -915,7 +916,7 @@ export const getMessageData =
       };
 
       if (!getState().app.discrubCancelled) {
-        const reactionsEnabled = await getReactionsEnabled();
+        const reactionsEnabled = stringToBool(settings.reactionsEnabled);
         if (!options.excludeReactions && reactionsEnabled) {
           await dispatch(_generateReactionMap(retArr));
         }
@@ -971,6 +972,7 @@ const _getUserMap =
   async (_, getState) => {
     const { userMap: existingUserMap, reactionMap } =
       getState().export.exportMaps;
+    const { settings } = getState().app;
     const defaultMapping = {
       userName: null,
       displayName: null,
@@ -978,7 +980,7 @@ const _getUserMap =
       guilds: {},
     };
     const userMap: ExportUserMap = {};
-    const reactionsEnabled = await getReactionsEnabled();
+    const reactionsEnabled = stringToBool(settings.reactionsEnabled);
     messages.forEach((message) => {
       const content = message.content;
       const author = message.author;
@@ -1168,6 +1170,7 @@ const _getSearchMessages =
     { excludeReactions }: Partial<MessageSearchOptions> = {}
   ): AppThunk<Promise<MessageData>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     const { channels } = getState().channel;
     const { dms } = getState().dm;
@@ -1225,7 +1228,7 @@ const _getSearchMessages =
           reachedEnd = true;
         }
       }
-      const reactionsEnabled = await getReactionsEnabled();
+      const reactionsEnabled = stringToBool(settings.reactionsEnabled);
       if (!excludeReactions && reactionsEnabled)
         retArr = await dispatch(_resolveMessageReactions(retArr));
     }

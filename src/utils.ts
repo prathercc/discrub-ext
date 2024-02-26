@@ -327,3 +327,5 @@ export const isGuildForum = (channel: Channel | Maybe) => {
     )
   );
 };
+export const stringToBool = (str: string): boolean =>
+  str.toLowerCase() === "true";

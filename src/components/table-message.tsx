@@ -8,10 +8,11 @@ import Message from "../classes/message";
 import { EmbedType } from "../enum/embed-type";
 import { TableCell } from "@mui/material";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
-import { getReactionsEnabled } from "../services/chrome-service";
-import { useEffect, useState } from "react";
+import { AppSettings } from "../features/app/app-types";
+import { stringToBool } from "../utils";
 
 type TableMessageProps = {
+  settings: AppSettings;
   row: Message;
   openReactionModal?: () => void;
   openAttachmentModal?: () => void;
@@ -20,25 +21,19 @@ type TableMessageProps = {
 };
 
 export default function TableMessage({
+  settings,
   row,
   openReactionModal = () => {},
   openAttachmentModal = () => {},
   openEmbedModal = () => {},
   setModifyEntity,
 }: TableMessageProps) {
-  const [reactionsEnabled, setReactionsEnabled] = useState(false);
   const hasValidEmbed = row?.embeds?.some(
     (embed) => embed?.type === EmbedType.RICH
   );
   const hasAttachments = row.attachments.length > 0;
-  const hasReactions = !!row.reactions?.length && reactionsEnabled;
-
-  useEffect(() => {
-    const checkSettings = async () => {
-      setReactionsEnabled(await getReactionsEnabled());
-    };
-    checkSettings();
-  }, []);
+  const hasReactions =
+    !!row.reactions?.length && stringToBool(settings.reactionsEnabled);
 
   return (
     <TableCell colSpan={5}>

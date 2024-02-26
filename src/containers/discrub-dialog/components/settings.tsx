@@ -7,39 +7,32 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { getSettings, setSetting } from "../../../services/chrome-service";
-import { useState, useEffect } from "react";
+import { setSetting } from "../../../services/chrome-service";
+import { AppSettings } from "../../../features/app/app-types";
+import { DiscrubSetting } from "../../../enum/discrub-setting";
 
-function Settings() {
-  const [settings, setSettings] = useState<Record<string, string | number>>({});
-  const [isStale, setIsStale] = useState(true);
+type SettingsProps = {
+  settings: AppSettings;
+  onChangeSettings: (settings: AppSettings) => void;
+};
 
-  useEffect(() => {
-    const getLatestSettings = async () => {
-      setSettings(await getSettings());
-    };
-    if (isStale) {
-      setIsStale(false);
-      getLatestSettings();
-    }
-  }, [isStale]);
-
-  const handleChange = async (setting: string, value: string | number) => {
-    await setSetting(setting, value);
-    setIsStale(true);
+function Settings({ settings, onChangeSettings }: SettingsProps) {
+  const handleChange = async (setting: string, value: string) => {
+    const settings = await setSetting(setting, value);
+    onChangeSettings(settings);
   };
 
-  const getValue = (setting: string) => {
+  const getValue = (setting: DiscrubSetting) => {
     return settings[setting] || null;
   };
 
   const controls = [
     {
-      name: "fetchReactionData",
+      name: DiscrubSetting.REACTIONS_ENABLED,
       label: "Fetch Reaction Data",
       options: [
-        { value: 1, name: "Yes" },
-        { value: -1, name: "No" },
+        { value: "true", name: "Yes" },
+        { value: "false", name: "No" },
       ],
     },
   ];

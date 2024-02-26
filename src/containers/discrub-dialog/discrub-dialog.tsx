@@ -28,7 +28,8 @@ function DiscrubDialog() {
   const { resetGuild } = useGuildSlice();
   const { resetDm } = useDmSlice();
   const { resetChannel } = useChannelSlice();
-  const { setDiscrubPaused } = useAppSlice();
+  const { setDiscrubPaused, setSettings, state: appState } = useAppSlice();
+  const settings = appState.settings();
   const { getUserData } = useUserSlice();
 
   const handleChangeMenuIndex = async (index: number) => {
@@ -43,8 +44,12 @@ function DiscrubDialog() {
   };
 
   useEffect(() => {
+    const init = async () => {
+      const settings = await initializeSettings();
+      setSettings(settings);
+    };
     getUserData();
-    initializeSettings();
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -72,7 +77,9 @@ function DiscrubDialog() {
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <Tags />}
       {menuIndex === 3 && <About />}
-      {menuIndex === 4 && <Settings />}
+      {menuIndex === 4 && (
+        <Settings settings={settings} onChangeSettings={setSettings} />
+      )}
 
       <Box sx={{ position: "fixed", top: "23px", right: "310px", opacity: 1 }}>
         <Stack

@@ -1,8 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { wait } from "../../utils";
-import { AppTask, AppState, Timeout } from "./app-types";
+import { AppTask, AppState, Timeout, AppSettings } from "./app-types";
 import Message from "../../classes/message";
 import { AppThunk } from "../../app/store";
+import { DiscrubSetting } from "../../enum/discrub-setting";
+
+const defaultSettings: AppSettings = {
+  [DiscrubSetting.REACTIONS_ENABLED]: "false",
+};
 
 const emptyTask: AppTask = {
   active: false,
@@ -14,6 +19,7 @@ const initialState: AppState = {
   discrubPaused: false, // Flag to pause Export/Purge/Search
   discrubCancelled: false, // Flag to cancel Export/Purge/Search
   task: emptyTask, // AppTask object, used for manipulating an entity
+  settings: defaultSettings,
 };
 
 export const appSlice = createSlice({
@@ -44,6 +50,9 @@ export const appSlice = createSlice({
     resetModify: (state): void => {
       state.task = emptyTask;
     },
+    setSettings: (state, { payload }: { payload: AppSettings }): void => {
+      state.settings = payload;
+    },
   },
 });
 
@@ -55,6 +64,7 @@ export const {
   setStatus,
   resetStatus,
   resetModify,
+  setSettings,
 } = appSlice.actions;
 
 export const checkDiscrubPaused =

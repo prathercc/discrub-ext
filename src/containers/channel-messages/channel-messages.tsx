@@ -80,6 +80,7 @@ function ChannelMessages() {
   const { state: appState, setModifyEntity } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
   const task = appState.task();
+  const settings = appState.settings();
 
   const { statusText } = task || {};
 
@@ -113,6 +114,7 @@ function ChannelMessages() {
     data: m,
     renderRow: (row) => (
       <TableMessage
+        settings={settings}
         row={row}
         setModifyEntity={setModifyEntity}
         openAttachmentModal={() => setAttachmentModalOpen(true)}

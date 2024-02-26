@@ -9,8 +9,9 @@ import {
   resetModify as resetModifyAction,
   checkDiscrubPaused as checkDiscrubPausedAction,
   setTimeoutMessage as setTimeoutMessageAction,
+  setSettings as setSettingsAction,
 } from "./app-slice";
-import { AppTask } from "./app-types";
+import { AppSettings, AppTask } from "./app-types";
 import Message from "../../classes/message";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
@@ -26,10 +27,14 @@ const useAppSlice = () => {
   const useTask = (): AppTask =>
     useAppSelector((state: RootState) => state.app.task);
 
+  const useSettings = (): AppSettings =>
+    useAppSelector((state: RootState) => state.app.settings);
+
   const state = {
     discrubCancelled: useDiscrubCancelled,
     discrubPaused: useDiscrubPaused,
     task: useTask,
+    settings: useSettings,
   };
 
   const setDiscrubPaused = (value: boolean): void => {
@@ -57,6 +62,10 @@ const useAppSlice = () => {
   };
   const resetModify = (): void => {
     dispatch(resetModifyAction());
+  };
+
+  const setSettings = (settings: AppSettings): void => {
+    dispatch(setSettingsAction(settings));
   };
 
   const checkDiscrubPaused = async (): Promise<void> => {
@@ -87,6 +96,7 @@ const useAppSlice = () => {
     resetModify,
     checkDiscrubPaused,
     setTimeoutMessage,
+    setSettings,
   };
 };
 
