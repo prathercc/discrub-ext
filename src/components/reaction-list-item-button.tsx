@@ -64,7 +64,7 @@ const ReactionListItemButton = ({
   const getReactingUserAvatar = (reactingUser: ReactingUser) => {
     return (
       <img
-        style={{ width: "40px", height: "40px", borderRadius: "50px" }}
+        style={{ width: "40px", height: "40px", borderRadius: "50%" }}
         src={getAvatarUrl(reactingUser.id, reactingUser.avatar)}
         alt="avatar-icon"
       />

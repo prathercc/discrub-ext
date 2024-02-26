@@ -10,7 +10,12 @@ import { ChannelType } from "./enum/channel-type";
 import { EmbedType } from "./enum/embed-type";
 import { MessageRegex } from "./enum/message-regex";
 import { v4 as uuidv4 } from "uuid";
-import { ExportEmojiMap } from "./features/export/export-types";
+import {
+  ExportEmojiMap,
+  ExportReaction,
+  ExportUserMap,
+} from "./features/export/export-types";
+import { ReactingUser } from "./components/reaction-list-item-button";
 
 /**
  *
@@ -341,3 +346,26 @@ export const resolveEmojiUrl = (
 
 export const stringToBool = (str: string): boolean =>
   str.toLowerCase() === "true";
+
+export const getReactingUsers = (
+  exportReactions: ExportReaction[],
+  userMap: ExportUserMap,
+  selectedGuild: Guild | Maybe
+): ReactingUser[] => {
+  return exportReactions
+    .filter(({ id: userId }) => userMap[userId])
+    .map(({ id: userId, burst }) => {
+      const mapping = userMap[userId];
+      const guildNickName = selectedGuild
+        ? mapping?.guilds?.[selectedGuild.id]?.nick
+        : null;
+
+      return {
+        displayName: guildNickName || mapping.displayName,
+        userName: mapping.userName,
+        id: userId,
+        avatar: mapping.avatar,
+        burst,
+      };
+    });
+};

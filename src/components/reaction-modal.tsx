@@ -17,7 +17,7 @@ import ReactionListItemButton, {
   ReactingUser,
 } from "./reaction-list-item-button";
 import { useExportSlice } from "../features/export/use-export-slice";
-import { getEncodedEmoji } from "../utils";
+import { getEncodedEmoji, getReactingUsers } from "../utils";
 import { useGuildSlice } from "../features/guild/use-guild-slice";
 import { useUserSlice } from "../features/user/use-user-slice";
 
@@ -89,22 +89,11 @@ const ReactionModal = ({
                     : null;
 
                   if (encodedEmoji && exportReactions) {
-                    reactingUsers = exportReactions
-                      .filter(({ id: userId }) => userMap[userId])
-                      .map(({ id: userId, burst }) => {
-                        const mapping = userMap[userId];
-                        const guildNickName = selectedGuild
-                          ? mapping?.guilds?.[selectedGuild.id]?.nick
-                          : null;
-
-                        return {
-                          displayName: guildNickName || mapping.displayName,
-                          userName: mapping.userName,
-                          id: userId,
-                          avatar: mapping.avatar,
-                          burst,
-                        };
-                      });
+                    reactingUsers = getReactingUsers(
+                      exportReactions,
+                      userMap,
+                      selectedGuild
+                    );
                   }
                   return encodedEmoji ? (
                     <ReactionListItemButton
