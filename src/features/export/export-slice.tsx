@@ -624,7 +624,12 @@ export const getFormattedInnerHtml =
     const { userMention } = dispatch(getSpecialFormatting(rawHtml));
     if (userMention.length) {
       userMention.forEach((userMentionRef) => {
-        const { guilds, userName, displayName } = userMap[userMentionRef.id];
+        const userMapping = userMap[userMentionRef.id];
+        const { guilds, userName, displayName } = userMapping || {
+          guilds: {},
+          userName: null,
+          displayName: null,
+        };
 
         let nick, roles, joinedAt: string | Maybe;
         let roleNames: string[] = [];
@@ -651,7 +656,7 @@ export const getFormattedInnerHtml =
                 borderRadius: "5px",
               }}
               dangerouslySetInnerHTML={{
-                __html: `@${nick || displayName || userName}`,
+                __html: `@${nick || displayName || userName || "Deleted User"}`,
               }}
             />
           )

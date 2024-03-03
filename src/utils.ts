@@ -130,10 +130,10 @@ export const formatUserData = ({
   joinedAt,
   roleNames = [],
 }: FormatUserData) => {
-  return `${userName ? `Username: ${userName}` : ""}${
-    displayName ? `\nGlobal Name: ${displayName}` : ""
-  }${guildNickname ? `\nNickname: ${guildNickname}` : ""}${
-    userId ? `\nUser ID: ${userId}` : ""
+  return `${userName ? `Username: ${userName}\n` : ""}${
+    displayName ? `Global Name: ${displayName}\n` : ""
+  }${guildNickname ? `Nickname: ${guildNickname}\n` : ""}${
+    userId ? `User ID: ${userId}` : ""
   }${joinedAt ? `\nJoined Server: ${joinedAt}` : ""}${
     roleNames.length ? `\n\nRoles: ${roleNames.join(", ")}` : ""
   }`;
