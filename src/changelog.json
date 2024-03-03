@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.11.9",
+    "changes": ["Small bug fix for HTML exports."]
+  },
+  {
     "version": "1.11.8",
     "changes": [
       "Include voice/audio files in exports.",
