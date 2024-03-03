@@ -15,6 +15,7 @@ import SpeakerNotesOffIcon from "@mui/icons-material/SpeakerNotesOff";
 function DonationListButton({ donation }: { donation: Donation }) {
   const [collapsed, setCollapsed] = useState(false);
   const days = differenceInDays(new Date(), parseISO(donation.date));
+  const ago = days > 0 ? `${days} days ago` : "Just earlier 😊";
 
   const handleClick = () => {
     if (donation.message) {
@@ -68,7 +69,7 @@ function DonationListButton({ donation }: { donation: Donation }) {
             ${donation.dollars}
           </ListItemIcon>
         }
-        <ListItemText primary={donation.name} secondary={`${days} days ago`} />
+        <ListItemText primary={donation.name} secondary={ago} />
         {donation.message && (
           <>{collapsed ? <SpeakerNotesOffIcon /> : <ChatIcon />}</>
         )}
