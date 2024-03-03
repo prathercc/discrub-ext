@@ -414,12 +414,12 @@ const MessageMock = ({
                 borderRadius: "5px",
                 display: "none",
                 height: "500px",
+                minWidth: "200px",
                 "&:target": {
                   display: "flex",
                   gap: "5px",
                   position: "fixed",
                   justifyContent: "flex-start",
-                  alignItems: "center",
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
@@ -436,7 +436,7 @@ const MessageMock = ({
                     <Typography>{r.emoji.name}</Typography>
                   )
                 }
-                href="javascript:history.back()"
+                href="#/" // Non-existant target to prevent page scroll when dialog is closed
               >
                 Close
               </Button>
