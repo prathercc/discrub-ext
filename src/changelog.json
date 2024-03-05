@@ -1,7 +1,11 @@
 [
   {
     "version": "1.11.9",
-    "changes": ["Small bug fix for HTML exports."]
+    "changes": [
+      "Bug fix for HTML export crashes.",
+      "Download reacting Users avatars during exports.",
+      "Show loader while Guild roles are being downloaded during exports."
+    ]
   },
   {
     "version": "1.11.8",

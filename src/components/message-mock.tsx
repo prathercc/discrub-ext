@@ -13,7 +13,6 @@ import {
   stringToBool,
   getEncodedEmoji,
   getReactingUsers,
-  getAvatarUrl,
 } from "../utils";
 import CheckIcon from "@mui/icons-material/Check";
 import WebhookEmbedMock from "./webhook-embed-mock";
@@ -68,6 +67,7 @@ const MessageMock = ({
   const roleMap = exportState.roleMap();
   const emojiMap = exportState.emojiMap();
   const reactionMap = exportState.reactionMap();
+  const avatarMap = exportState.avatarMap();
 
   const messageDate = parseISO(message.timestamp);
   const tz = getTimeZone(messageDate);
@@ -455,35 +455,39 @@ const MessageMock = ({
                       const reactingUser = reactingUsers.find(
                         (rU) => rU.id === exportReaction.id
                       );
-                      return reactingUser ? (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "flex-start",
-                            flexDirection: "row",
-                            gap: "5px",
-                          }}
-                        >
-                          <img
-                            style={{
-                              width: "24px",
-                              height: "24px",
-                              borderRadius: "50%",
+                      if (reactingUser) {
+                        const avatarUrl = `../${
+                          avatarMap[`${reactingUser.id}/${reactingUser.avatar}`]
+                        }`;
+                        return (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "flex-start",
+                              flexDirection: "row",
+                              gap: "5px",
                             }}
-                            src={getAvatarUrl(
-                              reactingUser.id,
-                              reactingUser.avatar
-                            )}
-                            alt="avatar-icon"
-                          />
-                          <Typography sx={{ color: "text.primary" }}>
-                            {reactingUser.displayName}
-                          </Typography>
-                          <Typography sx={{ color: "text.disabled" }}>
-                            {reactingUser.userName}
-                          </Typography>
-                        </Box>
-                      ) : null;
+                          >
+                            <img
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                borderRadius: "50%",
+                              }}
+                              src={avatarUrl}
+                              alt="avatar-icon"
+                            />
+                            <Typography sx={{ color: "text.primary" }}>
+                              {reactingUser.displayName}
+                            </Typography>
+                            <Typography sx={{ color: "text.disabled" }}>
+                              {reactingUser.userName}
+                            </Typography>
+                          </Box>
+                        );
+                      } else {
+                        return null;
+                      }
                     })
                   : null}
               </Stack>
