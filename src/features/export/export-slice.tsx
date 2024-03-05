@@ -265,7 +265,11 @@ const _downloadRoles =
   (exportUtils: ExportUtils, guild: Guild): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const guildRoles = guild.roles || [];
-    for (const role of guildRoles) {
+    for (const [_, role] of guildRoles.entries()) {
+      const { discrubCancelled } = getState().app;
+      if (discrubCancelled) break;
+      await dispatch(checkDiscrubPaused());
+
       const { exportMaps } = getState().export;
       const iconUrl = getIconUrl(role);
       if (iconUrl) {
