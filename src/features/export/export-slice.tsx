@@ -909,14 +909,14 @@ export const exportMessages =
     const { selectedGuild } = getState().guild;
     const { messagesPerPage } = getState().export;
 
-    if (selectedGuild)
-      await dispatch(_downloadRoles(exportUtils, selectedGuild));
-    if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
-
     const safeEntityName = getSafeExportName(entityName);
     const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
     dispatch(setIsExporting(true));
     dispatch(setName(safeEntityName));
+
+    if (selectedGuild)
+      await dispatch(_downloadRoles(exportUtils, selectedGuild));
+    if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
 
     const mediaPath = `${entityMainDirectory}/${safeEntityName}_media`;
     const paths = { media: mediaPath };
