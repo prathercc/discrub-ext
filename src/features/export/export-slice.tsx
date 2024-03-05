@@ -5,6 +5,7 @@ import {
   entityContainsMedia,
   formatUserData,
   getAvatarUrl,
+  getEncodedEmoji,
   getExportFileName,
   getIconUrl,
   getMediaUrls,
@@ -265,7 +266,11 @@ const _downloadRoles =
   (exportUtils: ExportUtils, guild: Guild): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const guildRoles = guild.roles || [];
-    for (const role of guildRoles) {
+    for (const [_, role] of guildRoles.entries()) {
+      const { discrubCancelled } = getState().app;
+      if (discrubCancelled) break;
+      await dispatch(checkDiscrubPaused());
+
       const { exportMaps } = getState().export;
       const iconUrl = getIconUrl(role);
       if (iconUrl) {
@@ -289,25 +294,53 @@ const _downloadRoles =
 const _downloadAvatarFromMessage =
   ({ message, exportUtils }: AvatarFromMessageProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
+    const { reactionsEnabled } = settings;
     const { exportMaps } = getState().export;
-    const { id: userId, avatar: avatarId } = message.author || {};
-    const idAndAvatar = `${userId}/${avatarId}`;
+    const { reactionMap, userMap } = exportMaps;
 
-    if (!exportMaps.avatarMap[idAndAvatar]) {
-      const { success, data } = await downloadFile(
-        getAvatarUrl(message.author.id, message.author.avatar)
-      );
-      if (success && data) {
-        const fileExt = data.type.split("/")?.[1] || "webp";
-        const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
-        await exportUtils.addToZip(data, avatarFilePath);
+    const avatarLookups: { id: Snowflake; avatar: string | Maybe }[] = [
+      { id: message.author.id, avatar: message.author.avatar },
+    ];
 
-        dispatch(
-          setExportAvatarMap({
-            ...exportMaps.avatarMap,
-            [idAndAvatar]: avatarFilePath,
-          })
+    if (stringToBool(reactionsEnabled)) {
+      message.reactions?.forEach((r) => {
+        const encodedEmoji = getEncodedEmoji(r.emoji);
+        if (encodedEmoji) {
+          const users = reactionMap[message.id]?.[encodedEmoji] || [];
+          users.forEach((eR) => {
+            const { avatar } = userMap[eR.id] || {};
+            if (!avatarLookups.some((aL) => aL.id === eR.id))
+              avatarLookups.push({ id: eR.id, avatar: avatar });
+          });
+        }
+      });
+    }
+
+    for (const [_, aL] of avatarLookups.entries()) {
+      const { discrubCancelled } = getState().app;
+      if (discrubCancelled) break;
+      await dispatch(checkDiscrubPaused());
+
+      const { avatarMap } = getState().export.exportMaps;
+      const idAndAvatar = `${aL.id}/${aL.avatar}`;
+
+      if (!avatarMap[idAndAvatar]) {
+        const { success, data } = await downloadFile(
+          getAvatarUrl(aL.id, aL.avatar)
         );
+        if (success && data) {
+          const fileExt = data.type.split("/")?.[1] || "webp";
+          const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
+          await exportUtils.addToZip(data, avatarFilePath);
+
+          dispatch(
+            setExportAvatarMap({
+              ...avatarMap,
+              [idAndAvatar]: avatarFilePath,
+            })
+          );
+        }
       }
     }
   };
@@ -624,7 +657,12 @@ export const getFormattedInnerHtml =
     const { userMention } = dispatch(getSpecialFormatting(rawHtml));
     if (userMention.length) {
       userMention.forEach((userMentionRef) => {
-        const { guilds, userName, displayName } = userMap[userMentionRef.id];
+        const userMapping = userMap[userMentionRef.id];
+        const { guilds, userName, displayName } = userMapping || {
+          guilds: {},
+          userName: null,
+          displayName: null,
+        };
 
         let nick, roles, joinedAt: string | Maybe;
         let roleNames: string[] = [];
@@ -651,7 +689,7 @@ export const getFormattedInnerHtml =
                 borderRadius: "5px",
               }}
               dangerouslySetInnerHTML={{
-                __html: `@${nick || displayName || userName}`,
+                __html: `@${nick || displayName || userName || "Deleted User"}`,
               }}
             />
           )
@@ -904,14 +942,14 @@ export const exportMessages =
     const { selectedGuild } = getState().guild;
     const { messagesPerPage } = getState().export;
 
-    if (selectedGuild)
-      await dispatch(_downloadRoles(exportUtils, selectedGuild));
-    if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
-
     const safeEntityName = getSafeExportName(entityName);
     const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
     dispatch(setIsExporting(true));
     dispatch(setName(safeEntityName));
+
+    if (selectedGuild)
+      await dispatch(_downloadRoles(exportUtils, selectedGuild));
+    if (format === ExportType.HTML) await _downloadDiscrubMedia(exportUtils);
 
     const mediaPath = `${entityMainDirectory}/${safeEntityName}_media`;
     const paths = { media: mediaPath };
