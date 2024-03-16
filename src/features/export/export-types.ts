@@ -124,6 +124,7 @@ export type FilesFromMessagesProps = {
   message: Message;
   exportUtils: ExportUtils;
   paths: { media: string };
+  index: number;
 };
 
 export type AvatarFromMessageProps = {
