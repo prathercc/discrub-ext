@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.11.10",
+    "changes": ["Add support for call messages.", "Order exported media."]
+  },
+  {
     "version": "1.11.9",
     "changes": [
       "Bug fix for HTML export crashes.",
