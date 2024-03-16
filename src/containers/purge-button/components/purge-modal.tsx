@@ -28,7 +28,7 @@ import { useUserSlice } from "../../../features/user/use-user-slice";
 import { useAppSlice } from "../../../features/app/use-app-slice";
 import { isMessage } from "../../../app/guards";
 import { usePurgeSlice } from "../../../features/purge/use-purge-slice";
-import MessageMock from "../../../components/message-mock";
+import MessageMock from "../../message-mock/message-mock";
 
 type PurgeModalProps = {
   dialogOpen: boolean;

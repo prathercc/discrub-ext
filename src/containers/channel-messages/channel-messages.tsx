@@ -44,6 +44,7 @@ import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
 import ReactionModal from "../../components/reaction-modal";
+import { MessageType } from "../../enum/message-type";
 
 function ChannelMessages() {
   const { state: userState } = useUserSlice();
@@ -112,6 +113,7 @@ function ChannelMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
+    selectable: m.type !== MessageType.CALL,
     renderRow: (row) => (
       <TableMessage
         settings={settings}

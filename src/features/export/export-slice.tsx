@@ -213,6 +213,7 @@ const _downloadFilesFromMessage =
     message,
     exportUtils,
     paths,
+    index,
   }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { downloadImages, artistMode } = getState().export;
@@ -230,11 +231,11 @@ const _downloadFilesFromMessage =
       mediaPath = `${mediaPath}/${message.userName}`;
     }
 
-    for (const entity of [...embeds, ...attachments]) {
+    for (const [eI, entity] of [...embeds, ...attachments].entries()) {
       const isMedia = entityContainsMedia(entity);
       if (isMedia) {
         const downloadUrls = getMediaUrls(entity);
-        for (const downloadUrl of downloadUrls) {
+        for (const [dI, downloadUrl] of downloadUrls.entries()) {
           const { discrubCancelled } = getState().app;
           if (discrubCancelled) break;
           await dispatch(checkDiscrubPaused());
@@ -245,7 +246,11 @@ const _downloadFilesFromMessage =
             const { success, data } = await downloadFile(downloadUrl);
             if (success && data) {
               const blobType = data.type.split("/")?.[1];
-              const fileName = getExportFileName(entity, blobType);
+              const fileIndex = `${index + 1}_${eI + 1}_${dI + 1}`;
+              const fileName = `${fileIndex}_${getExportFileName(
+                entity,
+                blobType
+              )}`;
               await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
 
               const sliceIdx = mediaPath.indexOf("/");
@@ -770,7 +775,7 @@ const _processMessages =
       await dispatch(checkDiscrubPaused());
 
       await dispatch(
-        _downloadFilesFromMessage({ message, exportUtils, paths })
+        _downloadFilesFromMessage({ message, exportUtils, paths, index: i })
       );
       await dispatch(_downloadEmojisFromMessage({ message, exportUtils }));
       await dispatch(_downloadAvatarFromMessage({ message, exportUtils }));

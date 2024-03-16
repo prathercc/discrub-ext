@@ -158,10 +158,10 @@ export const getExportFileName = (
   if (isRole(entity)) {
     return `${getSafeExportName(entity.name)}_${entity.id}.${type}`;
   } else if (isAttachment(entity)) {
-    return `${getSafeExportName(entity.filename)}_${uuidv4()}.${type}`;
+    return `${getSafeExportName(entity.filename)}.${uuidv4()}.${type}`;
   } else {
     const name = entity.title ? `${entity.title}_` : "";
-    return `${getSafeExportName(name)}${uuidv4()}.${type}`;
+    return `${getSafeExportName(name)}.${uuidv4()}.${type}`;
   }
 };
 

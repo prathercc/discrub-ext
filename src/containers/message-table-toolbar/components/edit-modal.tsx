@@ -17,7 +17,7 @@ import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
 import { AppTask } from "../../../features/app/app-types";
 import { isMessage } from "../../../app/guards";
-import MessageMock from "../../../components/message-mock";
+import MessageMock from "../../message-mock/message-mock";
 import Message from "../../../classes/message";
 
 type EditModalProps = {

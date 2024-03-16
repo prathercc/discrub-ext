@@ -18,6 +18,7 @@ export type TableColumn<T> = {
 
 export type TableRow<T> = {
   data: T & { id: string };
+  selectable: boolean;
   renderRow: (rowData: T & { id: string }) => React.ReactNode;
 };
 
@@ -74,9 +75,11 @@ export default function Table<T>({
   const isSelected = (id: string): boolean =>
     internalSelections.some((selectedId) => selectedId === id);
 
-  const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.checked) {
-      const mappedRowIds = rows.map((row) => row.data.id);
+  const handleSelectAllClick = () => {
+    if (!internalSelections.length) {
+      const mappedRowIds = rows
+        .filter((row) => row.selectable)
+        .map((row) => row.data.id);
       setInternalSelections(mappedRowIds);
       setSelectedRows(mappedRowIds);
     } else {
@@ -132,10 +135,13 @@ export default function Table<T>({
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row) => {
                   const isItemSelected = isSelected(row.data.id);
+                  const onClick = (event: React.MouseEvent) => {
+                    if (row.selectable) handleClick(event, row.data.id);
+                  };
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.data.id)}
+                      onClick={onClick}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
