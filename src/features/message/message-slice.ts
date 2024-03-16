@@ -1255,6 +1255,7 @@ const _messageTypeAllowed = (type: number) => {
     MessageType.GUILD_INVITE_REMINDER,
     MessageType.CONTEXT_MENU_COMMAND,
     MessageType.AUTO_MODERATION_ACTION,
+    MessageType.CALL,
   ].some((t) => t === type);
 };
 
