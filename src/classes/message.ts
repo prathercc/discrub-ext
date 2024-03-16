@@ -14,10 +14,12 @@ import { StickerItemObject } from "../types/sticker-item-object";
 import { StickerObject } from "../types/sticker-object";
 import { RoleSubscriptionDataObject } from "../types/role-subscription-data-object";
 import { ResolvedDataObject } from "../types/resolved-data-object";
+import { MessageCallObject } from "../types/message-call-object";
 
 class Message {
   id: Snowflake;
   channel_id: Snowflake;
+  call?: MessageCallObject;
   author: User;
   content: string;
   timestamp: string;
@@ -51,6 +53,7 @@ class Message {
 
   constructor(opts: {
     id: Snowflake;
+    call?: MessageCallObject;
     channel_id: Snowflake;
     author: User;
     content: string;
@@ -83,6 +86,7 @@ class Message {
     resolved?: ResolvedDataObject;
   }) {
     this.id = opts.id;
+    this.call = opts.call;
     this.channel_id = opts.channel_id;
     this.author = opts.author;
     this.content = opts.content;
