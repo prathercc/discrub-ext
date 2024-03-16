@@ -3,7 +3,7 @@ import Stack from "@mui/material/Stack";
 import Tooltip from "../common-components/tooltip/tooltip";
 import AttachmentIcon from "@mui/icons-material/Attachment";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
-import MessageMock from "./message-mock";
+import MessageMock from "../containers/message-mock/message-mock";
 import Message from "../classes/message";
 import { EmbedType } from "../enum/embed-type";
 import { TableCell } from "@mui/material";

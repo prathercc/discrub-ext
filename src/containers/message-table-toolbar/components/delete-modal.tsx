@@ -22,7 +22,7 @@ import CancelButton from "../../../components/cancel-button";
 import { isMessage } from "../../../app/guards";
 import { DeleteConfiguration } from "../../../features/message/message-types";
 import { AppTask } from "../../../features/app/app-types";
-import MessageMock from "../../../components/message-mock";
+import MessageMock from "../../message-mock/message-mock";
 
 type DeleteModalProps = {
   open: boolean;

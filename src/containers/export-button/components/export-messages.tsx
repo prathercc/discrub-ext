@@ -4,7 +4,7 @@ import Channel from "../../../classes/channel";
 import Message from "../../../classes/message";
 import Guild from "../../../classes/guild";
 import MessageTitleMock from "./message-title-mock";
-import MessageMock from "../../../components/message-mock";
+import MessageMock from "../../message-mock/message-mock";
 import { MessageType } from "../../../enum/message-type";
 
 type ExportMessagesProps = {
@@ -46,7 +46,7 @@ const ExportMessages = ({
               const previousMessage = messages[index - 1];
 
               let isChained = false;
-              if (previousMessage) {
+              if (previousMessage && message.type !== MessageType.CALL) {
                 const elapsedSeconds = differenceInSeconds(
                   parseISO(message.timestamp),
                   parseISO(previousMessage.timestamp)
