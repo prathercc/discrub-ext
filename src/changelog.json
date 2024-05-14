@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.11.11",
+    "changes": [
+      "Add 'Lookup Server Nicknames & Roles' setting.",
+      "Add 'Lookup Display Names' setting.",
+      "Show APP in place of BOT when rendering messages from a Verified Bot."
+    ]
+  },
+  {
     "version": "1.11.10",
     "changes": ["Add support for call messages.", "Order exported media."]
   },
