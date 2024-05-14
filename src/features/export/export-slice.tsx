@@ -694,7 +694,9 @@ export const getFormattedInnerHtml =
                 borderRadius: "5px",
               }}
               dangerouslySetInnerHTML={{
-                __html: `@${nick || displayName || userName || "Deleted User"}`,
+                __html: `@${
+                  nick || displayName || userName || "User Not Found"
+                }`,
               }}
             />
           )

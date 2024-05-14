@@ -92,7 +92,7 @@ const AuthorName = ({
             wordBreak: "keep-all",
           }}
         >
-          <CheckIcon sx={{ width: "12px !important" }} /> BOT
+          <CheckIcon sx={{ width: "12px !important" }} /> APP
         </span>
       )}
     </>

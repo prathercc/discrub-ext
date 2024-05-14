@@ -1025,11 +1025,13 @@ const _getUserMap =
 const _collectUserNames =
   (userMap: ExportUserMap): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
+    const { displayNameLookup } = settings;
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
 
-    if (token) {
+    if (token && stringToBool(displayNameLookup)) {
       const userIds = Object.keys(updateMap);
       for (const [i, userId] of userIds.entries()) {
         if (getState().app.discrubCancelled) break;
@@ -1065,11 +1067,13 @@ const _collectUserNames =
 const _collectUserGuildData =
   (userMap: ExportUserMap, guildId: Snowflake): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
+    const { serverNickNameLookup } = settings;
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
 
-    if (token) {
+    if (token && stringToBool(serverNickNameLookup)) {
       const userIds = Object.keys(updateMap);
       for (const [i, userId] of userIds.entries()) {
         if (getState().app.discrubCancelled) break;
@@ -1114,7 +1118,6 @@ const _collectUserGuildData =
           }
         }
       }
-
       dispatch(resetStatus());
       dispatch(setExportUserMap({ ...existingUserMap, ...updateMap }));
     }
