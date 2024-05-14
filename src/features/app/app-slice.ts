@@ -7,6 +7,8 @@ import { DiscrubSetting } from "../../enum/discrub-setting";
 
 const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
+  [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
+  [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
 };
 
 const emptyTask: AppTask = {

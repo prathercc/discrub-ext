@@ -23,6 +23,8 @@ export const sendChromeMessage = (msg: string, callback?: ChromeCallback) => {
 
 const defaultSettings = [
   { name: DiscrubSetting.REACTIONS_ENABLED, value: "true" },
+  { name: DiscrubSetting.SERVER_NICKNAME_LOOKUP, value: "true" },
+  { name: DiscrubSetting.DISPLAY_NAME_LOOKUP, value: "true" },
 ];
 
 export const initializeSettings = async () => {
@@ -40,7 +42,14 @@ export const getSettings = async (): Promise<AppSettings> => {
     defaultSettings.map((setting) => setting.name)
   );
 
-  return { reactionsEnabled: chromeSettings[DiscrubSetting.REACTIONS_ENABLED] };
+  return {
+    [DiscrubSetting.REACTIONS_ENABLED]:
+      chromeSettings[DiscrubSetting.REACTIONS_ENABLED],
+    [DiscrubSetting.SERVER_NICKNAME_LOOKUP]:
+      chromeSettings[DiscrubSetting.SERVER_NICKNAME_LOOKUP],
+    [DiscrubSetting.DISPLAY_NAME_LOOKUP]:
+      chromeSettings[DiscrubSetting.DISPLAY_NAME_LOOKUP],
+  };
 };
 
 export const setSetting = async (name: string, value: string) => {
