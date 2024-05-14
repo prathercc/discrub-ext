@@ -135,7 +135,7 @@ export const getPreFilterUsers =
           (mapping) =>
             mapping.id !== currentUser.id &&
             Boolean(userMap[mapping.id].guilds[guildId]) &&
-            mapping.name !== "Deleted User"
+            mapping.name !== "User Not Found"
         ),
         { id: currentUser.id, name: currentUser.username },
       ].sort((a, b) => sortByProperty(a, b, "name", "asc"));
