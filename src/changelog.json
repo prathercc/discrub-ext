@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.11.12",
+    "changes": ["Fix message chaining in HTML exports for Tupperbox messages."]
+  },
+  {
     "version": "1.11.11",
     "changes": [
       "Add 'Lookup Server Nicknames & Roles' setting.",
