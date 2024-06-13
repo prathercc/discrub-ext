@@ -55,6 +55,7 @@ const ExportMessages = ({
                 isChained =
                   Math.abs(elapsedSeconds) <= 330 &&
                   message.author.id === previousMessage.author.id &&
+                  message.author.username === previousMessage.author.username &&
                   message.type !== MessageType.REPLY &&
                   previousMessage.channel_id === message.channel_id;
               }
