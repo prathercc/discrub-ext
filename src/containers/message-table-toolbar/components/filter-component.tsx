@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   FormGroup,
   Switch,
+  Checkbox,
 } from "@mui/material";
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import CopyAdornment from "../../../components/copy-adornment";
@@ -150,6 +151,24 @@ const FilterComponent = ({
           }
           label="Attachment Name"
         />
+        {isDm && (
+          <FormGroup sx={{ minWidth: "fit-content" }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  onChange={(e) => {
+                    handleFilterUpdate({
+                      filterName: FilterName.CALL_LOG,
+                      filterValue: e.target.checked,
+                      filterType: FilterType.TOGGLE,
+                    });
+                  }}
+                />
+              }
+              label="Call Log"
+            />
+          </FormGroup>
+        )}
         {!isDm && (
           <Autocomplete
             clearIcon={<ClearIcon />}
