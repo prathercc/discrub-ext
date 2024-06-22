@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.11.13",
+    "changes": ["Add 'Call Log' Quick Filter to messages within a DM."]
+  },
+  {
     "version": "1.11.12",
     "changes": ["Fix message chaining in HTML exports for Tupperbox messages."]
   },
