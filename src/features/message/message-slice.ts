@@ -280,6 +280,14 @@ export const messageSlice = createSlice({
                   x,
                   inverseActive
                 );
+              } else if (param.filterType === FilterType.TOGGLE) {
+                if (param.filterName === FilterName.CALL_LOG) {
+                  criteriaMet = _filterCallLog(
+                    param.filterValue,
+                    x,
+                    inverseActive
+                  );
+                }
               }
             }
           });
@@ -294,6 +302,22 @@ export const messageSlice = createSlice({
     },
   },
 });
+
+const _filterCallLog = (
+  _filterValue: boolean,
+  message: Message,
+  inverseActive: boolean
+): boolean => {
+  const isCall = message.type === MessageType.CALL;
+
+  const criteriaMet = (!inverseActive && !isCall) || (inverseActive && isCall);
+
+  if (criteriaMet) {
+    return false;
+  }
+
+  return true;
+};
 
 const _filterThread = (
   filterValue: Snowflake,

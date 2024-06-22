@@ -42,6 +42,11 @@ export type Filter =
       filterValue: boolean;
       filterType: FilterType.TOGGLE;
       filterName: FilterName.INVERSE;
+    }
+  | {
+      filterValue: boolean;
+      filterType: FilterType.TOGGLE;
+      filterName: FilterName.CALL_LOG;
     };
 
 export type DeleteConfiguration = {
