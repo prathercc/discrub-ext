@@ -73,12 +73,15 @@ const initialState: ExportState = {
   downloadImages: false,
   previewImages: false,
   artistMode: false,
+  folderingThreads: false,
   name: "",
   isGenerating: false,
   currentPage: 1,
+  totalPages: 0,
   messagesPerPage: 1000,
   sortOverride: SortDirection.DESCENDING,
   exportMaps: initialMaps,
+  exportMessages: [],
 };
 
 export const exportSlice = createSlice({
@@ -160,6 +163,9 @@ export const exportSlice = createSlice({
     setCurrentPage: (state, { payload }: { payload: number }): void => {
       state.currentPage = payload;
     },
+    setTotalPages: (state, { payload }: { payload: number }): void => {
+      state.totalPages = payload;
+    },
     setIsGenerating: (state, { payload }: { payload: boolean }): void => {
       state.isGenerating = payload;
     },
@@ -175,13 +181,20 @@ export const exportSlice = createSlice({
     setArtistMode: (state, { payload }: { payload: boolean }): void => {
       state.artistMode = payload;
     },
+    setFolderingThreads: (state, { payload }: { payload: boolean }): void => {
+      state.folderingThreads = payload;
+    },
     setName: (state, { payload }: { payload: string }): void => {
       state.name = payload;
+    },
+    setExportMessages: (state, { payload }: { payload: Message[] }): void => {
+      state.exportMessages = payload;
     },
     resetExportSettings: (state): void => {
       state.downloadImages = false;
       state.previewImages = false;
       state.artistMode = false;
+      state.folderingThreads = false;
       state.sortOverride = SortDirection.DESCENDING;
       state.messagesPerPage = 1000;
     },
@@ -206,6 +219,9 @@ export const {
   setExportRoleMap,
   setExportReactionMap,
   setArtistMode,
+  setFolderingThreads,
+  setExportMessages,
+  setTotalPages,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -886,6 +902,8 @@ const _compressMessages =
       messages.length > messagesPerPage
         ? Math.ceil(messages.length / messagesPerPage)
         : 1;
+    dispatch(setTotalPages(totalPages));
+
     while (getState().export.currentPage <= totalPages) {
       const currentPage = getState().export.currentPage;
       const { discrubCancelled } = getState().app;
@@ -905,6 +923,8 @@ const _compressMessages =
         startIndex,
         startIndex + messagesPerPage
       );
+
+      dispatch(setExportMessages(exportMessages));
 
       if (format === ExportType.JSON) {
         await dispatch(

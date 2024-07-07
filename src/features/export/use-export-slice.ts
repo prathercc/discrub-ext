@@ -15,12 +15,15 @@ import {
   setPreviewImages as setPreviewImagesAction,
   setDownloadImages as setDownloadImagesAction,
   setArtistMode as setArtistModeAction,
+  setFolderingThreads as setFolderingThreadsAction,
   setName as setNameAction,
   resetExportSettings as resetExportSettingsAction,
   getSpecialFormatting as getSpecialFormattingAction,
   getFormattedInnerHtml as getFormattedInnerHtmlAction,
   exportMessages as exportMessagesAction,
   exportChannels as exportChannelsAction,
+  setExportMessages as setExportMessagesAction,
+  setTotalPages as setTotalPagesAction,
 } from "./export-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -54,6 +57,9 @@ const useExportSlice = () => {
   const useArtistMode = (): boolean =>
     useAppSelector((state: RootState) => state.export.artistMode);
 
+  const useFolderingThreads = (): boolean =>
+    useAppSelector((state: RootState) => state.export.folderingThreads);
+
   const useName = (): string =>
     useAppSelector((state: RootState) => state.export.name);
 
@@ -62,6 +68,9 @@ const useExportSlice = () => {
 
   const useCurrentPage = (): number =>
     useAppSelector((state: RootState) => state.export.currentPage);
+
+  const useTotalPages = (): number =>
+    useAppSelector((state: RootState) => state.export.totalPages);
 
   const useMessagesPerPage = (): number =>
     useAppSelector((state: RootState) => state.export.messagesPerPage);
@@ -87,14 +96,19 @@ const useExportSlice = () => {
   const useReactionMap = (): ExportReactionMap =>
     useAppSelector((state: RootState) => state.export.exportMaps.reactionMap);
 
+  const useExportMessages = (): Message[] =>
+    useAppSelector((state: RootState) => state.export.exportMessages);
+
   const state = {
     isExporting: useIsExporting,
     downloadImages: useDownloadImages,
     previewImages: usePreviewImages,
     artistMode: useArtistMode,
+    folderingThreads: useFolderingThreads,
     name: useName,
     isGenerating: useIsGenerating,
     currentPage: useCurrentPage,
+    totalPages: useTotalPages,
     messagesPerPage: useMessagesPerPage,
     sortOverride: useSortOverride,
     userMap: useUserMap,
@@ -103,6 +117,11 @@ const useExportSlice = () => {
     mediaMap: useMediaMap,
     roleMap: useRoleMap,
     reactionMap: useReactionMap,
+    exportMessages: useExportMessages,
+  };
+
+  const setExportMessages = (messages: Message[]): void => {
+    dispatch(setExportMessagesAction(messages));
   };
 
   const setExportUserMap = (map: ExportUserMap): void => {
@@ -145,6 +164,10 @@ const useExportSlice = () => {
     dispatch(setCurrentPageAction(page));
   };
 
+  const setTotalPages = (pages: number): void => {
+    dispatch(setTotalPagesAction(pages));
+  };
+
   const setIsGenerating = (value: boolean): void => {
     dispatch(setIsGeneratingAction(value));
   };
@@ -163,6 +186,10 @@ const useExportSlice = () => {
 
   const setArtistMode = (value: boolean): void => {
     dispatch(setArtistModeAction(value));
+  };
+
+  const setFolderingThreads = (value: boolean): void => {
+    dispatch(setFolderingThreadsAction(value));
   };
 
   const setName = (value: string): void => {
@@ -222,12 +249,15 @@ const useExportSlice = () => {
     setPreviewImages,
     setDownloadImages,
     setArtistMode,
+    setFolderingThreads,
     setName,
     resetExportSettings,
     getSpecialFormatting,
     getFormattedInnerHtml,
     exportMessages,
     exportChannels,
+    setExportMessages,
+    setTotalPages,
   };
 };
 

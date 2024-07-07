@@ -77,6 +77,21 @@ export const getPercent = (index: number, total: number): string => {
 
 /**
  *
+ * @param arr
+ * @returns The joined strings properly punctuated
+ */
+export const punctuateStringArr = (arr: String[]) => {
+  let str = "";
+  arr.forEach((s) => {
+    str = `${str}${
+      str.length ? `${arr[arr.length - 1] === s ? " and " : ", "}` : ""
+    }${s}`;
+  });
+  return str;
+};
+
+/**
+ *
  * @param color Integer representation of hexadecimal color code
  * @returns Hexadecimal color code
  */

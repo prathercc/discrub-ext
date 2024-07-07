@@ -8,12 +8,15 @@ export type ExportState = {
   downloadImages: boolean;
   previewImages: boolean;
   artistMode: boolean;
+  folderingThreads: boolean;
   name: string;
   isGenerating: boolean;
   currentPage: number;
+  totalPages: number;
   messagesPerPage: number;
   sortOverride: SortDirection;
   exportMaps: ExportMap;
+  exportMessages: Message[];
 };
 
 export type ExportMap = {
