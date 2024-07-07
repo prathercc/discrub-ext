@@ -4,8 +4,9 @@ import copy from "copy-to-clipboard";
 import Message from "../classes/message";
 import { useGuildSlice } from "../features/guild/use-guild-slice";
 import { useExportSlice } from "../features/export/use-export-slice";
-import { getAvatarUrl } from "../utils";
+import { resolveAvatarUrl } from "../utils";
 import MuiImg from "../common-components/mui-img/mui-img";
+import { useThreadSlice } from "../features/thread/use-thread-slice";
 
 type AuthorAvatarProps = {
   message: Message;
@@ -27,6 +28,10 @@ const AuthorAvatar = ({
   const { state: exportState } = useExportSlice();
   const avatarMap = exportState.avatarMap();
   const userMap = exportState.userMap();
+  const folderingThreads = exportState.folderingThreads();
+
+  const { state: threadState } = useThreadSlice();
+  const threads = threadState.threads();
 
   const guildNickName =
     userMap[author.id]?.guilds[String(selectedGuild?.id)]?.nick;
@@ -41,11 +46,16 @@ const AuthorAvatar = ({
     }
   };
 
-  const idAndAvatar = `${userId}/${avatarId}`;
-  let avatarUrl = getAvatarUrl(message.author.id, message.author.avatar);
-  if (avatarMap && avatarMap[idAndAvatar] && !browserView) {
-    avatarUrl = `../${avatarMap[idAndAvatar]}`;
-  }
+  const { remote, local } = resolveAvatarUrl(
+    userId,
+    avatarId,
+    message,
+    threads,
+    avatarMap,
+    folderingThreads
+  );
+
+  const avatarUrl = !browserView ? local || remote : remote;
 
   return (
     <>

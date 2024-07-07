@@ -208,9 +208,10 @@ const useExportSlice = () => {
     content,
     exportView,
     isReply,
+    message,
   }: FormattedInnerHtmlProps): string => {
     return dispatch(
-      getFormattedInnerHtmlAction({ content, exportView, isReply })
+      getFormattedInnerHtmlAction({ content, exportView, isReply, message })
     );
   };
 

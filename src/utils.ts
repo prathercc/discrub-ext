@@ -11,8 +11,10 @@ import { EmbedType } from "./enum/embed-type";
 import { MessageRegex } from "./enum/message-regex";
 import { v4 as uuidv4 } from "uuid";
 import {
+  ExportAvatarMap,
   ExportEmojiMap,
   ExportReaction,
+  ExportRoleMap,
   ExportUserMap,
 } from "./features/export/export-types";
 import { ReactingUser } from "./components/reaction-list-item-button";
@@ -154,14 +156,6 @@ export const formatUserData = ({
   }`;
 };
 
-export const getAvatarUrl = (userId: Snowflake, avatar?: string | Maybe) => {
-  if (avatar) {
-    return `https://cdn.discordapp.com/avatars/${userId}/${avatar}`;
-  } else {
-    return "resources/media/default_avatar.png";
-  }
-};
-
 export const getRichEmbeds = (message: Message): Embed[] => {
   return message.embeds.filter((embed) => embed.type === EmbedType.RICH);
 };
@@ -184,11 +178,8 @@ export const getColor = (value: number): string => {
   return colorToHex(value);
 };
 
-export const getIconUrl = (entity: Role | Channel | Guild) => {
-  if (isRole(entity)) {
-    if (!entity.id || !entity.icon) return "";
-    return `https://cdn.discordapp.com/role-icons/${entity.id}/${entity.icon}`;
-  } else if (isGuild(entity)) {
+export const getIconUrl = (entity: Channel | Guild) => {
+  if (isGuild(entity)) {
     if (!entity.icon) {
       return "resources/media/default_group_chat_icon.png";
     }
@@ -199,7 +190,10 @@ export const getIconUrl = (entity: Role | Channel | Guild) => {
     }
 
     if (entity.type === ChannelType.DM && entity.recipients?.[0]?.avatar) {
-      return getAvatarUrl(entity.recipients[0].id, entity.recipients[0].avatar);
+      return resolveAvatarUrl(
+        entity.recipients[0].id,
+        entity.recipients[0].avatar
+      ).remote;
     }
 
     return "resources/media/default_dm_icon.png";
@@ -300,7 +294,9 @@ export const getHighestRoles = (
 
   const iconRole =
     _orderRoles(
-      applicableRoles.filter((role) => Boolean(getIconUrl(role)))
+      applicableRoles.filter(
+        (role) => !!resolveRoleUrl(role.id, role.icon).remote
+      )
     )?.[0] || null;
 
   return { colorRole, iconRole };
@@ -349,13 +345,84 @@ export const isGuildForum = (channel: Channel | Maybe) => {
   );
 };
 
-export const resolveEmojiUrl = (
-  emojiMap: ExportEmojiMap | null,
-  id: Snowflake | Maybe
-) => {
+export type ResolvedFilePathObject = {
+  local: string | undefined;
+  remote: string | undefined;
+};
+
+export const resolveRoleUrl = (
+  roleId: Snowflake,
+  roleIcon: string | Maybe,
+  message?: Message,
+  threads?: Channel[],
+  roleMap?: ExportRoleMap | Maybe,
+  folderingThreads?: boolean
+): ResolvedFilePathObject => {
+  const remoteFilePath =
+    roleId && roleIcon
+      ? `https://cdn.discordapp.com/role-icons/${roleId}/${roleIcon}`
+      : undefined;
+
+  let localFilePath = remoteFilePath
+    ? roleMap?.[remoteFilePath] || undefined
+    : undefined;
+
+  if (localFilePath) {
+    localFilePath =
+      isThreadMessage(message, threads) && folderingThreads
+        ? `../../${localFilePath}`
+        : `../${localFilePath}`;
+  }
+
   return {
-    remote: `https://cdn.discordapp.com/emojis/${id}`,
-    local: id && emojiMap && emojiMap[id] ? `../${emojiMap[id]}` : null,
+    remote: remoteFilePath,
+    local: localFilePath,
+  };
+};
+
+export const resolveEmojiUrl = (
+  emojiId: Snowflake | Maybe,
+  message?: Message,
+  threads?: Channel[],
+  emojiMap?: ExportEmojiMap | Maybe,
+  folderingThreads?: boolean
+): ResolvedFilePathObject => {
+  let localFilePath = emojiId ? emojiMap?.[emojiId] || undefined : undefined;
+  if (localFilePath) {
+    localFilePath =
+      isThreadMessage(message, threads) && folderingThreads
+        ? `../../${localFilePath}`
+        : `../${localFilePath}`;
+  }
+
+  return {
+    remote: `https://cdn.discordapp.com/emojis/${emojiId}`,
+    local: localFilePath,
+  };
+};
+
+export const resolveAvatarUrl = (
+  userId: Snowflake,
+  avatar: string | Maybe,
+  message?: Message,
+  threads?: Channel[],
+  avatarMap?: ExportAvatarMap,
+  folderingThreads?: boolean
+): ResolvedFilePathObject => {
+  const idAndAvatar = `${userId}/${avatar}`;
+  let localFilePath = avatarMap?.[idAndAvatar] || undefined;
+  if (localFilePath) {
+    localFilePath =
+      isThreadMessage(message, threads) && folderingThreads
+        ? `../../${localFilePath}`
+        : `../${localFilePath}`;
+  }
+
+  return {
+    remote: avatar
+      ? `https://cdn.discordapp.com/avatars/${idAndAvatar}`
+      : "resources/media/default_avatar.png",
+    local: localFilePath,
   };
 };
 
@@ -383,4 +450,8 @@ export const getReactingUsers = (
         burst,
       };
     });
+};
+
+export const isThreadMessage = (message?: Message, threads: Channel[] = []) => {
+  return !!message?.thread || threads.some((t) => t.id === message?.channel_id);
 };

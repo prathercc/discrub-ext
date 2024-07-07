@@ -1,6 +1,12 @@
 import { Stack, Typography, useTheme } from "@mui/material";
 import { format, parseISO } from "date-fns";
-import { getTimeZone, stringToBool } from "../../utils";
+import {
+  getTimeZone,
+  resolveAvatarUrl,
+  resolveEmojiUrl,
+  resolveRoleUrl,
+  stringToBool,
+} from "../../utils";
 import { useGuildSlice } from "../../features/guild/use-guild-slice";
 import { useChannelSlice } from "../../features/channel/use-channel-slice";
 import { useThreadSlice } from "../../features/thread/use-thread-slice";
@@ -63,6 +69,7 @@ const MessageMock = ({
   const emojiMap = exportState.emojiMap();
   const reactionMap = exportState.reactionMap();
   const avatarMap = exportState.avatarMap();
+  const folderingThreads = exportState.folderingThreads();
 
   const isCall = message.type === MessageType.CALL;
 
@@ -91,7 +98,35 @@ const MessageMock = ({
       content,
       isReply,
       exportView: !browserView,
+      message,
     });
+  };
+
+  const getLocalAvatar = (userId: Snowflake, avatar: string | Maybe) => {
+    return resolveAvatarUrl(
+      userId,
+      avatar,
+      message,
+      threads,
+      avatarMap,
+      folderingThreads
+    ).local;
+  };
+
+  const getLocalEmoji = (id: Snowflake | Maybe) => {
+    return resolveEmojiUrl(id, message, threads, emojiMap, folderingThreads)
+      .local;
+  };
+
+  const getRolePath = (id: Snowflake, icon: string | Maybe) => {
+    return resolveRoleUrl(
+      id,
+      icon,
+      message,
+      threads,
+      roleMap,
+      folderingThreads
+    );
   };
 
   return (
@@ -118,11 +153,11 @@ const MessageMock = ({
         <RepliedToContent
           browserView={browserView}
           message={repliedToMsg}
-          roleMap={roleMap}
           selectedGuild={selectedGuild}
           userMap={userMap}
           id={`reply-data-${index}`}
           rawHtml={getRawHtml(repliedToMsg.content, true)}
+          getRolePath={getRolePath}
         />
       )}
       <Stack
@@ -169,9 +204,9 @@ const MessageMock = ({
               {!isChained && !isCall && (
                 <AuthorName
                   msg={message}
-                  roleMap={roleMap}
                   userMap={userMap}
                   selectedGuild={selectedGuild}
+                  getRolePath={getRolePath}
                 />
               )}
             </Typography>
@@ -197,11 +232,11 @@ const MessageMock = ({
               call={message.call}
               currentUser={currentUser}
               msg={message}
-              roleMap={roleMap}
               selectedGuild={selectedGuild}
               userMap={userMap}
               longDateTime={longDateTime}
               shortDateTime={shortDateTime}
+              getRolePath={getRolePath}
             />
           )}
           {!browserView && <Attachments message={message} />}
@@ -209,11 +244,11 @@ const MessageMock = ({
           {!browserView && stringToBool(settings.reactionsEnabled) && (
             <Reactions
               message={message}
-              avatarMap={avatarMap}
-              emojiMap={emojiMap}
               reactionMap={reactionMap}
               selectedGuild={selectedGuild}
               userMap={userMap}
+              getLocalAvatar={getLocalAvatar}
+              getLocalEmoji={getLocalEmoji}
             />
           )}
         </Stack>

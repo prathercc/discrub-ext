@@ -3,30 +3,28 @@ import AuthorAvatar from "../../../components/author-avatar";
 import AuthorName from "./author-name";
 import MessageContent from "./message-content";
 import Message from "../../../classes/message";
-import {
-  ExportRoleMap,
-  ExportUserMap,
-} from "../../../features/export/export-types";
+import { ExportUserMap } from "../../../features/export/export-types";
 import Guild from "../../../classes/guild";
+import { ResolvedFilePathObject } from "../../../utils";
 
 type RepliedToContentProps = {
   browserView: boolean;
   message: Message;
-  roleMap: ExportRoleMap;
   userMap: ExportUserMap;
   selectedGuild: Guild | Maybe;
   id: string;
   rawHtml: string;
+  getRolePath: (x: Snowflake, y: string | Maybe) => ResolvedFilePathObject;
 };
 
 const RepliedToContent = ({
   browserView,
   message,
-  roleMap,
   userMap,
   selectedGuild,
   id,
   rawHtml,
+  getRolePath,
 }: RepliedToContentProps) => {
   return (
     <Stack
@@ -75,7 +73,7 @@ const RepliedToContent = ({
           {browserView ? (
             <AuthorName
               msg={message}
-              roleMap={roleMap}
+              getRolePath={getRolePath}
               userMap={userMap}
               selectedGuild={selectedGuild}
             />
@@ -83,7 +81,7 @@ const RepliedToContent = ({
             <a href={`#${message.id}`}>
               <AuthorName
                 msg={message}
-                roleMap={roleMap}
+                getRolePath={getRolePath}
                 userMap={userMap}
                 selectedGuild={selectedGuild}
               />

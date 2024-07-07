@@ -293,7 +293,7 @@ const _downloadRoles =
       await dispatch(checkDiscrubPaused());
 
       const { exportMaps } = getState().export;
-      const iconUrl = getIconUrl(role);
+      const iconUrl = resolveRoleUrl(role.id, role.icon).remote;
       if (iconUrl) {
         const { success, data } = await downloadFile(iconUrl);
         if (success && data) {
@@ -304,7 +304,7 @@ const _downloadRoles =
           dispatch(
             setExportRoleMap({
               ...exportMaps.roleMap,
-              [iconUrl]: `../${roleFilePath}`,
+              [iconUrl]: roleFilePath,
             })
           );
         }
@@ -345,11 +345,10 @@ const _downloadAvatarFromMessage =
 
       const { avatarMap } = getState().export.exportMaps;
       const idAndAvatar = `${aL.id}/${aL.avatar}`;
+      const { remote: remoteAvatar } = resolveAvatarUrl(aL.id, aL.avatar);
 
-      if (!avatarMap[idAndAvatar]) {
-        const { success, data } = await downloadFile(
-          getAvatarUrl(aL.id, aL.avatar)
-        );
+      if (!avatarMap[idAndAvatar] && remoteAvatar) {
+        const { success, data } = await downloadFile(remoteAvatar);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
@@ -463,17 +462,27 @@ export const getSpecialFormatting =
   };
 
 const _getEmoji =
-  ({ emojiRef, isReply, exportView }: GetEmojiProps): AppThunk<ReactElement> =>
+  ({
+    emojiRef,
+    isReply,
+    exportView,
+    message,
+  }: GetEmojiProps): AppThunk<ReactElement> =>
   (_, getState) => {
     const { id, name } = emojiRef;
-    const { emojiMap } = getState().export.exportMaps;
+    const { exportMaps, folderingThreads } = getState().export;
+    const { emojiMap } = exportMaps;
+    const { threads } = getState().thread;
 
     const { local: localPath, remote: remotePath } = resolveEmojiUrl(
+      id,
+      message,
+      threads,
       emojiMap,
-      id
+      folderingThreads
     );
 
-    const emojiUrl = exportView && localPath ? localPath : remotePath;
+    const emojiUrl = exportView ? localPath || remotePath : remotePath;
 
     return (
       <img
@@ -501,6 +510,7 @@ export const getFormattedInnerHtml =
     content,
     isReply = false,
     exportView = false,
+    message,
   }: FormattedInnerHtmlProps): AppThunk<string> =>
   (dispatch, getState) => {
     const { userMap } = getState().export.exportMaps;
@@ -512,7 +522,9 @@ export const getFormattedInnerHtml =
       emoji.forEach((emojiRef) => {
         rawHtml = rawHtml.replaceAll(
           emojiRef.raw,
-          renderToString(dispatch(_getEmoji({ emojiRef, isReply, exportView })))
+          renderToString(
+            dispatch(_getEmoji({ emojiRef, isReply, exportView, message }))
+          )
         );
       });
     }
