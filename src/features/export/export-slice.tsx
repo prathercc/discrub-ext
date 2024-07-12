@@ -462,24 +462,15 @@ export const getSpecialFormatting =
   };
 
 const _getEmoji =
-  ({
-    emojiRef,
-    isReply,
-    exportView,
-    message,
-  }: GetEmojiProps): AppThunk<ReactElement> =>
+  ({ emojiRef, isReply, exportView }: GetEmojiProps): AppThunk<ReactElement> =>
   (_, getState) => {
     const { id, name } = emojiRef;
-    const { exportMaps, folderingThreads } = getState().export;
+    const { exportMaps } = getState().export;
     const { emojiMap } = exportMaps;
-    const { threads } = getState().thread;
 
     const { local: localPath, remote: remotePath } = resolveEmojiUrl(
       id,
-      message,
-      threads,
-      emojiMap,
-      folderingThreads
+      emojiMap
     );
 
     const emojiUrl = exportView ? localPath || remotePath : remotePath;

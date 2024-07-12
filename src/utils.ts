@@ -353,10 +353,7 @@ export type ResolvedFilePathObject = {
 export const resolveRoleUrl = (
   roleId: Snowflake,
   roleIcon: string | Maybe,
-  message?: Message,
-  threads?: Channel[],
-  roleMap?: ExportRoleMap | Maybe,
-  folderingThreads?: boolean
+  roleMap?: ExportRoleMap | Maybe
 ): ResolvedFilePathObject => {
   const remoteFilePath =
     roleId && roleIcon
@@ -368,10 +365,7 @@ export const resolveRoleUrl = (
     : undefined;
 
   if (localFilePath) {
-    localFilePath =
-      isThreadMessage(message, threads) && folderingThreads
-        ? `../../${localFilePath}`
-        : `../${localFilePath}`;
+    localFilePath = `../${localFilePath}`;
   }
 
   return {
@@ -382,17 +376,11 @@ export const resolveRoleUrl = (
 
 export const resolveEmojiUrl = (
   emojiId: Snowflake | Maybe,
-  message?: Message,
-  threads?: Channel[],
-  emojiMap?: ExportEmojiMap | Maybe,
-  folderingThreads?: boolean
+  emojiMap?: ExportEmojiMap | Maybe
 ): ResolvedFilePathObject => {
   let localFilePath = emojiId ? emojiMap?.[emojiId] || undefined : undefined;
   if (localFilePath) {
-    localFilePath =
-      isThreadMessage(message, threads) && folderingThreads
-        ? `../../${localFilePath}`
-        : `../${localFilePath}`;
+    localFilePath = `../${localFilePath}`;
   }
 
   return {
@@ -404,18 +392,12 @@ export const resolveEmojiUrl = (
 export const resolveAvatarUrl = (
   userId: Snowflake,
   avatar: string | Maybe,
-  message?: Message,
-  threads?: Channel[],
-  avatarMap?: ExportAvatarMap,
-  folderingThreads?: boolean
+  avatarMap?: ExportAvatarMap
 ): ResolvedFilePathObject => {
   const idAndAvatar = `${userId}/${avatar}`;
   let localFilePath = avatarMap?.[idAndAvatar] || undefined;
   if (localFilePath) {
-    localFilePath =
-      isThreadMessage(message, threads) && folderingThreads
-        ? `../../${localFilePath}`
-        : `../${localFilePath}`;
+    localFilePath = `../${localFilePath}`;
   }
 
   return {

@@ -6,7 +6,6 @@ import { useGuildSlice } from "../features/guild/use-guild-slice";
 import { useExportSlice } from "../features/export/use-export-slice";
 import { resolveAvatarUrl } from "../utils";
 import MuiImg from "../common-components/mui-img/mui-img";
-import { useThreadSlice } from "../features/thread/use-thread-slice";
 
 type AuthorAvatarProps = {
   message: Message;
@@ -28,10 +27,6 @@ const AuthorAvatar = ({
   const { state: exportState } = useExportSlice();
   const avatarMap = exportState.avatarMap();
   const userMap = exportState.userMap();
-  const folderingThreads = exportState.folderingThreads();
-
-  const { state: threadState } = useThreadSlice();
-  const threads = threadState.threads();
 
   const guildNickName =
     userMap[author.id]?.guilds[String(selectedGuild?.id)]?.nick;
@@ -46,14 +41,7 @@ const AuthorAvatar = ({
     }
   };
 
-  const { remote, local } = resolveAvatarUrl(
-    userId,
-    avatarId,
-    message,
-    threads,
-    avatarMap,
-    folderingThreads
-  );
+  const { remote, local } = resolveAvatarUrl(userId, avatarId, avatarMap);
 
   const avatarUrl = !browserView ? local || remote : remote;
 

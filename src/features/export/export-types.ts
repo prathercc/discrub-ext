@@ -1,3 +1,4 @@
+import Channel from "../../classes/channel";
 import Message from "../../classes/message";
 import { ExportType } from "../../enum/export-type";
 import { SortDirection } from "../../enum/sort-direction";
@@ -176,4 +177,5 @@ export type CompressMessagesProps = {
   entityName: string;
   entityMainDirectory: string;
   exportUtils: ExportUtils;
+  threadData?: { thread: Channel; threadNo: number; threadCount: number };
 };

@@ -69,7 +69,6 @@ const MessageMock = ({
   const emojiMap = exportState.emojiMap();
   const reactionMap = exportState.reactionMap();
   const avatarMap = exportState.avatarMap();
-  const folderingThreads = exportState.folderingThreads();
 
   const isCall = message.type === MessageType.CALL;
 
@@ -103,30 +102,15 @@ const MessageMock = ({
   };
 
   const getLocalAvatar = (userId: Snowflake, avatar: string | Maybe) => {
-    return resolveAvatarUrl(
-      userId,
-      avatar,
-      message,
-      threads,
-      avatarMap,
-      folderingThreads
-    ).local;
+    return resolveAvatarUrl(userId, avatar, avatarMap).local;
   };
 
   const getLocalEmoji = (id: Snowflake | Maybe) => {
-    return resolveEmojiUrl(id, message, threads, emojiMap, folderingThreads)
-      .local;
+    return resolveEmojiUrl(id, emojiMap).local;
   };
 
   const getRolePath = (id: Snowflake, icon: string | Maybe) => {
-    return resolveRoleUrl(
-      id,
-      icon,
-      message,
-      threads,
-      roleMap,
-      folderingThreads
-    );
+    return resolveRoleUrl(id, icon, roleMap);
   };
 
   return (
