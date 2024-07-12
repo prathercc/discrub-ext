@@ -1,6 +1,6 @@
 import {
+  ResolvedFilePathObject,
   formatUserData,
-  getIconUrl,
   getColor,
   getHighestRoles,
   getRoleNames,
@@ -8,24 +8,21 @@ import {
 import CheckIcon from "@mui/icons-material/Check";
 import Message from "../../../classes/message";
 import Role from "../../../classes/role";
-import {
-  ExportRoleMap,
-  ExportUserMap,
-} from "../../../features/export/export-types";
+import { ExportUserMap } from "../../../features/export/export-types";
 import Guild from "../../../classes/guild";
 
 export type AuthorNameProps = {
   msg: Message;
   userMap: ExportUserMap;
-  roleMap: ExportRoleMap;
   selectedGuild: Guild | Maybe;
+  getRolePath: (x: Snowflake, y: string | Maybe) => ResolvedFilePathObject;
 };
 
 const AuthorName = ({
   msg,
   userMap,
-  roleMap,
   selectedGuild,
+  getRolePath,
 }: AuthorNameProps) => {
   const author = msg.author;
 
@@ -48,6 +45,10 @@ const AuthorName = ({
     roleNames = getRoleNames(guildRoles, selectedGuild);
   }
 
+  const { local, remote }: ResolvedFilePathObject = iconRole
+    ? getRolePath(iconRole.id, iconRole.icon)
+    : { local: undefined, remote: undefined };
+
   return (
     <>
       <strong
@@ -67,11 +68,7 @@ const AuthorName = ({
         <img
           title={iconRole.name}
           style={{ width: "20px", height: "20px" }}
-          src={
-            roleMap[String(getIconUrl(iconRole))] ||
-            getIconUrl(iconRole) ||
-            undefined
-          }
+          src={local || remote}
           alt="role-icon"
         />
       )}

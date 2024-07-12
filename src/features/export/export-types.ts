@@ -1,3 +1,4 @@
+import Channel from "../../classes/channel";
 import Message from "../../classes/message";
 import { ExportType } from "../../enum/export-type";
 import { SortDirection } from "../../enum/sort-direction";
@@ -8,12 +9,15 @@ export type ExportState = {
   downloadImages: boolean;
   previewImages: boolean;
   artistMode: boolean;
+  folderingThreads: boolean;
   name: string;
   isGenerating: boolean;
   currentPage: number;
+  totalPages: number;
   messagesPerPage: number;
   sortOverride: SortDirection;
   exportMaps: ExportMap;
+  exportMessages: Message[];
 };
 
 export type ExportMap = {
@@ -136,12 +140,14 @@ export type GetEmojiProps = {
   emojiRef: EmojiRef;
   isReply: boolean;
   exportView: boolean;
+  message: Message;
 };
 
 export type FormattedInnerHtmlProps = {
   content: string;
   isReply: boolean;
   exportView: boolean;
+  message: Message;
 };
 
 export type EmojisFromMessageProps = {
@@ -171,4 +177,5 @@ export type CompressMessagesProps = {
   entityName: string;
   entityMainDirectory: string;
   exportUtils: ExportUtils;
+  threadData?: { thread: Channel; threadNo: number; threadCount: number };
 };

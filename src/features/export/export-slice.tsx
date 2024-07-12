@@ -4,15 +4,15 @@ import { v4 as uuidv4 } from "uuid";
 import {
   entityContainsMedia,
   formatUserData,
-  getAvatarUrl,
   getEncodedEmoji,
   getExportFileName,
-  getIconUrl,
   getMediaUrls,
   getRoleNames,
   getSafeExportName,
   isDm,
+  resolveAvatarUrl,
   resolveEmojiUrl,
+  resolveRoleUrl,
   sortByProperty,
   stringToBool,
   wait,
@@ -73,12 +73,15 @@ const initialState: ExportState = {
   downloadImages: false,
   previewImages: false,
   artistMode: false,
+  folderingThreads: false,
   name: "",
   isGenerating: false,
   currentPage: 1,
+  totalPages: 0,
   messagesPerPage: 1000,
   sortOverride: SortDirection.DESCENDING,
   exportMaps: initialMaps,
+  exportMessages: [],
 };
 
 export const exportSlice = createSlice({
@@ -160,6 +163,9 @@ export const exportSlice = createSlice({
     setCurrentPage: (state, { payload }: { payload: number }): void => {
       state.currentPage = payload;
     },
+    setTotalPages: (state, { payload }: { payload: number }): void => {
+      state.totalPages = payload;
+    },
     setIsGenerating: (state, { payload }: { payload: boolean }): void => {
       state.isGenerating = payload;
     },
@@ -175,13 +181,20 @@ export const exportSlice = createSlice({
     setArtistMode: (state, { payload }: { payload: boolean }): void => {
       state.artistMode = payload;
     },
+    setFolderingThreads: (state, { payload }: { payload: boolean }): void => {
+      state.folderingThreads = payload;
+    },
     setName: (state, { payload }: { payload: string }): void => {
       state.name = payload;
+    },
+    setExportMessages: (state, { payload }: { payload: Message[] }): void => {
+      state.exportMessages = payload;
     },
     resetExportSettings: (state): void => {
       state.downloadImages = false;
       state.previewImages = false;
       state.artistMode = false;
+      state.folderingThreads = false;
       state.sortOverride = SortDirection.DESCENDING;
       state.messagesPerPage = 1000;
     },
@@ -206,6 +219,9 @@ export const {
   setExportRoleMap,
   setExportReactionMap,
   setArtistMode,
+  setFolderingThreads,
+  setExportMessages,
+  setTotalPages,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -277,7 +293,7 @@ const _downloadRoles =
       await dispatch(checkDiscrubPaused());
 
       const { exportMaps } = getState().export;
-      const iconUrl = getIconUrl(role);
+      const iconUrl = resolveRoleUrl(role.id, role.icon).remote;
       if (iconUrl) {
         const { success, data } = await downloadFile(iconUrl);
         if (success && data) {
@@ -288,7 +304,7 @@ const _downloadRoles =
           dispatch(
             setExportRoleMap({
               ...exportMaps.roleMap,
-              [iconUrl]: `../${roleFilePath}`,
+              [iconUrl]: roleFilePath,
             })
           );
         }
@@ -329,11 +345,10 @@ const _downloadAvatarFromMessage =
 
       const { avatarMap } = getState().export.exportMaps;
       const idAndAvatar = `${aL.id}/${aL.avatar}`;
+      const { remote: remoteAvatar } = resolveAvatarUrl(aL.id, aL.avatar);
 
-      if (!avatarMap[idAndAvatar]) {
-        const { success, data } = await downloadFile(
-          getAvatarUrl(aL.id, aL.avatar)
-        );
+      if (!avatarMap[idAndAvatar] && remoteAvatar) {
+        const { success, data } = await downloadFile(remoteAvatar);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
@@ -450,14 +465,15 @@ const _getEmoji =
   ({ emojiRef, isReply, exportView }: GetEmojiProps): AppThunk<ReactElement> =>
   (_, getState) => {
     const { id, name } = emojiRef;
-    const { emojiMap } = getState().export.exportMaps;
+    const { exportMaps } = getState().export;
+    const { emojiMap } = exportMaps;
 
     const { local: localPath, remote: remotePath } = resolveEmojiUrl(
-      emojiMap,
-      id
+      id,
+      emojiMap
     );
 
-    const emojiUrl = exportView && localPath ? localPath : remotePath;
+    const emojiUrl = exportView ? localPath || remotePath : remotePath;
 
     return (
       <img
@@ -485,6 +501,7 @@ export const getFormattedInnerHtml =
     content,
     isReply = false,
     exportView = false,
+    message,
   }: FormattedInnerHtmlProps): AppThunk<string> =>
   (dispatch, getState) => {
     const { userMap } = getState().export.exportMaps;
@@ -496,7 +513,9 @@ export const getFormattedInnerHtml =
       emoji.forEach((emojiRef) => {
         rawHtml = rawHtml.replaceAll(
           emojiRef.raw,
-          renderToString(dispatch(_getEmoji({ emojiRef, isReply, exportView })))
+          renderToString(
+            dispatch(_getEmoji({ emojiRef, isReply, exportView, message }))
+          )
         );
       });
     }
@@ -875,17 +894,52 @@ const _compressMessages =
     entityName,
     entityMainDirectory,
     exportUtils,
+    threadData,
   }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    dispatch(setStatus("Compressing"));
+    const compressionStr = threadData
+      ? ` Thread ${threadData.threadNo}/${threadData.threadCount}`
+      : "";
+    dispatch(setStatus(`Compressing${compressionStr} - Page ? of ?`));
     await wait(1);
 
-    const { messagesPerPage } = getState().export;
+    const { messagesPerPage, folderingThreads } = getState().export;
+    const { threads } = getState().thread;
+
+    let adjustedMessages: Message[] = messages;
+
+    if (folderingThreads && !threadData) {
+      adjustedMessages = messages.filter(
+        (m) => !m.thread && !threads.some((t) => t.id === m.channel_id)
+      );
+      for (let [i, t] of threads.entries()) {
+        const threadNumber = i + 1;
+        const threadName = `Thread ${threadNumber}`;
+        await dispatch(
+          _compressMessages({
+            messages: messages.filter(
+              (m) => m.thread?.id === t.id || m.channel_id === t.id
+            ),
+            format,
+            entityName: threadName,
+            entityMainDirectory,
+            exportUtils,
+            threadData: {
+              thread: t,
+              threadCount: threads.length,
+              threadNo: threadNumber,
+            },
+          })
+        );
+      }
+    }
 
     const totalPages =
-      messages.length > messagesPerPage
-        ? Math.ceil(messages.length / messagesPerPage)
+      adjustedMessages.length > messagesPerPage
+        ? Math.ceil(adjustedMessages.length / messagesPerPage)
         : 1;
+    dispatch(setTotalPages(totalPages));
+
     while (getState().export.currentPage <= totalPages) {
       const currentPage = getState().export.currentPage;
       const { discrubCancelled } = getState().app;
@@ -894,17 +948,19 @@ const _compressMessages =
       if (format === ExportType.MEDIA) {
         dispatch(setStatus("Cleaning up..."));
       } else {
-        const status = `Compressing - Page ${currentPage} of ${totalPages}`;
+        const status = `Compressing${compressionStr} - Page ${currentPage} of ${totalPages}`;
         dispatch(setStatus(status));
       }
 
       await wait(1);
       const startIndex =
         currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
-      const exportMessages = messages?.slice(
+      const exportMessages = adjustedMessages?.slice(
         startIndex,
         startIndex + messagesPerPage
       );
+
+      dispatch(setExportMessages(exportMessages));
 
       if (format === ExportType.JSON) {
         await dispatch(

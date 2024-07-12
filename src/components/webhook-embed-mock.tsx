@@ -11,15 +11,18 @@ import { getColor, getTimeZone } from "../utils";
 import Embed from "../classes/embed";
 import { useExportSlice } from "../features/export/use-export-slice";
 import { EmbedFieldObject } from "../types/embed-field-object";
+import Message from "../classes/message";
 
 type WebhookEmbedMockProps = {
   embed: Embed;
   alwaysExpanded?: boolean;
+  message: Message;
 };
 
 const WebhookEmbedMock = ({
   embed,
   alwaysExpanded = false,
+  message,
 }: WebhookEmbedMockProps) => {
   const theme = useTheme();
 
@@ -64,6 +67,7 @@ const WebhookEmbedMock = ({
                   content: name || "",
                   isReply: false,
                   exportView: alwaysExpanded,
+                  message,
                 }),
               }}
             />
@@ -78,6 +82,7 @@ const WebhookEmbedMock = ({
                 content: name || "",
                 isReply: false,
                 exportView: alwaysExpanded,
+                message,
               }),
             }}
           />
@@ -128,6 +133,7 @@ const WebhookEmbedMock = ({
                   content: title || "",
                   isReply: false,
                   exportView: alwaysExpanded,
+                  message,
                 }),
               }}
             />
@@ -141,6 +147,7 @@ const WebhookEmbedMock = ({
                 content: title || "",
                 isReply: false,
                 exportView: alwaysExpanded,
+                message,
               }),
             }}
           />
@@ -160,6 +167,7 @@ const WebhookEmbedMock = ({
             content: description || "",
             isReply: false,
             exportView: alwaysExpanded,
+            message,
           }),
         }}
       />
@@ -178,6 +186,7 @@ const WebhookEmbedMock = ({
                 content: name,
                 isReply: false,
                 exportView: alwaysExpanded,
+                message,
               }),
             }}
           />
@@ -191,6 +200,7 @@ const WebhookEmbedMock = ({
                 content: value,
                 isReply: false,
                 exportView: alwaysExpanded,
+                message,
               }),
             }}
           />
@@ -260,6 +270,7 @@ const WebhookEmbedMock = ({
                 content: text,
                 isReply: false,
                 exportView: alwaysExpanded,
+                message,
               }),
             }}
           />

@@ -4,7 +4,7 @@ import copy from "copy-to-clipboard";
 import Message from "../classes/message";
 import { useGuildSlice } from "../features/guild/use-guild-slice";
 import { useExportSlice } from "../features/export/use-export-slice";
-import { getAvatarUrl } from "../utils";
+import { resolveAvatarUrl } from "../utils";
 import MuiImg from "../common-components/mui-img/mui-img";
 
 type AuthorAvatarProps = {
@@ -41,11 +41,9 @@ const AuthorAvatar = ({
     }
   };
 
-  const idAndAvatar = `${userId}/${avatarId}`;
-  let avatarUrl = getAvatarUrl(message.author.id, message.author.avatar);
-  if (avatarMap && avatarMap[idAndAvatar] && !browserView) {
-    avatarUrl = `../${avatarMap[idAndAvatar]}`;
-  }
+  const { remote, local } = resolveAvatarUrl(userId, avatarId, avatarMap);
+
+  const avatarUrl = !browserView ? local || remote : remote;
 
   return (
     <>

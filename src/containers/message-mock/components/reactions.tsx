@@ -1,14 +1,8 @@
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
-import {
-  resolveEmojiUrl,
-  getEncodedEmoji,
-  getReactingUsers,
-} from "../../../utils";
+import { getEncodedEmoji, getReactingUsers } from "../../../utils";
 import Message from "../../../classes/message";
 import ServerEmoji from "../../../components/server-emoji";
 import {
-  ExportAvatarMap,
-  ExportEmojiMap,
   ExportReaction,
   ExportReactionMap,
   ExportUserMap,
@@ -18,20 +12,20 @@ import { MessageType } from "../../../enum/message-type";
 
 type ReactionsProps = {
   message: Message;
-  emojiMap: ExportEmojiMap;
   reactionMap: ExportReactionMap;
   userMap: ExportUserMap;
-  avatarMap: ExportAvatarMap;
   selectedGuild: Guild | Maybe;
+  getLocalAvatar: (x: Snowflake, y: string | Maybe) => string | undefined;
+  getLocalEmoji: (x: Snowflake | Maybe) => string | undefined;
 };
 
 const Reactions = ({
   message,
-  emojiMap,
   reactionMap,
   userMap,
-  avatarMap,
   selectedGuild,
+  getLocalAvatar,
+  getLocalEmoji,
 }: ReactionsProps) => {
   const theme = useTheme();
 
@@ -46,7 +40,7 @@ const Reactions = ({
       }}
     >
       {message.reactions?.map((r) => {
-        const { local: localPath } = resolveEmojiUrl(emojiMap, r.emoji.id);
+        const localPath = getLocalEmoji(r.emoji.id);
         return (
           <Box
             title={r.emoji.id ? `:${r.emoji.name}:` : String(r.emoji.name)}
@@ -88,7 +82,7 @@ const Reactions = ({
         );
       })}
       {message.reactions?.map((r) => {
-        const { local: localPath } = resolveEmojiUrl(emojiMap, r.emoji.id);
+        const localPath = getLocalEmoji(r.emoji.id);
         const encodedEmoji = getEncodedEmoji(r.emoji);
         const exportReactions: ExportReaction[] = encodedEmoji
           ? reactionMap[message.id][encodedEmoji]
@@ -137,9 +131,11 @@ const Reactions = ({
                       (rU) => rU.id === exportReaction.id
                     );
                     if (reactingUser) {
-                      const avatarUrl = `../${
-                        avatarMap[`${reactingUser.id}/${reactingUser.avatar}`]
-                      }`;
+                      const avatarUrl = getLocalAvatar(
+                        reactingUser.id,
+                        reactingUser.avatar
+                      );
+
                       return (
                         <Box
                           sx={{

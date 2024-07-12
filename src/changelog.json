@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.11.14",
+    "changes": ["Add toggle to export threads & forum post as separate files."]
+  },
+  {
     "version": "1.11.13",
     "changes": ["Add 'Call Log' Quick Filter to messages within a DM."]
   },

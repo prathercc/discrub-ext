@@ -13,8 +13,7 @@ import DefaultContent from "./components/default-content";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import BulkContent from "./components/bulk-content";
 import ExportMessages from "./components/export-messages";
-import { sortByProperty } from "../../utils";
-import Message from "../../classes/message";
+import { punctuateStringArr } from "../../utils";
 import Guild from "../../classes/guild";
 
 type ExportButtonProps = {
@@ -37,12 +36,13 @@ const ExportButton = ({
   } = useExportSlice();
   const isGenerating = exportState.isGenerating();
   const isExporting = exportState.isExporting();
-  const sortOverride = exportState.sortOverride();
   const currentPage = exportState.currentPage();
-  const messagesPerPage = exportState.messagesPerPage();
   const downloadImages = exportState.downloadImages();
   const previewImages = exportState.previewImages();
   const artistMode = exportState.artistMode();
+  const folderingThreads = exportState.folderingThreads();
+  const activeExportMessages = exportState.exportMessages();
+  const totalPages = exportState.totalPages();
 
   const { setDiscrubCancelled, setDiscrubPaused } = useAppSlice();
 
@@ -145,33 +145,10 @@ const ExportButton = ({
       );
   };
 
-  const getExportMessages = (): Message[] => {
-    let exportMessages = filters.length > 0 ? filteredMessages : messages;
-    exportMessages = bulk
-      ? exportMessages
-          .map((m) => new Message({ ...m }))
-          .sort((a, b) =>
-            sortByProperty(
-              Object.assign(a, { date: new Date(a.timestamp) }),
-              Object.assign(b, { date: new Date(b.timestamp) }),
-              "date",
-              sortOverride
-            )
-          )
-      : exportMessages;
-    const startIndex =
-      currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
-
-    return exportMessages.slice(startIndex, startIndex + messagesPerPage);
-  };
-
   const exportTitle = `Export ${bulk ? exportType : "Messages"}`;
 
   const getExportPageTitle = (): string => {
-    return `Page ${currentPage} of ${Math.ceil(
-      (filteredMessages.length ? filteredMessages.length : messages.length) /
-        messagesPerPage
-    )}`;
+    return `Page ${currentPage} of ${totalPages}`;
   };
 
   const getTooltipDescription = (exportType: ExportType): string => {
@@ -186,9 +163,16 @@ const ExportButton = ({
         exportAccessories.push("Media Previewed");
       }
 
-      const accessories = `(${exportAccessories.join(" and ")})`;
-      descriptionArr.push(`Messages ${accessories}`);
+      if (folderingThreads) {
+        exportAccessories.push("Threads & Forum Posts Foldered");
+      }
+
+      const accessory = punctuateStringArr(exportAccessories);
+      descriptionArr.push(
+        `Messages ${accessory.length ? `(${accessory})` : ""}`
+      );
     }
+
     if (downloadImages) {
       descriptionArr.push(
         `Attached & Embedded Media${artistMode ? " (Artist Mode)" : ""}`
@@ -216,7 +200,7 @@ const ExportButton = ({
       </Button>
       {isGenerating && (
         <ExportMessages
-          messages={getExportMessages()}
+          messages={activeExportMessages}
           componentRef={contentRef}
           isExporting={isExporting}
           entity={entity}

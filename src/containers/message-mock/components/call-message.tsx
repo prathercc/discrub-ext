@@ -16,11 +16,11 @@ const CallMessage = ({
   currentUser,
   call,
   msg,
-  roleMap,
   userMap,
   selectedGuild,
   longDateTime,
   shortDateTime,
+  getRolePath,
 }: CallMessageProps) => {
   const theme = useTheme();
   const { timestamp } = msg;
@@ -59,9 +59,9 @@ const CallMessage = ({
       <Typography sx={{ color: theme.palette.text.primary }}>
         <AuthorName
           msg={msg}
-          roleMap={roleMap}
           userMap={userMap}
           selectedGuild={selectedGuild}
+          getRolePath={getRolePath}
         />
       </Typography>
       <Typography style={{ color: theme.palette.text.disabled }}>

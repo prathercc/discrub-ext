@@ -15,7 +15,7 @@ import { Emoji } from "../classes/emoji";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import { getAvatarUrl, resolveEmojiUrl } from "../utils";
+import { resolveAvatarUrl, resolveEmojiUrl } from "../utils";
 import copy from "copy-to-clipboard";
 import Tooltip from "../common-components/tooltip/tooltip";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
@@ -65,7 +65,7 @@ const ReactionListItemButton = ({
     return (
       <img
         style={{ width: "40px", height: "40px", borderRadius: "50%" }}
-        src={getAvatarUrl(reactingUser.id, reactingUser.avatar)}
+        src={resolveAvatarUrl(reactingUser.id, reactingUser.avatar).remote}
         alt="avatar-icon"
       />
     );
@@ -106,16 +106,14 @@ const ReactionListItemButton = ({
     );
   };
 
+  const remoteEmojiUrl = resolveEmojiUrl(emoji.id).remote;
+
   return (
     <>
       <ListItemButton dense onClick={handleClick}>
         <Tooltip title={emoji.id ? `:${emoji.name}:` : `${emoji.name}`}>
           <ListItemIcon onClick={handleEmojiClick}>
-            {emoji.id ? (
-              <ServerEmoji url={resolveEmojiUrl(null, emoji.id).remote} />
-            ) : (
-              emoji.name
-            )}
+            {remoteEmojiUrl ? <ServerEmoji url={remoteEmojiUrl} /> : emoji.name}
           </ListItemIcon>
         </Tooltip>
         <ListItemText
