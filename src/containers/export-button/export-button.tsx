@@ -164,7 +164,7 @@ const ExportButton = ({
       }
 
       if (folderingThreads) {
-        exportAccessories.push("Threads Foldered");
+        exportAccessories.push("Threads & Forum Posts Foldered");
       }
 
       const accessory = punctuateStringArr(exportAccessories);

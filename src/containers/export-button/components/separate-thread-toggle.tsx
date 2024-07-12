@@ -13,8 +13,10 @@ const SeparateThreadToggle = () => {
     <Tooltip
       arrow
       placement="top"
-      title={`${!folderingThreads ? "Not " : ""}Foldering Threads`}
-      description="Foldering Threads will store any existing threads into separate files for better readability."
+      title={`${
+        !folderingThreads ? "Not " : ""
+      }Foldering Threads & Forum Posts`}
+      description="Foldering Threads & Forum Posts will store any existing threads or forum posts into separate files for better readability."
     >
       <IconButton
         disabled={isExporting}
