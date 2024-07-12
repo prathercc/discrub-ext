@@ -894,16 +894,49 @@ const _compressMessages =
     entityName,
     entityMainDirectory,
     exportUtils,
+    threadData,
   }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    dispatch(setStatus("Compressing"));
+    const compressionStr = threadData
+      ? ` Thread ${threadData.threadNo}/${threadData.threadCount}`
+      : "";
+    dispatch(setStatus(`Compressing${compressionStr} - Page ? of ?`));
     await wait(1);
 
-    const { messagesPerPage } = getState().export;
+    const { messagesPerPage, folderingThreads } = getState().export;
+    const { threads } = getState().thread;
+
+    let adjustedMessages: Message[] = messages;
+
+    if (folderingThreads && !threadData) {
+      adjustedMessages = messages.filter(
+        (m) => !m.thread && !threads.some((t) => t.id === m.channel_id)
+      );
+      for (let [i, t] of threads.entries()) {
+        const threadNumber = i + 1;
+        const threadName = `Thread ${threadNumber}`;
+        await dispatch(
+          _compressMessages({
+            messages: messages.filter(
+              (m) => m.thread?.id === t.id || m.channel_id === t.id
+            ),
+            format,
+            entityName: threadName,
+            entityMainDirectory,
+            exportUtils,
+            threadData: {
+              thread: t,
+              threadCount: threads.length,
+              threadNo: threadNumber,
+            },
+          })
+        );
+      }
+    }
 
     const totalPages =
-      messages.length > messagesPerPage
-        ? Math.ceil(messages.length / messagesPerPage)
+      adjustedMessages.length > messagesPerPage
+        ? Math.ceil(adjustedMessages.length / messagesPerPage)
         : 1;
     dispatch(setTotalPages(totalPages));
 
@@ -915,14 +948,14 @@ const _compressMessages =
       if (format === ExportType.MEDIA) {
         dispatch(setStatus("Cleaning up..."));
       } else {
-        const status = `Compressing - Page ${currentPage} of ${totalPages}`;
+        const status = `Compressing${compressionStr} - Page ${currentPage} of ${totalPages}`;
         dispatch(setStatus(status));
       }
 
       await wait(1);
       const startIndex =
         currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
-      const exportMessages = messages?.slice(
+      const exportMessages = adjustedMessages?.slice(
         startIndex,
         startIndex + messagesPerPage
       );
