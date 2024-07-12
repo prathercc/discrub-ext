@@ -15,8 +15,8 @@ const SeparateThreadToggle = () => {
       placement="top"
       title={`${
         !folderingThreads ? "Not " : ""
-      }Foldering Threads & Forum Posts`}
-      description="Foldering Threads & Forum Posts will store any existing threads or forum posts into separate files for better readability."
+      }Separating Threads & Forum Posts`}
+      description="Separating Threads & Forum Posts will store any existing threads or forum posts into separate files for better readability."
     >
       <IconButton
         disabled={isExporting}
