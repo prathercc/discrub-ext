@@ -143,6 +143,7 @@ const ExportButton = ({
     } else
       return (
         <DefaultContent
+          isDm={isDm}
           isExporting={isExporting}
           messageCount={
             filters.length ? filteredMessages?.length : messages.length

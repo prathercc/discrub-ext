@@ -15,9 +15,14 @@ import SeparateThreadToggle from "./separate-thread-toggle";
 type DefaultContentProps = {
   isExporting: boolean;
   messageCount: number;
+  isDm: boolean;
 };
 
-const DefaultContent = ({ isExporting, messageCount }: DefaultContentProps) => {
+const DefaultContent = ({
+  isExporting,
+  messageCount,
+  isDm,
+}: DefaultContentProps) => {
   const theme = useTheme();
 
   return (
@@ -42,7 +47,7 @@ const DefaultContent = ({ isExporting, messageCount }: DefaultContentProps) => {
             >
               <Typography variant="body2">Export Options</Typography>
               <Stack direction="row" alignItems="center" spacing={1}>
-                <SeparateThreadToggle />
+                {!isDm && <SeparateThreadToggle />}
                 <ArtistModeToggle />
                 <PreviewImageToggle />
                 <ImageToggle />

@@ -6,7 +6,8 @@
       "Prevent ghost files from being created when no messages are available for export.",
       "Apply Advanced Filters to multi-Channel exports.",
       "Show Channel name on thread/forum post messages in Guild exports.",
-      "Fix issue where standard emojis were not rendered properly in reaction dialog."
+      "Fix issue where standard emojis were not rendered properly in reaction dialog.",
+      "Hide Separate Threads & Forum Posts export option for DM exports."
     ]
   },
   {
