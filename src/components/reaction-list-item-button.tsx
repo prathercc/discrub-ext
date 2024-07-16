@@ -113,7 +113,11 @@ const ReactionListItemButton = ({
       <ListItemButton dense onClick={handleClick}>
         <Tooltip title={emoji.id ? `:${emoji.name}:` : `${emoji.name}`}>
           <ListItemIcon onClick={handleEmojiClick}>
-            {remoteEmojiUrl ? <ServerEmoji url={remoteEmojiUrl} /> : emoji.name}
+            {emoji.id && remoteEmojiUrl ? (
+              <ServerEmoji url={remoteEmojiUrl} />
+            ) : (
+              emoji.name
+            )}
           </ListItemIcon>
         </Tooltip>
         <ListItemText
