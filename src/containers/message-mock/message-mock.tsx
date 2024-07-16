@@ -201,7 +201,11 @@ const MessageMock = ({
                   shortDateTime={shortDateTime}
                 />
                 {showChannelName && (
-                  <ChannelName channels={channels} message={message} />
+                  <ChannelName
+                    channels={channels}
+                    message={message}
+                    thread={foundThread}
+                  />
                 )}
               </>
             )}
