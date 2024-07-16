@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.11.15",
+    "changes": [
+      "Fix export issue when using Separate Threads & Forum Posts export option.",
+      "Prevent ghost files from being created when no messages are available for export."
+    ]
+  },
+  {
     "version": "1.11.14",
     "changes": ["Add toggle to export threads & forum post as separate files."]
   },
