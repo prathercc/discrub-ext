@@ -167,12 +167,19 @@ function ChannelMessages() {
     messagesLoading ||
     (!advancedFilterActive && !selectedChannel?.id) ||
     discrubCancelled;
-  const exportAndPurgeDisabled = Boolean(
+  const purgeDisabled = Boolean(
     !selectedGuild?.id ||
       messagesLoading ||
       selectedChannel?.id ||
       messages.length > 0 ||
       advancedFilterActive ||
+      discrubCancelled
+  );
+  const exportDisabled = Boolean(
+    !selectedGuild?.id ||
+      messagesLoading ||
+      selectedChannel?.id ||
+      messages.length > 0 ||
       discrubCancelled
   );
 
@@ -361,8 +368,8 @@ function ChannelMessages() {
                 spacing={1}
                 justifyContent="flex-end"
               >
-                <ExportButton bulk disabled={exportAndPurgeDisabled} />
-                <PurgeButton disabled={exportAndPurgeDisabled} />
+                <ExportButton bulk disabled={exportDisabled} />
+                <PurgeButton disabled={purgeDisabled} />
                 <PauseButton disabled={pauseCancelDisabled} />
                 <Button
                   disabled={searchBtnDisabled}
