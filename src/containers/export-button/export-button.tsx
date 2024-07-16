@@ -53,6 +53,7 @@ const ExportButton = ({
 
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
+  const userId = guildState.preFilterUserId();
 
   const { state: dmState } = useDmSlice();
   const selectedDm = dmState.selectedDm();
@@ -102,8 +103,13 @@ const ExportButton = ({
           selectedExportChannels.some((id) => id === c.id)
         );
       }
-      if (entity && exportChannels.length) {
-        exportChannels(channelsToExport, exportUtils, format);
+      if (entity && channelsToExport.length) {
+        exportChannels(
+          channelsToExport,
+          exportUtils,
+          format,
+          userId || undefined
+        );
       }
     } else {
       const entity = isDm ? selectedDm : selectedChannel || selectedGuild;
@@ -137,6 +143,7 @@ const ExportButton = ({
     } else
       return (
         <DefaultContent
+          isDm={isDm}
           isExporting={isExporting}
           messageCount={
             filters.length ? filteredMessages?.length : messages.length

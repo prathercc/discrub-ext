@@ -2,9 +2,13 @@ import { Typography, useTheme } from "@mui/material";
 import Channel from "../../../classes/channel";
 import Message from "../../../classes/message";
 
-type ChannelNameProps = { channels: Channel[]; message: Message };
+type ChannelNameProps = {
+  channels: Channel[];
+  message: Message;
+  thread: Channel | undefined;
+};
 
-const ChannelName = ({ channels, message }: ChannelNameProps) => {
+const ChannelName = ({ channels, message, thread }: ChannelNameProps) => {
   const theme = useTheme();
 
   return (
@@ -17,7 +21,13 @@ const ChannelName = ({ channels, message }: ChannelNameProps) => {
         color: theme.palette.text.primary,
       }}
     >
-      {channels.find((channel) => channel.id === message.channel_id)?.name}
+      {
+        channels.find(
+          (channel) =>
+            channel.id === message.channel_id ||
+            thread?.parent_id === channel.id
+        )?.name
+      }
     </Typography>
   );
 };

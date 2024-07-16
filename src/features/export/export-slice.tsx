@@ -904,7 +904,9 @@ const _compressMessages =
     await wait(1);
 
     const { messagesPerPage, folderingThreads } = getState().export;
-    const { threads } = getState().thread;
+    const threads = getState().thread.threads?.filter((t) =>
+      messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id)
+    );
 
     let adjustedMessages: Message[] = messages;
 
@@ -915,82 +917,88 @@ const _compressMessages =
       for (let [i, t] of threads.entries()) {
         const threadNumber = i + 1;
         const threadName = `Thread ${threadNumber}`;
-        await dispatch(
-          _compressMessages({
-            messages: messages.filter(
-              (m) => m.thread?.id === t.id || m.channel_id === t.id
-            ),
-            format,
-            entityName: threadName,
-            entityMainDirectory,
-            exportUtils,
-            threadData: {
-              thread: t,
-              threadCount: threads.length,
-              threadNo: threadNumber,
-            },
-          })
+        const threadMessages = messages.filter(
+          (m) => m.thread?.id === t.id || m.channel_id === t.id
         );
+        if (threadMessages.length) {
+          await dispatch(
+            _compressMessages({
+              messages: threadMessages,
+              format,
+              entityName: threadName,
+              entityMainDirectory,
+              exportUtils,
+              threadData: {
+                thread: t,
+                threadCount: threads.length,
+                threadNo: threadNumber,
+              },
+            })
+          );
+        }
       }
     }
 
-    const totalPages =
-      adjustedMessages.length > messagesPerPage
-        ? Math.ceil(adjustedMessages.length / messagesPerPage)
-        : 1;
-    dispatch(setTotalPages(totalPages));
+    if (adjustedMessages.length) {
+      const totalPages =
+        adjustedMessages.length > messagesPerPage
+          ? Math.ceil(adjustedMessages.length / messagesPerPage)
+          : 1;
+      dispatch(setTotalPages(totalPages));
 
-    while (getState().export.currentPage <= totalPages) {
-      const currentPage = getState().export.currentPage;
-      const { discrubCancelled } = getState().app;
-      await dispatch(checkDiscrubPaused());
-      if (discrubCancelled) break;
-      if (format === ExportType.MEDIA) {
-        dispatch(setStatus("Cleaning up..."));
-      } else {
-        const status = `Compressing${compressionStr} - Page ${currentPage} of ${totalPages}`;
-        dispatch(setStatus(status));
-      }
+      while (getState().export.currentPage <= totalPages) {
+        const currentPage = getState().export.currentPage;
+        const { discrubCancelled } = getState().app;
+        await dispatch(checkDiscrubPaused());
+        if (discrubCancelled) break;
+        if (format === ExportType.MEDIA) {
+          dispatch(setStatus("Cleaning up..."));
+        } else {
+          const status = `Compressing${compressionStr} - Page ${currentPage} of ${totalPages}`;
+          dispatch(setStatus(status));
+        }
 
-      await wait(1);
-      const startIndex =
-        currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
-      const exportMessages = adjustedMessages?.slice(
-        startIndex,
-        startIndex + messagesPerPage
-      );
+        await wait(1);
+        const startIndex =
+          currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
+        const exportMessages = adjustedMessages?.slice(
+          startIndex,
+          startIndex + messagesPerPage
+        );
 
-      dispatch(setExportMessages(exportMessages));
+        dispatch(setExportMessages(exportMessages));
 
-      if (format === ExportType.JSON) {
-        await dispatch(
-          _exportJson({
+        if (format === ExportType.JSON) {
+          await dispatch(
+            _exportJson({
+              exportUtils,
+              messages: exportMessages,
+              entityMainDirectory,
+              entityName,
+              currentPage,
+            })
+          );
+        } else if (format === ExportType.HTML) {
+          await _exportHtml({
             exportUtils,
             messages: exportMessages,
             entityMainDirectory,
             entityName,
             currentPage,
-          })
-        );
-      } else if (format === ExportType.HTML) {
-        await _exportHtml({
-          exportUtils,
-          messages: exportMessages,
-          entityMainDirectory,
-          entityName,
-          currentPage,
-        });
-      } else if (format === ExportType.CSV) {
-        await _exportCsv({
-          exportUtils,
-          messages: exportMessages,
-          entityMainDirectory,
-          entityName,
-          currentPage,
-        });
+          });
+        } else if (format === ExportType.CSV) {
+          await _exportCsv({
+            exportUtils,
+            messages: exportMessages,
+            entityMainDirectory,
+            entityName,
+            currentPage,
+          });
+        }
+        dispatch(setCurrentPage(currentPage + 1));
       }
-      dispatch(setCurrentPage(currentPage + 1));
     }
+
     dispatch(setCurrentPage(1));
   };
 
