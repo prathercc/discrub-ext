@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.11.16",
+    "changes": [
+      "Adjust CSV exports so that all columns from dataset are included.",
+      "Make 'Username', 'Attachment Name', and 'Message' Quick Filters accept multiple values."
+    ]
+  },
+  {
     "version": "1.11.15",
     "changes": [
       "Fix export issue when using Separate Threads & Forum Posts export option.",
