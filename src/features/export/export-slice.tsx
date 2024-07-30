@@ -877,10 +877,21 @@ const _exportCsv = async ({
   entityName,
   currentPage,
 }: ExportHtmlProps) => {
-  const csvData: unknown[] = messages.map((m) => flatten(m));
+  const csvKeys: string[] = [];
+  const csvData: Object[] = messages.map((m) => {
+    const flattenedMessage: Object = flatten(m);
+    Object.keys(flattenedMessage).forEach((mKey) => {
+      if (!csvKeys.some((csvKey) => csvKey === mKey)) {
+        csvKeys.push(mKey);
+      }
+    });
+    return flattenedMessage;
+  });
 
   await exportUtils.addToZip(
-    Papa.unparse(csvData),
+    Papa.unparse(csvData, {
+      columns: ["id", ...csvKeys.filter((k) => k !== "id").sort()],
+    }),
     `${entityMainDirectory}/${getSafeExportName(
       entityName
     )}_page_${currentPage}.csv`
