@@ -5,4 +5,5 @@ export enum FilterName {
   START_TIME = "startTime",
   END_TIME = "endTime",
   CALL_LOG = "callLog",
+  USER_NAME = "userName",
 }

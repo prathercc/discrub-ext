@@ -377,13 +377,15 @@ const _filterStartTime = (
 
 const _filterText = (
   filterName: keyof Message,
-  filterValue: string,
+  filterValue: string | string[],
   message: Message,
   inverseActive: boolean
 ): boolean => {
   const messagePropertyValue = message[filterName];
   if (typeof messagePropertyValue === "string") {
-    const textContainsValue = messagePropertyValue.includes(filterValue);
+    const textContainsValue = Array.isArray(filterValue)
+      ? filterValue.some((fv) => messagePropertyValue.includes(fv))
+      : messagePropertyValue.includes(filterValue);
     const criteriaMet =
       (!inverseActive && !textContainsValue) ||
       (inverseActive && textContainsValue);
@@ -395,14 +397,17 @@ const _filterText = (
 };
 
 const _filterAttachmentName = (
-  filterValue: string,
+  filterValue: string | string[],
   message: Message,
   inverseActive: boolean
 ) => {
   const csvAttachments = message.attachments.map((a) => a.filename).join();
-  const attachmentsIncludeValue = csvAttachments
-    .toLowerCase()
-    .includes(filterValue.toLowerCase());
+  const attachmentsIncludeValue = Array.isArray(filterValue)
+    ? filterValue.some((fv) =>
+        csvAttachments.toLowerCase().includes(fv.toLowerCase())
+      )
+    : csvAttachments.toLowerCase().includes(filterValue.toLowerCase());
+
   const criteriaMet =
     (inverseActive && attachmentsIncludeValue) ||
     (!inverseActive && !attachmentsIncludeValue);
@@ -413,11 +418,13 @@ const _filterAttachmentName = (
 };
 
 const _filterMessageContent = (
-  filterValue: string,
+  filterValue: string | string[],
   message: Message,
   inverseActive: boolean
 ) => {
-  const contentContainsValue = message.content.includes(filterValue);
+  const contentContainsValue = Array.isArray(filterValue)
+    ? filterValue.some((fv) => message.content.includes(fv))
+    : message.content.includes(filterValue);
   const embedsContainValue =
     message.embeds &&
     message.embeds.some((embed) => {
@@ -431,10 +438,16 @@ const _filterMessageContent = (
           footer?.text,
           title,
           url,
-        ].some((prop) => prop?.includes(filterValue)) ||
+        ].some((prop) =>
+          Array.isArray(filterValue)
+            ? filterValue.some((fv) => prop?.includes(fv))
+            : prop?.includes(filterValue)
+        ) ||
           fields?.some((field) =>
             [field.name, field.value].some((fieldProp) =>
-              fieldProp?.includes(filterValue)
+              Array.isArray(filterValue)
+                ? filterValue.some((fv) => fieldProp?.includes(fv))
+                : fieldProp?.includes(filterValue)
             )
           ))
       );

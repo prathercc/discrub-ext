@@ -26,7 +26,7 @@ export type Filter =
       filterType: FilterType.THREAD;
     }
   | {
-      filterValue: string | Maybe;
+      filterValue: string | string[] | Maybe;
       filterType: FilterType.TEXT;
       filterName:
         | FilterName.ATTACHMENT_NAME

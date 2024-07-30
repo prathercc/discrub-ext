@@ -8,6 +8,7 @@ import {
   FormGroup,
   Switch,
   Checkbox,
+  Chip,
 } from "@mui/material";
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import CopyAdornment from "../../../components/copy-adornment";
@@ -42,6 +43,9 @@ const FilterComponent = ({
   const [startTime, setStartTime] = useState<Date | Maybe>(null);
   const [endTime, setEndTime] = useState<Date | Maybe>(null);
   const [inverse, setInverse] = useState(false);
+  const [messageTags, setMessageTags] = useState<string[]>([]);
+  const [attachmentTags, setAttachmentTags] = useState<string[]>([]);
+  const [userNameTags, setUserNameTags] = useState<string[]>([]);
 
   return (
     <Stack zIndex={1} sx={{ width: "100%" }} spacing={2}>
@@ -105,31 +109,103 @@ const FilterComponent = ({
         alignItems="center"
         spacing={2}
       >
-        <TextField
-          size="small"
+        <Autocomplete
+          multiple
+          id="user-name-autocomplete"
+          options={[]}
+          freeSolo
           fullWidth
-          variant="filled"
-          label="Username"
-          onChange={(e) =>
+          onChange={(_, v) => {
+            setUserNameTags(v);
             handleFilterUpdate({
-              filterName: "userName",
-              filterValue: e.target.value,
+              filterName: FilterName.USER_NAME,
+              filterValue: v,
               filterType: FilterType.TEXT,
+            });
+          }}
+          onInputChange={(_, v) => {
+            if (!userNameTags.length) {
+              handleFilterUpdate({
+                filterName: FilterName.USER_NAME,
+                filterValue: v,
+                filterType: FilterType.TEXT,
+              });
+            }
+          }}
+          value={userNameTags}
+          renderTags={(value: readonly string[], getTagProps) =>
+            value.map((option: string, index: number) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              return (
+                <Chip
+                  variant="outlined"
+                  label={option}
+                  key={key}
+                  {...tagProps}
+                />
+              );
             })
           }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              size="small"
+              variant="filled"
+              label="Username"
+              fullWidth
+              maxRows={1}
+            />
+          )}
         />
-        <TextField
-          size="small"
+
+        <Autocomplete
+          multiple
+          id="message-content-autocomplete"
+          options={[]}
+          freeSolo
           fullWidth
-          variant="filled"
-          onChange={(e) =>
+          onChange={(_, v) => {
+            console.warn(v);
+            setMessageTags(v);
             handleFilterUpdate({
               filterName: FilterName.CONTENT,
-              filterValue: e.target.value,
+              filterValue: v,
               filterType: FilterType.TEXT,
+            });
+          }}
+          onInputChange={(_, v) => {
+            if (!messageTags.length) {
+              handleFilterUpdate({
+                filterName: FilterName.CONTENT,
+                filterValue: v,
+                filterType: FilterType.TEXT,
+              });
+            }
+          }}
+          value={messageTags}
+          renderTags={(value: readonly string[], getTagProps) =>
+            value.map((option: string, index: number) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              return (
+                <Chip
+                  variant="outlined"
+                  label={option}
+                  key={key}
+                  {...tagProps}
+                />
+              );
             })
           }
-          label="Message"
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              size="small"
+              variant="filled"
+              label="Message"
+              fullWidth
+              maxRows={1}
+            />
+          )}
         />
       </Stack>
       <Stack
@@ -138,18 +214,53 @@ const FilterComponent = ({
         alignItems="center"
         spacing={2}
       >
-        <TextField
-          size="small"
+        <Autocomplete
+          multiple
+          id="attachment-name-autocomplete"
+          options={[]}
+          freeSolo
           fullWidth
-          variant="filled"
-          onChange={(e) =>
+          onChange={(_, v) => {
+            setAttachmentTags(v);
             handleFilterUpdate({
               filterName: FilterName.ATTACHMENT_NAME,
-              filterValue: e.target.value,
+              filterValue: v,
               filterType: FilterType.TEXT,
+            });
+          }}
+          onInputChange={(_, v) => {
+            if (!attachmentTags.length) {
+              handleFilterUpdate({
+                filterName: FilterName.ATTACHMENT_NAME,
+                filterValue: v,
+                filterType: FilterType.TEXT,
+              });
+            }
+          }}
+          value={attachmentTags}
+          renderTags={(value: readonly string[], getTagProps) =>
+            value.map((option: string, index: number) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              return (
+                <Chip
+                  variant="outlined"
+                  label={option}
+                  key={key}
+                  {...tagProps}
+                />
+              );
             })
           }
-          label="Attachment Name"
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              size="small"
+              variant="filled"
+              label="Attachment Name"
+              fullWidth
+              maxRows={1}
+            />
+          )}
         />
         {isDm && (
           <FormGroup sx={{ minWidth: "fit-content" }}>
