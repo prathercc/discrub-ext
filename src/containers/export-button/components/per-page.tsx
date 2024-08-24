@@ -1,11 +1,27 @@
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import TextField from "@mui/material/TextField";
 import { useExportSlice } from "../../../features/export/use-export-slice";
+import { useAppSlice } from "../../../features/app/use-app-slice";
+import { setSetting } from "../../../services/chrome-service";
+import { DiscrubSetting } from "../../../enum/discrub-setting";
 
 const PerPage = () => {
-  const { state: exportState, setMessagesPerPage } = useExportSlice();
+  const { state: appState, setSettings } = useAppSlice();
+  const settings = appState.settings();
+  const { state: exportState } = useExportSlice();
   const isExporting = exportState.isExporting();
-  const messagesPerPage = exportState.messagesPerPage();
+  const messagesPerPage = settings.exportMessagesPerPage;
+
+  const handleOnChange = async (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const input = parseInt(e.target.value);
+    const settings = await setSetting(
+      DiscrubSetting.EXPORT_MESSAGES_PER_PAGE,
+      !isNaN(input) ? e.target.value : "1000"
+    );
+    setSettings(settings);
+  };
 
   return (
     <Tooltip
@@ -21,11 +37,7 @@ const PerPage = () => {
         inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
         disabled={isExporting}
         value={messagesPerPage}
-        onChange={(e) => {
-          const input = parseInt(e.target.value);
-          if (!isNaN(input)) setMessagesPerPage(input);
-          else setMessagesPerPage(1000);
-        }}
+        onChange={handleOnChange}
       />
     </Tooltip>
   );

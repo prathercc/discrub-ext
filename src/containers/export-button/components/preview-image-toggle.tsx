@@ -3,11 +3,25 @@ import Tooltip from "../../../common-components/tooltip/tooltip";
 import ImageIcon from "@mui/icons-material/Image";
 import HideImageIcon from "@mui/icons-material/HideImage";
 import { useExportSlice } from "../../../features/export/use-export-slice";
+import { useAppSlice } from "../../../features/app/use-app-slice";
+import { boolToString, stringToBool } from "../../../utils";
+import { setSetting } from "../../../services/chrome-service";
+import { DiscrubSetting } from "../../../enum/discrub-setting";
 
 const PreviewImageToggle = () => {
-  const { state: exportState, setPreviewImages } = useExportSlice();
-  const previewImages = exportState.previewImages();
+  const { state: appState, setSettings } = useAppSlice();
+  const settings = appState.settings();
+  const { state: exportState } = useExportSlice();
+  const previewImages = stringToBool(settings.exportPreviewMedia);
   const isExporting = exportState.isExporting();
+
+  const handleToggle = async () => {
+    const settings = await setSetting(
+      DiscrubSetting.EXPORT_PREVIEW_MEDIA,
+      boolToString(!previewImages)
+    );
+    setSettings(settings);
+  };
 
   return (
     <Tooltip
@@ -18,7 +32,7 @@ const PreviewImageToggle = () => {
     >
       <IconButton
         disabled={isExporting}
-        onClick={() => setPreviewImages(!previewImages)}
+        onClick={handleToggle}
         color={previewImages ? "primary" : "secondary"}
       >
         {!previewImages ? <HideImageIcon /> : <ImageIcon />}

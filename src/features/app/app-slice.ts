@@ -4,11 +4,19 @@ import { AppTask, AppState, Timeout, AppSettings } from "./app-types";
 import Message from "../../classes/message";
 import { AppThunk } from "../../app/store";
 import { DiscrubSetting } from "../../enum/discrub-setting";
+import { SortDirection } from "../../enum/sort-direction";
 
 const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
   [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
+
+  [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
+  [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",
+  [DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER]: SortDirection.DESCENDING,
+  [DiscrubSetting.EXPORT_PREVIEW_MEDIA]: "false",
+  [DiscrubSetting.EXPORT_DOWNLOAD_MEDIA]: "false",
+  [DiscrubSetting.EXPORT_MESSAGES_PER_PAGE]: "1000",
 };
 
 const emptyTask: AppTask = {

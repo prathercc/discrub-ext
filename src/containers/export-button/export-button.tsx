@@ -13,7 +13,7 @@ import DefaultContent from "./components/default-content";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import BulkContent from "./components/bulk-content";
 import ExportMessages from "./components/export-messages";
-import { punctuateStringArr } from "../../utils";
+import { punctuateStringArr, stringToBool } from "../../utils";
 import Guild from "../../classes/guild";
 
 type ExportButtonProps = {
@@ -29,7 +29,6 @@ const ExportButton = ({
 }: ExportButtonProps) => {
   const {
     state: exportState,
-    resetExportSettings,
     setIsGenerating,
     exportMessages,
     exportChannels,
@@ -37,14 +36,21 @@ const ExportButton = ({
   const isGenerating = exportState.isGenerating();
   const isExporting = exportState.isExporting();
   const currentPage = exportState.currentPage();
-  const downloadImages = exportState.downloadImages();
-  const previewImages = exportState.previewImages();
-  const artistMode = exportState.artistMode();
-  const folderingThreads = exportState.folderingThreads();
   const activeExportMessages = exportState.exportMessages();
   const totalPages = exportState.totalPages();
 
-  const { setDiscrubCancelled, setDiscrubPaused } = useAppSlice();
+  const {
+    setDiscrubCancelled,
+    setDiscrubPaused,
+    state: appState,
+  } = useAppSlice();
+  const settings = appState.settings();
+  const folderingThreads = stringToBool(
+    settings.exportSeparateThreadAndForumPosts
+  );
+  const artistMode = stringToBool(settings.exportUseArtistMode);
+  const previewImages = stringToBool(settings.exportPreviewMedia);
+  const downloadImages = stringToBool(settings.exportDownloadMedia);
 
   const { state: channelState, setSelectedExportChannels } = useChannelSlice();
   const channels = channelState.channels();
@@ -198,7 +204,6 @@ const ExportButton = ({
       <Button
         disabled={disabled}
         onClick={async () => {
-          resetExportSettings();
           setDialogOpen(true);
         }}
         variant="contained"

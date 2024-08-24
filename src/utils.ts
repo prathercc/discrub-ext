@@ -411,6 +411,9 @@ export const resolveAvatarUrl = (
 export const stringToBool = (str: string): boolean =>
   str.toLowerCase() === "true";
 
+export const boolToString = (b: boolean): string =>
+  b === true ? "true" : "false";
+
 export const getReactingUsers = (
   exportReactions: ExportReaction[],
   userMap: ExportUserMap,

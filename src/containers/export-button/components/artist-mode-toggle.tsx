@@ -3,11 +3,25 @@ import Tooltip from "../../../common-components/tooltip/tooltip";
 import FormatColorResetIcon from "@mui/icons-material/FormatColorReset";
 import BrushIcon from "@mui/icons-material/Brush";
 import { useExportSlice } from "../../../features/export/use-export-slice";
+import { boolToString, stringToBool } from "../../../utils";
+import { useAppSlice } from "../../../features/app/use-app-slice";
+import { setSetting } from "../../../services/chrome-service";
+import { DiscrubSetting } from "../../../enum/discrub-setting";
 
 const ArtistModeToggle = () => {
-  const { state: exportState, setArtistMode } = useExportSlice();
-  const artistMode = exportState.artistMode();
+  const { state: appState, setSettings } = useAppSlice();
+  const settings = appState.settings();
+  const { state: exportState } = useExportSlice();
+  const artistMode = stringToBool(settings.exportUseArtistMode);
   const isExporting = exportState.isExporting();
+
+  const handleToggle = async () => {
+    const settings = await setSetting(
+      DiscrubSetting.EXPORT_ARTIST_MODE,
+      boolToString(!artistMode)
+    );
+    setSettings(settings);
+  };
 
   return (
     <Tooltip
@@ -18,7 +32,7 @@ const ArtistModeToggle = () => {
     >
       <IconButton
         disabled={isExporting}
-        onClick={() => setArtistMode(!artistMode)}
+        onClick={handleToggle}
         color={artistMode ? "primary" : "secondary"}
       >
         {artistMode ? <BrushIcon /> : <FormatColorResetIcon />}

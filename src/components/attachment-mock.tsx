@@ -9,7 +9,9 @@ import {
   attachmentIsImage,
   attachmentIsVideo,
   entityContainsMedia,
+  stringToBool,
 } from "../utils";
+import { useAppSlice } from "../features/app/use-app-slice";
 
 type AttachmentMockProps = {
   attachment: Attachment;
@@ -18,9 +20,11 @@ type AttachmentMockProps = {
 const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
   const theme = useTheme();
 
+  const { state: appState } = useAppSlice();
+  const settings = appState.settings();
   const { state: exportState } = useExportSlice();
   const mediaMap = exportState.mediaMap();
-  const previewImages = exportState.previewImages();
+  const previewImages = stringToBool(settings.exportPreviewMedia);
 
   const isImg = attachmentIsImage(attachment);
   const isVid = attachmentIsVideo(attachment);

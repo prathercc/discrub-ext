@@ -2,4 +2,11 @@ export enum DiscrubSetting {
   REACTIONS_ENABLED = "reactionsEnabled",
   SERVER_NICKNAME_LOOKUP = "serverNickNameLookup",
   DISPLAY_NAME_LOOKUP = "displayNameLookup",
+
+  EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS = "exportSeparateThreadAndForumPosts",
+  EXPORT_ARTIST_MODE = "exportUseArtistMode",
+  EXPORT_MESSAGE_SORT_ORDER = "exportMessageSortOrder",
+  EXPORT_PREVIEW_MEDIA = "exportPreviewMedia",
+  EXPORT_DOWNLOAD_MEDIA = "exportDownloadMedia",
+  EXPORT_MESSAGES_PER_PAGE = "exportMessagesPerPage",
 }

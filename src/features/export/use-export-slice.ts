@@ -7,17 +7,10 @@ import {
   setExportRoleMap as setExportRoleMapAction,
   setExportReactionMap as setExportReactionMapAction,
   resetExportMaps as resetExportMapsAction,
-  setSortOverride as setSortOverrideAction,
-  setMessagesPerPage as setMessagesPerPageAction,
   setCurrentPage as setCurrentPageAction,
   setIsGenerating as setIsGeneratingAction,
   setIsExporting as setIsExportingAction,
-  setPreviewImages as setPreviewImagesAction,
-  setDownloadImages as setDownloadImagesAction,
-  setArtistMode as setArtistModeAction,
-  setFolderingThreads as setFolderingThreadsAction,
   setName as setNameAction,
-  resetExportSettings as resetExportSettingsAction,
   getSpecialFormatting as getSpecialFormattingAction,
   getFormattedInnerHtml as getFormattedInnerHtmlAction,
   exportMessages as exportMessagesAction,
@@ -36,7 +29,6 @@ import {
   FormattedInnerHtmlProps,
   SpecialFormatting,
 } from "./export-types";
-import { SortDirection } from "../../enum/sort-direction";
 import Channel from "../../classes/channel";
 import ExportUtils from "./export-utils";
 import { ExportType } from "../../enum/export-type";
@@ -47,18 +39,6 @@ const useExportSlice = () => {
 
   const useIsExporting = (): boolean =>
     useAppSelector((state: RootState) => state.export.isExporting);
-
-  const useDownloadImages = (): boolean =>
-    useAppSelector((state: RootState) => state.export.downloadImages);
-
-  const usePreviewImages = (): boolean =>
-    useAppSelector((state: RootState) => state.export.previewImages);
-
-  const useArtistMode = (): boolean =>
-    useAppSelector((state: RootState) => state.export.artistMode);
-
-  const useFolderingThreads = (): boolean =>
-    useAppSelector((state: RootState) => state.export.folderingThreads);
 
   const useName = (): string =>
     useAppSelector((state: RootState) => state.export.name);
@@ -71,12 +51,6 @@ const useExportSlice = () => {
 
   const useTotalPages = (): number =>
     useAppSelector((state: RootState) => state.export.totalPages);
-
-  const useMessagesPerPage = (): number =>
-    useAppSelector((state: RootState) => state.export.messagesPerPage);
-
-  const useSortOverride = (): SortDirection =>
-    useAppSelector((state: RootState) => state.export.sortOverride);
 
   const useUserMap = (): ExportUserMap =>
     useAppSelector((state: RootState) => state.export.exportMaps.userMap);
@@ -101,16 +75,10 @@ const useExportSlice = () => {
 
   const state = {
     isExporting: useIsExporting,
-    downloadImages: useDownloadImages,
-    previewImages: usePreviewImages,
-    artistMode: useArtistMode,
-    folderingThreads: useFolderingThreads,
     name: useName,
     isGenerating: useIsGenerating,
     currentPage: useCurrentPage,
     totalPages: useTotalPages,
-    messagesPerPage: useMessagesPerPage,
-    sortOverride: useSortOverride,
     userMap: useUserMap,
     emojiMap: useEmojiMap,
     avatarMap: useAvatarMap,
@@ -152,14 +120,6 @@ const useExportSlice = () => {
     dispatch(resetExportMapsAction(maps));
   };
 
-  const setSortOverride = (type: SortDirection): void => {
-    dispatch(setSortOverrideAction(type));
-  };
-
-  const setMessagesPerPage = (amount: number): void => {
-    dispatch(setMessagesPerPageAction(amount));
-  };
-
   const setCurrentPage = (page: number): void => {
     dispatch(setCurrentPageAction(page));
   };
@@ -176,28 +136,8 @@ const useExportSlice = () => {
     dispatch(setIsExportingAction(value));
   };
 
-  const setPreviewImages = (value: boolean): void => {
-    dispatch(setPreviewImagesAction(value));
-  };
-
-  const setDownloadImages = (value: boolean): void => {
-    dispatch(setDownloadImagesAction(value));
-  };
-
-  const setArtistMode = (value: boolean): void => {
-    dispatch(setArtistModeAction(value));
-  };
-
-  const setFolderingThreads = (value: boolean): void => {
-    dispatch(setFolderingThreadsAction(value));
-  };
-
   const setName = (value: string): void => {
     dispatch(setNameAction(value));
-  };
-
-  const resetExportSettings = (): void => {
-    dispatch(resetExportSettingsAction());
   };
 
   const getSpecialFormatting = (content: string): SpecialFormatting => {
@@ -242,17 +182,10 @@ const useExportSlice = () => {
     setExportRoleMap,
     setExportReactionMap,
     resetExportMaps,
-    setSortOverride,
-    setMessagesPerPage,
     setCurrentPage,
     setIsGenerating,
     setIsExporting,
-    setPreviewImages,
-    setDownloadImages,
-    setArtistMode,
-    setFolderingThreads,
     setName,
-    resetExportSettings,
     getSpecialFormatting,
     getFormattedInnerHtml,
     exportMessages,
