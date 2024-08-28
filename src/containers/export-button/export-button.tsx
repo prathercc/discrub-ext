@@ -42,6 +42,7 @@ const ExportButton = ({
   const {
     setDiscrubCancelled,
     setDiscrubPaused,
+    setSettings,
     state: appState,
   } = useAppSlice();
   const settings = appState.settings();
@@ -144,6 +145,8 @@ const ExportButton = ({
           selectedExportChannels={selectedExportChannels}
           channels={channels}
           setSelectedExportChannels={setSelectedExportChannels}
+          settings={settings}
+          onChangeSettings={setSettings}
         />
       );
     } else
@@ -154,6 +157,8 @@ const ExportButton = ({
           messageCount={
             filters.length ? filteredMessages?.length : messages.length
           }
+          settings={settings}
+          onChangeSettings={setSettings}
         />
       );
   };
