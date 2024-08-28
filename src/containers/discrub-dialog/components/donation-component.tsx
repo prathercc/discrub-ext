@@ -77,7 +77,7 @@ function DonationComponent() {
           </Icon>
         </Stack>
 
-        {donations.length ? (
+        {donations?.length ? (
           <List>
             {donations.map((donation) => (
               <DonationListButton donation={donation} />
