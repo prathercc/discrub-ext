@@ -12,6 +12,7 @@ const Tooltip = (
   return (
     <MuiTooltip
       disableInteractive
+      PopperProps={{ sx: { maxWidth: "200px" } }}
       TransitionProps={{
         timeout: {
           appear: 1,
