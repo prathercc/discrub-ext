@@ -6,6 +6,7 @@ import Guild from "../../../classes/guild";
 import MessageTitleMock from "./message-title-mock";
 import MessageMock from "../../message-mock/message-mock";
 import { MessageType } from "../../../enum/message-type";
+import { isNonStandardMessage } from "../../../utils";
 
 type ExportMessagesProps = {
   componentRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -46,7 +47,11 @@ const ExportMessages = ({
               const previousMessage = messages[index - 1];
 
               let isChained = false;
-              if (previousMessage && message.type !== MessageType.CALL) {
+              if (
+                previousMessage &&
+                !isNonStandardMessage(previousMessage) &&
+                !isNonStandardMessage(message)
+              ) {
                 const elapsedSeconds = differenceInSeconds(
                   parseISO(message.timestamp),
                   parseISO(previousMessage.timestamp)

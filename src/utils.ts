@@ -18,6 +18,7 @@ import {
   ExportUserMap,
 } from "./features/export/export-types";
 import { ReactingUser } from "./components/reaction-list-item-button";
+import { MessageType } from "./enum/message-type";
 
 /**
  *
@@ -439,4 +440,12 @@ export const getReactingUsers = (
 
 export const isThreadMessage = (message?: Message, threads: Channel[] = []) => {
   return !!message?.thread || threads.some((t) => t.id === message?.channel_id);
+};
+
+export const isNonStandardMessage = (message: Message) => {
+  const nonStandardTypes = [
+    MessageType.CALL,
+    MessageType.CHANNEL_PINNED_MESSAGE,
+  ];
+  return nonStandardTypes.some((v) => v === message.type);
 };

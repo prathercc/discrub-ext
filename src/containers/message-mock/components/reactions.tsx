@@ -1,5 +1,9 @@
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
-import { getEncodedEmoji, getReactingUsers } from "../../../utils";
+import {
+  getEncodedEmoji,
+  getReactingUsers,
+  isNonStandardMessage,
+} from "../../../utils";
 import Message from "../../../classes/message";
 import ServerEmoji from "../../../components/server-emoji";
 import {
@@ -8,7 +12,6 @@ import {
   ExportUserMap,
 } from "../../../features/export/export-types";
 import Guild from "../../../classes/guild";
-import { MessageType } from "../../../enum/message-type";
 
 type ReactionsProps = {
   message: Message;
@@ -36,7 +39,7 @@ const Reactions = ({
         gap: "5px",
         mb: "5px",
         flexWrap: "wrap",
-        paddingLeft: message.type === MessageType.CALL ? "40px" : "inherit",
+        paddingLeft: isNonStandardMessage(message) ? "40px" : "inherit",
       }}
     >
       {message.reactions?.map((r) => {
