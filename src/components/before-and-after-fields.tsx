@@ -47,7 +47,7 @@ function BeforeAndAfterFields({
         arrow
         title={afterProps.toolTipTitle}
         description={afterProps.toolTipDescription}
-        placement="top"
+        placement="left"
       >
         <DateTimePicker
           onDateChange={(e) => setSearchAfterDate(e)}
@@ -60,7 +60,7 @@ function BeforeAndAfterFields({
         arrow
         title={beforeProps.toolTipTitle}
         description={beforeProps.toolTipDescription}
-        placement="top"
+        placement="right"
       >
         <DateTimePicker
           onDateChange={(e) => setSearchBeforeDate(e)}

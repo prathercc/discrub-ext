@@ -257,7 +257,7 @@ function ChannelMessages() {
               </Stack>
 
               <Collapse orientation="vertical" in={expanded}>
-                <Stack direction="column" gap="5px">
+                <Stack direction="column" gap="5px" spacing={1}>
                   <Stack
                     direction="row"
                     justifyContent="center"

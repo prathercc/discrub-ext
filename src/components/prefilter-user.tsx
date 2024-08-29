@@ -72,9 +72,10 @@ function PrefilterUser({
       arrow
       title={toolTipTitle}
       description={toolTipDescription}
-      placement="top"
+      placement="left"
     >
       <Autocomplete
+        sx={{ width: "100%" }}
         clearIcon={<ClearIcon />}
         freeSolo={!isDm}
         onInputChange={handleChange}
@@ -86,7 +87,6 @@ function PrefilterUser({
             fullWidth
             size="small"
             label={textfieldLabel}
-            sx={{ width: "280px !important" }}
           />
         )}
         value={getDisplayValue()}

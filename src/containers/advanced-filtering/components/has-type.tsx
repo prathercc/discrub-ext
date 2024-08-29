@@ -34,9 +34,9 @@ function HasType({ disabled }: HasTypeProps) {
       arrow
       title="Messages Containing"
       description="Search messages that contain the following type(s)"
-      placement="top"
+      placement="left"
     >
-      <FormControl sx={{ width: 400 }}>
+      <FormControl sx={{ width: "100%" }}>
         <InputLabel
           variant="filled"
           size="small"

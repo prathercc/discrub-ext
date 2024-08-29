@@ -25,7 +25,7 @@ function MessageContains({ disabled }: MessageContainsProps) {
       arrow
       title="Message Content"
       description="Search messages by content"
-      placement="top"
+      placement="left"
     >
       <TextField
         fullWidth
