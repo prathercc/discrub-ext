@@ -6,7 +6,7 @@ import Guild from "../../../classes/guild";
 import MessageTitleMock from "./message-title-mock";
 import MessageMock from "../../message-mock/message-mock";
 import { MessageType } from "../../../enum/message-type";
-import { isNonStandardMessage } from "../../../utils";
+import { isNonStandardMessage, messageTypeEquals } from "../../../utils";
 
 type ExportMessagesProps = {
   componentRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -61,7 +61,7 @@ const ExportMessages = ({
                   Math.abs(elapsedSeconds) <= 330 &&
                   message.author.id === previousMessage.author.id &&
                   message.author.username === previousMessage.author.username &&
-                  message.type !== MessageType.REPLY &&
+                  !messageTypeEquals(message.type, MessageType.REPLY) &&
                   previousMessage.channel_id === message.channel_id;
               }
 

@@ -447,5 +447,9 @@ export const isNonStandardMessage = (message: Message) => {
     MessageType.CALL,
     MessageType.CHANNEL_PINNED_MESSAGE,
   ];
-  return nonStandardTypes.some((v) => v === message.type);
+  return nonStandardTypes.some((v) => messageTypeEquals(message.type, v));
+};
+
+export const messageTypeEquals = (type: number, compareType: MessageType) => {
+  return `${type}` === compareType;
 };

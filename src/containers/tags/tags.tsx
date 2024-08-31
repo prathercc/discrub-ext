@@ -14,7 +14,11 @@ import {
   Typography,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
-import { getSafeExportName, sortByProperty } from "../../utils";
+import {
+  getSafeExportName,
+  messageTypeEquals,
+  sortByProperty,
+} from "../../utils";
 import BeforeAndAfterFields from "../../components/before-and-after-fields";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -143,7 +147,7 @@ function Tags() {
 
       if (skipReplies) {
         messages = messages.filter(
-          (message) => message.type !== MessageType.REPLY
+          (message) => !messageTypeEquals(message.type, MessageType.REPLY)
         );
       }
 

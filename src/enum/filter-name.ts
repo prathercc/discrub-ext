@@ -4,6 +4,6 @@ export enum FilterName {
   CONTENT = "content",
   START_TIME = "startTime",
   END_TIME = "endTime",
-  CALL_LOG = "callLog",
   USER_NAME = "userName",
+  MESSAGE_TYPE = "messageType",
 }

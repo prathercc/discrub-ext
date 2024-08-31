@@ -13,6 +13,7 @@ import {
   getEncodedEmoji,
   isDm,
   isGuildForum,
+  messageTypeEquals,
   sortByProperty,
   stringToBool,
 } from "../../utils";
@@ -218,6 +219,22 @@ export const messageSlice = createSlice({
             (filter) => filter.filterName !== filterName
           );
         }
+      } else if (filterType === FilterType.ARRAY) {
+        if (filterValue.length) {
+          retFilters = [
+            ...filteredList.filter((f) => f.filterName !== filterName),
+            {
+              filterName: filterName,
+              filterValue: filterValue,
+              filterType: filterType,
+            },
+          ];
+        } else {
+          // Remove filter from list
+          retFilters = [
+            ...filteredList.filter((f) => f.filterName !== filterName),
+          ];
+        }
       }
       state.filters = retFilters;
     },
@@ -280,9 +297,9 @@ export const messageSlice = createSlice({
                   x,
                   inverseActive
                 );
-              } else if (param.filterType === FilterType.TOGGLE) {
-                if (param.filterName === FilterName.CALL_LOG) {
-                  criteriaMet = _filterCallLog(
+              } else if (param.filterType === FilterType.ARRAY) {
+                if (param.filterName === FilterName.MESSAGE_TYPE) {
+                  criteriaMet = _filterMessageType(
                     param.filterValue,
                     x,
                     inverseActive
@@ -303,14 +320,16 @@ export const messageSlice = createSlice({
   },
 });
 
-const _filterCallLog = (
-  _filterValue: boolean,
+const _filterMessageType = (
+  _filterValue: string[],
   message: Message,
   inverseActive: boolean
 ): boolean => {
-  const isCall = message.type === MessageType.CALL;
-
-  const criteriaMet = (!inverseActive && !isCall) || (inverseActive && isCall);
+  const messageHasType = _filterValue.some((fv) =>
+    messageTypeEquals(message.type, fv as MessageType)
+  );
+  const criteriaMet =
+    (!inverseActive && !messageHasType) || (inverseActive && messageHasType);
 
   if (criteriaMet) {
     return false;
@@ -1296,7 +1315,7 @@ const _messageTypeAllowed = (type: number) => {
     MessageType.CONTEXT_MENU_COMMAND,
     MessageType.AUTO_MODERATION_ACTION,
     MessageType.CALL,
-  ].some((t) => t === type);
+  ].some((t) => messageTypeEquals(type, t));
 };
 
 const _getMessages =

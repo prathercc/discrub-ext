@@ -19,6 +19,8 @@ import { Filter } from "../../../features/message/message-types";
 import { FilterName } from "../../../enum/filter-name";
 import { FilterType } from "../../../enum/filter-type";
 import Channel from "../../../classes/channel";
+import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
+import { MessageType } from "../../../enum/message-type";
 
 type FilterComponentProps = {
   isDm: boolean;
@@ -44,7 +46,7 @@ const FilterComponent = ({
   const [startTime, setStartTime] = useState<Date | Maybe>(null);
   const [endTime, setEndTime] = useState<Date | Maybe>(null);
   const [inverse, setInverse] = useState(0);
-  const [callLog, setCallLog] = useState(0);
+  const [messageTypes, setMessageTypes] = useState<string[]>([]);
   const [messageTags, setMessageTags] = useState<string[]>([]);
   const [attachmentTags, setAttachmentTags] = useState<string[]>([]);
   const [userNameTags, setUserNameTags] = useState<string[]>([]);
@@ -86,30 +88,23 @@ const FilterComponent = ({
         </FormControl>
       </Tooltip>
 
-      {isDm && (
-        <FormControl fullWidth>
-          <InputLabel variant="filled">Call Log</InputLabel>
-          <Select
-            input={<FilledInput size="small" />}
-            value={callLog}
-            label="Call Log"
-            onChange={(e) => {
-              const { value } = e.target;
-              const parsedValue =
-                typeof value === "number" ? value : Number.parseInt(value);
-              handleFilterUpdate({
-                filterName: FilterName.CALL_LOG,
-                filterValue: !!parsedValue,
-                filterType: FilterType.TOGGLE,
-              });
-              setCallLog(parsedValue);
-            }}
-          >
-            <MenuItem value={0}>No</MenuItem>
-            <MenuItem value={1}>Yes</MenuItem>
-          </Select>
-        </FormControl>
-      )}
+      <MultiValueSelect
+        label="Message Types"
+        onChange={(values) => {
+          handleFilterUpdate({
+            filterName: FilterName.MESSAGE_TYPE,
+            filterValue: values,
+            filterType: FilterType.ARRAY,
+          });
+          setMessageTypes(values);
+        }}
+        value={messageTypes}
+        values={[MessageType.CALL, MessageType.CHANNEL_PINNED_MESSAGE]}
+        displayNameMap={{
+          [MessageType.CALL]: "Call",
+          [MessageType.CHANNEL_PINNED_MESSAGE]: "Pinned Message",
+        }}
+      />
 
       <DateTimePicker
         onDateChange={(e) => {

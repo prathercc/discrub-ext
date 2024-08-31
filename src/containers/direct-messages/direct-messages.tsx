@@ -22,7 +22,7 @@ import ExportButton from "../export-button/export-button";
 import PurgeButton from "../purge-button/purge-button";
 import AdvancedFiltering from "../advanced-filtering/advanced-filtering";
 import TokenNotFound from "../../components/token-not-found";
-import { sortByProperty } from "../../utils";
+import { messageTypeEquals, sortByProperty } from "../../utils";
 import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -107,7 +107,7 @@ function DirectMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: m.type !== MessageType.CALL,
+    selectable: !messageTypeEquals(m.type, MessageType.CALL),
     renderRow: (row) => (
       <TableMessage
         settings={settings}

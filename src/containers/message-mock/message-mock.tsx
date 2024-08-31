@@ -3,6 +3,7 @@ import { format, parseISO } from "date-fns";
 import {
   getTimeZone,
   isNonStandardMessage,
+  messageTypeEquals,
   resolveAvatarUrl,
   resolveEmojiUrl,
   resolveRoleUrl,
@@ -72,8 +73,11 @@ const MessageMock = ({
   const reactionMap = exportState.reactionMap();
   const avatarMap = exportState.avatarMap();
 
-  const isCall = message.type === MessageType.CALL;
-  const isPinMessage = message.type === MessageType.CHANNEL_PINNED_MESSAGE;
+  const isCall = messageTypeEquals(message.type, MessageType.CALL);
+  const isPinMessage = messageTypeEquals(
+    message.type,
+    MessageType.CHANNEL_PINNED_MESSAGE
+  );
   const nonStandardMessage = isNonStandardMessage(message);
 
   const messageDate = parseISO(message.timestamp);
@@ -89,10 +93,9 @@ const MessageMock = ({
   const foundThread = threads?.find(
     (thread) => thread.id === message.id || thread.id === message.channel_id
   );
-  const repliedToMsg =
-    message.type === MessageType.REPLY
-      ? messages.find((msg) => msg.id === message.message_reference?.message_id)
-      : null;
+  const repliedToMsg = messageTypeEquals(message.type, MessageType.REPLY)
+    ? messages.find((msg) => msg.id === message.message_reference?.message_id)
+    : null;
 
   const showChannelName = selectedGuild?.id && !selectedChannel?.id;
 
