@@ -68,6 +68,7 @@ import Channel from "../../classes/channel";
 import { QueryStringParam } from "../../enum/query-string-param";
 import { Reaction } from "../../classes/reaction";
 import { ReactionType } from "../../enum/reaction-type";
+import { MessageCategory } from "../../enum/message-category";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -325,9 +326,12 @@ const _filterMessageType = (
   message: Message,
   inverseActive: boolean
 ): boolean => {
-  const messageHasType = _filterValue.some((fv) =>
-    messageTypeEquals(message.type, fv as MessageType)
-  );
+  const messageHasType = _filterValue.some((fv) => {
+    return (
+      messageTypeEquals(message.type, fv as MessageType) ||
+      (fv === MessageCategory.PINNED && message.pinned)
+    );
+  });
   const criteriaMet =
     (!inverseActive && !messageHasType) || (inverseActive && messageHasType);
 

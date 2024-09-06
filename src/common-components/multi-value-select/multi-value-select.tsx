@@ -55,7 +55,7 @@ const MultiValueSelect = ({
         input={<FilledInput size="small" />}
         renderValue={(selected) =>
           (displayNameMap
-            ? selected.map((s) => displayNameMap[s])
+            ? selected.map((s) => displayNameMap[s] || s)
             : selected
           ).join(", ")
         }
@@ -64,7 +64,11 @@ const MultiValueSelect = ({
           <MenuItem dense key={name} value={name}>
             <Checkbox size="small" checked={value?.indexOf(name) > -1} />
             <ListItemText
-              primary={displayNameMap ? displayNameMap[name] : name}
+              primary={
+                displayNameMap && displayNameMap[name]
+                  ? displayNameMap[name]
+                  : name
+              }
             />
           </MenuItem>
         ))}

@@ -21,6 +21,7 @@ import { FilterType } from "../../../enum/filter-type";
 import Channel from "../../../classes/channel";
 import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
 import { MessageType } from "../../../enum/message-type";
+import { MessageCategory } from "../../../enum/message-category";
 
 type FilterComponentProps = {
   isDm: boolean;
@@ -89,7 +90,7 @@ const FilterComponent = ({
       </Tooltip>
 
       <MultiValueSelect
-        label="Message Types"
+        label="Message Type/Category"
         onChange={(values) => {
           handleFilterUpdate({
             filterName: FilterName.MESSAGE_TYPE,
@@ -99,10 +100,15 @@ const FilterComponent = ({
           setMessageTypes(values);
         }}
         value={messageTypes}
-        values={[MessageType.CALL, MessageType.CHANNEL_PINNED_MESSAGE]}
+        values={[
+          MessageType.CALL,
+          MessageCategory.PINNED,
+          MessageType.CHANNEL_PINNED_MESSAGE,
+        ]}
         displayNameMap={{
           [MessageType.CALL]: "Call",
-          [MessageType.CHANNEL_PINNED_MESSAGE]: "Pinned Message",
+          [MessageType.CHANNEL_PINNED_MESSAGE]: "Pin Notification",
+          [MessageCategory.PINNED]: "Pinned",
         }}
       />
 
