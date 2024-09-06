@@ -1,6 +1,7 @@
 import {
   DialogContent,
   DialogContentText,
+  Divider,
   Stack,
   Typography,
 } from "@mui/material";
@@ -53,6 +54,7 @@ const BulkContent = ({
     DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
     DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER,
     DiscrubSetting.EXPORT_MESSAGES_PER_PAGE,
+    DiscrubSetting.EXPORT_IMAGE_RES_MODE,
   ];
   if (isDm) {
     visibleSettings = visibleSettings.filter(
@@ -65,7 +67,12 @@ const BulkContent = ({
       <Stack
         mt={1}
         mb={1}
-        sx={{ maxHeight: "300px", overflow: "auto" }}
+        sx={{
+          maxHeight: "300px",
+          overflow: "auto",
+          width: "100%",
+          overflowX: "hidden",
+        }}
         direction="column"
         alignItems="center"
       >
@@ -73,6 +80,7 @@ const BulkContent = ({
           onChangeSettings={onChangeSettings}
           visibleSettings={visibleSettings}
           settings={settings}
+          containerProps={{ width: "100%" }}
         />
       </Stack>
     );
@@ -98,6 +106,7 @@ const BulkContent = ({
               handleChannelSelect={handleChannelSelect}
               onSelectAll={toggleSelectAll}
             />
+            <Divider sx={{ height: "auto" }} orientation="vertical" />
             {getExportSettings()}
           </Stack>
         </>

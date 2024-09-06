@@ -4,7 +4,9 @@ import {
   MenuItem,
   Select,
   Stack,
+  SxProps,
   TextField,
+  Theme,
 } from "@mui/material";
 import { setSetting } from "../../../services/chrome-service";
 import { AppSettings } from "../../../features/app/app-types";
@@ -22,18 +24,22 @@ import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
 import FolderIcon from "@mui/icons-material/Folder";
 import FolderOffIcon from "@mui/icons-material/FolderOff";
 import FormatListNumberedRtlIcon from "@mui/icons-material/FormatListNumberedRtl";
+import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import { stringToBool } from "../../../utils";
+import { ResolutionType } from "../../../enum/resolution-type";
 
 type ConfigProps = {
   settings: AppSettings;
   onChangeSettings: (settings: AppSettings) => void;
   visibleSettings: DiscrubSetting[];
+  containerProps?: SxProps<Theme>;
 };
 
 function Config({
   settings,
   onChangeSettings,
   visibleSettings = [],
+  containerProps,
 }: ConfigProps) {
   const handleChange = async (setting: DiscrubSetting, value: string) => {
     const settings = await setSetting(setting, value);
@@ -42,6 +48,21 @@ function Config({
 
   const getValue = (setting: DiscrubSetting) => {
     return settings[setting] || null;
+  };
+
+  const getResolutionModeDesc = (): string => {
+    switch (getValue(DiscrubSetting.EXPORT_IMAGE_RES_MODE)) {
+      case ResolutionType.HOVER_LIMITED:
+        return "When hovered over, images will be expanded to a safe size.";
+      case ResolutionType.HOVER_FULL:
+        return "When hovered over, images will be expanded to its full resolution.";
+      case ResolutionType.NO_HOVER_LIMITED:
+        return "Images will be automatically expanded to a safe size.";
+      case ResolutionType.NO_HOVER_FULL:
+        return "Images will be automatically expanded to its full resolution.";
+      default:
+        return "";
+    }
   };
 
   const controls = [
@@ -104,7 +125,7 @@ function Config({
     },
     {
       name: DiscrubSetting.EXPORT_PREVIEW_MEDIA,
-      label: "Preview Media",
+      label: "Preview Media (HTML)",
       options: [
         { value: "true", name: "Yes" },
         { value: "false", name: "No" },
@@ -117,6 +138,24 @@ function Config({
         ) : (
           <HideImageIcon />
         ),
+    },
+    {
+      name: DiscrubSetting.EXPORT_IMAGE_RES_MODE,
+      label: "Image Display Mode (HTML)",
+      options: [
+        { value: ResolutionType.HOVER_LIMITED, name: "Hover, Safe Resolution" },
+        { value: ResolutionType.HOVER_FULL, name: "Hover, Full Resolution" },
+        {
+          value: ResolutionType.NO_HOVER_LIMITED,
+          name: "No Hover, Safe Resolution",
+        },
+        {
+          value: ResolutionType.NO_HOVER_FULL,
+          name: "No Hover, Full Resolution",
+        },
+      ],
+      description: getResolutionModeDesc(),
+      icon: () => <AspectRatioIcon />,
     },
     {
       name: DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
@@ -136,7 +175,7 @@ function Config({
     },
     {
       name: DiscrubSetting.EXPORT_ARTIST_MODE,
-      label: "Use Artist Mode",
+      label: "Artist Mode",
       options: [
         { value: "true", name: "Yes" },
         { value: "false", name: "No" },
@@ -187,7 +226,14 @@ function Config({
   };
 
   return (
-    <Stack sx={{ padding: 3, spacing: 2, gap: "15px" }}>
+    <Stack
+      sx={{
+        padding: 3,
+        spacing: 2,
+        gap: "15px",
+        ...containerProps,
+      }}
+    >
       {Object.keys(settings).length &&
         controls.map((control) => {
           const Icon = control.icon?.();

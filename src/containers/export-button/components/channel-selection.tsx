@@ -37,7 +37,12 @@ const ChannelSelection = ({
     : channels;
 
   return (
-    <Stack direction="column" spacing={3} justifyContent="space-between">
+    <Stack
+      sx={{ width: "100%" }}
+      direction="column"
+      spacing={3}
+      justifyContent="space-between"
+    >
       <Box sx={{ maxHeight: "250px", overflow: "auto" }}>
         <List disablePadding dense>
           {filteredChannels.map((channel) => (

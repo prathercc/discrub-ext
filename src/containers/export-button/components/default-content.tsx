@@ -30,6 +30,7 @@ const DefaultContent = ({
     DiscrubSetting.EXPORT_PREVIEW_MEDIA,
     DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
     DiscrubSetting.EXPORT_MESSAGES_PER_PAGE,
+    DiscrubSetting.EXPORT_IMAGE_RES_MODE,
   ];
   if (isDm) {
     visibleSettings = visibleSettings.filter(
@@ -51,6 +52,7 @@ const DefaultContent = ({
               onChangeSettings={onChangeSettings}
               visibleSettings={visibleSettings}
               settings={settings}
+              containerProps={{ width: "auto" }}
             />
           </Stack>
         </>

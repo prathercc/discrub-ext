@@ -1,6 +1,7 @@
 /*global chrome*/
 
 import { DiscrubSetting } from "../enum/discrub-setting";
+import { ResolutionType } from "../enum/resolution-type";
 import { SortDirection } from "../enum/sort-direction";
 import { AppSettings } from "../features/app/app-types";
 
@@ -39,6 +40,10 @@ const defaultSettings = [
   { name: DiscrubSetting.EXPORT_PREVIEW_MEDIA, value: "false" },
   { name: DiscrubSetting.EXPORT_DOWNLOAD_MEDIA, value: "false" },
   { name: DiscrubSetting.EXPORT_MESSAGES_PER_PAGE, value: "1000" },
+  {
+    name: DiscrubSetting.EXPORT_IMAGE_RES_MODE,
+    value: ResolutionType.HOVER_LIMITED,
+  },
 ];
 
 export const initializeSettings = async () => {
@@ -76,6 +81,8 @@ export const getSettings = async (): Promise<AppSettings> => {
       chromeSettings[DiscrubSetting.EXPORT_DOWNLOAD_MEDIA],
     [DiscrubSetting.EXPORT_MESSAGES_PER_PAGE]:
       chromeSettings[DiscrubSetting.EXPORT_MESSAGES_PER_PAGE],
+    [DiscrubSetting.EXPORT_IMAGE_RES_MODE]:
+      chromeSettings[DiscrubSetting.EXPORT_IMAGE_RES_MODE],
   };
 };
 

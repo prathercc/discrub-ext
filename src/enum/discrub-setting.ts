@@ -9,4 +9,5 @@ export enum DiscrubSetting {
   EXPORT_PREVIEW_MEDIA = "exportPreviewMedia",
   EXPORT_DOWNLOAD_MEDIA = "exportDownloadMedia",
   EXPORT_MESSAGES_PER_PAGE = "exportMessagesPerPage",
+  EXPORT_IMAGE_RES_MODE = "exportImageResMode",
 }

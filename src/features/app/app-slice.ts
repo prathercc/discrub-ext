@@ -5,6 +5,7 @@ import Message from "../../classes/message";
 import { AppThunk } from "../../app/store";
 import { DiscrubSetting } from "../../enum/discrub-setting";
 import { SortDirection } from "../../enum/sort-direction";
+import { ResolutionType } from "../../enum/resolution-type";
 
 const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
@@ -17,6 +18,7 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.EXPORT_PREVIEW_MEDIA]: "false",
   [DiscrubSetting.EXPORT_DOWNLOAD_MEDIA]: "false",
   [DiscrubSetting.EXPORT_MESSAGES_PER_PAGE]: "1000",
+  [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
 };
 
 const emptyTask: AppTask = {
