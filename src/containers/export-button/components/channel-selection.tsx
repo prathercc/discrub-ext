@@ -21,7 +21,7 @@ type ChannelSelectionProps = {
   selectedExportChannels: Snowflake[];
   channels: Channel[];
   handleChannelSelect: (id: Snowflake) => void;
-  onSelectAll: () => void;
+  onSelectAll: (channels: Channel[]) => void;
 };
 
 const ChannelSelection = ({
@@ -76,7 +76,7 @@ const ChannelSelection = ({
           title={selectedExportChannels.length ? "Deselect All" : "Select All"}
         >
           <IconButton
-            onClick={onSelectAll}
+            onClick={() => onSelectAll(filteredChannels)}
             color={selectedExportChannels.length ? "secondary" : "primary"}
           >
             {selectedExportChannels.length ? (

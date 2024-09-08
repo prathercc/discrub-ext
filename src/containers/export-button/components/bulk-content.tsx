@@ -42,9 +42,9 @@ const BulkContent = ({
     }
   };
 
-  const toggleSelectAll = () => {
+  const toggleSelectAll = (filteredChannels: Channel[]) => {
     setSelectedExportChannels(
-      selectedExportChannels.length ? [] : channels.map((c) => c.id)
+      selectedExportChannels.length ? [] : filteredChannels.map((c) => c.id)
     );
   };
   let visibleSettings = [
