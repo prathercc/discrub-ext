@@ -38,6 +38,7 @@ const ExportButton = ({
   const activeExportMessages = exportState.exportMessages();
   const totalPages = exportState.totalPages();
   const entity = exportState.currentExportEntity();
+  const name = exportState.name();
 
   const {
     setDiscrubCancelled,
@@ -169,10 +170,6 @@ const ExportButton = ({
 
   const exportTitle = `Export ${bulk ? exportType : "Messages"}`;
 
-  const getExportPageTitle = (): string => {
-    return `Page ${currentPage} of ${totalPages}`;
-  };
-
   const getTooltipDescription = (exportType: ExportType): string => {
     const descriptionArr: string[] = [];
 
@@ -225,7 +222,9 @@ const ExportButton = ({
           componentRef={contentRef}
           isExporting={isExporting}
           entity={entity}
-          getExportPageTitle={getExportPageTitle}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          safeEntityName={name}
         />
       )}
       <ExportModal
