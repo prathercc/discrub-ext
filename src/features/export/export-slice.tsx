@@ -75,6 +75,7 @@ const initialState: ExportState = {
   totalPages: 0,
   exportMaps: initialMaps,
   exportMessages: [],
+  currentExportEntity: null,
 };
 
 export const exportSlice = createSlice({
@@ -165,6 +166,12 @@ export const exportSlice = createSlice({
     setExportMessages: (state, { payload }: { payload: Message[] }): void => {
       state.exportMessages = payload;
     },
+    setCurrentExportEntity: (
+      state,
+      { payload }: { payload: Guild | Channel | Maybe }
+    ): void => {
+      state.currentExportEntity = payload;
+    },
   },
 });
 
@@ -182,6 +189,7 @@ export const {
   setExportReactionMap,
   setExportMessages,
   setTotalPages,
+  setCurrentExportEntity,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -989,11 +997,17 @@ export const exportMessages =
   ): AppThunk =>
   async (dispatch, getState) => {
     const { selectedGuild } = getState().guild;
+    const { selectedChannel } = getState().channel;
+    const { selectedDms } = getState().dm;
 
+    const entity = !!selectedDms.length
+      ? selectedDms[0]
+      : selectedChannel || selectedGuild;
     const safeEntityName = getSafeExportName(entityName);
     const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
     dispatch(setIsExporting(true));
     dispatch(setName(safeEntityName));
+    dispatch(setCurrentExportEntity(entity));
 
     if (selectedGuild)
       await dispatch(_downloadRoles(exportUtils, selectedGuild));
@@ -1026,6 +1040,7 @@ export const exportMessages =
     dispatch(setIsGenerating(false));
     dispatch(setIsExporting(false));
     dispatch(setName(""));
+    dispatch(setCurrentExportEntity(null));
     await exportUtils.resetZip();
     dispatch(resetStatus());
     dispatch(setCurrentPage(1));
@@ -1056,6 +1071,7 @@ export const exportChannels =
       dispatch(resetStatus());
       const safeEntityName = getSafeExportName(entity.name || entity.id);
       const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
+      dispatch(setCurrentExportEntity(entity));
       dispatch(setName(safeEntityName));
       if (!isDm(entity)) {
         dispatch(setChannel(entity.id));
@@ -1118,6 +1134,7 @@ export const exportChannels =
     dispatch(setIsGenerating(false));
     dispatch(setIsExporting(false));
     dispatch(setName(""));
+    dispatch(setCurrentExportEntity(null));
     await exportUtils.resetZip();
     dispatch(resetStatus());
     dispatch(setCurrentPage(1));

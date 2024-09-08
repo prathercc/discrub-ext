@@ -17,7 +17,7 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
 
   const { state: dmState, setPreFilterUserId: dmSetPreFilterUserId } =
     useDmSlice();
-  const selectedDm = dmState.selectedDm();
+  const selectedDms = dmState.selectedDms();
 
   const preFilterUserId = isDm
     ? dmState.preFilterUserId()
@@ -52,7 +52,7 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
   const getChildrenDisabled = (): boolean => {
     if (messagesLoading) return true;
     if (isDm) {
-      return !selectedDm;
+      return selectedDms.length !== 1;
     } else {
       return !selectedGuild;
     }

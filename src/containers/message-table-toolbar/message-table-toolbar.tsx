@@ -30,8 +30,8 @@ type MessageTableToolbarProps = {
 
 const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   const { state: dmState } = useDmSlice();
-  const selectedDm = dmState.selectedDm();
-  const isDm = !!selectedDm?.id;
+  const selectedDms = dmState.selectedDms();
+  const isDm = !!selectedDms.length;
 
   const {
     state: appState,

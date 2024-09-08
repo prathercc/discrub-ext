@@ -83,6 +83,7 @@ function DonationListButton({ donation }: { donation: Donation }) {
             padding: "5px 10px 5px 10px",
             backgroundColor: "rgb(30, 33, 36)",
             borderRadius: "5px",
+            opacity: donation.message.length,
           }}
         >
           <Typography variant="caption">{donation.message}</Typography>

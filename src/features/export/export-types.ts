@@ -1,4 +1,5 @@
 import Channel from "../../classes/channel";
+import Guild from "../../classes/guild";
 import Message from "../../classes/message";
 import { ExportType } from "../../enum/export-type";
 import ExportUtils from "./export-utils";
@@ -11,6 +12,7 @@ export type ExportState = {
   totalPages: number;
   exportMaps: ExportMap;
   exportMessages: Message[];
+  currentExportEntity: Guild | Channel | Maybe;
 };
 
 export type ExportMap = {

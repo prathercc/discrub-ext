@@ -17,6 +17,7 @@ import {
   exportChannels as exportChannelsAction,
   setExportMessages as setExportMessagesAction,
   setTotalPages as setTotalPagesAction,
+  setCurrentExportEntity as setCurrentExportEntityAction,
 } from "./export-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
@@ -33,6 +34,7 @@ import Channel from "../../classes/channel";
 import ExportUtils from "./export-utils";
 import { ExportType } from "../../enum/export-type";
 import Message from "../../classes/message";
+import Guild from "../../classes/guild";
 
 const useExportSlice = () => {
   const dispatch = useAppDispatch();
@@ -73,6 +75,9 @@ const useExportSlice = () => {
   const useExportMessages = (): Message[] =>
     useAppSelector((state: RootState) => state.export.exportMessages);
 
+  const useCurrentExportEntity = (): Guild | Channel | Maybe =>
+    useAppSelector((state: RootState) => state.export.currentExportEntity);
+
   const state = {
     isExporting: useIsExporting,
     name: useName,
@@ -86,6 +91,11 @@ const useExportSlice = () => {
     roleMap: useRoleMap,
     reactionMap: useReactionMap,
     exportMessages: useExportMessages,
+    currentExportEntity: useCurrentExportEntity,
+  };
+
+  const setCurrentExportEntity = (entity: Guild | Channel | Maybe): void => {
+    dispatch(setCurrentExportEntityAction(entity));
   };
 
   const setExportMessages = (messages: Message[]): void => {
@@ -192,6 +202,7 @@ const useExportSlice = () => {
     exportChannels,
     setExportMessages,
     setTotalPages,
+    setCurrentExportEntity,
   };
 };
 

@@ -54,7 +54,7 @@ const PurgeModal = ({
 
   const { state: dmState, setPreFilterUserId: setDmPreFilterUserId } =
     useDmSlice();
-  const selectedDm = dmState.selectedDm();
+  const selectedDms = dmState.selectedDms();
 
   const { state: userState } = useUserSlice();
   const currentUser = userState.currentUser();
@@ -74,7 +74,9 @@ const PurgeModal = ({
 
   const finishedPurge = !active && entity;
 
-  const deleteType = isDm ? "DM" : "Server";
+  const deleteType = isDm
+    ? `DM${selectedDms.length > 1 ? "'s" : ""}`
+    : "Server";
 
   useEffect(() => {
     if (dialogOpen) {
@@ -106,17 +108,18 @@ const PurgeModal = ({
     active || entity || (!isDm && !preFilterUserId)
   );
 
-  const dmDialogText =
-    "Are you sure you want to purge this DM? All of your messages will be deleted.";
+  const dmDialogText = `Are you sure you want to purge ${
+    selectedDms.length > 1 ? "these DM's" : "this DM"
+  }? All of your messages will be deleted.`;
 
   const guildDialogText =
     "Are you sure you want to purge this Server? All messages in every Channel will be deleted for yourself or a given User Id.";
 
   const handlePurge = () => {
-    if (isDm && selectedDm) {
-      purge([selectedDm]);
+    if (isDm && !!selectedDms.length) {
+      purge([...selectedDms]);
     } else if (!isDm && channels.length) {
-      purge(channels);
+      purge([...channels]);
     }
   };
 
