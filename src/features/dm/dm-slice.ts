@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchDirectMessages } from "../../services/discord-service";
 import { resetFilters, resetMessageData } from "../message/message-slice";
 import Channel from "../../classes/channel";
 import { DmState, PreFilterUser, SetSelectedDmsProps } from "./dm-types";
 import { AppThunk } from "../../app/store";
+import DiscordService from "../../services/discord-service";
 
 const initialState: DmState = {
   dms: [],
@@ -74,10 +74,13 @@ export const {
 } = dmSlice.actions;
 
 export const getDms = (): AppThunk => async (dispatch, getState) => {
+  const { settings } = getState().app;
   const { token } = getState().user;
   if (token) {
     dispatch(setIsLoading(true));
-    const { success, data } = await fetchDirectMessages(token);
+    const { success, data } = await new DiscordService(
+      settings
+    ).fetchDirectMessages(token);
     if (success && data) {
       dispatch(setDms(data));
       dispatch(setIsLoading(false));

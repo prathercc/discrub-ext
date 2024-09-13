@@ -50,13 +50,13 @@ import { ExportType } from "../../enum/export-type";
 import Message from "../../classes/message";
 import ExportUtils from "./export-utils";
 import { AppThunk } from "../../app/store";
-import { downloadFile } from "../../services/discord-service";
 import { ReactElement } from "react";
 import { Typography } from "@mui/material";
 import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
 import Channel from "../../classes/channel";
+import DiscordService from "../../services/discord-service";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -200,6 +200,7 @@ const _downloadFilesFromMessage =
     index,
   }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { exportUseArtistMode, exportDownloadMedia } =
       getState().app.settings;
     const artistMode = stringToBool(exportUseArtistMode);
@@ -230,7 +231,9 @@ const _downloadFilesFromMessage =
           const map = exportMaps.mediaMap;
 
           if (!map[downloadUrl]) {
-            const { success, data } = await downloadFile(downloadUrl);
+            const { success, data } = await new DiscordService(
+              settings
+            ).downloadFile(downloadUrl);
             if (success && data) {
               const blobType = data.type.split("/")?.[1];
               const fileIndex = `${index + 1}_${eI + 1}_${dI + 1}`;
@@ -259,14 +262,16 @@ const _downloadRoles =
   async (dispatch, getState) => {
     const guildRoles = guild.roles || [];
     for (const [_, role] of guildRoles.entries()) {
-      const { discrubCancelled } = getState().app;
+      const { discrubCancelled, settings } = getState().app;
       if (discrubCancelled) break;
       await dispatch(checkDiscrubPaused());
 
       const { exportMaps } = getState().export;
       const iconUrl = resolveRoleUrl(role.id, role.icon).remote;
       if (iconUrl) {
-        const { success, data } = await downloadFile(iconUrl);
+        const { success, data } = await new DiscordService(
+          settings
+        ).downloadFile(iconUrl);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const fileName = getExportFileName(role, fileExt);
@@ -310,7 +315,7 @@ const _downloadAvatarFromMessage =
     }
 
     for (const [_, aL] of avatarLookups.entries()) {
-      const { discrubCancelled } = getState().app;
+      const { discrubCancelled, settings } = getState().app;
       if (discrubCancelled) break;
       await dispatch(checkDiscrubPaused());
 
@@ -319,7 +324,9 @@ const _downloadAvatarFromMessage =
       const { remote: remoteAvatar } = resolveAvatarUrl(aL.id, aL.avatar);
 
       if (!avatarMap[idAndAvatar] && remoteAvatar) {
-        const { success, data } = await downloadFile(remoteAvatar);
+        const { success, data } = await new DiscordService(
+          settings
+        ).downloadFile(remoteAvatar);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
@@ -719,9 +726,9 @@ const _downloadEmojisFromMessage =
         await dispatch(checkDiscrubPaused());
         const { exportMaps } = getState().export;
         if (!exportMaps.emojiMap[id]) {
-          const { success, data } = await downloadFile(
-            `https://cdn.discordapp.com/emojis/${id}`
-          );
+          const { success, data } = await new DiscordService(
+            settings
+          ).downloadFile(`https://cdn.discordapp.com/emojis/${id}`);
 
           if (success && data) {
             const fileExt = data.type?.split("/")?.[1] || "gif";
@@ -745,7 +752,7 @@ const _downloadEmojisFromMessage =
 const _downloadDiscrubMedia = async (exportUtils: ExportUtils) => {
   const media = [{ url: "resources/media/discrub.png", name: "discrub.png" }];
   for (const m of media) {
-    const { success, data } = await downloadFile(m.url);
+    const { success, data } = await new DiscordService().downloadFile(m.url);
 
     if (success && data) {
       await exportUtils.addToZip(data, `discrub_media/${m.name}`);

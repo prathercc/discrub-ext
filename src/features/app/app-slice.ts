@@ -11,6 +11,8 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
   [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
+  [DiscrubSetting.RANDOM_DELETE_DELAY]: "0",
+  [DiscrubSetting.RANDOM_SEARCH_DELAY]: "0",
 
   [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
   [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",

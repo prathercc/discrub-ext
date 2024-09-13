@@ -25,6 +25,8 @@ import FolderIcon from "@mui/icons-material/Folder";
 import FolderOffIcon from "@mui/icons-material/FolderOff";
 import FormatListNumberedRtlIcon from "@mui/icons-material/FormatListNumberedRtl";
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
+import AutoDeleteIcon from "@mui/icons-material/AutoDelete";
+import YoutubeSearchedForIcon from "@mui/icons-material/YoutubeSearchedFor";
 import { stringToBool } from "../../../utils";
 import { ResolutionType } from "../../../enum/resolution-type";
 
@@ -97,6 +99,25 @@ function Config({
       description:
         "Having this setting set to 'Yes' will ensure that User mentions are correctly displayed, even if the mentioned User is not apart of the conversation. It is recommended to keep this setting enabled.",
     },
+    {
+      name: DiscrubSetting.RANDOM_DELETE_DELAY,
+      label: "Delete/Edit Random Delay (seconds)",
+      description:
+        "Wait a random amount of seconds (from zero and the provided value), between message deletes/edits.",
+      numeric: true,
+      fallbackValue: "0",
+      icon: () => <AutoDeleteIcon />,
+    },
+    {
+      name: DiscrubSetting.RANDOM_SEARCH_DELAY,
+      label: "Search Random Delay (seconds)",
+      description:
+        "Wait a random amount of seconds (from zero and the provided value), between message, user, and reaction searches.",
+      numeric: true,
+      fallbackValue: "0",
+      icon: () => <YoutubeSearchedForIcon />,
+    },
+
     // Export Settings
     {
       name: DiscrubSetting.EXPORT_MESSAGES_PER_PAGE,
@@ -220,7 +241,7 @@ function Config({
     const input = parseInt(e.target.value);
     const settings = await setSetting(
       setting,
-      !isNaN(input) ? e.target.value : fallbackValue || ""
+      !isNaN(input) ? `${input}` : fallbackValue || ""
     );
     onChangeSettings(settings);
   };
@@ -253,8 +274,9 @@ function Config({
                 )}
                 {control.options?.length && (
                   <>
-                    <InputLabel>{control.label}</InputLabel>
+                    <InputLabel variant="filled">{control.label}</InputLabel>
                     <Select
+                      variant="filled"
                       endAdornment={Icon}
                       IconComponent={Icon ? "span" : undefined}
                       value={getValue(control.name)}

@@ -27,6 +27,8 @@ const defaultSettings = [
   { name: DiscrubSetting.REACTIONS_ENABLED, value: "true" },
   { name: DiscrubSetting.SERVER_NICKNAME_LOOKUP, value: "true" },
   { name: DiscrubSetting.DISPLAY_NAME_LOOKUP, value: "true" },
+  { name: DiscrubSetting.RANDOM_DELETE_DELAY, value: "0" },
+  { name: DiscrubSetting.RANDOM_SEARCH_DELAY, value: "0" },
 
   {
     name: DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
@@ -68,6 +70,10 @@ export const getSettings = async (): Promise<AppSettings> => {
       chromeSettings[DiscrubSetting.SERVER_NICKNAME_LOOKUP],
     [DiscrubSetting.DISPLAY_NAME_LOOKUP]:
       chromeSettings[DiscrubSetting.DISPLAY_NAME_LOOKUP],
+    [DiscrubSetting.RANDOM_DELETE_DELAY]:
+      chromeSettings[DiscrubSetting.RANDOM_DELETE_DELAY],
+    [DiscrubSetting.RANDOM_SEARCH_DELAY]:
+      chromeSettings[DiscrubSetting.RANDOM_SEARCH_DELAY],
 
     [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]:
       chromeSettings[DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS],
