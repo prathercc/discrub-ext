@@ -320,7 +320,8 @@ const _filterMessageType = (
   const messageHasType = _filterValue.some((fv) => {
     return (
       messageTypeEquals(message.type, fv as MessageType) ||
-      (fv === MessageCategory.PINNED && message.pinned)
+      (fv === MessageCategory.PINNED && message.pinned) ||
+      (fv === MessageCategory.REACTIONS && !!message.reactions?.length)
     );
   });
   const criteriaMet =

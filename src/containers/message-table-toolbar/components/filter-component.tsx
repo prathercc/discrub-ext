@@ -104,11 +104,13 @@ const FilterComponent = ({
           MessageType.CALL,
           MessageCategory.PINNED,
           MessageType.CHANNEL_PINNED_MESSAGE,
+          MessageCategory.REACTIONS,
         ]}
         displayNameMap={{
           [MessageType.CALL]: "Call",
           [MessageType.CHANNEL_PINNED_MESSAGE]: "Pin Notification",
           [MessageCategory.PINNED]: "Pinned",
+          [MessageCategory.REACTIONS]: "Reactions",
         }}
       />
 
