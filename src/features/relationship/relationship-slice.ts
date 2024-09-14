@@ -1,12 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {
-  createDm,
-  deleteFriendRequest,
-  getRelationships,
-  sendFriendRequest,
-} from "../../services/discord-service";
 import { AddFriendProps, RelationshipState } from "./relationship-types";
 import { AppThunk } from "../../app/store";
+import DiscordService from "../../services/discord-service";
 
 const initialState: RelationshipState = {
   isLoading: null,
@@ -29,10 +24,13 @@ export const relationshipSlice = createSlice({
 export const { setIsLoading, setFriends } = relationshipSlice.actions;
 
 export const getFriends = (): AppThunk => async (dispatch, getState) => {
+  const { settings } = getState().app;
   const { token } = getState().user;
   if (token) {
     dispatch(setIsLoading(true));
-    const { success, data } = await getRelationships(token);
+    const { success, data } = await new DiscordService(
+      settings
+    ).getRelationships(token);
     if (success && data) {
       dispatch(setFriends(data));
     } else {
@@ -45,10 +43,14 @@ export const getFriends = (): AppThunk => async (dispatch, getState) => {
 export const addFriend =
   ({ username, discriminator }: AddFriendProps): AppThunk =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     if (token) {
       dispatch(setIsLoading(true));
-      await sendFriendRequest(token, { username, discriminator });
+      await new DiscordService(settings).sendFriendRequest(token, {
+        username,
+        discriminator,
+      });
       dispatch(setIsLoading(false));
     }
   };
@@ -56,12 +58,15 @@ export const addFriend =
 export const deleteFriend =
   (userId: Snowflake): AppThunk =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     //   const { friends } = getState().relationship;
 
     if (token) {
       dispatch(setIsLoading(true));
-      const { success } = await deleteFriendRequest(token, userId);
+      const { success } = await new DiscordService(
+        settings
+      ).deleteFriendRequest(token, userId);
       if (success) {
         //   dispatch(setFriends(friends.filter((f) => f.user.id !== userId)));
       }
@@ -72,10 +77,11 @@ export const deleteFriend =
 export const openDm =
   (userId: Snowflake): AppThunk =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     if (token) {
       dispatch(setIsLoading(true));
-      await createDm(token, userId); // TODO: Possibly return a response so User knows if DM was opened successfully.
+      await new DiscordService(settings).createDm(token, userId); // TODO: Possibly return a response so User knows if DM was opened successfully.
       dispatch(setIsLoading(false));
     }
   };

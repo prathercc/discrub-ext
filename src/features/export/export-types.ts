@@ -1,23 +1,18 @@
 import Channel from "../../classes/channel";
+import Guild from "../../classes/guild";
 import Message from "../../classes/message";
 import { ExportType } from "../../enum/export-type";
-import { SortDirection } from "../../enum/sort-direction";
 import ExportUtils from "./export-utils";
 
 export type ExportState = {
   isExporting: boolean;
-  downloadImages: boolean;
-  previewImages: boolean;
-  artistMode: boolean;
-  folderingThreads: boolean;
   name: string;
   isGenerating: boolean;
   currentPage: number;
   totalPages: number;
-  messagesPerPage: number;
-  sortOverride: SortDirection;
   exportMaps: ExportMap;
   exportMessages: Message[];
+  currentExportEntity: Guild | Channel | Maybe;
 };
 
 export type ExportMap = {

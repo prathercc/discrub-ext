@@ -22,7 +22,7 @@ import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
 import AdvancedFiltering from "../advanced-filtering/advanced-filtering";
 import TokenNotFound from "../../components/token-not-found";
-import { sortByProperty } from "../../utils";
+import { messageTypeEquals, sortByProperty } from "../../utils";
 import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -113,7 +113,7 @@ function ChannelMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: m.type !== MessageType.CALL,
+    selectable: !messageTypeEquals(m.type, MessageType.CALL),
     renderRow: (row) => (
       <TableMessage
         settings={settings}
@@ -257,7 +257,7 @@ function ChannelMessages() {
               </Stack>
 
               <Collapse orientation="vertical" in={expanded}>
-                <Stack direction="column" gap="5px">
+                <Stack direction="column" gap="5px" spacing={1}>
                   <Stack
                     direction="row"
                     justifyContent="center"

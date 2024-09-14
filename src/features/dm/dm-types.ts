@@ -2,7 +2,7 @@ import Channel from "../../classes/channel";
 
 export type DmState = {
   dms: Channel[];
-  selectedDm: Channel | Maybe;
+  selectedDms: Channel[];
   isLoading: boolean | Maybe;
   preFilterUserId: Snowflake | Maybe;
   preFilterUsers: PreFilterUser[];
@@ -13,7 +13,7 @@ export type PreFilterUser = {
   id: Snowflake;
 };
 
-export type SetDmProps = {
-  dmId: Snowflake;
+export type SetSelectedDmsProps = {
+  dmIds: Snowflake[];
   preFilterUser: PreFilterUser;
 };

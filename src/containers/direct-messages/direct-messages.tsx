@@ -17,12 +17,13 @@ import {
   Autocomplete,
   IconButton,
   Collapse,
+  Chip,
 } from "@mui/material";
 import ExportButton from "../export-button/export-button";
 import PurgeButton from "../purge-button/purge-button";
 import AdvancedFiltering from "../advanced-filtering/advanced-filtering";
 import TokenNotFound from "../../components/token-not-found";
-import { sortByProperty } from "../../utils";
+import { messageTypeEquals, sortByProperty } from "../../utils";
 import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -49,8 +50,8 @@ function DirectMessages() {
   const token = userState.token();
   const userLoading = userState.isLoading();
 
-  const { state: dmState, changeDm, getDms } = useDmSlice();
-  const selectedDm = dmState.selectedDm();
+  const { state: dmState, getDms, setSelectedDms } = useDmSlice();
+  const selectedDms = dmState.selectedDms();
   const dms = dmState.dms();
   const preFilterUserId = dmState.preFilterUserId();
 
@@ -61,6 +62,7 @@ function DirectMessages() {
     deleteAttachment,
     setSelected,
     deleteReaction,
+    resetAdvancedFilters,
   } = useMessageSlice();
   const messagesLoading = messageState.isLoading();
   const messages = messageState.messages();
@@ -107,7 +109,7 @@ function DirectMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: m.type !== MessageType.CALL,
+    selectable: !messageTypeEquals(m.type, MessageType.CALL),
     renderRow: (row) => (
       <TableMessage
         settings={settings}
@@ -129,16 +131,17 @@ function DirectMessages() {
   };
 
   const fetchDmData = async () => {
-    if (selectedDm) {
-      getMessageData(null, selectedDm.id, { preFilterUserId });
-      setSearchTouched(true);
-      setExpanded(false);
-    }
+    getMessageData(null, selectedDms[0].id, { preFilterUserId });
+    setSearchTouched(true);
+    setExpanded(false);
   };
 
-  const handleChangeDm = async (id: Snowflake | null) => {
-    changeDm(id);
+  const handleChangeDm = async (ids: Snowflake[]) => {
+    setSelectedDms(ids);
     setSearchTouched(false);
+    if (ids.length > 1) {
+      resetAdvancedFilters();
+    }
   };
 
   const sortedDms = dms
@@ -160,10 +163,11 @@ function DirectMessages() {
   ].some((c) => c);
 
   const dmFieldDisabled = messagesLoading || discrubCancelled;
-  const searchDisabled = !selectedDm?.id || messagesLoading || discrubCancelled;
+  const searchDisabled =
+    selectedDms.length !== 1 || messagesLoading || discrubCancelled;
   const pauseCancelDisabled = !messagesLoading;
   const exportAndPurgeDisabled =
-    !selectedDm?.id ||
+    selectedDms.length === 0 ||
     messagesLoading ||
     messages.length > 0 ||
     advancedFilterActive ||
@@ -224,7 +228,7 @@ function DirectMessages() {
               </Stack>
 
               <Collapse orientation="vertical" in={expanded}>
-                <Stack direction="column" gap="5px">
+                <Stack direction="column" gap="5px" spacing={1}>
                   <Stack
                     direction="row"
                     justifyContent="center"
@@ -232,6 +236,7 @@ function DirectMessages() {
                     spacing={1}
                   >
                     <Autocomplete
+                      multiple
                       clearIcon={<ClearIcon />}
                       onChange={(_, val) => handleChangeDm(val)}
                       options={sortedDms.map((directMessage) => {
@@ -249,6 +254,27 @@ function DirectMessages() {
                           </Typography>
                         );
                       }}
+                      renderTags={(value: readonly string[], getTagProps) =>
+                        value.map((option: string, index: number) => {
+                          const { key, ...tagProps } = getTagProps({ index });
+                          const foundDm = dms.find((dm) => dm.id === option);
+                          return (
+                            <Chip
+                              variant="outlined"
+                              label={String(
+                                dms.find((dm) => dm.id === option)?.name
+                              )}
+                              key={key}
+                              {...tagProps}
+                              avatar={
+                                foundDm ? (
+                                  <EntityIcon entity={foundDm} />
+                                ) : undefined
+                              }
+                            />
+                          );
+                        })
+                      }
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -268,15 +294,13 @@ function DirectMessages() {
                                   copyName="DM List"
                                   disabled={dmFieldDisabled}
                                 />
-                                {selectedDm && (
-                                  <EntityIcon entity={selectedDm} />
-                                )}
+                                {params.InputProps.startAdornment}
                               </>
                             ),
                           }}
                         />
                       )}
-                      value={selectedDm?.id}
+                      value={selectedDms.map((dm) => dm.id)}
                       disabled={dmFieldDisabled}
                     />
                   </Stack>
@@ -295,7 +319,7 @@ function DirectMessages() {
                 <PauseButton disabled={pauseCancelDisabled} />
                 <Button
                   disabled={searchDisabled}
-                  onClick={() => selectedDm?.id && fetchDmData()}
+                  onClick={fetchDmData}
                   variant="contained"
                 >
                   Search
@@ -325,7 +349,7 @@ function DirectMessages() {
                 />
               </Box>
             )}
-            {messages.length === 0 && selectedDm?.id && searchTouched && (
+            {messages.length === 0 && !!selectedDms.length && searchTouched && (
               <Paper sx={{ padding: "10px" }}>
                 <Box
                   sx={{

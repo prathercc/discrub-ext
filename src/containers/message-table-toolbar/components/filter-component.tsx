@@ -4,11 +4,12 @@ import Stack from "@mui/material/Stack";
 import DateTimePicker from "../../../common-components/date-time-picker/date-time-picker";
 import {
   Autocomplete,
-  FormControlLabel,
-  FormGroup,
-  Switch,
-  Checkbox,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FilledInput,
 } from "@mui/material";
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import CopyAdornment from "../../../components/copy-adornment";
@@ -18,6 +19,9 @@ import { Filter } from "../../../features/message/message-types";
 import { FilterName } from "../../../enum/filter-name";
 import { FilterType } from "../../../enum/filter-type";
 import Channel from "../../../classes/channel";
+import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
+import { MessageType } from "../../../enum/message-type";
+import { MessageCategory } from "../../../enum/message-category";
 
 type FilterComponentProps = {
   isDm: boolean;
@@ -42,284 +46,270 @@ const FilterComponent = ({
 
   const [startTime, setStartTime] = useState<Date | Maybe>(null);
   const [endTime, setEndTime] = useState<Date | Maybe>(null);
-  const [inverse, setInverse] = useState(false);
+  const [inverse, setInverse] = useState(0);
+  const [messageTypes, setMessageTypes] = useState<string[]>([]);
   const [messageTags, setMessageTags] = useState<string[]>([]);
   const [attachmentTags, setAttachmentTags] = useState<string[]>([]);
   const [userNameTags, setUserNameTags] = useState<string[]>([]);
 
   return (
-    <Stack zIndex={1} sx={{ width: "100%" }} spacing={2}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={2}
+    <Stack
+      zIndex={1}
+      sx={{ width: "100%" }}
+      spacing={1}
+      direction="column"
+      mt={1}
+    >
+      <Tooltip
+        title="Inverse Filter"
+        description="Show messages NOT matching the other provided Quick Filters"
+        placement="left"
       >
-        <DateTimePicker
-          onDateChange={(e) => {
-            handleFilterUpdate({
-              filterName: FilterName.START_TIME,
-              filterValue: e,
-              filterType: FilterType.DATE,
-            });
-            setStartTime(e);
-          }}
-          label="Start Time"
-          value={startTime}
-        />
-        <DateTimePicker
-          onDateChange={(e) => {
-            handleFilterUpdate({
-              filterName: FilterName.END_TIME,
-              filterValue: e,
-              filterType: FilterType.DATE,
-            });
-            setEndTime(e);
-          }}
-          label="End Time"
-          value={endTime}
-        />
-        <Tooltip
-          title="Inverse Filter"
-          description="Show messages NOT matching the other provided Quick Filters"
-        >
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={inverse}
-                  onChange={(e) => {
-                    handleFilterUpdate({
-                      filterName: FilterName.INVERSE,
-                      filterValue: e.target.checked,
-                      filterType: FilterType.TOGGLE,
-                    });
-                    setInverse(e.target.checked);
-                  }}
-                />
-              }
-              label="Inverse"
-            />
-          </FormGroup>
-        </Tooltip>
-      </Stack>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={2}
-      >
-        <Autocomplete
-          multiple
-          id="user-name-autocomplete"
-          options={[]}
-          freeSolo
-          fullWidth
-          onChange={(_, v) => {
-            setUserNameTags(v);
+        <FormControl fullWidth>
+          <InputLabel variant="filled">Inverse</InputLabel>
+          <Select
+            input={<FilledInput size="small" />}
+            value={inverse}
+            label="Inverse"
+            onChange={(e) => {
+              const { value } = e.target;
+              const parsedValue =
+                typeof value === "number" ? value : Number.parseInt(value);
+              handleFilterUpdate({
+                filterName: FilterName.INVERSE,
+                filterValue: !!parsedValue,
+                filterType: FilterType.TOGGLE,
+              });
+              setInverse(parsedValue);
+            }}
+          >
+            <MenuItem value={0}>No</MenuItem>
+            <MenuItem value={1}>Yes</MenuItem>
+          </Select>
+        </FormControl>
+      </Tooltip>
+
+      <MultiValueSelect
+        label="Message Type/Category"
+        onChange={(values) => {
+          handleFilterUpdate({
+            filterName: FilterName.MESSAGE_TYPE,
+            filterValue: values,
+            filterType: FilterType.ARRAY,
+          });
+          setMessageTypes(values);
+        }}
+        value={messageTypes}
+        values={[
+          MessageType.CALL,
+          MessageCategory.PINNED,
+          MessageType.CHANNEL_PINNED_MESSAGE,
+          MessageCategory.REACTIONS,
+        ]}
+        displayNameMap={{
+          [MessageType.CALL]: "Call",
+          [MessageType.CHANNEL_PINNED_MESSAGE]: "Pin Notification",
+          [MessageCategory.PINNED]: "Pinned",
+          [MessageCategory.REACTIONS]: "Reactions",
+        }}
+      />
+
+      <DateTimePicker
+        onDateChange={(e) => {
+          handleFilterUpdate({
+            filterName: FilterName.START_TIME,
+            filterValue: e,
+            filterType: FilterType.DATE,
+          });
+          setStartTime(e);
+        }}
+        label="Start Time"
+        value={startTime}
+      />
+      <DateTimePicker
+        onDateChange={(e) => {
+          handleFilterUpdate({
+            filterName: FilterName.END_TIME,
+            filterValue: e,
+            filterType: FilterType.DATE,
+          });
+          setEndTime(e);
+        }}
+        label="End Time"
+        value={endTime}
+      />
+
+      <Autocomplete
+        multiple
+        id="user-name-autocomplete"
+        options={[]}
+        freeSolo
+        fullWidth
+        onChange={(_, v) => {
+          setUserNameTags(v);
+          handleFilterUpdate({
+            filterName: FilterName.USER_NAME,
+            filterValue: v,
+            filterType: FilterType.TEXT,
+          });
+        }}
+        onInputChange={(_, v) => {
+          if (!userNameTags.length) {
             handleFilterUpdate({
               filterName: FilterName.USER_NAME,
               filterValue: v,
               filterType: FilterType.TEXT,
             });
-          }}
-          onInputChange={(_, v) => {
-            if (!userNameTags.length) {
-              handleFilterUpdate({
-                filterName: FilterName.USER_NAME,
-                filterValue: v,
-                filterType: FilterType.TEXT,
-              });
-            }
-          }}
-          value={userNameTags}
-          renderTags={(value: readonly string[], getTagProps) =>
-            value.map((option: string, index: number) => {
-              const { key, ...tagProps } = getTagProps({ index });
-              return (
-                <Chip
-                  variant="outlined"
-                  label={option}
-                  key={key}
-                  {...tagProps}
-                />
-              );
-            })
           }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              variant="filled"
-              label="Username"
-              fullWidth
-              maxRows={1}
-            />
-          )}
-        />
+        }}
+        value={userNameTags}
+        renderTags={(value: readonly string[], getTagProps) =>
+          value.map((option: string, index: number) => {
+            const { key, ...tagProps } = getTagProps({ index });
+            return (
+              <Chip variant="outlined" label={option} key={key} {...tagProps} />
+            );
+          })
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            variant="filled"
+            label="Username"
+            fullWidth
+            maxRows={1}
+          />
+        )}
+      />
 
-        <Autocomplete
-          multiple
-          id="message-content-autocomplete"
-          options={[]}
-          freeSolo
-          fullWidth
-          onChange={(_, v) => {
-            console.warn(v);
-            setMessageTags(v);
+      <Autocomplete
+        multiple
+        id="message-content-autocomplete"
+        options={[]}
+        freeSolo
+        fullWidth
+        onChange={(_, v) => {
+          console.warn(v);
+          setMessageTags(v);
+          handleFilterUpdate({
+            filterName: FilterName.CONTENT,
+            filterValue: v,
+            filterType: FilterType.TEXT,
+          });
+        }}
+        onInputChange={(_, v) => {
+          if (!messageTags.length) {
             handleFilterUpdate({
               filterName: FilterName.CONTENT,
               filterValue: v,
               filterType: FilterType.TEXT,
             });
-          }}
-          onInputChange={(_, v) => {
-            if (!messageTags.length) {
-              handleFilterUpdate({
-                filterName: FilterName.CONTENT,
-                filterValue: v,
-                filterType: FilterType.TEXT,
-              });
-            }
-          }}
-          value={messageTags}
-          renderTags={(value: readonly string[], getTagProps) =>
-            value.map((option: string, index: number) => {
-              const { key, ...tagProps } = getTagProps({ index });
-              return (
-                <Chip
-                  variant="outlined"
-                  label={option}
-                  key={key}
-                  {...tagProps}
-                />
-              );
-            })
           }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              variant="filled"
-              label="Message"
-              fullWidth
-              maxRows={1}
-            />
-          )}
-        />
-      </Stack>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={2}
-      >
-        <Autocomplete
-          multiple
-          id="attachment-name-autocomplete"
-          options={[]}
-          freeSolo
-          fullWidth
-          onChange={(_, v) => {
-            setAttachmentTags(v);
+        }}
+        value={messageTags}
+        renderTags={(value: readonly string[], getTagProps) =>
+          value.map((option: string, index: number) => {
+            const { key, ...tagProps } = getTagProps({ index });
+            return (
+              <Chip variant="outlined" label={option} key={key} {...tagProps} />
+            );
+          })
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            variant="filled"
+            label="Message"
+            fullWidth
+            maxRows={1}
+          />
+        )}
+      />
+
+      <Autocomplete
+        multiple
+        id="attachment-name-autocomplete"
+        options={[]}
+        freeSolo
+        fullWidth
+        onChange={(_, v) => {
+          setAttachmentTags(v);
+          handleFilterUpdate({
+            filterName: FilterName.ATTACHMENT_NAME,
+            filterValue: v,
+            filterType: FilterType.TEXT,
+          });
+        }}
+        onInputChange={(_, v) => {
+          if (!attachmentTags.length) {
             handleFilterUpdate({
               filterName: FilterName.ATTACHMENT_NAME,
               filterValue: v,
               filterType: FilterType.TEXT,
             });
-          }}
-          onInputChange={(_, v) => {
-            if (!attachmentTags.length) {
-              handleFilterUpdate({
-                filterName: FilterName.ATTACHMENT_NAME,
-                filterValue: v,
-                filterType: FilterType.TEXT,
-              });
-            }
-          }}
-          value={attachmentTags}
-          renderTags={(value: readonly string[], getTagProps) =>
-            value.map((option: string, index: number) => {
-              const { key, ...tagProps } = getTagProps({ index });
-              return (
-                <Chip
-                  variant="outlined"
-                  label={option}
-                  key={key}
-                  {...tagProps}
-                />
-              );
+          }
+        }}
+        value={attachmentTags}
+        renderTags={(value: readonly string[], getTagProps) =>
+          value.map((option: string, index: number) => {
+            const { key, ...tagProps } = getTagProps({ index });
+            return (
+              <Chip variant="outlined" label={option} key={key} {...tagProps} />
+            );
+          })
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            variant="filled"
+            label="Attachment Name"
+            fullWidth
+            maxRows={1}
+          />
+        )}
+      />
+
+      {!isDm && (
+        <Autocomplete
+          clearIcon={<ClearIcon />}
+          onChange={(_, val) =>
+            handleFilterUpdate({
+              filterValue: val,
+              filterType: FilterType.THREAD,
             })
           }
+          options={sortedThreads.map((thread) => {
+            return thread.id;
+          })}
+          getOptionLabel={(id) => {
+            const foundThread = threads.find((thread) => thread.id === id);
+            return String(foundThread?.name);
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
-              size="small"
               variant="filled"
-              label="Attachment Name"
               fullWidth
-              maxRows={1}
+              size="small"
+              label="Threads"
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <CopyAdornment
+                    copyValue={threads
+                      .map((thread) => String(thread.name))
+                      .join("\r\n")}
+                    copyName="Thread List"
+                  />
+                ),
+              }}
             />
           )}
         />
-        {isDm && (
-          <FormGroup sx={{ minWidth: "fit-content" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  onChange={(e) => {
-                    handleFilterUpdate({
-                      filterName: FilterName.CALL_LOG,
-                      filterValue: e.target.checked,
-                      filterType: FilterType.TOGGLE,
-                    });
-                  }}
-                />
-              }
-              label="Call Log"
-            />
-          </FormGroup>
-        )}
-        {!isDm && (
-          <Autocomplete
-            clearIcon={<ClearIcon />}
-            onChange={(_, val) =>
-              handleFilterUpdate({
-                filterValue: val,
-                filterType: FilterType.THREAD,
-              })
-            }
-            options={sortedThreads.map((thread) => {
-              return thread.id;
-            })}
-            getOptionLabel={(id) => {
-              const foundThread = threads.find((thread) => thread.id === id);
-              return String(foundThread?.name);
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="filled"
-                fullWidth
-                size="small"
-                label="Threads"
-                sx={{ width: "320px !important" }}
-                InputProps={{
-                  ...params.InputProps,
-                  startAdornment: (
-                    <CopyAdornment
-                      copyValue={threads
-                        .map((thread) => String(thread.name))
-                        .join("\r\n")}
-                      copyName="Thread List"
-                    />
-                  ),
-                }}
-              />
-            )}
-          />
-        )}
-      </Stack>
+      )}
     </Stack>
   );
 };

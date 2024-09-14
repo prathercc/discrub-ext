@@ -13,8 +13,7 @@ import DefaultContent from "./components/default-content";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import BulkContent from "./components/bulk-content";
 import ExportMessages from "./components/export-messages";
-import { punctuateStringArr } from "../../utils";
-import Guild from "../../classes/guild";
+import { punctuateStringArr, stringToBool } from "../../utils";
 
 type ExportButtonProps = {
   bulk?: boolean;
@@ -29,7 +28,6 @@ const ExportButton = ({
 }: ExportButtonProps) => {
   const {
     state: exportState,
-    resetExportSettings,
     setIsGenerating,
     exportMessages,
     exportChannels,
@@ -37,14 +35,24 @@ const ExportButton = ({
   const isGenerating = exportState.isGenerating();
   const isExporting = exportState.isExporting();
   const currentPage = exportState.currentPage();
-  const downloadImages = exportState.downloadImages();
-  const previewImages = exportState.previewImages();
-  const artistMode = exportState.artistMode();
-  const folderingThreads = exportState.folderingThreads();
   const activeExportMessages = exportState.exportMessages();
   const totalPages = exportState.totalPages();
+  const entity = exportState.currentExportEntity();
+  const name = exportState.name();
 
-  const { setDiscrubCancelled, setDiscrubPaused } = useAppSlice();
+  const {
+    setDiscrubCancelled,
+    setDiscrubPaused,
+    setSettings,
+    state: appState,
+  } = useAppSlice();
+  const settings = appState.settings();
+  const folderingThreads = stringToBool(
+    settings.exportSeparateThreadAndForumPosts
+  );
+  const artistMode = stringToBool(settings.exportUseArtistMode);
+  const previewImages = stringToBool(settings.exportPreviewMedia);
+  const downloadImages = stringToBool(settings.exportDownloadMedia);
 
   const { state: channelState, setSelectedExportChannels } = useChannelSlice();
   const channels = channelState.channels();
@@ -56,7 +64,7 @@ const ExportButton = ({
   const userId = guildState.preFilterUserId();
 
   const { state: dmState } = useDmSlice();
-  const selectedDm = dmState.selectedDm();
+  const selectedDms = dmState.selectedDms();
 
   const { state: messageState } = useMessageSlice();
   const messages = messageState.messages();
@@ -65,19 +73,24 @@ const ExportButton = ({
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const exportType = isDm ? "DM" : "Server";
+  const exportType = isDm
+    ? `DM${selectedDms.length > 1 ? "'s" : ""}`
+    : "Server";
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const entity: Guild | Channel | Maybe = isDm
-    ? selectedDm
-    : selectedChannel || selectedGuild;
+  const getZipName = () => {
+    if (isDm) {
+      return bulk ? "Direct Messages" : String(selectedDms[0]?.name);
+    } else {
+      return String(selectedGuild?.name);
+    }
+  };
 
-  const zipName = String(isDm ? selectedDm?.name : selectedGuild?.name);
   const exportUtils = new ExportUtils(
     contentRef,
     (e: boolean) => setIsGenerating(e),
-    zipName
+    getZipName()
   );
 
   const handleDialogClose = () => {
@@ -94,16 +107,15 @@ const ExportButton = ({
 
   const handleExportSelected = async (format: ExportType = ExportType.JSON) => {
     if (bulk) {
-      let entity = isDm ? selectedDm : selectedGuild;
       let channelsToExport: Channel[] = [];
-      if (isDm && selectedDm) {
-        channelsToExport = [selectedDm];
+      if (isDm && selectedDms.length) {
+        channelsToExport = [...selectedDms];
       } else if (selectedGuild) {
         channelsToExport = channels.filter((c) =>
           selectedExportChannels.some((id) => id === c.id)
         );
       }
-      if (entity && channelsToExport.length) {
+      if (channelsToExport.length) {
         exportChannels(
           channelsToExport,
           exportUtils,
@@ -112,7 +124,7 @@ const ExportButton = ({
         );
       }
     } else {
-      const entity = isDm ? selectedDm : selectedChannel || selectedGuild;
+      const entity = isDm ? selectedDms[0] : selectedChannel || selectedGuild;
       const messagesToExport = filters.length ? filteredMessages : messages;
       if (entity && messagesToExport.length) {
         exportMessages(
@@ -138,6 +150,8 @@ const ExportButton = ({
           selectedExportChannels={selectedExportChannels}
           channels={channels}
           setSelectedExportChannels={setSelectedExportChannels}
+          settings={settings}
+          onChangeSettings={setSettings}
         />
       );
     } else
@@ -148,15 +162,13 @@ const ExportButton = ({
           messageCount={
             filters.length ? filteredMessages?.length : messages.length
           }
+          settings={settings}
+          onChangeSettings={setSettings}
         />
       );
   };
 
   const exportTitle = `Export ${bulk ? exportType : "Messages"}`;
-
-  const getExportPageTitle = (): string => {
-    return `Page ${currentPage} of ${totalPages}`;
-  };
 
   const getTooltipDescription = (exportType: ExportType): string => {
     const descriptionArr: string[] = [];
@@ -198,7 +210,6 @@ const ExportButton = ({
       <Button
         disabled={disabled}
         onClick={async () => {
-          resetExportSettings();
           setDialogOpen(true);
         }}
         variant="contained"
@@ -211,7 +222,9 @@ const ExportButton = ({
           componentRef={contentRef}
           isExporting={isExporting}
           entity={entity}
-          getExportPageTitle={getExportPageTitle}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          safeEntityName={name}
         />
       )}
       <ExportModal

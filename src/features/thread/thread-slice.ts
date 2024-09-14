@@ -1,10 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  editChannel,
-  fetchPrivateThreads,
-  fetchPublicThreads,
-} from "../../services/discord-service";
-import {
   ArchivedThreadProps,
   LiftPermissionProps,
   ThreadState,
@@ -12,6 +7,7 @@ import {
 } from "./thread-types";
 import { AppThunk } from "../../app/store";
 import Channel from "../../classes/channel";
+import DiscordService from "../../services/discord-service";
 
 const initialState: ThreadState = { threads: [] };
 
@@ -37,15 +33,18 @@ export const getArchivedThreads =
   }: ArchivedThreadProps): AppThunk<Promise<Channel[]>> =>
   async (_, getState) => {
     const { token } = getState().user;
-    const { discrubCancelled } = getState().app;
+    const { discrubCancelled, settings } = getState().app;
 
     if (!discrubCancelled && token) {
       const threadArr: Channel[] = [];
 
       const { success: publicSuccess, data: publicData } =
-        await fetchPublicThreads(token, channelId);
+        await new DiscordService(settings).fetchPublicThreads(token, channelId);
       const { success: privateSuccess, data: privateData } =
-        await fetchPrivateThreads(token, channelId);
+        await new DiscordService(settings).fetchPrivateThreads(
+          token,
+          channelId
+        );
 
       if (publicSuccess && publicData) {
         threadArr.concat(publicData);
@@ -69,11 +68,16 @@ export const unarchiveThread =
   (threadId: Snowflake): AppThunk<Promise<Channel | Maybe>> =>
   async (dispatch, getState) => {
     const { token } = getState().user;
+    const { settings } = getState().app;
     if (threadId && token) {
-      const { success, data } = await editChannel(token, threadId, {
-        archived: false,
-        locked: false,
-      });
+      const { success, data } = await new DiscordService(settings).editChannel(
+        token,
+        threadId,
+        {
+          archived: false,
+          locked: false,
+        }
+      );
 
       if (success) {
         const { threads } = getState().thread;

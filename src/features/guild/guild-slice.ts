@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchGuilds, fetchRoles } from "../../services/discord-service";
 import { getChannels, resetChannel } from "../channel/channel-slice";
 import {
   resetAdvancedFilters,
@@ -12,6 +11,7 @@ import { sortByProperty } from "../../utils";
 import { GuildState } from "./guild-types";
 import { PreFilterUser } from "../dm/dm-types";
 import { AppThunk } from "../../app/store";
+import DiscordService from "../../services/discord-service";
 
 const initialState: GuildState = {
   guilds: [],
@@ -66,11 +66,15 @@ export const {
 export const getRoles =
   (guildId: Snowflake): AppThunk =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { guilds } = getState().guild;
     const { token } = getState().user;
     const guild = guilds.find((g) => g.id === guildId);
     if (guild && !guild.roles && token) {
-      const { data, success } = await fetchRoles(guildId, token);
+      const { data, success } = await new DiscordService(settings).fetchRoles(
+        guildId,
+        token
+      );
       if (success && data) {
         const updatedGuilds = guilds.map((g) => {
           if (g.id === guildId) {
@@ -87,10 +91,13 @@ export const getRoles =
   };
 
 export const getGuilds = (): AppThunk => async (dispatch, getState) => {
+  const { settings } = getState().app;
   const { token } = getState().user;
   if (token) {
     dispatch(setIsLoading(true));
-    const { success, data } = await fetchGuilds(token);
+    const { success, data } = await new DiscordService(settings).fetchGuilds(
+      token
+    );
     if (success && data) {
       dispatch(setGuilds(data.map((guild) => new Guild(guild))));
     } else {

@@ -46,18 +46,17 @@ import {
   ProcessMessagesProps,
   SpecialFormatting,
 } from "./export-types";
-import { SortDirection } from "../../enum/sort-direction";
 import { ExportType } from "../../enum/export-type";
 import Message from "../../classes/message";
 import ExportUtils from "./export-utils";
 import { AppThunk } from "../../app/store";
-import { downloadFile } from "../../services/discord-service";
 import { ReactElement } from "react";
 import { Typography } from "@mui/material";
 import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
 import Channel from "../../classes/channel";
+import DiscordService from "../../services/discord-service";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -70,18 +69,13 @@ const initialMaps: ExportMap = {
 
 const initialState: ExportState = {
   isExporting: false,
-  downloadImages: false,
-  previewImages: false,
-  artistMode: false,
-  folderingThreads: false,
   name: "",
   isGenerating: false,
   currentPage: 1,
   totalPages: 0,
-  messagesPerPage: 1000,
-  sortOverride: SortDirection.DESCENDING,
   exportMaps: initialMaps,
   exportMessages: [],
+  currentExportEntity: null,
 };
 
 export const exportSlice = createSlice({
@@ -154,12 +148,6 @@ export const exportSlice = createSlice({
         state.exportMaps = initialMaps;
       }
     },
-    setSortOverride: (state, { payload }: { payload: SortDirection }): void => {
-      state.sortOverride = payload;
-    },
-    setMessagesPerPage: (state, { payload }: { payload: number }): void => {
-      state.messagesPerPage = payload;
-    },
     setCurrentPage: (state, { payload }: { payload: number }): void => {
       state.currentPage = payload;
     },
@@ -172,45 +160,26 @@ export const exportSlice = createSlice({
     setIsExporting: (state, { payload }: { payload: boolean }): void => {
       state.isExporting = payload;
     },
-    setPreviewImages: (state, { payload }: { payload: boolean }): void => {
-      state.previewImages = payload;
-    },
-    setDownloadImages: (state, { payload }: { payload: boolean }): void => {
-      state.downloadImages = payload;
-    },
-    setArtistMode: (state, { payload }: { payload: boolean }): void => {
-      state.artistMode = payload;
-    },
-    setFolderingThreads: (state, { payload }: { payload: boolean }): void => {
-      state.folderingThreads = payload;
-    },
     setName: (state, { payload }: { payload: string }): void => {
       state.name = payload;
     },
     setExportMessages: (state, { payload }: { payload: Message[] }): void => {
       state.exportMessages = payload;
     },
-    resetExportSettings: (state): void => {
-      state.downloadImages = false;
-      state.previewImages = false;
-      state.artistMode = false;
-      state.folderingThreads = false;
-      state.sortOverride = SortDirection.DESCENDING;
-      state.messagesPerPage = 1000;
+    setCurrentExportEntity: (
+      state,
+      { payload }: { payload: Guild | Channel | Maybe }
+    ): void => {
+      state.currentExportEntity = payload;
     },
   },
 });
 
 export const {
-  setSortOverride,
-  setMessagesPerPage,
   setCurrentPage,
   setIsGenerating,
   setIsExporting,
-  setPreviewImages,
-  setDownloadImages,
   setName,
-  resetExportSettings,
   resetExportMaps,
   setExportUserMap,
   setExportAvatarMap,
@@ -218,10 +187,9 @@ export const {
   setExportMediaMap,
   setExportRoleMap,
   setExportReactionMap,
-  setArtistMode,
-  setFolderingThreads,
   setExportMessages,
   setTotalPages,
+  setCurrentExportEntity,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -232,7 +200,11 @@ const _downloadFilesFromMessage =
     index,
   }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    const { downloadImages, artistMode } = getState().export;
+    const { settings } = getState().app;
+    const { exportUseArtistMode, exportDownloadMedia } =
+      getState().app.settings;
+    const artistMode = stringToBool(exportUseArtistMode);
+    const downloadImages = stringToBool(exportDownloadMedia);
     let embeds = message.embeds;
     let attachments = message.attachments;
     if (!downloadImages) {
@@ -259,7 +231,9 @@ const _downloadFilesFromMessage =
           const map = exportMaps.mediaMap;
 
           if (!map[downloadUrl]) {
-            const { success, data } = await downloadFile(downloadUrl);
+            const { success, data } = await new DiscordService(
+              settings
+            ).downloadFile(downloadUrl);
             if (success && data) {
               const blobType = data.type.split("/")?.[1];
               const fileIndex = `${index + 1}_${eI + 1}_${dI + 1}`;
@@ -288,14 +262,16 @@ const _downloadRoles =
   async (dispatch, getState) => {
     const guildRoles = guild.roles || [];
     for (const [_, role] of guildRoles.entries()) {
-      const { discrubCancelled } = getState().app;
+      const { discrubCancelled, settings } = getState().app;
       if (discrubCancelled) break;
       await dispatch(checkDiscrubPaused());
 
       const { exportMaps } = getState().export;
       const iconUrl = resolveRoleUrl(role.id, role.icon).remote;
       if (iconUrl) {
-        const { success, data } = await downloadFile(iconUrl);
+        const { success, data } = await new DiscordService(
+          settings
+        ).downloadFile(iconUrl);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const fileName = getExportFileName(role, fileExt);
@@ -339,7 +315,7 @@ const _downloadAvatarFromMessage =
     }
 
     for (const [_, aL] of avatarLookups.entries()) {
-      const { discrubCancelled } = getState().app;
+      const { discrubCancelled, settings } = getState().app;
       if (discrubCancelled) break;
       await dispatch(checkDiscrubPaused());
 
@@ -348,7 +324,9 @@ const _downloadAvatarFromMessage =
       const { remote: remoteAvatar } = resolveAvatarUrl(aL.id, aL.avatar);
 
       if (!avatarMap[idAndAvatar] && remoteAvatar) {
-        const { success, data } = await downloadFile(remoteAvatar);
+        const { success, data } = await new DiscordService(
+          settings
+        ).downloadFile(remoteAvatar);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
@@ -748,9 +726,9 @@ const _downloadEmojisFromMessage =
         await dispatch(checkDiscrubPaused());
         const { exportMaps } = getState().export;
         if (!exportMaps.emojiMap[id]) {
-          const { success, data } = await downloadFile(
-            `https://cdn.discordapp.com/emojis/${id}`
-          );
+          const { success, data } = await new DiscordService(
+            settings
+          ).downloadFile(`https://cdn.discordapp.com/emojis/${id}`);
 
           if (success && data) {
             const fileExt = data.type?.split("/")?.[1] || "gif";
@@ -774,7 +752,7 @@ const _downloadEmojisFromMessage =
 const _downloadDiscrubMedia = async (exportUtils: ExportUtils) => {
   const media = [{ url: "resources/media/discrub.png", name: "discrub.png" }];
   for (const m of media) {
-    const { success, data } = await downloadFile(m.url);
+    const { success, data } = await new DiscordService().downloadFile(m.url);
 
     if (success && data) {
       await exportUtils.addToZip(data, `discrub_media/${m.name}`);
@@ -914,7 +892,11 @@ const _compressMessages =
     dispatch(setStatus(`Compressing${compressionStr} - Page ? of ?`));
     await wait(1);
 
-    const { messagesPerPage, folderingThreads } = getState().export;
+    const { exportSeparateThreadAndForumPosts, exportMessagesPerPage } =
+      getState().app.settings;
+    const messagesPerPage = parseInt(exportMessagesPerPage);
+    const folderingThreads = stringToBool(exportSeparateThreadAndForumPosts);
+
     const threads = getState().thread.threads?.filter((t) =>
       messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id)
     );
@@ -1022,12 +1004,17 @@ export const exportMessages =
   ): AppThunk =>
   async (dispatch, getState) => {
     const { selectedGuild } = getState().guild;
-    const { messagesPerPage } = getState().export;
+    const { selectedChannel } = getState().channel;
+    const { selectedDms } = getState().dm;
 
+    const entity = !!selectedDms.length
+      ? selectedDms[0]
+      : selectedChannel || selectedGuild;
     const safeEntityName = getSafeExportName(entityName);
     const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
     dispatch(setIsExporting(true));
     dispatch(setName(safeEntityName));
+    dispatch(setCurrentExportEntity(entity));
 
     if (selectedGuild)
       await dispatch(_downloadRoles(exportUtils, selectedGuild));
@@ -1037,9 +1024,6 @@ export const exportMessages =
     const paths = { media: mediaPath };
 
     await dispatch(_processMessages({ messages, paths, exportUtils }));
-
-    if (messagesPerPage === null || messagesPerPage === 0)
-      await dispatch(setMessagesPerPage(exportMessages.length));
 
     if (messages.length > 0 && !getState().app.discrubCancelled) {
       await dispatch(checkDiscrubPaused());
@@ -1063,6 +1047,7 @@ export const exportMessages =
     dispatch(setIsGenerating(false));
     dispatch(setIsExporting(false));
     dispatch(setName(""));
+    dispatch(setCurrentExportEntity(null));
     await exportUtils.resetZip();
     dispatch(resetStatus());
     dispatch(setCurrentPage(1));
@@ -1078,8 +1063,9 @@ export const exportChannels =
     userId?: Snowflake
   ): AppThunk =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
+    const sortOverride = settings.exportMessageSortOrder;
     const { selectedGuild } = getState().guild;
-    const { messagesPerPage, sortOverride } = getState().export;
 
     dispatch(setIsExporting(true));
 
@@ -1092,6 +1078,7 @@ export const exportChannels =
       dispatch(resetStatus());
       const safeEntityName = getSafeExportName(entity.name || entity.id);
       const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
+      dispatch(setCurrentExportEntity(entity));
       dispatch(setName(safeEntityName));
       if (!isDm(entity)) {
         dispatch(setChannel(entity.id));
@@ -1125,9 +1112,6 @@ export const exportChannels =
         _processMessages({ messages: exportMessages, paths, exportUtils })
       );
 
-      if (messagesPerPage === null || messagesPerPage === 0)
-        await dispatch(setMessagesPerPage(exportMessages.length));
-
       if (exportMessages.length > 0) {
         if (getState().app.discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
@@ -1157,6 +1141,7 @@ export const exportChannels =
     dispatch(setIsGenerating(false));
     dispatch(setIsExporting(false));
     dispatch(setName(""));
+    dispatch(setCurrentExportEntity(null));
     await exportUtils.resetZip();
     dispatch(resetStatus());
     dispatch(setCurrentPage(1));

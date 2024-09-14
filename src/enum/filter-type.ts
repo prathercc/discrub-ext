@@ -3,4 +3,5 @@ export enum FilterType {
   DATE = "date",
   THREAD = "thread",
   TOGGLE = "toggle",
+  ARRAY = "array",
 }

@@ -8,21 +8,27 @@ import {
   Box,
   TextField,
   IconButton,
+  Stack,
 } from "@mui/material";
 import Channel from "../../../classes/channel";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useState } from "react";
+import Tooltip from "../../../common-components/tooltip/tooltip";
+import SelectAllIcon from "@mui/icons-material/SelectAll";
+import DeselectIcon from "@mui/icons-material/Deselect";
 
 type ChannelSelectionProps = {
   selectedExportChannels: Snowflake[];
   channels: Channel[];
   handleChannelSelect: (id: Snowflake) => void;
+  onSelectAll: (channels: Channel[]) => void;
 };
 
 const ChannelSelection = ({
   selectedExportChannels,
   channels,
   handleChannelSelect,
+  onSelectAll,
 }: ChannelSelectionProps) => {
   const [filterValue, setFilterValue] = useState<string>("");
 
@@ -31,8 +37,13 @@ const ChannelSelection = ({
     : channels;
 
   return (
-    <>
-      <Box sx={{ width: 350, height: 200, overflow: "auto" }}>
+    <Stack
+      sx={{ width: "100%" }}
+      direction="column"
+      spacing={3}
+      justifyContent="space-between"
+    >
+      <Box sx={{ maxHeight: "250px", overflow: "auto" }}>
         <List disablePadding dense>
           {filteredChannels.map((channel) => (
             <ListItem key={channel.id} value={channel.id} dense>
@@ -59,27 +70,44 @@ const ChannelSelection = ({
         </List>
       </Box>
 
-      <TextField
-        variant="filled"
-        fullWidth
-        size="small"
-        label="Filter Channels"
-        value={filterValue}
-        onChange={(e) => setFilterValue(e.target.value)}
-        InputProps={{
-          endAdornment: (
-            <IconButton
-              onClick={(e) => {
-                e.preventDefault();
-                setFilterValue("");
-              }}
-            >
-              <ClearIcon />
-            </IconButton>
-          ),
-        }}
-      />
-    </>
+      <Stack direction="row" spacing={3}>
+        <Tooltip
+          arrow
+          title={selectedExportChannels.length ? "Deselect All" : "Select All"}
+        >
+          <IconButton
+            onClick={() => onSelectAll(filteredChannels)}
+            color={selectedExportChannels.length ? "secondary" : "primary"}
+          >
+            {selectedExportChannels.length ? (
+              <DeselectIcon />
+            ) : (
+              <SelectAllIcon />
+            )}
+          </IconButton>
+        </Tooltip>
+        <TextField
+          variant="filled"
+          fullWidth
+          size="small"
+          label="Filter Channels"
+          value={filterValue}
+          onChange={(e) => setFilterValue(e.target.value)}
+          InputProps={{
+            endAdornment: (
+              <IconButton
+                onClick={(e) => {
+                  e.preventDefault();
+                  setFilterValue("");
+                }}
+              >
+                <ClearIcon />
+              </IconButton>
+            ),
+          }}
+        />
+      </Stack>
+    </Stack>
   );
 };
 

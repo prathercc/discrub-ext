@@ -2,6 +2,8 @@ import { Stack, Typography, useTheme } from "@mui/material";
 import { format, parseISO } from "date-fns";
 import {
   getTimeZone,
+  isNonStandardMessage,
+  messageTypeEquals,
   resolveAvatarUrl,
   resolveEmojiUrl,
   resolveRoleUrl,
@@ -28,6 +30,7 @@ import ChainedDate from "./components/chained-date";
 import Reactions from "./components/reactions";
 import CallMessage from "./components/call-message";
 import Date from "./components/date";
+import PinMessage from "./components/pin-message";
 
 type MessageMockProps = {
   message: Message;
@@ -70,7 +73,12 @@ const MessageMock = ({
   const reactionMap = exportState.reactionMap();
   const avatarMap = exportState.avatarMap();
 
-  const isCall = message.type === MessageType.CALL;
+  const isCall = messageTypeEquals(message.type, MessageType.CALL);
+  const isPinMessage = messageTypeEquals(
+    message.type,
+    MessageType.CHANNEL_PINNED_MESSAGE
+  );
+  const nonStandardMessage = isNonStandardMessage(message);
 
   const messageDate = parseISO(message.timestamp);
   const tz = getTimeZone(messageDate);
@@ -85,10 +93,9 @@ const MessageMock = ({
   const foundThread = threads?.find(
     (thread) => thread.id === message.id || thread.id === message.channel_id
   );
-  const repliedToMsg =
-    message.type === MessageType.REPLY
-      ? messages.find((msg) => msg.id === message.message_reference?.message_id)
-      : null;
+  const repliedToMsg = messageTypeEquals(message.type, MessageType.REPLY)
+    ? messages.find((msg) => msg.id === message.message_reference?.message_id)
+    : null;
 
   const showChannelName = selectedGuild?.id && !selectedChannel?.id;
 
@@ -146,7 +153,7 @@ const MessageMock = ({
       )}
       <Stack
         direction="row"
-        alignItems={isCall && browserView ? "center" : "flex-start"}
+        alignItems={nonStandardMessage && browserView ? "center" : "flex-start"}
         justifyContent="flex-start"
         spacing={1}
         sx={{
@@ -156,7 +163,7 @@ const MessageMock = ({
           minHeight: isChained ? 0 : "50px",
         }}
       >
-        {!isChained && !isCall && (
+        {!isChained && !nonStandardMessage && (
           <AuthorAvatar browserView={browserView} message={message} />
         )}
         {isChained && (
@@ -185,7 +192,7 @@ const MessageMock = ({
               }}
               variant="body2"
             >
-              {!isChained && !isCall && (
+              {!isChained && !nonStandardMessage && (
                 <AuthorName
                   msg={message}
                   userMap={userMap}
@@ -194,7 +201,7 @@ const MessageMock = ({
                 />
               )}
             </Typography>
-            {!isChained && !isCall && (
+            {!isChained && !nonStandardMessage && (
               <>
                 <Date
                   longDateTime={longDateTime}
@@ -219,6 +226,16 @@ const MessageMock = ({
             <CallMessage
               call={message.call}
               currentUser={currentUser}
+              msg={message}
+              selectedGuild={selectedGuild}
+              userMap={userMap}
+              longDateTime={longDateTime}
+              shortDateTime={shortDateTime}
+              getRolePath={getRolePath}
+            />
+          )}
+          {isPinMessage && (
+            <PinMessage
               msg={message}
               selectedGuild={selectedGuild}
               userMap={userMap}

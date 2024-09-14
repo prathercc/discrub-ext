@@ -10,7 +10,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import debounce from "debounce";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import EditIcon from "@mui/icons-material/Edit";
-import { Button, Collapse } from "@mui/material";
+import { Button } from "@mui/material";
 import { useDmSlice } from "../../features/dm/use-dm-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
@@ -20,9 +20,9 @@ import {
   Filter,
 } from "../../features/message/message-types";
 import EditModal from "./components/edit-modal";
-import FilterComponent from "./components/filter-component";
 import { useThreadSlice } from "../../features/thread/use-thread-slice";
 import ExportButton from "../export-button/export-button";
+import FilterModal from "./components/filter-modal";
 
 type MessageTableToolbarProps = {
   selectedRows: string[];
@@ -30,8 +30,8 @@ type MessageTableToolbarProps = {
 
 const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   const { state: dmState } = useDmSlice();
-  const selectedDm = dmState.selectedDm();
-  const isDm = !!selectedDm?.id;
+  const selectedDms = dmState.selectedDms();
+  const isDm = !!selectedDms.length;
 
   const {
     state: appState,
@@ -50,6 +50,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
     filterMessages,
   } = useMessageSlice();
   const messages = messageState.messages();
+  const filters = messageState.filters();
 
   const { state: threadState } = useThreadSlice();
   const threads = threadState.threads();
@@ -59,7 +60,6 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
 
   const handleFilterToggle = () => {
-    if (filterOpen) resetFilters();
     setFilterOpen(!filterOpen);
   };
 
@@ -146,13 +146,14 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
             zIndex={2} // This ensures that the Export options show over FilterComponent
           >
             <Button
-              color="secondary"
+              variant="contained"
+              color={filters.length ? "primary" : "secondary"}
               startIcon={
-                filterOpen ? <FilterListOffIcon /> : <FilterListIcon />
+                filters.length ? <FilterListIcon /> : <FilterListOffIcon />
               }
               onClick={handleFilterToggle}
             >
-              Quick Filtering
+              {`Quick Filtering${filters.length ? " (Active)" : ""}`}
             </Button>
             <ExportButton
               disabled={discrubCancelled}
@@ -160,19 +161,15 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
               isDm={isDm}
             />
           </Stack>
-
-          <Collapse
-            sx={{ width: "100%" }}
-            orientation="vertical"
-            in={filterOpen}
-            unmountOnExit
-          >
-            <FilterComponent
-              isDm={isDm}
-              handleFilterUpdate={handleFilterUpdate}
-              threads={threads}
-            />
-          </Collapse>
+          <FilterModal
+            open={filterOpen}
+            handleModalToggle={handleFilterToggle}
+            isDm={isDm}
+            handleFilterUpdate={handleFilterUpdate}
+            threads={threads}
+            handleResetFilters={resetFilters}
+            filters={filters}
+          />
         </Stack>
 
         <Stack

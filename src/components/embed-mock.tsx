@@ -3,6 +3,8 @@ import Attachment from "../classes/attachment";
 import Embed from "../classes/embed";
 import { useExportSlice } from "../features/export/use-export-slice";
 import { EmbedType } from "../enum/embed-type";
+import { useAppSlice } from "../features/app/use-app-slice";
+import { stringToBool } from "../utils";
 
 type EmbedMockProps = {
   embed: Embed;
@@ -12,8 +14,10 @@ type EmbedMockProps = {
 const EmbedMock = ({ embed, index }: EmbedMockProps) => {
   const { type, video, description, thumbnail } = embed;
 
+  const { state: appState } = useAppSlice();
+  const settings = appState.settings();
   const { state: exportState } = useExportSlice();
-  const previewImages = exportState.previewImages();
+  const previewImages = stringToBool(settings.exportPreviewMedia);
   const mediaMap = exportState.mediaMap();
 
   const supportedVideoHosts = ["youtube"];

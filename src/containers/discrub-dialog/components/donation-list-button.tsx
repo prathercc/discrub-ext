@@ -13,7 +13,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import SpeakerNotesOffIcon from "@mui/icons-material/SpeakerNotesOff";
 
 function DonationListButton({ donation }: { donation: Donation }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const days = differenceInDays(new Date(), parseISO(donation.date));
   const ago =
     days > 0 ? `${days} day${days === 1 ? "" : "s"} ago` : "Just earlier 😊";
@@ -81,6 +81,9 @@ function DonationListButton({ donation }: { donation: Donation }) {
             display: "flex",
             justifyContent: "left",
             padding: "5px 10px 5px 10px",
+            backgroundColor: "rgb(30, 33, 36)",
+            borderRadius: "5px",
+            opacity: donation.message.length,
           }}
         >
           <Typography variant="caption">{donation.message}</Typography>

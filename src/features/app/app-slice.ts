@@ -4,11 +4,23 @@ import { AppTask, AppState, Timeout, AppSettings } from "./app-types";
 import Message from "../../classes/message";
 import { AppThunk } from "../../app/store";
 import { DiscrubSetting } from "../../enum/discrub-setting";
+import { SortDirection } from "../../enum/sort-direction";
+import { ResolutionType } from "../../enum/resolution-type";
 
 const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
   [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
+  [DiscrubSetting.RANDOM_DELETE_DELAY]: "0",
+  [DiscrubSetting.RANDOM_SEARCH_DELAY]: "0",
+
+  [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
+  [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",
+  [DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER]: SortDirection.DESCENDING,
+  [DiscrubSetting.EXPORT_PREVIEW_MEDIA]: "false",
+  [DiscrubSetting.EXPORT_DOWNLOAD_MEDIA]: "false",
+  [DiscrubSetting.EXPORT_MESSAGES_PER_PAGE]: "1000",
+  [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
 };
 
 const emptyTask: AppTask = {

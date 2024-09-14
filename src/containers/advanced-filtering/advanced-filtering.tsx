@@ -1,39 +1,58 @@
 import { useState } from "react";
-import { Stack, Button, Collapse } from "@mui/material";
+import { Stack, Button } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import { useGuildSlice } from "../../features/guild/use-guild-slice";
 import { useDmSlice } from "../../features/dm/use-dm-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
-import MessageContains from "./components/message-contains";
-import HasType from "./components/has-type";
-import BeforeAndAfterFields from "../../components/before-and-after-fields";
-import PrefilterUser from "../../components/prefilter-user";
+import AdvancedFilterModal from "./components/advanced-filter-modal";
 
 type AdvancedFilteringProps = {
   isDm?: boolean;
 };
 
 function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
-  const { state: guildState } = useGuildSlice();
+  const { state: guildState, setPreFilterUserId } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
 
-  const { state: dmState } = useDmSlice();
-  const selectedDm = dmState.selectedDm();
+  const { state: dmState, setPreFilterUserId: dmSetPreFilterUserId } =
+    useDmSlice();
+  const selectedDms = dmState.selectedDms();
 
-  const { state: messageState } = useMessageSlice();
+  const preFilterUserId = isDm
+    ? dmState.preFilterUserId()
+    : guildState.preFilterUserId();
+
+  const { state: messageState, resetAdvancedFilters } = useMessageSlice();
   const messagesLoading = messageState.isLoading();
+  const searchAfterDate = messageState.searchAfterDate();
+  const searchBeforeDate = messageState.searchBeforeDate();
+  const searchMessageContent = messageState.searchMessageContent();
+  const selectedHasTypes = messageState.selectedHasTypes();
 
-  const [show, setShow] = useState(false);
+  const filtersActive = [
+    searchAfterDate,
+    searchBeforeDate,
+    searchMessageContent,
+    selectedHasTypes,
+    preFilterUserId,
+  ].some((val) => (Array.isArray(val) ? !!val.length : !!val));
 
-  const handleFilterButtonClick = () => {
-    setShow(!show);
+  const [open, setOpen] = useState(false);
+
+  const handleResetFilters = () => {
+    isDm ? dmSetPreFilterUserId(null) : setPreFilterUserId(null);
+    resetAdvancedFilters();
+  };
+
+  const handleToggle = () => {
+    setOpen(!open);
   };
 
   const getChildrenDisabled = (): boolean => {
     if (messagesLoading) return true;
     if (isDm) {
-      return !selectedDm;
+      return selectedDms.length !== 1;
     } else {
       return !selectedGuild;
     }
@@ -43,49 +62,27 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
     <Stack
       direction="column"
       justifyContent="center"
-      alignItems="center"
+      alignItems="flex-end"
       spacing={1}
     >
       <Button
-        sx={{ width: "100% !important", userSelect: "none !important" }}
-        disabled={Boolean(messagesLoading)}
-        onClick={handleFilterButtonClick}
-        color="secondary"
-        startIcon={show ? <FilterListOffIcon /> : <FilterListIcon />}
+        sx={{ userSelect: "none !important" }}
+        disabled={getChildrenDisabled()}
+        onClick={handleToggle}
+        color={filtersActive ? "primary" : "secondary"}
+        startIcon={filtersActive ? <FilterListIcon /> : <FilterListOffIcon />}
+        variant="contained"
       >
-        Advanced Filtering
+        {`Advanced Filtering${filtersActive ? " (Active)" : ""}`}
       </Button>
-      <Collapse
-        sx={{
-          "& .MuiCollapse-wrapperInner": {
-            minHeight: "47px !important",
-          },
-        }}
-        orientation="vertical"
-        in={show}
-        unmountOnExit
-      >
-        <Stack spacing={1}>
-          <Stack
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-            spacing={1}
-          >
-            <PrefilterUser disabled={getChildrenDisabled()} isDm={isDm} />
-            <BeforeAndAfterFields disabled={getChildrenDisabled()} />
-          </Stack>
-          <Stack
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-            spacing={1}
-          >
-            <MessageContains disabled={getChildrenDisabled()} />
-            <HasType disabled={getChildrenDisabled()} />
-          </Stack>
-        </Stack>
-      </Collapse>
+
+      <AdvancedFilterModal
+        isDm={isDm}
+        open={open}
+        handleModalToggle={handleToggle}
+        handleResetFilters={handleResetFilters}
+        filtersActive={filtersActive}
+      />
     </Stack>
   );
 }

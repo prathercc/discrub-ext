@@ -18,6 +18,7 @@ import {
   ExportUserMap,
 } from "./features/export/export-types";
 import { ReactingUser } from "./components/reaction-list-item-button";
+import { MessageType } from "./enum/message-type";
 
 /**
  *
@@ -411,6 +412,9 @@ export const resolveAvatarUrl = (
 export const stringToBool = (str: string): boolean =>
   str.toLowerCase() === "true";
 
+export const boolToString = (b: boolean): string =>
+  b === true ? "true" : "false";
+
 export const getReactingUsers = (
   exportReactions: ExportReaction[],
   userMap: ExportUserMap,
@@ -436,4 +440,16 @@ export const getReactingUsers = (
 
 export const isThreadMessage = (message?: Message, threads: Channel[] = []) => {
   return !!message?.thread || threads.some((t) => t.id === message?.channel_id);
+};
+
+export const isNonStandardMessage = (message: Message) => {
+  const nonStandardTypes = [
+    MessageType.CALL,
+    MessageType.CHANNEL_PINNED_MESSAGE,
+  ];
+  return nonStandardTypes.some((v) => messageTypeEquals(message.type, v));
+};
+
+export const messageTypeEquals = (type: number, compareType: MessageType) => {
+  return `${type}` === compareType;
 };

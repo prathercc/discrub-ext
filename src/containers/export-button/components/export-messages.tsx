@@ -6,13 +6,17 @@ import Guild from "../../../classes/guild";
 import MessageTitleMock from "./message-title-mock";
 import MessageMock from "../../message-mock/message-mock";
 import { MessageType } from "../../../enum/message-type";
+import { isNonStandardMessage, messageTypeEquals } from "../../../utils";
+import PageFooterControls from "./page-footer-controls";
 
 type ExportMessagesProps = {
   componentRef: React.MutableRefObject<HTMLDivElement | null>;
   isExporting: boolean;
   messages: Message[];
   entity: Channel | Guild | Maybe;
-  getExportPageTitle: () => string;
+  currentPage: number;
+  totalPages: number;
+  safeEntityName: string;
 };
 
 const ExportMessages = ({
@@ -20,8 +24,14 @@ const ExportMessages = ({
   isExporting,
   messages,
   entity,
-  getExportPageTitle,
+  currentPage,
+  totalPages,
+  safeEntityName,
 }: ExportMessagesProps) => {
+  const getExportPageTitle = (): string => {
+    return `Page ${currentPage} of ${totalPages}`;
+  };
+
   return (
     <Box sx={{ display: "none", margin: 0 }}>
       <Stack
@@ -39,14 +49,18 @@ const ExportMessages = ({
           justifyContent="flex-start"
           alignItems="flex-start"
           spacing={1}
-          sx={{ marginTop: "55px", width: "100%" }}
+          sx={{ marginTop: "55px", width: "100%", marginBottom: "45px" }}
         >
           {isExporting &&
             messages.map((message, index) => {
               const previousMessage = messages[index - 1];
 
               let isChained = false;
-              if (previousMessage && message.type !== MessageType.CALL) {
+              if (
+                previousMessage &&
+                !isNonStandardMessage(previousMessage) &&
+                !isNonStandardMessage(message)
+              ) {
                 const elapsedSeconds = differenceInSeconds(
                   parseISO(message.timestamp),
                   parseISO(previousMessage.timestamp)
@@ -56,7 +70,7 @@ const ExportMessages = ({
                   Math.abs(elapsedSeconds) <= 330 &&
                   message.author.id === previousMessage.author.id &&
                   message.author.username === previousMessage.author.username &&
-                  message.type !== MessageType.REPLY &&
+                  !messageTypeEquals(message.type, MessageType.REPLY) &&
                   previousMessage.channel_id === message.channel_id;
               }
 
@@ -69,6 +83,11 @@ const ExportMessages = ({
               );
             })}
         </Stack>
+        <PageFooterControls
+          safeEntityName={safeEntityName}
+          currentPage={currentPage}
+          totalPages={totalPages}
+        />
       </Stack>
     </Box>
   );

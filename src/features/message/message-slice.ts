@@ -1,18 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  editMessage as editMsg,
-  deleteMessage as delMsg,
-  getUser,
-  fetchSearchMessageData,
-  fetchMessageData,
-  fetchGuildUser,
-  getReactions,
-  deleteReaction as delReaction,
-} from "../../services/discord-service";
-import {
   getEncodedEmoji,
   isDm,
   isGuildForum,
+  messageTypeEquals,
   sortByProperty,
   stringToBool,
 } from "../../utils";
@@ -67,6 +58,8 @@ import Channel from "../../classes/channel";
 import { QueryStringParam } from "../../enum/query-string-param";
 import { Reaction } from "../../classes/reaction";
 import { ReactionType } from "../../enum/reaction-type";
+import { MessageCategory } from "../../enum/message-category";
+import DiscordService from "../../services/discord-service";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -218,6 +211,22 @@ export const messageSlice = createSlice({
             (filter) => filter.filterName !== filterName
           );
         }
+      } else if (filterType === FilterType.ARRAY) {
+        if (filterValue.length) {
+          retFilters = [
+            ...filteredList.filter((f) => f.filterName !== filterName),
+            {
+              filterName: filterName,
+              filterValue: filterValue,
+              filterType: filterType,
+            },
+          ];
+        } else {
+          // Remove filter from list
+          retFilters = [
+            ...filteredList.filter((f) => f.filterName !== filterName),
+          ];
+        }
       }
       state.filters = retFilters;
     },
@@ -280,9 +289,9 @@ export const messageSlice = createSlice({
                   x,
                   inverseActive
                 );
-              } else if (param.filterType === FilterType.TOGGLE) {
-                if (param.filterName === FilterName.CALL_LOG) {
-                  criteriaMet = _filterCallLog(
+              } else if (param.filterType === FilterType.ARRAY) {
+                if (param.filterName === FilterName.MESSAGE_TYPE) {
+                  criteriaMet = _filterMessageType(
                     param.filterValue,
                     x,
                     inverseActive
@@ -303,14 +312,20 @@ export const messageSlice = createSlice({
   },
 });
 
-const _filterCallLog = (
-  _filterValue: boolean,
+const _filterMessageType = (
+  _filterValue: string[],
   message: Message,
   inverseActive: boolean
 ): boolean => {
-  const isCall = message.type === MessageType.CALL;
-
-  const criteriaMet = (!inverseActive && !isCall) || (inverseActive && isCall);
+  const messageHasType = _filterValue.some((fv) => {
+    return (
+      messageTypeEquals(message.type, fv as MessageType) ||
+      (fv === MessageCategory.PINNED && message.pinned) ||
+      (fv === MessageCategory.REACTIONS && !!message.reactions?.length)
+    );
+  });
+  const criteriaMet =
+    (!inverseActive && !messageHasType) || (inverseActive && messageHasType);
 
   if (criteriaMet) {
     return false;
@@ -489,6 +504,7 @@ export const deleteReaction =
     emoji: string
   ): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token, currentUser } = getState().user;
     const { reactionMap } = getState().export.exportMaps;
     const { messages, filteredMessages } = getState().message;
@@ -502,7 +518,12 @@ export const deleteReaction =
 
     if (token && message && reaction) {
       dispatch(setIsModifying(true));
-      const { success } = await delReaction(token, channelId, messageId, emoji);
+      const { success } = await new DiscordService(settings).deleteReaction(
+        token,
+        channelId,
+        messageId,
+        emoji
+      );
       if (success) {
         const updatedMessage = {
           ...message,
@@ -603,11 +624,12 @@ export const deleteAttachment =
 export const updateMessage =
   (message: Message): AppThunk<Promise<boolean>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     const { entity: modifyMessage } = getState().app.task;
 
     if (token && isMessage(modifyMessage)) {
-      const { success, data } = await editMsg(
+      const { success, data } = await new DiscordService(settings).editMessage(
         token,
         message.id,
         {
@@ -699,10 +721,15 @@ export const editMessages =
 export const deleteMessage =
   (message: Message): AppThunk<Promise<boolean>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
 
     if (token) {
-      const { success } = await delMsg(token, message.id, message.channel_id);
+      const { success } = await new DiscordService(settings).deleteMessage(
+        token,
+        message.id,
+        message.channel_id
+      );
       if (success) {
         const { messages, filteredMessages, selectedMessages } =
           getState().message;
@@ -825,6 +852,7 @@ const _fetchReactingUserIds =
   ): AppThunk<Promise<ExportReaction[]>> =>
   async (dispatch, getState) => {
     const exportReactions: ExportReaction[] = [];
+    const { settings } = getState().app;
     const { token } = getState().user;
 
     for (const type of [ReactionType.NORMAL, ReactionType.BURST]) {
@@ -833,7 +861,9 @@ const _fetchReactingUserIds =
       while (!reachedEnd) {
         if (getState().app.discrubCancelled || !token) break;
         await dispatch(checkDiscrubPaused());
-        const { success, data } = await getReactions(
+        const { success, data } = await new DiscordService(
+          settings
+        ).getReactions(
           token,
           message.channel_id,
           message.id,
@@ -1082,7 +1112,10 @@ const _collectUserNames =
         dispatch(setStatus(status));
 
         if (!userName && !displayName) {
-          const { success, data } = await getUser(token, userId);
+          const { success, data } = await new DiscordService(settings).getUser(
+            token,
+            userId
+          );
           if (success && data) {
             updateMap[userId] = {
               ...mapping,
@@ -1124,11 +1157,9 @@ const _collectUserGuildData =
         dispatch(setStatus(status));
 
         if (!userGuilds[guildId]) {
-          const { success, data } = await fetchGuildUser(
-            guildId,
-            userId,
-            token
-          );
+          const { success, data } = await new DiscordService(
+            settings
+          ).fetchGuildUser(guildId, userId, token);
 
           if (success && data) {
             updateMap[userId] = {
@@ -1163,6 +1194,7 @@ const _collectUserGuildData =
 const _resolveMessageReactions =
   (messages: Message[]): AppThunk<Promise<Message[]>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     const trackMap: Record<Snowflake, Reaction[]> = {};
     let retArr: Message[] = [...messages];
@@ -1178,7 +1210,9 @@ const _resolveMessageReactions =
         dispatch(setStatus(status));
 
         if (!trackMap[message.id]) {
-          const { success, data } = await fetchMessageData(
+          const { success, data } = await new DiscordService(
+            settings
+          ).fetchMessageData(
             token,
             message.id,
             message.channel_id,
@@ -1229,13 +1263,9 @@ const _getSearchMessages =
         await dispatch(checkDiscrubPaused());
         if (getState().app.discrubCancelled) break;
 
-        const { success, data } = await fetchSearchMessageData(
-          token,
-          offset,
-          channelId,
-          guildId,
-          criteria
-        );
+        const { success, data } = await new DiscordService(
+          settings
+        ).fetchSearchMessageData(token, offset, channelId, guildId, criteria);
 
         if (success && data) {
           const { total_results, messages = [], threads = [] } = data || {};
@@ -1296,7 +1326,7 @@ const _messageTypeAllowed = (type: number) => {
     MessageType.CONTEXT_MENU_COMMAND,
     MessageType.AUTO_MODERATION_ACTION,
     MessageType.CALL,
-  ].some((t) => t === type);
+  ].some((t) => messageTypeEquals(type, t));
 };
 
 const _getMessages =
@@ -1354,6 +1384,7 @@ const _getMessages =
 const _getMessagesFromChannel =
   (channelId: Snowflake): AppThunk<Promise<Message[]>> =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     let lastId = "";
     let reachedEnd = false;
@@ -1363,11 +1394,9 @@ const _getMessagesFromChannel =
       while (!reachedEnd) {
         if (getState().app.discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
-        const { success, data } = await fetchMessageData(
-          token,
-          lastId,
-          channelId
-        );
+        const { success, data } = await new DiscordService(
+          settings
+        ).fetchMessageData(token, lastId, channelId);
 
         if (success && data) {
           if (data.length < 100) reachedEnd = true;

@@ -1,4 +1,10 @@
-import { IconButton, Stack, Typography, useTheme } from "@mui/material";
+import {
+  IconButton,
+  Stack,
+  SxProps,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import bytes from "bytes";
 import { useExportSlice } from "../features/export/use-export-slice";
@@ -9,18 +15,72 @@ import {
   attachmentIsImage,
   attachmentIsVideo,
   entityContainsMedia,
+  stringToBool,
 } from "../utils";
+import { useAppSlice } from "../features/app/use-app-slice";
+import { ResolutionType } from "../enum/resolution-type";
 
 type AttachmentMockProps = {
   attachment: Attachment;
 };
 
+export const getMediaResProps = (
+  resMode: string,
+  fullWidth: number,
+  fullHeight: number
+): SxProps => {
+  const thumbnailWidth = 100;
+  const thumbnailHeight = 100;
+  const safeWidth = 400;
+  const safeHeight = 400;
+
+  const thumbnailProps = {
+    width: fullWidth < thumbnailWidth ? fullWidth : thumbnailWidth,
+    height: fullHeight < thumbnailHeight ? fullHeight : thumbnailHeight,
+  };
+  const fullProps = { width: fullWidth, height: fullHeight };
+  const safeProps = {
+    width: fullWidth > safeWidth ? safeWidth : fullWidth,
+    height: fullHeight > safeHeight ? safeHeight : fullHeight,
+  };
+
+  switch (resMode) {
+    case ResolutionType.HOVER_LIMITED:
+      return {
+        ...thumbnailProps,
+        "&:hover": {
+          ...safeProps,
+        },
+      };
+    case ResolutionType.HOVER_FULL:
+      return {
+        ...thumbnailProps,
+        "&:hover": {
+          ...fullProps,
+        },
+      };
+    case ResolutionType.NO_HOVER_FULL:
+      return {
+        ...fullProps,
+      };
+    case ResolutionType.NO_HOVER_LIMITED:
+      return {
+        ...safeProps,
+      };
+    default:
+      return {};
+  }
+};
+
 const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
   const theme = useTheme();
 
+  const { state: appState } = useAppSlice();
+  const settings = appState.settings();
   const { state: exportState } = useExportSlice();
   const mediaMap = exportState.mediaMap();
-  const previewImages = exportState.previewImages();
+  const previewImages = stringToBool(settings.exportPreviewMedia);
+  const resMode = settings.exportImageResMode;
 
   const isImg = attachmentIsImage(attachment);
   const isVid = attachmentIsVideo(attachment);
@@ -43,16 +103,11 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
               alt: "attachment",
             }}
             sx={{
-              width: attachmentWidth < 100 ? attachmentWidth : 100,
-              height: attachmentHeight < 100 ? attachmentHeight : 100,
               transition: "all ease-in-out .5s",
               borderRadius: "5px",
               cursor: "pointer",
               boxShadow: "4px 5px 6px 0px rgba(0,0,0,0.75)",
-              "&:hover": {
-                width: attachmentWidth > 400 ? 400 : attachmentWidth,
-                height: attachmentHeight > 400 ? 400 : attachmentHeight,
-              },
+              ...getMediaResProps(resMode, attachmentWidth, attachmentHeight),
             }}
           />
         </a>

@@ -44,9 +44,9 @@ export type Filter =
       filterName: FilterName.INVERSE;
     }
   | {
-      filterValue: boolean;
-      filterType: FilterType.TOGGLE;
-      filterName: FilterName.CALL_LOG;
+      filterName: FilterName.MESSAGE_TYPE;
+      filterValue: string[];
+      filterType: FilterType.ARRAY;
     };
 
 export type DeleteConfiguration = {

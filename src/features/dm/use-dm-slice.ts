@@ -2,11 +2,10 @@ import { RootState } from "../../app/store";
 import {
   setIsLoading as setIsLoadingAction,
   setDms as setDmsAction,
-  setDm as setDmAction,
   resetDm as resetDmAction,
   setPreFilterUserId as setPreFilterUserIdAction,
   getDms as getDmsAction,
-  changeDm as changeDmAction,
+  mutateSelectedDms as mutateSelectedDmsAction,
 } from "./dm-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { PreFilterUser } from "./dm-types";
@@ -18,8 +17,8 @@ const useDmSlice = () => {
   const useDms = (): Channel[] =>
     useAppSelector((state: RootState) => state.dm.dms);
 
-  const useSelectedDm = (): Channel | Maybe =>
-    useAppSelector((state: RootState) => state.dm.selectedDm);
+  const useSelectedDms = (): Channel[] =>
+    useAppSelector((state: RootState) => state.dm.selectedDms);
 
   const useIsLoading = (): boolean | Maybe =>
     useAppSelector((state: RootState) => state.dm.isLoading);
@@ -32,7 +31,7 @@ const useDmSlice = () => {
 
   const state = {
     dms: useDms,
-    selectedDm: useSelectedDm,
+    selectedDms: useSelectedDms,
     isLoading: useIsLoading,
     preFilterUserId: usePreFilterUserId,
     preFilterUsers: usePreFilterUsers,
@@ -44,10 +43,6 @@ const useDmSlice = () => {
 
   const setDms = (dms: Channel[]): void => {
     dispatch(setDmsAction(dms));
-  };
-
-  const setDm = (dmId: Snowflake, preFilterUser: PreFilterUser) => {
-    dispatch(setDmAction({ dmId, preFilterUser }));
   };
 
   const resetDm = () => {
@@ -62,19 +57,18 @@ const useDmSlice = () => {
     dispatch(getDmsAction());
   };
 
-  const changeDm = (dmId: Snowflake | null) => {
-    dispatch(changeDmAction(dmId));
+  const setSelectedDms = (dmIds: Snowflake[]) => {
+    dispatch(mutateSelectedDmsAction(dmIds));
   };
 
   return {
     state,
     setIsLoading,
     setDms,
-    setDm,
     resetDm,
     setPreFilterUserId,
     getDms,
-    changeDm,
+    setSelectedDms,
   };
 };
 

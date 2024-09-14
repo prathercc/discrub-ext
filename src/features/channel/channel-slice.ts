@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchChannel, fetchChannels } from "../../services/discord-service";
 import {
   resetAdvancedFilters,
   resetFilters,
@@ -10,6 +9,7 @@ import { setPreFilterUserId } from "../guild/guild-slice";
 import { ChannelState } from "./channel-types";
 import { AppThunk } from "../../app/store";
 import { ChannelType } from "../../enum/channel-type";
+import DiscordService from "../../services/discord-service";
 
 const initialState: ChannelState = {
   channels: [],
@@ -57,10 +57,13 @@ export const {
 export const getChannels =
   (guildId: Snowflake): AppThunk =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { token } = getState().user;
     if (guildId && token) {
       dispatch(setIsLoading(true));
-      const { success, data } = await fetchChannels(token, guildId);
+      const { success, data } = await new DiscordService(
+        settings
+      ).fetchChannels(token, guildId);
       if (success && data) {
         dispatch(
           setChannels(data.filter((c) => c.type !== ChannelType.GUILD_CATEGORY))
@@ -87,12 +90,16 @@ export const changeChannel =
 export const loadChannel =
   (channelId: Snowflake): AppThunk =>
   async (dispatch, getState) => {
+    const { settings } = getState().app;
     const { selectedGuild } = getState().guild;
     const { token } = getState().user;
     const { channels } = getState().channel;
 
     if (token && channelId && !channels.map((c) => c.id).includes(channelId)) {
-      const { data, success } = await fetchChannel(token, channelId);
+      const { data, success } = await new DiscordService(settings).fetchChannel(
+        token,
+        channelId
+      );
       if (success && data && data.guild_id === selectedGuild?.id) {
         dispatch(setChannels([...channels, data]));
       }

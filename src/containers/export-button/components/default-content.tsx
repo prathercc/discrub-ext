@@ -3,27 +3,40 @@ import {
   DialogContentText,
   Stack,
   Typography,
-  useTheme,
 } from "@mui/material";
-import ImageToggle from "./image-toggle";
 import Progress from "./progress";
-import PreviewImageToggle from "./preview-image-toggle";
-import PerPage from "./per-page";
-import ArtistModeToggle from "./artist-mode-toggle";
-import SeparateThreadToggle from "./separate-thread-toggle";
+import Config from "../../discrub-dialog/components/config";
+import { DiscrubSetting } from "../../../enum/discrub-setting";
+import { AppSettings } from "../../../features/app/app-types";
 
 type DefaultContentProps = {
   isExporting: boolean;
   messageCount: number;
   isDm: boolean;
+  settings: AppSettings;
+  onChangeSettings: (settings: AppSettings) => void;
 };
 
 const DefaultContent = ({
   isExporting,
   messageCount,
+  settings,
+  onChangeSettings,
   isDm,
 }: DefaultContentProps) => {
-  const theme = useTheme();
+  let visibleSettings = [
+    DiscrubSetting.EXPORT_ARTIST_MODE,
+    DiscrubSetting.EXPORT_DOWNLOAD_MEDIA,
+    DiscrubSetting.EXPORT_PREVIEW_MEDIA,
+    DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
+    DiscrubSetting.EXPORT_MESSAGES_PER_PAGE,
+    DiscrubSetting.EXPORT_IMAGE_RES_MODE,
+  ];
+  if (isDm) {
+    visibleSettings = visibleSettings.filter(
+      (s) => s !== DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS
+    );
+  }
 
   return (
     <DialogContent>
@@ -34,28 +47,13 @@ const DefaultContent = ({
               <strong>{messageCount}</strong> messages are available to export
             </Typography>
           </DialogContentText>
-          <Stack direction="row" justifyContent="flex-end" mt={1} mb={1}>
-            <Stack
-              sx={{
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: "15px",
-                padding: "5px",
-              }}
-              direction="column"
-              spacing={1}
-              alignItems="center"
-            >
-              <Typography variant="body2">Export Options</Typography>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                {!isDm && <SeparateThreadToggle />}
-                <ArtistModeToggle />
-                <PreviewImageToggle />
-                <ImageToggle />
-              </Stack>
-            </Stack>
-          </Stack>
-          <Stack direction="row" justifyContent="flex-end" alignItems="center">
-            <PerPage />
+          <Stack mt={1} mb={1} sx={{ maxHeight: "325px", overflow: "auto" }}>
+            <Config
+              onChangeSettings={onChangeSettings}
+              visibleSettings={visibleSettings}
+              settings={settings}
+              containerProps={{ width: "auto" }}
+            />
           </Stack>
         </>
       )}

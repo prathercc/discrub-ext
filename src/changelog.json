@@ -1,5 +1,21 @@
 [
   {
+    "version": "1.12.0",
+    "changes": [
+      "Export Options are now saved as settings.",
+      "Prevent Ko-Fi feed error from breaking extension.",
+      "Quick Filtering has been revamped.",
+      "Advanced Filtering has been revamped.",
+      "Channel Pin notifications are now rendered properly.",
+      "Image Display Mode export setting has been added.",
+      "Message Type/Category Quick Filter now has Pinned, Pin Notification, Call, and Reaction options added.",
+      "Multi-DM exports and purges are now supported.",
+      "Page controls have been added to the bottom of HTML exports.",
+      "Using the 'Select All' button on a filtered Server export Channel list now only selects from the filtered list.",
+      "Search & Delete/Edit random delay settings have been added."
+    ]
+  },
+  {
     "version": "1.11.16",
     "changes": [
       "Adjust CSV exports so that all columns from dataset are included.",
