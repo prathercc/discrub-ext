@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.12.1",
+    "changes": [
+      "Make Preview/Download Media settings multi-select with 'Images', 'Videos', and 'Audio' as options."
+    ]
+  },
+  {
     "version": "1.12.0",
     "changes": [
       "Export Options are now saved as settings.",
