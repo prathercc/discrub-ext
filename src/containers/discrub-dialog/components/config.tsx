@@ -16,9 +16,7 @@ import { SortDirection } from "../../../enum/sort-direction";
 import BrushIcon from "@mui/icons-material/Brush";
 import FormatColorResetIcon from "@mui/icons-material/FormatColorReset";
 import DownloadIcon from "@mui/icons-material/Download";
-import FileDownloadOffIcon from "@mui/icons-material/FileDownloadOff";
 import ImageIcon from "@mui/icons-material/Image";
-import HideImageIcon from "@mui/icons-material/HideImage";
 import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
 import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -29,6 +27,8 @@ import AutoDeleteIcon from "@mui/icons-material/AutoDelete";
 import YoutubeSearchedForIcon from "@mui/icons-material/YoutubeSearchedFor";
 import { stringToBool } from "../../../utils";
 import { ResolutionType } from "../../../enum/resolution-type";
+import { MediaType } from "../../../enum/media-type";
+import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
 
 type ConfigProps = {
   settings: AppSettings;
@@ -131,34 +131,28 @@ function Config({
     {
       name: DiscrubSetting.EXPORT_DOWNLOAD_MEDIA,
       label: "Download Media",
+      multiselect: true,
       options: [
-        { value: "true", name: "Yes" },
-        { value: "false", name: "No" },
+        { value: MediaType.IMAGES, name: "Images" },
+        { value: MediaType.VIDEOS, name: "Videos" },
+        { value: MediaType.AUDIO, name: "Audio" },
       ],
       description:
         "Exports may be performed more slowly when downloading media.",
-      icon: () =>
-        stringToBool(settings.exportDownloadMedia) ? (
-          <DownloadIcon />
-        ) : (
-          <FileDownloadOffIcon />
-        ),
+      icon: () => <DownloadIcon />,
     },
     {
       name: DiscrubSetting.EXPORT_PREVIEW_MEDIA,
       label: "Preview Media (HTML)",
+      multiselect: true,
       options: [
-        { value: "true", name: "Yes" },
-        { value: "false", name: "No" },
+        { value: MediaType.IMAGES, name: "Images" },
+        { value: MediaType.VIDEOS, name: "Videos" },
+        { value: MediaType.AUDIO, name: "Audio" },
       ],
       description:
         "Previewing Media on a large number of messages can negatively affect the speed of the export.",
-      icon: () =>
-        stringToBool(settings.exportPreviewMedia) ? (
-          <ImageIcon />
-        ) : (
-          <HideImageIcon />
-        ),
+      icon: () => <ImageIcon />,
     },
     {
       name: DiscrubSetting.EXPORT_IMAGE_RES_MODE,
@@ -272,7 +266,7 @@ function Config({
                     InputProps={{ endAdornment: Icon }}
                   />
                 )}
-                {control.options?.length && (
+                {control.options?.length && !control.multiselect && (
                   <>
                     <InputLabel variant="filled">{control.label}</InputLabel>
                     <Select
@@ -298,6 +292,23 @@ function Config({
                       })}
                     </Select>
                   </>
+                )}
+                {control.multiselect && (
+                  <MultiValueSelect
+                    label={control.label}
+                    onChange={(values) => {
+                      handleChange(control.name, values.join());
+                    }}
+                    value={
+                      getValue(control.name)
+                        ? getValue(control.name)?.split(",") || []
+                        : []
+                    }
+                    values={control.options.map((o) => o.value)}
+                    displayNameMap={control.options.reduce((acc, curr) => {
+                      return { ...acc, [curr.value]: curr.name };
+                    }, {})}
+                  />
                 )}
               </FormControl>
             </Tooltip>

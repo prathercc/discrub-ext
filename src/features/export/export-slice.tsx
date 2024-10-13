@@ -2,7 +2,9 @@ import { createSlice } from "@reduxjs/toolkit";
 import { getMessageData, resetMessageData } from "../message/message-slice";
 import { v4 as uuidv4 } from "uuid";
 import {
-  entityContainsMedia,
+  entityIsAudio,
+  entityIsImage,
+  entityIsVideo,
   formatUserData,
   getEncodedEmoji,
   getExportFileName,
@@ -15,6 +17,7 @@ import {
   resolveRoleUrl,
   sortByProperty,
   stringToBool,
+  stringToTypedArray,
   wait,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
@@ -57,6 +60,7 @@ import Papa from "papaparse";
 import { flatten } from "flat";
 import Channel from "../../classes/channel";
 import DiscordService from "../../services/discord-service";
+import { MediaType } from "../../enum/media-type";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -201,18 +205,22 @@ const _downloadFilesFromMessage =
   }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
-    const { exportUseArtistMode, exportDownloadMedia } =
+    const { exportUseArtistMode, exportDownloadMedia_2 } =
       getState().app.settings;
     const artistMode = stringToBool(exportUseArtistMode);
-    const downloadImages = stringToBool(exportDownloadMedia);
+    const downloadMedia = stringToTypedArray<MediaType>(exportDownloadMedia_2);
+    const isDownloadingImages = downloadMedia.some(
+      (mt) => mt === MediaType.IMAGES
+    );
+    const isDownloadingVideos = downloadMedia.some(
+      (mt) => mt === MediaType.VIDEOS
+    );
+    const isDownloadingAudio = downloadMedia.some(
+      (mt) => mt === MediaType.AUDIO
+    );
+
     let embeds = message.embeds;
     let attachments = message.attachments;
-    if (!downloadImages) {
-      embeds = [];
-      attachments = attachments.filter(
-        (attachment) => !entityContainsMedia(attachment)
-      );
-    }
 
     let mediaPath = paths.media;
     if (artistMode && message.userName) {
@@ -220,8 +228,15 @@ const _downloadFilesFromMessage =
     }
 
     for (const [eI, entity] of [...embeds, ...attachments].entries()) {
-      const isMedia = entityContainsMedia(entity);
-      if (isMedia) {
+      const isImage = entityIsImage(entity);
+      const isVideo = entityIsVideo(entity);
+      const isAudio = entityIsAudio(entity);
+      const shouldPerformDownload =
+        (isImage && isDownloadingImages) ||
+        (isVideo && isDownloadingVideos) ||
+        (isAudio && isDownloadingAudio);
+
+      if (shouldPerformDownload) {
         const downloadUrls = getMediaUrls(entity);
         for (const [dI, downloadUrl] of downloadUrls.entries()) {
           const { discrubCancelled } = getState().app;

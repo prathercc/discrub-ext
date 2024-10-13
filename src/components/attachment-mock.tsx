@@ -11,14 +11,15 @@ import { useExportSlice } from "../features/export/use-export-slice";
 import Attachment from "../classes/attachment";
 import MuiImg from "../common-components/mui-img/mui-img";
 import {
-  attachmentIsAudio,
-  attachmentIsImage,
-  attachmentIsVideo,
   entityContainsMedia,
-  stringToBool,
+  entityIsAudio,
+  entityIsImage,
+  entityIsVideo,
+  stringToTypedArray,
 } from "../utils";
 import { useAppSlice } from "../features/app/use-app-slice";
 import { ResolutionType } from "../enum/resolution-type";
+import { MediaType } from "../enum/media-type";
 
 type AttachmentMockProps = {
   attachment: Attachment;
@@ -79,12 +80,23 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
   const settings = appState.settings();
   const { state: exportState } = useExportSlice();
   const mediaMap = exportState.mediaMap();
-  const previewImages = stringToBool(settings.exportPreviewMedia);
+  const previewMedia = stringToTypedArray<MediaType>(
+    settings.exportPreviewMedia_2
+  );
+  const isPreviewingImages = previewMedia.some((mt) => mt === MediaType.IMAGES);
+  const isPreviewingVideos = previewMedia.some((mt) => mt === MediaType.VIDEOS);
+  const isPreviewingAudio = previewMedia.some((mt) => mt === MediaType.AUDIO);
   const resMode = settings.exportImageResMode;
 
-  const isImg = attachmentIsImage(attachment);
-  const isVid = attachmentIsVideo(attachment);
-  const isAudio = attachmentIsAudio(attachment);
+  const isImg = entityIsImage(attachment);
+  const isVid = entityIsVideo(attachment);
+  const isAudio = entityIsAudio(attachment);
+
+  const shouldPreventPreview =
+    !entityContainsMedia(attachment) ||
+    (isImg && !isPreviewingImages) ||
+    (isVid && !isPreviewingVideos) ||
+    (isAudio && !isPreviewingAudio);
 
   const url = entityContainsMedia(attachment)
     ? mediaMap[attachment.proxy_url] || attachment.proxy_url
@@ -95,7 +107,7 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
 
   return (
     <Stack direction="column" justifyContent="center" alignItems="flex-start">
-      {isImg && previewImages && url && (
+      {isImg && isPreviewingImages && url && (
         <a target="_blank" rel="noopener noreferrer" href={url}>
           <MuiImg
             props={{
@@ -112,7 +124,7 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
           />
         </a>
       )}
-      {previewImages && isVid && (
+      {isPreviewingVideos && isVid && (
         <video
           style={{
             borderRadius: "10px",
@@ -132,12 +144,12 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
           }
         />
       )}
-      {previewImages && isAudio && (
+      {isPreviewingAudio && isAudio && (
         <audio controls>
           <source src={url} />
         </audio>
       )}
-      {(!entityContainsMedia(attachment) || !previewImages) && (
+      {shouldPreventPreview && (
         <Stack
           sx={{
             backgroundColor: theme.palette.background.paper,

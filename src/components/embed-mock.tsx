@@ -4,7 +4,8 @@ import Embed from "../classes/embed";
 import { useExportSlice } from "../features/export/use-export-slice";
 import { EmbedType } from "../enum/embed-type";
 import { useAppSlice } from "../features/app/use-app-slice";
-import { stringToBool } from "../utils";
+import { stringToTypedArray } from "../utils";
+import { MediaType } from "../enum/media-type";
 
 type EmbedMockProps = {
   embed: Embed;
@@ -17,7 +18,11 @@ const EmbedMock = ({ embed, index }: EmbedMockProps) => {
   const { state: appState } = useAppSlice();
   const settings = appState.settings();
   const { state: exportState } = useExportSlice();
-  const previewImages = stringToBool(settings.exportPreviewMedia);
+  const previewMedia = stringToTypedArray<MediaType>(
+    settings.exportPreviewMedia_2
+  );
+  const isPreviewingImages = previewMedia.some((mt) => mt === MediaType.IMAGES);
+  const isPreviewingVideos = previewMedia.some((mt) => mt === MediaType.VIDEOS);
   const mediaMap = exportState.mediaMap();
 
   const supportedVideoHosts = ["youtube"];
@@ -31,7 +36,7 @@ const EmbedMock = ({ embed, index }: EmbedMockProps) => {
 
   return (
     <>
-      {previewImages && type === "gifv" && video && (
+      {isPreviewingVideos && type === EmbedType.GIFV && video && (
         <video
           style={{
             borderRadius: "10px",
@@ -48,8 +53,8 @@ const EmbedMock = ({ embed, index }: EmbedMockProps) => {
           poster={embed.thumbnail?.proxy_url || "resources/media/discrub.png"}
         />
       )}
-      {previewImages &&
-        type === "video" &&
+      {isPreviewingVideos &&
+        type === EmbedType.VIDEO &&
         video &&
         supportedVideoHosts.some((host) =>
           video?.url?.toLowerCase()?.includes(host)
@@ -69,7 +74,7 @@ const EmbedMock = ({ embed, index }: EmbedMockProps) => {
             allowFullScreen
           ></iframe>
         )}
-      {previewImages && type === EmbedType.IMAGE && thumbnail && (
+      {isPreviewingImages && type === EmbedType.IMAGE && thumbnail && (
         <AttachmentMock
           attachment={
             new Attachment({
