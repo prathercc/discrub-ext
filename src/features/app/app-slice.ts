@@ -17,8 +17,8 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
   [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",
   [DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER]: SortDirection.DESCENDING,
-  [DiscrubSetting.EXPORT_PREVIEW_MEDIA]: "false",
-  [DiscrubSetting.EXPORT_DOWNLOAD_MEDIA]: "false",
+  [DiscrubSetting.EXPORT_PREVIEW_MEDIA]: "",
+  [DiscrubSetting.EXPORT_DOWNLOAD_MEDIA]: "",
   [DiscrubSetting.EXPORT_MESSAGES_PER_PAGE]: "1000",
   [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
 };

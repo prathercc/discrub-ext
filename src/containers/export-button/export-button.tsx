@@ -13,7 +13,12 @@ import DefaultContent from "./components/default-content";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import BulkContent from "./components/bulk-content";
 import ExportMessages from "./components/export-messages";
-import { punctuateStringArr, stringToBool } from "../../utils";
+import {
+  punctuateStringArr,
+  stringToBool,
+  stringToTypedArray,
+} from "../../utils";
+import { MediaType } from "../../enum/media-type";
 
 type ExportButtonProps = {
   bulk?: boolean;
@@ -51,8 +56,23 @@ const ExportButton = ({
     settings.exportSeparateThreadAndForumPosts
   );
   const artistMode = stringToBool(settings.exportUseArtistMode);
-  const previewImages = stringToBool(settings.exportPreviewMedia);
-  const downloadImages = stringToBool(settings.exportDownloadMedia);
+  const previewMedia = stringToTypedArray<MediaType>(
+    settings.exportPreviewMedia_2
+  );
+  const isPreviewingImages = previewMedia.some((mt) => mt === MediaType.IMAGES);
+  const isPreviewingVideos = previewMedia.some((mt) => mt === MediaType.VIDEOS);
+  const isPreviewingAudio = previewMedia.some((mt) => mt === MediaType.AUDIO);
+
+  const downloadMedia = stringToTypedArray<MediaType>(
+    settings.exportDownloadMedia_2
+  );
+  const isDownloadingImages = downloadMedia.some(
+    (mt) => mt === MediaType.IMAGES
+  );
+  const isDownloadingVideos = downloadMedia.some(
+    (mt) => mt === MediaType.VIDEOS
+  );
+  const isDownloadingAudio = downloadMedia.some((mt) => mt === MediaType.AUDIO);
 
   const { state: channelState, setSelectedExportChannels } = useChannelSlice();
   const channels = channelState.channels();
@@ -178,8 +198,20 @@ const ExportButton = ({
         `${exportType.toUpperCase()} Format`,
       ];
 
-      if (previewImages && exportType === ExportType.HTML) {
-        exportAccessories.push("Media Previewed");
+      if (exportType === ExportType.HTML) {
+        const previewArr = [];
+        if (isPreviewingImages) {
+          previewArr.push("Images");
+        }
+        if (isPreviewingVideos) {
+          previewArr.push("Videos");
+        }
+        if (isPreviewingAudio) {
+          previewArr.push("Audio");
+        }
+        if (previewArr.length) {
+          exportAccessories.push(`${punctuateStringArr(previewArr)} Previewed`);
+        }
       }
 
       if (folderingThreads) {
@@ -192,9 +224,21 @@ const ExportButton = ({
       );
     }
 
-    if (downloadImages) {
+    if (downloadMedia.length) {
+      const downloadArr = [];
+      if (isDownloadingImages) {
+        downloadArr.push("Images");
+      }
+      if (isDownloadingVideos) {
+        downloadArr.push("Videos");
+      }
+      if (isDownloadingAudio) {
+        downloadArr.push("Audio");
+      }
       descriptionArr.push(
-        `Attached & Embedded Media${artistMode ? " (Artist Mode)" : ""}`
+        `Attached & Embedded ${punctuateStringArr(downloadArr)}${
+          artistMode ? " (Artist Mode)" : ""
+        }`
       );
     }
     if (!isDm) {

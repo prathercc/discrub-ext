@@ -39,8 +39,8 @@ const defaultSettings = [
     name: DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER,
     value: SortDirection.DESCENDING,
   },
-  { name: DiscrubSetting.EXPORT_PREVIEW_MEDIA, value: "false" },
-  { name: DiscrubSetting.EXPORT_DOWNLOAD_MEDIA, value: "false" },
+  { name: DiscrubSetting.EXPORT_PREVIEW_MEDIA, value: "" },
+  { name: DiscrubSetting.EXPORT_DOWNLOAD_MEDIA, value: "" },
   { name: DiscrubSetting.EXPORT_MESSAGES_PER_PAGE, value: "1000" },
   {
     name: DiscrubSetting.EXPORT_IMAGE_RES_MODE,
