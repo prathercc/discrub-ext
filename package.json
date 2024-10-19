@@ -4,8 +4,9 @@
   "version": "1.12.2",
   "type": "module",
   "scripts": {
+    "clean_prod_manifest": "cat <<< $(jq 'del(.use_dynamic_url, .web_accessible_resources[].use_dynamic_url)' dist/manifest.json) > dist/manifest.json",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && npm run clean_prod_manifest",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
