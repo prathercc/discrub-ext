@@ -3,6 +3,7 @@ import {
   getEncodedEmoji,
   isDm,
   isGuildForum,
+  isRemovableMessage,
   messageTypeEquals,
   sortByProperty,
   stringToBool,
@@ -801,9 +802,10 @@ export const deleteMessages =
         );
       } else {
         const shouldDelete =
-          (deleteConfig.attachments && deleteConfig.messages) ||
-          (currentRow.content.length === 0 && deleteConfig.attachments) ||
-          (currentRow.attachments.length === 0 && deleteConfig.messages);
+          isRemovableMessage(currentRow) &&
+          ((deleteConfig.attachments && deleteConfig.messages) ||
+            (currentRow.content.length === 0 && deleteConfig.attachments) ||
+            (currentRow.attachments.length === 0 && deleteConfig.messages));
         const shouldEdit = deleteConfig.attachments || deleteConfig.messages;
 
         if (shouldDelete && !getState().app.discrubCancelled) {

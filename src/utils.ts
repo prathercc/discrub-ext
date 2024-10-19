@@ -465,3 +465,14 @@ export const isNonStandardMessage = (message: Message) => {
 export const messageTypeEquals = (type: number, compareType: MessageType) => {
   return `${type}` === compareType;
 };
+
+export const isRemovableMessage = (message: Message): boolean => {
+  return ![
+    MessageType.RECIPIENT_ADD,
+    MessageType.RECIPIENT_REMOVE,
+    MessageType.CALL,
+    MessageType.CHANNEL_NAME_CHANGE,
+    MessageType.CHANNEL_ICON_CHANGE,
+    MessageType.THREAD_STARTER_MESSAGE,
+  ].some((t) => messageTypeEquals(message.type, t));
+};

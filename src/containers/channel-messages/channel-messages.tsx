@@ -22,7 +22,7 @@ import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
 import AdvancedFiltering from "../advanced-filtering/advanced-filtering";
 import TokenNotFound from "../../components/token-not-found";
-import { messageTypeEquals, sortByProperty } from "../../utils";
+import { isRemovableMessage, sortByProperty } from "../../utils";
 import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -44,7 +44,6 @@ import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
 import ReactionModal from "../../components/reaction-modal";
-import { MessageType } from "../../enum/message-type";
 
 function ChannelMessages() {
   const { state: userState } = useUserSlice();
@@ -113,7 +112,7 @@ function ChannelMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: !messageTypeEquals(m.type, MessageType.CALL),
+    selectable: isRemovableMessage(m),
     renderRow: (row) => (
       <TableMessage
         settings={settings}
