@@ -2,7 +2,9 @@
   {
     "version": "1.12.2",
     "changes": [
-      "Add 'Thread' and 'Thread Starter' to Quick Filtering's Message Type/Category field."
+      "Add 'Thread' and 'Thread Starter' to Quick Filtering's Message Type/Category field.",
+      "Resolve Chrome Security Policy issue that broke extension following Chrome 130 update.",
+      "Prevent delete attempts on non-deletable messages."
     ]
   },
   {
