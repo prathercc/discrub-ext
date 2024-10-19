@@ -1,5 +1,13 @@
 [
   {
+    "version": "1.12.2",
+    "changes": [
+      "Add 'Thread' and 'Thread Starter' to Quick Filtering's Message Type/Category field.",
+      "Resolve Chrome Security Policy issue that broke extension following Chrome 130 update.",
+      "Prevent delete attempts on non-deletable messages."
+    ]
+  },
+  {
     "version": "1.12.1",
     "changes": [
       "Make Preview/Download Media settings multi-select with 'Images', 'Videos', and 'Audio' as options."

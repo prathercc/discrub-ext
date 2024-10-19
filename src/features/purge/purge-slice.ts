@@ -17,7 +17,7 @@ import { PurgeState } from "./purge-types";
 import { AppThunk } from "../../app/store";
 import Channel from "../../classes/channel";
 import Message from "../../classes/message";
-import { isDm } from "../../utils";
+import { isDm, isRemovableMessage } from "../../utils";
 
 const initialState: PurgeState = {
   isLoading: null,
@@ -101,7 +101,7 @@ export const purge =
                 timeout: 1,
               })
             );
-          } else {
+          } else if (isRemovableMessage(currentRow)) {
             const success = await dispatch(deleteMessage(currentRow));
             if (!success) {
               await dispatch(
