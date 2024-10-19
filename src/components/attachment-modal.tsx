@@ -19,7 +19,7 @@ import Attachment from "../classes/attachment";
 import { isMessage } from "../app/guards";
 import Tooltip from "../common-components/tooltip/tooltip";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { attachmentIsImage } from "../utils";
+import { entityIsImage } from "../utils";
 
 type AttachmentModalProps = {
   task: AppTask;
@@ -75,7 +75,7 @@ const AttachmentModal = ({
             variant="square"
             sx={{
               cursor: "pointer",
-              ...(attachmentIsImage(attachment)
+              ...(entityIsImage(attachment)
                 ? {
                     width: width < 100 ? width : 100,
                     height: height < 100 ? height : 100,

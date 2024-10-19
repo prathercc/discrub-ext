@@ -230,98 +230,23 @@ export const messageSlice = createSlice({
       }
       state.filters = retFilters;
     },
-    filterMessages: (state): void => {
-      let retArr: Message[] = [];
-      const inverseActive = state.filters
-        .filter((f) => f.filterName)
-        .some((filter) => filter.filterName === FilterName.INVERSE);
-      const activeFilterCount = state.filters.length;
-
-      if (
-        (activeFilterCount === 1 && inverseActive) ||
-        activeFilterCount === 0
-      ) {
-        retArr = state.messages;
-      } else {
-        state.messages.forEach((x) => {
-          let criteriaMet = true;
-          state.filters.forEach((param) => {
-            if (criteriaMet && param.filterValue) {
-              if (param.filterType === FilterType.TEXT) {
-                if (param.filterName === FilterName.ATTACHMENT_NAME) {
-                  criteriaMet = _filterAttachmentName(
-                    param.filterValue,
-                    x,
-                    inverseActive
-                  );
-                } else if (param.filterName === FilterName.CONTENT) {
-                  criteriaMet = _filterMessageContent(
-                    param.filterValue,
-                    x,
-                    inverseActive
-                  );
-                } else {
-                  criteriaMet = _filterText(
-                    param.filterName,
-                    param.filterValue,
-                    x,
-                    inverseActive
-                  );
-                }
-                return criteriaMet;
-              } else if (param.filterType === FilterType.DATE) {
-                if (param.filterName === FilterName.START_TIME) {
-                  criteriaMet = _filterStartTime(
-                    param.filterValue,
-                    x,
-                    inverseActive
-                  );
-                } else if (param.filterName === FilterName.END_TIME) {
-                  criteriaMet = _filterEndTime(
-                    param.filterValue,
-                    x,
-                    inverseActive
-                  );
-                }
-              } else if (param.filterType === FilterType.THREAD) {
-                criteriaMet = _filterThread(
-                  param.filterValue,
-                  x,
-                  inverseActive
-                );
-              } else if (param.filterType === FilterType.ARRAY) {
-                if (param.filterName === FilterName.MESSAGE_TYPE) {
-                  criteriaMet = _filterMessageType(
-                    param.filterValue,
-                    x,
-                    inverseActive
-                  );
-                }
-              }
-            }
-          });
-          if (criteriaMet) retArr.push(x);
-        });
-      }
-
-      state.filteredMessages = retArr;
-      state.selectedMessages = retArr
-        .filter((m) => state.selectedMessages.some((mId) => m.id === mId))
-        .map((m) => m.id);
-    },
   },
 });
 
 const _filterMessageType = (
   _filterValue: string[],
   message: Message,
-  inverseActive: boolean
+  inverseActive: boolean,
+  threads: Channel[]
 ): boolean => {
   const messageHasType = _filterValue.some((fv) => {
     return (
       messageTypeEquals(message.type, fv as MessageType) ||
       (fv === MessageCategory.PINNED && message.pinned) ||
-      (fv === MessageCategory.REACTIONS && !!message.reactions?.length)
+      (fv === MessageCategory.REACTIONS && !!message.reactions?.length) ||
+      (fv === MessageCategory.THREAD &&
+        threads.some((t) => t.id === message.channel_id)) ||
+      (fv === MessageCategory.THREAD_STARTER && message.thread?.id)
     );
   });
   const criteriaMet =
@@ -494,8 +419,88 @@ export const {
   resetFilters,
   resetAdvancedFilters,
   updateFilters,
-  filterMessages,
 } = messageSlice.actions;
+
+export const filterMessages =
+  (): AppThunk<Promise<void>> => async (dispatch, getState) => {
+    const state = getState().message;
+    let retArr: Message[] = [];
+    const inverseActive = state.filters
+      .filter((f) => f.filterName)
+      .some((filter) => filter.filterName === FilterName.INVERSE);
+    const activeFilterCount = state.filters.length;
+
+    if ((activeFilterCount === 1 && inverseActive) || activeFilterCount === 0) {
+      retArr = state.messages;
+    } else {
+      state.messages.forEach((x) => {
+        let criteriaMet = true;
+        state.filters.forEach((param) => {
+          if (criteriaMet && param.filterValue) {
+            if (param.filterType === FilterType.TEXT) {
+              if (param.filterName === FilterName.ATTACHMENT_NAME) {
+                criteriaMet = _filterAttachmentName(
+                  param.filterValue,
+                  x,
+                  inverseActive
+                );
+              } else if (param.filterName === FilterName.CONTENT) {
+                criteriaMet = _filterMessageContent(
+                  param.filterValue,
+                  x,
+                  inverseActive
+                );
+              } else {
+                criteriaMet = _filterText(
+                  param.filterName,
+                  param.filterValue,
+                  x,
+                  inverseActive
+                );
+              }
+              return criteriaMet;
+            } else if (param.filterType === FilterType.DATE) {
+              if (param.filterName === FilterName.START_TIME) {
+                criteriaMet = _filterStartTime(
+                  param.filterValue,
+                  x,
+                  inverseActive
+                );
+              } else if (param.filterName === FilterName.END_TIME) {
+                criteriaMet = _filterEndTime(
+                  param.filterValue,
+                  x,
+                  inverseActive
+                );
+              }
+            } else if (param.filterType === FilterType.THREAD) {
+              criteriaMet = _filterThread(param.filterValue, x, inverseActive);
+            } else if (param.filterType === FilterType.ARRAY) {
+              if (param.filterName === FilterName.MESSAGE_TYPE) {
+                const { threads } = getState().thread;
+                criteriaMet = _filterMessageType(
+                  param.filterValue,
+                  x,
+                  inverseActive,
+                  threads
+                );
+              }
+            }
+          }
+        });
+        if (criteriaMet) retArr.push(x);
+      });
+    }
+
+    dispatch(setFilteredMessages(retArr));
+    dispatch(
+      setSelected(
+        retArr
+          .filter((m) => state.selectedMessages.some((mId) => m.id === mId))
+          .map((m) => m.id)
+      )
+    );
+  };
 
 export const deleteReaction =
   (

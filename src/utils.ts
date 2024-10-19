@@ -201,38 +201,46 @@ export const getIconUrl = (entity: Channel | Guild) => {
   }
 };
 
-export const attachmentIsVideo = (attachment: Attachment): boolean => {
-  return Boolean(attachment.content_type?.includes("video"));
-};
-
-export const attachmentIsImage = (attachment: Attachment): boolean => {
-  return Boolean(
-    attachment.content_type?.includes("image") ||
-      ["png", "jpg", "jpeg", "gif"].some((sit) =>
-        attachment.filename.includes(sit)
-      )
-  );
-};
-
-export const attachmentIsAudio = (attachment: Attachment): boolean => {
-  return Boolean(
-    attachment.content_type?.includes("audio") ||
-      ["ogg"].some((sit) => attachment.filename.includes(sit))
-  );
-};
-
-export const entityContainsMedia = (entity: Attachment | Embed) => {
+export const entityIsImage = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
-    return (
-      attachmentIsVideo(entity) ||
-      attachmentIsImage(entity) ||
-      attachmentIsAudio(entity)
+    return Boolean(
+      entity.content_type?.includes("image") ||
+        ["png", "jpg", "jpeg", "gif"].some((sit) =>
+          entity.filename.includes(sit)
+        )
     );
   } else {
-    return [EmbedType.GIFV, EmbedType.IMAGE, EmbedType.RICH].some(
+    return [EmbedType.IMAGE, EmbedType.RICH].some(
       (type) => type === entity.type
     );
   }
+};
+
+export const entityIsVideo = (entity: Attachment | Embed) => {
+  if (isAttachment(entity)) {
+    return Boolean(entity.content_type?.includes("video"));
+  } else {
+    // TODO: Look into supporting embedded video.
+    // GIFV may actually need to be moved to entityIsImage...
+    return [EmbedType.GIFV].some((type) => type === entity.type);
+  }
+};
+
+export const entityIsAudio = (entity: Attachment | Embed) => {
+  if (isAttachment(entity)) {
+    return Boolean(
+      entity.content_type?.includes("audio") ||
+        ["ogg"].some((sit) => entity.filename.includes(sit))
+    );
+  }
+  // TODO: Look into supporting embedded audio.
+  return false;
+};
+
+export const entityContainsMedia = (entity: Attachment | Embed) => {
+  return (
+    entityIsImage(entity) || entityIsVideo(entity) || entityIsAudio(entity)
+  );
 };
 
 export const getMediaUrls = (entity: Attachment | Embed) => {
@@ -414,6 +422,10 @@ export const stringToBool = (str: string): boolean =>
 
 export const boolToString = (b: boolean): string =>
   b === true ? "true" : "false";
+
+export const stringToTypedArray = <T>(str: string): T[] => {
+  return str ? str.split(",").map((s) => s as T) : [];
+};
 
 export const getReactingUsers = (
   exportReactions: ExportReaction[],
