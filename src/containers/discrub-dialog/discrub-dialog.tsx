@@ -89,7 +89,7 @@ function DiscrubDialog() {
           spacing={1}
         >
           <Typography color="primary.main" variant="body2">
-            1.12.2
+            1.12.3
           </Typography>
         </Stack>
       </Box>

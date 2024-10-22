@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.12.3",
+    "changes": ["Auxillary changes for Firefox."]
+  },
+  {
     "version": "1.12.2",
     "changes": [
       "Add 'Thread' and 'Thread Starter' to Quick Filtering's Message Type/Category field.",
