@@ -6,7 +6,7 @@
   "manifest_version": 3,
   "permissions": ["storage"],
   "background": {
-    "service_worker": "public/resources/js/background.js",
+    "scripts": ["public/resources/js/background.js"],
     "type": "module"
   },
   "action": {
@@ -18,6 +18,11 @@
       "js": ["src/chrome/content.js"]
     }
   ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "prathercc@gmail.com"
+    }
+  },
   "web_accessible_resources": [
     {
       "matches": ["*://discord.com/*"],

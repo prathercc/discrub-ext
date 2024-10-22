@@ -1,30 +1,34 @@
 /* eslint-disable no-undef */
-/*global chrome*/
 import * as module from "./sw.js";
 
-chrome.action.onClicked.addListener((tab) => {
-  if (chrome && chrome.tabs) {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (browser && browser.tabs) {
+    browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { message: "INJECT_DIALOG" },
-          () => {}
-        );
+        browser.tabs.sendMessage(tabs[0].id, request).then((response) => {
+          sendResponse(response);
+        });
+      }
+    });
+  }
+  return true;
+});
+
+browser.action.onClicked.addListener((tab) => {
+  if (browser && browser.tabs) {
+    browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      if (tabs) {
+        browser.tabs.sendMessage(tabs[0].id, { message: "INJECT_DIALOG" });
       }
     });
   }
 });
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  if (chrome && chrome.tabs) {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+browser.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  if (browser && browser.tabs) {
+    browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { message: "INJECT_BUTTON" },
-          () => {}
-        );
+        browser.tabs.sendMessage(tabs[0].id, { message: "INJECT_BUTTON" });
       }
     });
   }
