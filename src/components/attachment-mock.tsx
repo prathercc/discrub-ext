@@ -137,11 +137,7 @@ const AttachmentMock = ({ attachment }: AttachmentMockProps) => {
           controls
           playsInline
           autoPlay={false}
-          poster={
-            mediaMap[attachment.proxy_url]
-              ? undefined
-              : "resources/media/discrub.png"
-          }
+          poster="../discrub_media/discrub.png" // Required to prevent 'react-to-print' from hanging indefinitely in some cases.
         />
       )}
       {isPreviewingAudio && isAudio && (

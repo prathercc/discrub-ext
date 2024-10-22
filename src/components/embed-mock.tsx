@@ -50,7 +50,7 @@ const EmbedMock = ({ embed, index }: EmbedMockProps) => {
           controls
           playsInline
           autoPlay={false}
-          poster={embed.thumbnail?.proxy_url || "resources/media/discrub.png"}
+          poster="../discrub_media/discrub.png" // Required to prevent 'react-to-print' from hanging indefinitely in some cases.
         />
       )}
       {isPreviewingVideos &&

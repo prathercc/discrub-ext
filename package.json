@@ -1,7 +1,7 @@
 {
   "name": "discrub-ext",
   "private": true,
-  "version": "1.12.2",
+  "version": "1.12.3",
   "type": "module",
   "scripts": {
     "clean_prod_manifest": "cat <<< $(jq 'del(.use_dynamic_url, .web_accessible_resources[].use_dynamic_url)' dist/manifest.json) > dist/manifest.json",
@@ -19,6 +19,7 @@
     "@reduxjs/toolkit": "^2.0.1",
     "@transcend-io/conflux": "^4.1.0",
     "@types/chrome": "^0.0.256",
+    "@types/firefox-webext-browser": "^120.0.4",
     "bytes": "^3.1.2",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.1.0",
