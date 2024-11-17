@@ -1,26 +1,42 @@
-import { useEffect, useState } from "react";
-import {
-  Stack,
-  useTheme,
-  List,
-  Box,
-  Icon,
-  Skeleton,
-  Typography,
-} from "@mui/material";
-import { Donation, fetchDonationData } from "../../../services/github-service";
+import { useState } from "react";
+import { Stack, useTheme, List, Box, Skeleton } from "@mui/material";
 import DonationListButton from "./donation-list-button";
+import DonationHeaderButton from "./donation-header-button.tsx";
+import { useDonations } from "../../../hooks/donations.ts";
+import DonationFooterControls from "./donation-footer-controls.tsx";
+import { AppSettings } from "../../../features/app/app-types.ts";
+import { setSetting } from "../../../services/chrome-service.ts";
+import { DiscrubSetting } from "../../../enum/discrub-setting.ts";
+import { boolToString } from "../../../utils.ts";
 
-function DonationComponent() {
+type DonationComponentProps = {
+  showKoFiFeed: boolean;
+  onChangeSettings: (settings: AppSettings) => void;
+};
+
+function DonationComponent({
+  showKoFiFeed,
+  onChangeSettings,
+}: DonationComponentProps) {
   const { palette } = useTheme();
-  const [donations, setDonations] = useState<Donation[]>([]);
-  useEffect(() => {
-    const getDonationData = async () => {
-      const data = await fetchDonationData();
-      setDonations(data);
-    };
-    getDonationData();
-  }, []);
+  const donations = useDonations();
+  const [page, setPage] = useState(1);
+  const donationsPerPage = 25;
+  const indexOfLastDonation = page * donationsPerPage;
+  const indexOfFirstDonation = indexOfLastDonation - donationsPerPage;
+  const currentDonations = donations.slice(
+    indexOfFirstDonation,
+    indexOfLastDonation,
+  );
+  const totalPages = Math.ceil(donations.length / donationsPerPage);
+
+  const handleToggleFeedVisibility = async () => {
+    const settings = await setSetting(
+      DiscrubSetting.APP_SHOW_KOFI_FEED,
+      boolToString(!showKoFiFeed),
+    );
+    onChangeSettings(settings);
+  };
 
   return (
     <Stack
@@ -39,7 +55,8 @@ function DonationComponent() {
         sx={{
           height: "100%",
           overflowY: "scroll",
-          bgcolor: "background.paper",
+          overflowX: "hidden",
+          backgroundColor: "background.paper",
           color: "text.primary",
           display: "flex",
           flexDirection: "column",
@@ -48,38 +65,13 @@ function DonationComponent() {
           padding: "3px",
         }}
       >
-        <Stack
-          sx={{
-            flexDirection: "row",
-            gap: "15px",
-            width: "100%",
-            borderRadius: "5px",
-            backgroundColor: "primary.dark",
-            justifyContent: "center",
-            alignItems: "center",
-            boxShadow: "rgba(232, 217, 217, 0.75) 2px 2px 5px -2px",
-          }}
-        >
-          <Icon>
-            <img
-              style={{ display: "flex", height: "inherit", width: "inherit" }}
-              src="resources/media/kofi.svg"
-              alt="kofi"
-            />
-          </Icon>
-          <Typography variant="body1">Ko-Fi Feed</Typography>
-          <Icon>
-            <img
-              style={{ display: "flex", height: "inherit", width: "inherit" }}
-              src="resources/media/kofi.svg"
-              alt="kofi"
-            />
-          </Icon>
-        </Stack>
+        <DonationHeaderButton
+          handleToggleFeedVisibility={handleToggleFeedVisibility}
+        />
 
-        {donations?.length ? (
-          <List>
-            {donations.map((donation) => (
+        {currentDonations?.length ? (
+          <List sx={{ opacity: showKoFiFeed ? 1 : 0 }}>
+            {currentDonations.map((donation) => (
               <DonationListButton donation={donation} />
             ))}
           </List>
@@ -96,6 +88,11 @@ function DonationComponent() {
             ))}
           </>
         )}
+        <DonationFooterControls
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages}
+        />
       </Box>
     </Stack>
   );

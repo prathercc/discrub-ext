@@ -17,6 +17,7 @@ import DirectMessages from "../direct-messages/direct-messages";
 import Settings from "./components/settings";
 import { initializeSettings } from "../../services/chrome-service";
 import AnnouncementComponent from "./components/announcement-component";
+import { stringToBool } from "../../utils.ts";
 
 function DiscrubDialog() {
   const { palette } = useTheme();
@@ -30,6 +31,8 @@ function DiscrubDialog() {
   const { resetChannel } = useChannelSlice();
   const { setDiscrubPaused, setSettings, state: appState } = useAppSlice();
   const settings = appState.settings();
+  const showKoFiFeed = stringToBool(settings.appShowKoFiFeed);
+
   const { getUserData } = useUserSlice();
 
   const handleChangeMenuIndex = async (index: number) => {
@@ -70,7 +73,10 @@ function DiscrubDialog() {
         m: 0,
       }}
     >
-      <DonationComponent />
+      <DonationComponent
+        onChangeSettings={setSettings}
+        showKoFiFeed={showKoFiFeed}
+      />
       <AnnouncementComponent />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && <ChannelMessages />}

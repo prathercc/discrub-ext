@@ -1,5 +1,9 @@
 [
   {
+    "version": "1.12.4",
+    "changes": ["Paginate Ko-Fi Feed and make feed hide-able."]
+  },
+  {
     "version": "1.12.3",
     "changes": ["Auxillary changes for Firefox."]
   },

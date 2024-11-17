@@ -12,4 +12,6 @@ export enum DiscrubSetting {
   EXPORT_DOWNLOAD_MEDIA = "exportDownloadMedia_2",
   EXPORT_MESSAGES_PER_PAGE = "exportMessagesPerPage",
   EXPORT_IMAGE_RES_MODE = "exportImageResMode",
+
+  APP_SHOW_KOFI_FEED = "appShowKoFiFeed",
 }
