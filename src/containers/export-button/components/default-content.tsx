@@ -1,13 +1,9 @@
-import {
-  DialogContent,
-  DialogContentText,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { DialogContent, DialogContentText, Typography } from "@mui/material";
 import Progress from "./progress";
-import Config from "../../discrub-dialog/components/config";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
 import { AppSettings } from "../../../features/app/app-types";
+import ExportTabs, { ExportTab } from "./export-tabs.tsx";
+import { getExportSettings } from "./bulk-content.tsx";
 
 type DefaultContentProps = {
   isExporting: boolean;
@@ -34,27 +30,27 @@ const DefaultContent = ({
   ];
   if (isDm) {
     visibleSettings = visibleSettings.filter(
-      (s) => s !== DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS
+      (s) => s !== DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
     );
   }
+
+  const configurationTab: ExportTab = {
+    label: "Configuration",
+    getComponent: () =>
+      getExportSettings(onChangeSettings, visibleSettings, settings),
+  };
+  const tabs: ExportTab[] = [configurationTab];
 
   return (
     <DialogContent>
       {!isExporting && (
         <>
-          <DialogContentText>
-            <Typography variant="body2">
+          <DialogContentText mb={1}>
+            <Typography variant="h6">
               <strong>{messageCount}</strong> messages are available to export
             </Typography>
           </DialogContentText>
-          <Stack mt={1} mb={1} sx={{ maxHeight: "325px", overflow: "auto" }}>
-            <Config
-              onChangeSettings={onChangeSettings}
-              visibleSettings={visibleSettings}
-              settings={settings}
-              containerProps={{ width: "auto" }}
-            />
-          </Stack>
+          <ExportTabs tabs={tabs} />
         </>
       )}
       {isExporting && <Progress />}

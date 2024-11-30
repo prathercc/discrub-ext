@@ -1,7 +1,7 @@
 [
   {
     "version": "1.12.4",
-    "changes": ["Paginate Ko-Fi Feed and make feed hide-able."]
+    "changes": ["Paginate Ko-Fi Feed and make feed hide-able.", "Clean up export dialog view."]
   },
   {
     "version": "1.12.3",

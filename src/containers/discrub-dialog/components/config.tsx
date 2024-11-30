@@ -229,13 +229,13 @@ function Config({
 
   const handleNumericOnChange = async (
     setting: DiscrubSetting,
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { fallbackValue } = controls.find((c) => c.name === setting) || {};
     const input = parseInt(e.target.value);
     const settings = await setSetting(
       setting,
-      !isNaN(input) ? `${input}` : fallbackValue || ""
+      !isNaN(input) ? `${input}` : fallbackValue || "",
     );
     onChangeSettings(settings);
   };
@@ -254,7 +254,7 @@ function Config({
           const Icon = control.icon?.();
           return (
             <Tooltip placement="left" title={control.description}>
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 {control.numeric && (
                   <TextField
                     label={control.label}
@@ -268,7 +268,9 @@ function Config({
                 )}
                 {control.options?.length && !control.multiselect && (
                   <>
-                    <InputLabel variant="filled">{control.label}</InputLabel>
+                    <InputLabel size="small" variant="filled">
+                      {control.label}
+                    </InputLabel>
                     <Select
                       variant="filled"
                       endAdornment={Icon}
