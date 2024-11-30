@@ -1,6 +1,7 @@
-import { Stack, useTheme, alpha, IconButton, Typography } from "@mui/material";
+import { Stack, IconButton, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { transparancy } from "../../../theme.ts";
 
 type DonationFooterControlsProps = {
   page: number;
@@ -13,18 +14,14 @@ function DonationFooterControls({
   setPage,
   totalPages,
 }: DonationFooterControlsProps) {
-  const { palette } = useTheme();
-
   return (
     <Stack
       sx={{
+        ...transparancy,
         width: "100%",
         position: "sticky",
         bottom: "0px",
         zIndex: 1000,
-        backgroundColor: alpha(palette.background.paper, 0.5),
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)", // For Safari support,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",

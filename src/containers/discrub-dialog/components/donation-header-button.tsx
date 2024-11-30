@@ -1,12 +1,11 @@
-import { Stack, useTheme, Button, Icon, alpha } from "@mui/material";
+import { Stack, Button, Icon } from "@mui/material";
+import { transparancy } from "../../../theme.ts";
 
 type DonationHeaderButtonProps = { handleToggleFeedVisibility: () => void };
 
 function DonationHeaderButton({
   handleToggleFeedVisibility,
 }: DonationHeaderButtonProps) {
-  const { palette } = useTheme();
-
   const getIcon = () => {
     return (
       <Icon>
@@ -26,13 +25,11 @@ function DonationHeaderButton({
   return (
     <Stack
       sx={{
+        ...transparancy,
         width: "100%",
         position: "sticky",
         top: "0px",
         zIndex: 1000,
-        backgroundColor: alpha(palette.background.paper, 0.5),
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)", // For Safari support,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
