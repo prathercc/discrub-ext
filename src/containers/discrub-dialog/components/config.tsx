@@ -145,10 +145,14 @@ function Config({
       name: DiscrubSetting.EXPORT_PREVIEW_MEDIA,
       label: "Preview Media (HTML)",
       multiselect: true,
+      categorized: true,
       options: [
-        { value: MediaType.IMAGES, name: "Images" },
-        { value: MediaType.VIDEOS, name: "Videos" },
-        { value: MediaType.AUDIO, name: "Audio" },
+        { value: MediaType.IMAGES, name: "Images", category: "Discord" },
+        { value: MediaType.VIDEOS, name: "Videos", category: "Discord" },
+        { value: MediaType.AUDIO, name: "Audio", category: "Discord" },
+
+        { value: MediaType.EMBEDDED_IMAGES, name: "Images", category: "Embed" },
+        { value: MediaType.EMBEDDED_VIDEOS, name: "Videos", category: "Embed" },
       ],
       description:
         "Previewing Media on a large number of messages can negatively affect the speed of the export.",
@@ -305,6 +309,22 @@ function Config({
                       getValue(control.name)
                         ? getValue(control.name)?.split(",") || []
                         : []
+                    }
+                    categories={
+                      control.categorized
+                        ? control.options.reduce((acc: string[], curr) => {
+                            if (!acc.some((cat) => cat === curr.category))
+                              return [...acc, curr.category];
+                            return acc;
+                          }, [])
+                        : undefined
+                    }
+                    categoryMap={
+                      control.categorized
+                        ? control.options.reduce((acc, curr) => {
+                            return { ...acc, [curr.value]: curr.category };
+                          }, {})
+                        : undefined
                     }
                     values={control.options.map((o) => o.value)}
                     displayNameMap={control.options.reduce((acc, curr) => {
