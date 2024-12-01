@@ -80,12 +80,7 @@ const MultiValueSelect = ({
         value={value}
         onChange={handleChange}
         input={<FilledInput size="small" />}
-        renderValue={(selected) =>
-          (displayNameMap
-            ? selected.map((s) => displayNameMap[s] || s)
-            : selected
-          ).join(", ")
-        }
+        renderValue={(selected) => `+${selected.length}`}
       >
         {elements.map((e) => e)}
       </Select>
