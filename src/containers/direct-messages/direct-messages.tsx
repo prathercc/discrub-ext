@@ -149,8 +149,8 @@ function DirectMessages() {
       sortByProperty(
         { name: String(a.name).toLowerCase() },
         { name: String(b.name).toLowerCase() },
-        "name"
-      )
+        "name",
+      ),
     );
 
   const advancedFilterActive = [
@@ -261,7 +261,7 @@ function DirectMessages() {
                             <Chip
                               variant="outlined"
                               label={String(
-                                dms.find((dm) => dm.id === option)?.name
+                                dms.find((dm) => dm.id === option)?.name,
                               )}
                               key={key}
                               {...tagProps}
@@ -337,6 +337,7 @@ function DirectMessages() {
             {messages.length > 0 && (
               <Box sx={{ maxHeight: "430px", overflow: "auto" }}>
                 <Table
+                  stickyControl
                   columns={columns}
                   rows={rows}
                   orderProps={orderProps}
