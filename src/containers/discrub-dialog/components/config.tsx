@@ -132,10 +132,14 @@ function Config({
       name: DiscrubSetting.EXPORT_DOWNLOAD_MEDIA,
       label: "Download Media",
       multiselect: true,
+      categorized: true,
       options: [
-        { value: MediaType.IMAGES, name: "Images" },
-        { value: MediaType.VIDEOS, name: "Videos" },
-        { value: MediaType.AUDIO, name: "Audio" },
+        { value: MediaType.IMAGES, name: "Images", category: "Discord" },
+        { value: MediaType.VIDEOS, name: "Videos", category: "Discord" },
+        { value: MediaType.AUDIO, name: "Audio", category: "Discord" },
+
+        { value: MediaType.EMBEDDED_IMAGES, name: "Images", category: "Embed" },
+        { value: MediaType.EMBEDDED_VIDEOS, name: "Videos", category: "Embed" },
       ],
       description:
         "Exports may be performed more slowly when downloading media.",

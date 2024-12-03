@@ -5,7 +5,8 @@
       "Paginate Ko-Fi Feed and make feed hide-able.",
       "Clean up export dialog view.",
       "Support video embed previewing from any source (HTML).",
-      "Preview images from Article embeds, when the respective setting is toggled (HTML)."
+      "Preview images from Article embeds, when the respective setting is toggled (HTML).",
+      "Add Embed Image and Video to Download Media categories (export)."
     ]
   },
   {
