@@ -54,7 +54,6 @@ import Message from "../../classes/message";
 import ExportUtils from "./export-utils";
 import { AppThunk } from "../../app/store";
 import { ReactElement } from "react";
-import { Typography } from "@mui/material";
 import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
@@ -579,19 +578,21 @@ export const getFormattedInnerHtml =
         rawHtml = rawHtml.replaceAll(
           codeRef.raw,
           renderToString(
-            <div
+            <span
               style={{
                 backgroundColor: "#282b30",
                 borderRadius: 5,
                 padding: "7px",
                 border: "1px solid #1e1f22",
-                whiteSpace: "pre-line",
                 color: "rgb(220, 221, 222) !important",
                 minWidth: "400px",
+                display: "block",
+                fontFamily: "monospace",
+                whiteSpace: "pre",
+                margin: "1em 0",
               }}
-            >
-              <Typography>{codeRef.text?.trim()}</Typography>
-            </div>,
+              dangerouslySetInnerHTML={{ __html: codeRef.text }}
+            />,
           ),
         );
       });
