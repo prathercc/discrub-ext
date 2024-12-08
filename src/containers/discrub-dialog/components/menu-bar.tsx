@@ -63,9 +63,9 @@ const MenuBar = ({
       url: "https://github.com/prathercc/discrub-ext",
     },
     {
-      title: "Review on Webstore",
-      img: "chromestore.svg",
-      url: "https://chrome.google.com/webstore/detail/discrub/plhdclenpaecffbcefjmpkkbdpkmhhbj",
+      title: "Review on Addon Page",
+      img: "firefox.svg",
+      url: "https://addons.mozilla.org/en-US/firefox/addon/discrub/",
     },
     {
       title: "Donate with Ko-Fi",
