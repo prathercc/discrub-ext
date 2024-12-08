@@ -2,6 +2,7 @@ import { useReactToPrint } from "react-to-print";
 import streamSaver from "streamsaver";
 import { Writer } from "@transcend-io/conflux";
 import { wait } from "../../utils";
+import hljsCss from "./highlight.js.css";
 
 export default class ExportUtils {
   constructor(contentRef, callback, zipName) {
@@ -43,7 +44,7 @@ export default class ExportUtils {
     }</div><div>${
       e.stack
     }</div><div style="background-color:black;color:white;border-radius:5px;margin-top:10px;">${this.exportMessages?.map(
-      (msg) => `<div>${JSON.stringify(msg)}</div>`
+      (msg) => `<div>${JSON.stringify(msg)}</div>`,
     )}</div>`;
   };
 
@@ -54,17 +55,24 @@ export default class ExportUtils {
       try {
         const bodyElementStyle =
           iframe.contentWindow.document.lastElementChild.getElementsByTagName(
-            "body"
+            "body",
           )[0].style;
         bodyElementStyle.margin = "3px";
         bodyElementStyle.backgroundColor = "#313338";
 
-        let meta = document.createElement("meta");
+        const hljsStyles = document.createElement("style");
+        hljsStyles.setAttribute("type", "text/css");
+        hljsStyles.appendChild(document.createTextNode(hljsCss));
+
+        const meta = document.createElement("meta");
         meta.httpEquiv = "Content-Type";
         meta.content = "text/html; charset=utf-8";
-        iframe.contentWindow.document
-          .getElementsByTagName("head")[0]
-          .prepend(meta);
+
+        const head =
+          iframe.contentWindow.document.getElementsByTagName("head")[0];
+        head.prepend(meta);
+        head.appendChild(hljsStyles);
+
         const printedHtml =
           iframe.contentWindow.document.lastElementChild.outerHTML;
 
@@ -91,7 +99,7 @@ export default class ExportUtils {
   addToZip = async (blob, filename) => {
     if (!this.fileStream) {
       this.fileStream = streamSaver.createWriteStream(
-        `${this.zipName || "Export"}.zip`
+        `${this.zipName || "Export"}.zip`,
       );
     }
     try {

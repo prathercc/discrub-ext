@@ -61,6 +61,7 @@ import Channel from "../../classes/channel";
 import DiscordService from "../../services/discord-service";
 import { MediaType } from "../../enum/media-type";
 import { isAttachment } from "../../app/guards.ts";
+import hljs from "highlight.js";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -584,14 +585,14 @@ export const getFormattedInnerHtml =
                 borderRadius: 5,
                 padding: "7px",
                 border: "1px solid #1e1f22",
-                color: "rgb(220, 221, 222) !important",
-                minWidth: "400px",
                 display: "block",
-                fontFamily: "monospace",
-                whiteSpace: "pre",
+                whiteSpace: "pre-wrap",
                 margin: "1em 0",
+                fontFamily: "monospace",
               }}
-              dangerouslySetInnerHTML={{ __html: codeRef.text }}
+              dangerouslySetInnerHTML={{
+                __html: hljs.highlightAuto(codeRef.text).value,
+              }}
             />,
           ),
         );
