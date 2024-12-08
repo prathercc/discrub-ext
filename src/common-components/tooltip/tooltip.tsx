@@ -5,14 +5,16 @@ import { Tooltip as MuiTooltip, TooltipProps, useTheme } from "@mui/material";
 const Tooltip = (
   props: {
     description?: string;
-  } & TooltipProps
+  } & TooltipProps,
 ) => {
   const theme = useTheme();
   const { title, description, children, ...rest } = props;
   return (
     <MuiTooltip
       disableInteractive
-      PopperProps={{ sx: { maxWidth: "200px" } }}
+      PopperProps={{
+        sx: { maxWidth: "200px", backgroundColor: "transparent" },
+      }}
       TransitionProps={{
         timeout: {
           appear: 1,
@@ -27,6 +29,7 @@ const Tooltip = (
             display: "flex",
             flexDirection: "column",
             color: theme.palette.text.secondary,
+            backgroundColor: "transparent",
           }}
         >
           <strong>{title}</strong>

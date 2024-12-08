@@ -1,5 +1,17 @@
 [
   {
+    "version": "1.12.4",
+    "changes": [
+      "Paginate Ko-Fi Feed and make feed hide-able.",
+      "Clean up export dialog view.",
+      "Support video embed previewing from any source (HTML).",
+      "Preview images from Article embeds, when the respective setting is toggled (HTML).",
+      "Add Embed Image and Video to Download Media categories (export).",
+      "Make message table pagination sticky.",
+      "Fix issue with rendered code formatted messages and add code highlighting support."
+    ]
+  },
+  {
     "version": "1.12.3",
     "changes": ["Auxillary changes for Firefox."]
   },

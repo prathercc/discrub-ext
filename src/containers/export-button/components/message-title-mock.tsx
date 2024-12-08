@@ -3,6 +3,7 @@ import Guild from "../../../classes/guild";
 import Channel from "../../../classes/channel";
 import { isGuild } from "../../../app/guards";
 import { isDm } from "../../../utils";
+import { transparancy } from "../../../theme.ts";
 
 type MessageTitleMockProps = {
   entity: Channel | Guild | Maybe;
@@ -42,13 +43,13 @@ const MessageTitleMock = ({
   return (
     <Stack
       sx={{
+        ...transparancy,
         width: "100%",
         zIndex: 5000,
         borderBottom: "0.5px solid #202225",
         padding: "5px",
-        position: "fixed",
+        position: "sticky",
         top: 0,
-        backgroundColor: "#313338",
         "& h4": {
           userSelect: "none !important",
           cursor: "default !important",

@@ -132,10 +132,14 @@ function Config({
       name: DiscrubSetting.EXPORT_DOWNLOAD_MEDIA,
       label: "Download Media",
       multiselect: true,
+      categorized: true,
       options: [
-        { value: MediaType.IMAGES, name: "Images" },
-        { value: MediaType.VIDEOS, name: "Videos" },
-        { value: MediaType.AUDIO, name: "Audio" },
+        { value: MediaType.IMAGES, name: "Images", category: "Discord" },
+        { value: MediaType.VIDEOS, name: "Videos", category: "Discord" },
+        { value: MediaType.AUDIO, name: "Audio", category: "Discord" },
+
+        { value: MediaType.EMBEDDED_IMAGES, name: "Images", category: "Embed" },
+        { value: MediaType.EMBEDDED_VIDEOS, name: "Videos", category: "Embed" },
       ],
       description:
         "Exports may be performed more slowly when downloading media.",
@@ -145,10 +149,14 @@ function Config({
       name: DiscrubSetting.EXPORT_PREVIEW_MEDIA,
       label: "Preview Media (HTML)",
       multiselect: true,
+      categorized: true,
       options: [
-        { value: MediaType.IMAGES, name: "Images" },
-        { value: MediaType.VIDEOS, name: "Videos" },
-        { value: MediaType.AUDIO, name: "Audio" },
+        { value: MediaType.IMAGES, name: "Images", category: "Discord" },
+        { value: MediaType.VIDEOS, name: "Videos", category: "Discord" },
+        { value: MediaType.AUDIO, name: "Audio", category: "Discord" },
+
+        { value: MediaType.EMBEDDED_IMAGES, name: "Images", category: "Embed" },
+        { value: MediaType.EMBEDDED_VIDEOS, name: "Videos", category: "Embed" },
       ],
       description:
         "Previewing Media on a large number of messages can negatively affect the speed of the export.",
@@ -229,13 +237,13 @@ function Config({
 
   const handleNumericOnChange = async (
     setting: DiscrubSetting,
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { fallbackValue } = controls.find((c) => c.name === setting) || {};
     const input = parseInt(e.target.value);
     const settings = await setSetting(
       setting,
-      !isNaN(input) ? `${input}` : fallbackValue || ""
+      !isNaN(input) ? `${input}` : fallbackValue || "",
     );
     onChangeSettings(settings);
   };
@@ -254,7 +262,7 @@ function Config({
           const Icon = control.icon?.();
           return (
             <Tooltip placement="left" title={control.description}>
-              <FormControl fullWidth>
+              <FormControl fullWidth size="small">
                 {control.numeric && (
                   <TextField
                     label={control.label}
@@ -268,7 +276,9 @@ function Config({
                 )}
                 {control.options?.length && !control.multiselect && (
                   <>
-                    <InputLabel variant="filled">{control.label}</InputLabel>
+                    <InputLabel size="small" variant="filled">
+                      {control.label}
+                    </InputLabel>
                     <Select
                       variant="filled"
                       endAdornment={Icon}
@@ -303,6 +313,22 @@ function Config({
                       getValue(control.name)
                         ? getValue(control.name)?.split(",") || []
                         : []
+                    }
+                    categories={
+                      control.categorized
+                        ? control.options.reduce((acc: string[], curr) => {
+                            if (!acc.some((cat) => cat === curr.category))
+                              return [...acc, curr.category];
+                            return acc;
+                          }, [])
+                        : undefined
+                    }
+                    categoryMap={
+                      control.categorized
+                        ? control.options.reduce((acc, curr) => {
+                            return { ...acc, [curr.value]: curr.category };
+                          }, {})
+                        : undefined
                     }
                     values={control.options.map((o) => o.value)}
                     displayNameMap={control.options.reduce((acc, curr) => {

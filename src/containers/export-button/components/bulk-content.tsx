@@ -1,7 +1,6 @@
 import {
   DialogContent,
   DialogContentText,
-  Divider,
   Stack,
   Typography,
 } from "@mui/material";
@@ -11,6 +10,7 @@ import ChannelSelection from "./channel-selection";
 import Config from "../../discrub-dialog/components/config";
 import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
+import ExportTabs, { ExportTab } from "./export-tabs.tsx";
 
 type BulkContentProps = {
   isDm?: boolean;
@@ -20,6 +20,34 @@ type BulkContentProps = {
   setSelectedExportChannels: (ids: Snowflake[]) => void;
   settings: AppSettings;
   onChangeSettings: (settings: AppSettings) => void;
+};
+
+export const getExportSettings = (
+  onChangeSettings: (settings: AppSettings) => void,
+  visibleSettings: DiscrubSetting[],
+  settings: AppSettings,
+) => {
+  return (
+    <Stack
+      mt={1}
+      mb={1}
+      sx={{
+        maxHeight: "300px",
+        overflow: "auto",
+        width: "100%",
+        overflowX: "hidden",
+      }}
+      direction="column"
+      alignItems="center"
+    >
+      <Config
+        onChangeSettings={onChangeSettings}
+        visibleSettings={visibleSettings}
+        settings={settings}
+        containerProps={{ width: "85%" }}
+      />
+    </Stack>
+  );
 };
 
 const BulkContent = ({
@@ -44,7 +72,7 @@ const BulkContent = ({
 
   const toggleSelectAll = (filteredChannels: Channel[]) => {
     setSelectedExportChannels(
-      selectedExportChannels.length ? [] : filteredChannels.map((c) => c.id)
+      selectedExportChannels.length ? [] : filteredChannels.map((c) => c.id),
     );
   };
   let visibleSettings = [
@@ -58,66 +86,46 @@ const BulkContent = ({
   ];
   if (isDm) {
     visibleSettings = visibleSettings.filter(
-      (s) => s !== DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS
+      (s) => s !== DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
     );
   }
 
-  const getExportSettings = () => {
-    return (
-      <Stack
-        mt={1}
-        mb={1}
-        sx={{
-          maxHeight: "300px",
-          overflow: "auto",
-          width: "100%",
-          overflowX: "hidden",
-        }}
-        direction="column"
-        alignItems="center"
-      >
-        <Config
-          onChangeSettings={onChangeSettings}
-          visibleSettings={visibleSettings}
-          settings={settings}
-          containerProps={{ width: "100%" }}
-        />
-      </Stack>
-    );
+  const channelSelectionTab: ExportTab = {
+    label: "Channel Selection",
+    getComponent: () => (
+      <>
+        <DialogContentText>
+          <Typography variant="body2">
+            {selectedExportChannels.length
+              ? `${selectedExportChannels.length} Channel${
+                  selectedExportChannels.length === 1 ? "" : "s"
+                } selected`
+              : "Select Channel(s) to export"}
+          </Typography>
+        </DialogContentText>
+        <Stack direction="row" spacing={3}>
+          <ChannelSelection
+            channels={channels}
+            selectedExportChannels={selectedExportChannels}
+            handleChannelSelect={handleChannelSelect}
+            onSelectAll={toggleSelectAll}
+          />
+        </Stack>
+      </>
+    ),
   };
+  const configurationTab: ExportTab = {
+    label: "Configuration",
+    getComponent: () =>
+      getExportSettings(onChangeSettings, visibleSettings, settings),
+  };
+  const guildTabs: ExportTab[] = [channelSelectionTab, configurationTab];
+  const dmTabs: ExportTab[] = [configurationTab];
 
   return (
     <DialogContent>
-      {!isExporting && !isDm && (
-        <>
-          <DialogContentText>
-            <Typography variant="body2">
-              {selectedExportChannels.length
-                ? `${selectedExportChannels.length} Channel${
-                    selectedExportChannels.length === 1 ? "" : "s"
-                  } selected`
-                : "Select Channel(s) to export"}
-            </Typography>
-          </DialogContentText>
-          <Stack direction="row" spacing={3}>
-            <ChannelSelection
-              channels={channels}
-              selectedExportChannels={selectedExportChannels}
-              handleChannelSelect={handleChannelSelect}
-              onSelectAll={toggleSelectAll}
-            />
-            <Divider sx={{ height: "auto" }} orientation="vertical" />
-            {getExportSettings()}
-          </Stack>
-        </>
-      )}
-      {!isExporting && isDm && (
-        <>
-          <Stack mt={1} mb={1}>
-            {getExportSettings()}
-          </Stack>
-        </>
-      )}
+      {!isExporting && !isDm && <ExportTabs tabs={guildTabs} />}
+      {!isExporting && isDm && <ExportTabs tabs={dmTabs} />}
       {isExporting && <Progress />}
     </DialogContent>
   );

@@ -21,6 +21,8 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.EXPORT_DOWNLOAD_MEDIA]: "",
   [DiscrubSetting.EXPORT_MESSAGES_PER_PAGE]: "1000",
   [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
+
+  [DiscrubSetting.APP_SHOW_KOFI_FEED]: "true",
 };
 
 const emptyTask: AppTask = {
@@ -51,7 +53,7 @@ export const appSlice = createSlice({
     },
     setModifyEntity: (
       state,
-      { payload }: { payload: Message | Maybe }
+      { payload }: { payload: Message | Maybe },
     ): void => {
       state.task.entity = payload;
     },

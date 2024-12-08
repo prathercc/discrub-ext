@@ -1,4 +1,4 @@
-import { isAttachment, isGuild, isRole } from "./app/guards";
+import { isAttachment, isGuild, isNonNullable, isRole } from "./app/guards";
 import Attachment from "./classes/attachment";
 import Channel from "./classes/channel";
 import Embed from "./classes/embed";
@@ -31,7 +31,7 @@ export const sortByProperty = <T>(
   a: T,
   b: T,
   property: string,
-  direction = "asc"
+  direction = "asc",
 ) => {
   const aVal = a[property as keyof T];
   const bVal = b[property as keyof T];
@@ -40,10 +40,10 @@ export const sortByProperty = <T>(
       ? -1
       : 1
     : aVal > bVal
-    ? direction === "asc"
-      ? 1
-      : -1
-    : 0;
+      ? direction === "asc"
+        ? 1
+        : -1
+      : 0;
 };
 
 /**
@@ -163,7 +163,7 @@ export const getRichEmbeds = (message: Message): Embed[] => {
 
 export const getExportFileName = (
   entity: Role | Attachment | Embed,
-  type: string
+  type: string,
 ) => {
   if (isRole(entity)) {
     return `${getSafeExportName(entity.name)}_${entity.id}.${type}`;
@@ -193,7 +193,7 @@ export const getIconUrl = (entity: Channel | Guild) => {
     if (entity.type === ChannelType.DM && entity.recipients?.[0]?.avatar) {
       return resolveAvatarUrl(
         entity.recipients[0].id,
-        entity.recipients[0].avatar
+        entity.recipients[0].avatar,
       ).remote;
     }
 
@@ -206,12 +206,12 @@ export const entityIsImage = (entity: Attachment | Embed) => {
     return Boolean(
       entity.content_type?.includes("image") ||
         ["png", "jpg", "jpeg", "gif"].some((sit) =>
-          entity.filename.includes(sit)
-        )
+          entity.filename.includes(sit),
+        ),
     );
   } else {
-    return [EmbedType.IMAGE, EmbedType.RICH].some(
-      (type) => type === entity.type
+    return [EmbedType.IMAGE, EmbedType.RICH, EmbedType.ARTICLE].some(
+      (type) => type === entity.type,
     );
   }
 };
@@ -220,9 +220,9 @@ export const entityIsVideo = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
     return Boolean(entity.content_type?.includes("video"));
   } else {
-    // TODO: Look into supporting embedded video.
-    // GIFV may actually need to be moved to entityIsImage...
-    return [EmbedType.GIFV].some((type) => type === entity.type);
+    return [EmbedType.GIFV, EmbedType.VIDEO].some(
+      (type) => type === entity.type,
+    );
   }
 };
 
@@ -230,7 +230,7 @@ export const entityIsAudio = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
     return Boolean(
       entity.content_type?.includes("audio") ||
-        ["ogg"].some((sit) => entity.filename.includes(sit))
+        ["ogg"].some((sit) => entity.filename.includes(sit)),
     );
   }
   // TODO: Look into supporting embedded audio.
@@ -243,37 +243,43 @@ export const entityContainsMedia = (entity: Attachment | Embed) => {
   );
 };
 
-export const getMediaUrls = (entity: Attachment | Embed) => {
+export const getMediaUrls = (entity: Attachment | Embed): string[] => {
+  let urls: (string | undefined)[] = [];
+
   if (isAttachment(entity)) {
-    return [entity.proxy_url].filter(Boolean);
+    urls = [entity.proxy_url];
   } else {
-    if (entity.type === EmbedType.GIFV) {
-      const url = entity.video?.proxy_url;
-      if (url) return [url];
+    switch (entity.type) {
+      case EmbedType.GIFV:
+        urls = [entity.video?.proxy_url];
+        break;
+      case EmbedType.IMAGE:
+        urls = [entity.thumbnail?.proxy_url];
+        break;
+      case EmbedType.RICH:
+        urls = [
+          entity.author?.proxy_icon_url,
+          entity.image?.proxy_url,
+          entity.thumbnail?.proxy_url,
+          entity.footer?.proxy_icon_url,
+        ];
+        break;
+      case EmbedType.ARTICLE:
+        urls = [entity.thumbnail?.proxy_url];
+        break;
+      case EmbedType.VIDEO:
+        urls = [entity.video?.proxy_url];
+        break;
+      default:
+        break;
     }
-    if (entity.type === EmbedType.IMAGE) {
-      const url = entity.thumbnail?.proxy_url;
-      if (url) return [url];
-    }
-    if (entity.type === EmbedType.RICH) {
-      const retArr: string[] = [];
-      [
-        entity.author?.proxy_icon_url,
-        entity.image?.proxy_url,
-        entity.thumbnail?.proxy_url,
-        entity.footer?.proxy_icon_url,
-      ].forEach((url) => {
-        if (url) retArr.push(url);
-      });
-      return retArr;
-    }
-    return [];
   }
+  return urls.filter(isNonNullable);
 };
 
 export const isDm = (channel: Channel) => {
   return [ChannelType.DM, ChannelType.GROUP_DM].some(
-    (type) => type === channel.type
+    (type) => type === channel.type,
   );
 };
 
@@ -289,7 +295,7 @@ type HighestRole = {
  */
 export const getHighestRoles = (
   roleIds: string[] = [],
-  guild: Guild
+  guild: Guild,
 ): HighestRole | Maybe => {
   if (!guild.roles || !roleIds) {
     return null;
@@ -304,8 +310,8 @@ export const getHighestRoles = (
   const iconRole =
     _orderRoles(
       applicableRoles.filter(
-        (role) => !!resolveRoleUrl(role.id, role.icon).remote
-      )
+        (role) => !!resolveRoleUrl(role.id, role.icon).remote,
+      ),
     )?.[0] || null;
 
   return { colorRole, iconRole };
@@ -313,7 +319,7 @@ export const getHighestRoles = (
 
 export const getRoleNames = (
   roleIds: string[] = [],
-  guild: Guild
+  guild: Guild,
 ): string[] => {
   const applicableRoles = _getApplicableRoles(roleIds, guild);
 
@@ -334,7 +340,7 @@ const _orderRoles = (roles: Role[] = []): Role[] => {
 const _getApplicableRoles = (roleIds: string[] = [], guild: Guild): Role[] => {
   return (
     guild.roles?.filter(
-      (role) => roleIds.some((id) => id === role.id) && Boolean(role.position)
+      (role) => roleIds.some((id) => id === role.id) && Boolean(role.position),
     ) || []
   );
 };
@@ -349,7 +355,7 @@ export const isGuildForum = (channel: Channel | Maybe) => {
   return !!(
     channel &&
     [ChannelType.GUILD_FORUM, ChannelType.GUILD_MEDIA].some(
-      (type) => type === channel.type
+      (type) => type === channel.type,
     )
   );
 };
@@ -362,7 +368,7 @@ export type ResolvedFilePathObject = {
 export const resolveRoleUrl = (
   roleId: Snowflake,
   roleIcon: string | Maybe,
-  roleMap?: ExportRoleMap | Maybe
+  roleMap?: ExportRoleMap | Maybe,
 ): ResolvedFilePathObject => {
   const remoteFilePath =
     roleId && roleIcon
@@ -385,7 +391,7 @@ export const resolveRoleUrl = (
 
 export const resolveEmojiUrl = (
   emojiId: Snowflake | Maybe,
-  emojiMap?: ExportEmojiMap | Maybe
+  emojiMap?: ExportEmojiMap | Maybe,
 ): ResolvedFilePathObject => {
   let localFilePath = emojiId ? emojiMap?.[emojiId] || undefined : undefined;
   if (localFilePath) {
@@ -401,7 +407,7 @@ export const resolveEmojiUrl = (
 export const resolveAvatarUrl = (
   userId: Snowflake,
   avatar: string | Maybe,
-  avatarMap?: ExportAvatarMap
+  avatarMap?: ExportAvatarMap,
 ): ResolvedFilePathObject => {
   const idAndAvatar = `${userId}/${avatar}`;
   let localFilePath = avatarMap?.[idAndAvatar] || undefined;
@@ -430,7 +436,7 @@ export const stringToTypedArray = <T>(str: string): T[] => {
 export const getReactingUsers = (
   exportReactions: ExportReaction[],
   userMap: ExportUserMap,
-  selectedGuild: Guild | Maybe
+  selectedGuild: Guild | Maybe,
 ): ReactingUser[] => {
   return exportReactions
     .filter(({ id: userId }) => userMap[userId])
