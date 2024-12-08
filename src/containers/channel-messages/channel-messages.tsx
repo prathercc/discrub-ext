@@ -172,14 +172,14 @@ function ChannelMessages() {
       selectedChannel?.id ||
       messages.length > 0 ||
       advancedFilterActive ||
-      discrubCancelled
+      discrubCancelled,
   );
   const exportDisabled = Boolean(
     !selectedGuild?.id ||
       messagesLoading ||
       selectedChannel?.id ||
       messages.length > 0 ||
-      discrubCancelled
+      discrubCancelled,
   );
 
   const sortedGuilds = guilds
@@ -188,8 +188,8 @@ function ChannelMessages() {
       sortByProperty(
         { name: a.name.toLowerCase() },
         { name: b.name.toLowerCase() },
-        "name"
-      )
+        "name",
+      ),
     );
   const sortedChannels = channels
     .map((c) => new Channel({ ...c }))
@@ -197,8 +197,8 @@ function ChannelMessages() {
       sortByProperty(
         { name: String(a.name).toLowerCase() },
         { name: String(b.name).toLowerCase() },
-        "name"
-      )
+        "name",
+      ),
     );
 
   useEffect(() => {
@@ -274,7 +274,7 @@ function ChannelMessages() {
                       }
                       renderOption={(params, id) => {
                         const foundGuild = guilds.find(
-                          (guild) => guild.id === id
+                          (guild) => guild.id === id,
                         );
                         return (
                           <Typography gap="4px" {...params}>
@@ -389,6 +389,7 @@ function ChannelMessages() {
             {messages.length > 0 && (
               <Box sx={{ maxHeight: "430px", overflow: "auto" }}>
                 <Table
+                  stickyControl
                   columns={columns}
                   rows={rows}
                   orderProps={orderProps}

@@ -33,6 +33,8 @@ const defaultSettings = [
     name: DiscrubSetting.EXPORT_IMAGE_RES_MODE,
     value: ResolutionType.HOVER_LIMITED,
   },
+
+  { name: DiscrubSetting.APP_SHOW_KOFI_FEED, value: "true" },
 ];
 
 export const initializeSettings = async () => {
@@ -76,6 +78,9 @@ export const getSettings = async (): Promise<AppSettings> => {
       chromeSettings[DiscrubSetting.EXPORT_MESSAGES_PER_PAGE],
     [DiscrubSetting.EXPORT_IMAGE_RES_MODE]:
       chromeSettings[DiscrubSetting.EXPORT_IMAGE_RES_MODE],
+
+    [DiscrubSetting.APP_SHOW_KOFI_FEED]:
+      chromeSettings[DiscrubSetting.APP_SHOW_KOFI_FEED],
   };
 };
 

@@ -1,4 +1,5 @@
 import { ThemeOptions, createTheme } from "@mui/material/styles";
+import { alpha } from "@mui/material";
 
 const primaryMain = "#7289da";
 const primaryDark = "rgb(79, 95, 152)";
@@ -8,12 +9,17 @@ const backgroundPaper = "#282b30";
 const textPrimary = "#ffffff";
 const textSecondary = "#d2d5f7";
 
+export const transparancy = {
+  backgroundColor: alpha(backgroundPaper, 0.5),
+  backdropFilter: "blur(10px)",
+  WebkitBackdropFilter: "blur(10px)", // For Safari support,
+};
+
 const toolTipStyle = {
   padding: "7px",
-  background: primaryDark,
+  ...transparancy,
   fontWeight: 600,
   fontSize: "0.8rem",
-  boxShadow: "4px 2px 5px 1px rgb(0 0 0 / 41%)",
 };
 
 export const theme: ThemeOptions = createTheme({
@@ -62,7 +68,7 @@ export const theme: ThemeOptions = createTheme({
         tooltipPlacementRight: toolTipStyle,
         tooltipArrow: toolTipStyle,
         arrow: {
-          color: primaryMain,
+          color: alpha(backgroundPaper, 0.5),
         },
       },
     },

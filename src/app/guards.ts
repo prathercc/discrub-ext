@@ -32,3 +32,7 @@ export const isAttachment = (entity: any): entity is Attachment => {
   const attachment = entity as Attachment;
   return "filename" in attachment;
 };
+
+export const isNonNullable = <T>(value: T): value is NonNullable<T> => {
+  return value !== null && value !== undefined;
+};

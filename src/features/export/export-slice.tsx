@@ -54,13 +54,14 @@ import Message from "../../classes/message";
 import ExportUtils from "./export-utils";
 import { AppThunk } from "../../app/store";
 import { ReactElement } from "react";
-import { Typography } from "@mui/material";
 import Guild from "../../classes/guild";
 import Papa from "papaparse";
 import { flatten } from "flat";
 import Channel from "../../classes/channel";
 import DiscordService from "../../services/discord-service";
 import { MediaType } from "../../enum/media-type";
+import { isAttachment } from "../../app/guards.ts";
+import hljs from "highlight.js";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -88,37 +89,37 @@ export const exportSlice = createSlice({
   reducers: {
     setExportUserMap: (
       state,
-      { payload }: { payload: ExportUserMap }
+      { payload }: { payload: ExportUserMap },
     ): void => {
       state.exportMaps.userMap = payload;
     },
     setExportEmojiMap: (
       state,
-      { payload }: { payload: ExportEmojiMap }
+      { payload }: { payload: ExportEmojiMap },
     ): void => {
       state.exportMaps.emojiMap = payload;
     },
     setExportAvatarMap: (
       state,
-      { payload }: { payload: ExportAvatarMap }
+      { payload }: { payload: ExportAvatarMap },
     ): void => {
       state.exportMaps.avatarMap = payload;
     },
     setExportMediaMap: (
       state,
-      { payload }: { payload: ExportMediaMap }
+      { payload }: { payload: ExportMediaMap },
     ): void => {
       state.exportMaps.mediaMap = payload;
     },
     setExportRoleMap: (
       state,
-      { payload }: { payload: ExportRoleMap }
+      { payload }: { payload: ExportRoleMap },
     ): void => {
       state.exportMaps.roleMap = payload;
     },
     setExportReactionMap: (
       state,
-      { payload }: { payload: ExportReactionMap }
+      { payload }: { payload: ExportReactionMap },
     ): void => {
       state.exportMaps.reactionMap = payload;
     },
@@ -172,7 +173,7 @@ export const exportSlice = createSlice({
     },
     setCurrentExportEntity: (
       state,
-      { payload }: { payload: Guild | Channel | Maybe }
+      { payload }: { payload: Guild | Channel | Maybe },
     ): void => {
       state.currentExportEntity = payload;
     },
@@ -209,14 +210,14 @@ const _downloadFilesFromMessage =
       getState().app.settings;
     const artistMode = stringToBool(exportUseArtistMode);
     const downloadMedia = stringToTypedArray<MediaType>(exportDownloadMedia_2);
-    const isDownloadingImages = downloadMedia.some(
-      (mt) => mt === MediaType.IMAGES
+    const isDlImages = downloadMedia.some((mt) => mt === MediaType.IMAGES);
+    const isDlVideos = downloadMedia.some((mt) => mt === MediaType.VIDEOS);
+    const isDlAudio = downloadMedia.some((mt) => mt === MediaType.AUDIO);
+    const isDlEmbedImages = downloadMedia.some(
+      (mt) => mt === MediaType.EMBEDDED_IMAGES,
     );
-    const isDownloadingVideos = downloadMedia.some(
-      (mt) => mt === MediaType.VIDEOS
-    );
-    const isDownloadingAudio = downloadMedia.some(
-      (mt) => mt === MediaType.AUDIO
+    const isDlEmbedVideos = downloadMedia.some(
+      (mt) => mt === MediaType.EMBEDDED_VIDEOS,
     );
 
     let embeds = message.embeds;
@@ -231,10 +232,11 @@ const _downloadFilesFromMessage =
       const isImage = entityIsImage(entity);
       const isVideo = entityIsVideo(entity);
       const isAudio = entityIsAudio(entity);
+      // As far as I'm aware, Discord does not support embedded audio.
       const shouldPerformDownload =
-        (isImage && isDownloadingImages) ||
-        (isVideo && isDownloadingVideos) ||
-        (isAudio && isDownloadingAudio);
+        (isImage && (isAttachment(entity) ? isDlImages : isDlEmbedImages)) ||
+        (isVideo && (isAttachment(entity) ? isDlVideos : isDlEmbedVideos)) ||
+        (isAudio && isDlAudio);
 
       if (shouldPerformDownload) {
         const downloadUrls = getMediaUrls(entity);
@@ -247,14 +249,14 @@ const _downloadFilesFromMessage =
 
           if (!map[downloadUrl]) {
             const { success, data } = await new DiscordService(
-              settings
+              settings,
             ).downloadFile(downloadUrl);
             if (success && data) {
               const blobType = data.type.split("/")?.[1];
               const fileIndex = `${index + 1}_${eI + 1}_${dI + 1}`;
               const fileName = `${fileIndex}_${getExportFileName(
                 entity,
-                blobType
+                blobType,
               )}`;
               await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
 
@@ -285,7 +287,7 @@ const _downloadRoles =
       const iconUrl = resolveRoleUrl(role.id, role.icon).remote;
       if (iconUrl) {
         const { success, data } = await new DiscordService(
-          settings
+          settings,
         ).downloadFile(iconUrl);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
@@ -296,7 +298,7 @@ const _downloadRoles =
             setExportRoleMap({
               ...exportMaps.roleMap,
               [iconUrl]: roleFilePath,
-            })
+            }),
           );
         }
       }
@@ -340,7 +342,7 @@ const _downloadAvatarFromMessage =
 
       if (!avatarMap[idAndAvatar] && remoteAvatar) {
         const { success, data } = await new DiscordService(
-          settings
+          settings,
         ).downloadFile(remoteAvatar);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
@@ -351,7 +353,7 @@ const _downloadAvatarFromMessage =
             setExportAvatarMap({
               ...avatarMap,
               [idAndAvatar]: avatarFilePath,
-            })
+            }),
           );
         }
       }
@@ -382,12 +384,12 @@ export const getSpecialFormatting =
             userName: foundRole?.name || displayName || userName || "Not Found",
             id: userId,
           };
-        }
+        },
       ),
       channel: Array.from(content.matchAll(MessageRegex.CHANNEL_MENTION))?.map(
         ({ 0: channelRef, groups: channelGroups }) => {
           return { channelId: channelGroups?.channel_id, raw: channelRef };
-        }
+        },
       ),
       underLine: Array.from(content.matchAll(MessageRegex.UNDER_LINE))?.map(
         ({ 0: underLineRef, groups: underLineGroups }) => {
@@ -395,7 +397,7 @@ export const getSpecialFormatting =
             text: underLineGroups?.text?.replaceAll("__", "") || "",
             raw: underLineRef,
           };
-        }
+        },
       ),
       code: Array.from(content.matchAll(MessageRegex.CODE))?.map(
         ({ 0: codeRef, groups: codeGroups }) => {
@@ -403,7 +405,7 @@ export const getSpecialFormatting =
             text: codeGroups?.text?.replaceAll("```", "") || "",
             raw: codeRef,
           };
-        }
+        },
       ),
       italics: Array.from(content.matchAll(MessageRegex.ITALICS))?.map(
         ({ 0: italicRef, groups: italicGroups }) => {
@@ -411,7 +413,7 @@ export const getSpecialFormatting =
             text: italicGroups?.text?.replaceAll("_", "") || "",
             raw: italicRef,
           };
-        }
+        },
       ),
       bold: Array.from(content.matchAll(MessageRegex.BOLD))?.map(
         ({ 0: boldRef, groups: boldGroups }) => {
@@ -419,7 +421,7 @@ export const getSpecialFormatting =
             text: boldGroups?.text?.replaceAll("**", "") || "",
             raw: boldRef,
           };
-        }
+        },
       ),
       link: Array.from(content.matchAll(MessageRegex.LINK))?.map(
         ({ 0: linkRef, groups: linkGroups }) => {
@@ -434,7 +436,7 @@ export const getSpecialFormatting =
               : "",
             raw: `${linkRef}${rawDescription ? "" : ")"}`,
           };
-        }
+        },
       ),
       quote:
         content.match(MessageRegex.QUOTE)?.map((quoteRef) => ({
@@ -463,7 +465,7 @@ const _getEmoji =
 
     const { local: localPath, remote: remotePath } = resolveEmojiUrl(
       id,
-      emojiMap
+      emojiMap,
     );
 
     const emojiUrl = exportView ? localPath || remotePath : remotePath;
@@ -507,8 +509,8 @@ export const getFormattedInnerHtml =
         rawHtml = rawHtml.replaceAll(
           emojiRef.raw,
           renderToString(
-            dispatch(_getEmoji({ emojiRef, isReply, exportView, message }))
-          )
+            dispatch(_getEmoji({ emojiRef, isReply, exportView, message })),
+          ),
         );
       });
     }
@@ -530,8 +532,8 @@ export const getFormattedInnerHtml =
               rel="noreferrer"
               title={linkRef.description}
               dangerouslySetInnerHTML={{ __html: linkRef.text }}
-            />
-          )
+            />,
+          ),
         );
       });
     }
@@ -553,8 +555,8 @@ export const getFormattedInnerHtml =
               rel="noreferrer"
               title={hyperLinkRef.raw}
               dangerouslySetInnerHTML={{ __html: hyperLinkRef.raw }}
-            />
-          )
+            />,
+          ),
         );
       });
     }
@@ -565,8 +567,8 @@ export const getFormattedInnerHtml =
         rawHtml = rawHtml.replaceAll(
           boldRef.raw,
           renderToString(
-            <strong dangerouslySetInnerHTML={{ __html: boldRef.text }} />
-          )
+            <strong dangerouslySetInnerHTML={{ __html: boldRef.text }} />,
+          ),
         );
       });
     }
@@ -577,20 +579,22 @@ export const getFormattedInnerHtml =
         rawHtml = rawHtml.replaceAll(
           codeRef.raw,
           renderToString(
-            <div
+            <span
               style={{
                 backgroundColor: "#282b30",
                 borderRadius: 5,
                 padding: "7px",
                 border: "1px solid #1e1f22",
-                whiteSpace: "pre-line",
-                color: "rgb(220, 221, 222) !important",
-                minWidth: "400px",
+                display: "block",
+                whiteSpace: "pre-wrap",
+                margin: "1em 0",
+                fontFamily: "monospace",
               }}
-            >
-              <Typography>{codeRef.text?.trim()}</Typography>
-            </div>
-          )
+              dangerouslySetInnerHTML={{
+                __html: hljs.highlightAuto(codeRef.text).value,
+              }}
+            />,
+          ),
         );
       });
     }
@@ -608,8 +612,8 @@ export const getFormattedInnerHtml =
                 padding: "3px",
               }}
               dangerouslySetInnerHTML={{ __html: quoteRef.text }}
-            />
-          )
+            />,
+          ),
         );
       });
     }
@@ -625,8 +629,8 @@ export const getFormattedInnerHtml =
                 textDecoration: "underline",
               }}
               dangerouslySetInnerHTML={{ __html: underLineRef.text }}
-            />
-          )
+            />,
+          ),
         );
       });
     }
@@ -642,8 +646,8 @@ export const getFormattedInnerHtml =
                 fontStyle: "italic",
               }}
               dangerouslySetInnerHTML={{ __html: italicsRef.text }}
-            />
-          )
+            />,
+          ),
         );
       });
     }
@@ -665,8 +669,8 @@ export const getFormattedInnerHtml =
                 borderRadius: "5px",
               }}
               dangerouslySetInnerHTML={{ __html: `# ${channelName}` }}
-            />
-          )
+            />,
+          ),
         );
       });
     }
@@ -710,8 +714,8 @@ export const getFormattedInnerHtml =
                   nick || displayName || userName || "User Not Found"
                 }`,
               }}
-            />
-          )
+            />,
+          ),
         );
       });
     }
@@ -723,7 +727,7 @@ const _downloadEmojisFromMessage =
   ({ message, exportUtils }: EmojisFromMessageProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { emoji: emojiReferences } = dispatch(
-      getSpecialFormatting(message.content)
+      getSpecialFormatting(message.content),
     );
     const { settings } = getState().app;
     const reactionsEnabled = stringToBool(settings.reactionsEnabled);
@@ -742,13 +746,13 @@ const _downloadEmojisFromMessage =
         const { exportMaps } = getState().export;
         if (!exportMaps.emojiMap[id]) {
           const { success, data } = await new DiscordService(
-            settings
+            settings,
           ).downloadFile(`https://cdn.discordapp.com/emojis/${id}`);
 
           if (success && data) {
             const fileExt = data.type?.split("/")?.[1] || "gif";
             const emojiFilePath = `emojis/${getSafeExportName(
-              name
+              name,
             )}_${id}.${fileExt}`;
             await exportUtils.addToZip(data, emojiFilePath);
 
@@ -756,7 +760,7 @@ const _downloadEmojisFromMessage =
               setExportEmojiMap({
                 ...exportMaps.emojiMap,
                 [id]: emojiFilePath,
-              })
+              }),
             );
           }
         }
@@ -789,7 +793,7 @@ const _processMessages =
       await dispatch(checkDiscrubPaused());
 
       await dispatch(
-        _downloadFilesFromMessage({ message, exportUtils, paths, index: i })
+        _downloadFilesFromMessage({ message, exportUtils, paths, index: i }),
       );
       await dispatch(_downloadEmojisFromMessage({ message, exportUtils }));
       await dispatch(_downloadAvatarFromMessage({ message, exportUtils }));
@@ -816,8 +820,8 @@ const _exportHtml = async ({
   await exportUtils.addToZip(
     htmlBlob,
     `${entityMainDirectory}/${getSafeExportName(
-      entityName
-    )}_page_${currentPage}.html`
+      entityName,
+    )}_page_${currentPage}.html`,
   );
 };
 
@@ -845,21 +849,21 @@ const _exportJson =
                   const { userName } = userMap[userMentionRef.id] || {};
                   content = content.replaceAll(
                     userMentionRef.raw,
-                    `@${userName}`
+                    `@${userName}`,
                   );
                 });
               }
               return Object.assign(new Message({ ...message }), { content });
-            })
+            }),
           ),
         ],
         {
           type: "text/plain",
-        }
+        },
       ),
       `${entityMainDirectory}/${getSafeExportName(
-        entityName
-      )}_page_${currentPage}.json`
+        entityName,
+      )}_page_${currentPage}.json`,
     );
   };
 
@@ -886,8 +890,8 @@ const _exportCsv = async ({
       columns: ["id", ...csvKeys.filter((k) => k !== "id").sort()],
     }),
     `${entityMainDirectory}/${getSafeExportName(
-      entityName
-    )}_page_${currentPage}.csv`
+      entityName,
+    )}_page_${currentPage}.csv`,
   );
 };
 
@@ -913,20 +917,20 @@ const _compressMessages =
     const folderingThreads = stringToBool(exportSeparateThreadAndForumPosts);
 
     const threads = getState().thread.threads?.filter((t) =>
-      messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id)
+      messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id),
     );
 
     let adjustedMessages: Message[] = messages;
 
     if (folderingThreads && !threadData) {
       adjustedMessages = messages.filter(
-        (m) => !m.thread && !threads.some((t) => t.id === m.channel_id)
+        (m) => !m.thread && !threads.some((t) => t.id === m.channel_id),
       );
       for (let [i, t] of threads.entries()) {
         const threadNumber = i + 1;
         const threadName = `Thread ${threadNumber}`;
         const threadMessages = messages.filter(
-          (m) => m.thread?.id === t.id || m.channel_id === t.id
+          (m) => m.thread?.id === t.id || m.channel_id === t.id,
         );
         if (threadMessages.length) {
           await dispatch(
@@ -941,7 +945,7 @@ const _compressMessages =
                 threadCount: threads.length,
                 threadNo: threadNumber,
               },
-            })
+            }),
           );
         }
       }
@@ -971,7 +975,7 @@ const _compressMessages =
           currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
         const exportMessages = adjustedMessages?.slice(
           startIndex,
-          startIndex + messagesPerPage
+          startIndex + messagesPerPage,
         );
 
         dispatch(setExportMessages(exportMessages));
@@ -984,7 +988,7 @@ const _compressMessages =
               entityMainDirectory,
               entityName,
               currentPage,
-            })
+            }),
           );
         } else if (format === ExportType.HTML) {
           await _exportHtml({
@@ -1015,7 +1019,7 @@ export const exportMessages =
     messages: Message[],
     entityName: string,
     exportUtils: ExportUtils,
-    format: ExportType
+    format: ExportType,
   ): AppThunk =>
   async (dispatch, getState) => {
     const { selectedGuild } = getState().guild;
@@ -1049,7 +1053,7 @@ export const exportMessages =
           entityName: safeEntityName,
           entityMainDirectory,
           exportUtils,
-        })
+        }),
       );
     }
 
@@ -1075,7 +1079,7 @@ export const exportChannels =
     channels: Channel[],
     exportUtils: ExportUtils,
     format: ExportType,
-    userId?: Snowflake
+    userId?: Snowflake,
   ): AppThunk =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
@@ -1104,7 +1108,7 @@ export const exportChannels =
       const messageData = await dispatch(
         getMessageData(selectedGuild?.id, entity.id, {
           preFilterUserId: userId,
-        })
+        }),
       );
 
       if (messageData) {
@@ -1115,8 +1119,8 @@ export const exportChannels =
               Object.assign(a, { date: new Date(a.timestamp) }),
               Object.assign(b, { date: new Date(b.timestamp) }),
               "date",
-              sortOverride
-            )
+              sortOverride,
+            ),
           );
       }
 
@@ -1124,7 +1128,7 @@ export const exportChannels =
       const paths = { media: mediaPath };
 
       await dispatch(
-        _processMessages({ messages: exportMessages, paths, exportUtils })
+        _processMessages({ messages: exportMessages, paths, exportUtils }),
       );
 
       if (exportMessages.length > 0) {
@@ -1137,7 +1141,7 @@ export const exportChannels =
             entityName: safeEntityName,
             entityMainDirectory,
             exportUtils,
-          })
+          }),
         );
       }
 

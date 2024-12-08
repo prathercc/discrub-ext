@@ -1,6 +1,7 @@
 import { Button, Stack } from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import EastIcon from "@mui/icons-material/East";
+import { transparancy } from "../../../theme.ts";
 
 type PageFooterControlsProps = {
   currentPage: number;
@@ -20,13 +21,13 @@ const PageFooterControls = ({
   return (
     <Stack
       sx={{
+        ...transparancy,
         width: "100%",
         zIndex: 5000,
         borderTop: "0.5px solid #202225",
         padding: "5px",
         position: "fixed",
         bottom: 0,
-        backgroundColor: "#313338",
         "& h4": {
           userSelect: "none !important",
           cursor: "default !important",

@@ -9,6 +9,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { SortDirection } from "../../enum/sort-direction";
 import TableHead from "./components/table-head";
+import { transparancy } from "../../theme.ts";
 
 export type TableColumn<T> = {
   id: keyof T;
@@ -35,6 +36,7 @@ type TableProps<T> = {
   renderToolbarComponent?: (selectedRows: string[]) => React.ReactNode;
   selectedRows?: string[];
   setSelectedRows?: (rowIds: string[]) => void;
+  stickyControl?: boolean;
 };
 
 export default function Table<T>({
@@ -44,6 +46,7 @@ export default function Table<T>({
   renderToolbarComponent,
   selectedRows = [],
   setSelectedRows = () => {},
+  stickyControl = false,
 }: TableProps<T>) {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -90,7 +93,7 @@ export default function Table<T>({
   const handleClick = (_: unknown, id: Snowflake) => {
     if (isSelected(id)) {
       const filteredSelections = internalSelections.filter(
-        (selectedId) => selectedId !== id
+        (selectedId) => selectedId !== id,
       );
       setInternalSelections(filteredSelections);
       setSelectedRows(filteredSelections);
@@ -106,7 +109,7 @@ export default function Table<T>({
   };
 
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
@@ -114,6 +117,10 @@ export default function Table<T>({
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+  const paginationStyle = stickyControl
+    ? { position: "sticky", bottom: "0px", ...transparancy }
+    : {};
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -165,7 +172,10 @@ export default function Table<T>({
           </Tbl>
         </TableContainer>
         <TablePagination
-          sx={{ userSelect: "none" }}
+          sx={{
+            userSelect: "none",
+            ...paginationStyle,
+          }}
           rowsPerPageOptions={[5, 10, 25, 50, 100, 1000, 10000]}
           component="div"
           count={rows.length}

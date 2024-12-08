@@ -49,7 +49,7 @@ const ExportMessages = ({
           justifyContent="flex-start"
           alignItems="flex-start"
           spacing={1}
-          sx={{ marginTop: "55px", width: "100%", marginBottom: "45px" }}
+          sx={{ marginTop: "25px", width: "100%", marginBottom: "45px" }}
         >
           {isExporting &&
             messages.map((message, index) => {
@@ -63,7 +63,7 @@ const ExportMessages = ({
               ) {
                 const elapsedSeconds = differenceInSeconds(
                   parseISO(message.timestamp),
-                  parseISO(previousMessage.timestamp)
+                  parseISO(previousMessage.timestamp),
                 );
 
                 isChained =
