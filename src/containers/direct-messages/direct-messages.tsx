@@ -65,10 +65,6 @@ function DirectMessages() {
   } = useMessageSlice();
   const messagesLoading = messageState.isLoading();
   const messages = messageState.messages();
-  const searchBeforeDate = messageState.searchBeforeDate();
-  const searchAfterDate = messageState.searchAfterDate();
-  const searchMessageContent = messageState.searchMessageContent();
-  const selectedHasTypes = messageState.selectedHasTypes();
   const selectedMessages = messageState.selectedMessages();
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
@@ -153,14 +149,6 @@ function DirectMessages() {
       ),
     );
 
-  const advancedFilterActive = [
-    preFilterUserId,
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes.length,
-  ].some((c) => c);
-
   const dmFieldDisabled = messagesLoading || discrubCancelled;
   const searchDisabled =
     selectedDms.length !== 1 || messagesLoading || discrubCancelled;
@@ -169,7 +157,6 @@ function DirectMessages() {
     selectedDms.length === 0 ||
     messagesLoading ||
     messages.length > 0 ||
-    advancedFilterActive ||
     discrubCancelled;
 
   useEffect(() => {

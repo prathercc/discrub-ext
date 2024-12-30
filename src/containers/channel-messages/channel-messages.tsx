@@ -171,7 +171,6 @@ function ChannelMessages() {
       messagesLoading ||
       selectedChannel?.id ||
       messages.length > 0 ||
-      advancedFilterActive ||
       discrubCancelled,
   );
   const exportDisabled = Boolean(
