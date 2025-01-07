@@ -8,8 +8,9 @@ type HasTypeProps = {
 };
 
 function HasType({ disabled }: HasTypeProps) {
-  const { state: messageState, setSelectedHasTypes } = useMessageSlice();
-  const selectedHasTypes = messageState.selectedHasTypes();
+  const { state: messageState, setSearchCriteria } = useMessageSlice();
+  const searchCriteria = messageState.searchCriteria();
+  const { selectedHasTypes } = searchCriteria;
 
   return (
     <Tooltip
@@ -21,7 +22,9 @@ function HasType({ disabled }: HasTypeProps) {
       <MultiValueSelect
         disabled={disabled}
         label="Messages Containing"
-        onChange={(values) => setSelectedHasTypes(values as HasTypeEnum[])}
+        onChange={(values) =>
+          setSearchCriteria({ selectedHasTypes: values as HasTypeEnum[] })
+        }
         value={selectedHasTypes}
         values={Object.values(HasTypeEnum)}
       />

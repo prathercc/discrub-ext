@@ -35,7 +35,7 @@ const AdvancedFilterModal = ({
   return (
     <Dialog hideBackdrop fullWidth open={open} keepMounted={filtersActive}>
       <DialogTitle>
-        <Typography variant="h5">Advanced Filtering</Typography>
+        <Typography variant="h5">Search Criteria</Typography>
       </DialogTitle>
       <DialogContent>
         <Stack direction="column" spacing={1}>

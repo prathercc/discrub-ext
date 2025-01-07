@@ -11,8 +11,9 @@ type MessageContainsProps = {
 function MessageContains({ disabled }: MessageContainsProps) {
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | Maybe>(null);
 
-  const { state: messageState, setSearchMessageContent } = useMessageSlice();
-  const searchMessageContent = messageState.searchMessageContent();
+  const { state: messageState, setSearchCriteria } = useMessageSlice();
+  const searchCriteria = messageState.searchCriteria();
+  const { searchMessageContent } = searchCriteria;
 
   useEffect(() => {
     if (!searchMessageContent && inputRef.current) {
@@ -33,7 +34,7 @@ function MessageContains({ disabled }: MessageContainsProps) {
         InputProps={{
           endAdornment: (
             <IconButton
-              onClick={() => setSearchMessageContent(null)}
+              onClick={() => setSearchCriteria({ searchMessageContent: null })}
               disabled={disabled}
               color="secondary"
             >
@@ -46,7 +47,9 @@ function MessageContains({ disabled }: MessageContainsProps) {
         label="Message Content"
         variant="filled"
         value={searchMessageContent}
-        onChange={(e) => setSearchMessageContent(e.target.value)}
+        onChange={(e) =>
+          setSearchCriteria({ searchMessageContent: e.target.value })
+        }
       />
     </Tooltip>
   );

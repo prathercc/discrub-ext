@@ -1,10 +1,7 @@
 import { RootState } from "../../app/store";
 import {
   setIsLoading as setIsLoadingAction,
-  setSelectedHasTypes as setSelectedHasTypesAction,
-  setSearchMessageContent as setSearchMessageContentAction,
-  setSearchBeforeDate as setSearchBeforeDateAction,
-  setSearchAfterDate as setSearchAfterDateAction,
+  setSearchCriteria as setSearchCriteriaAction,
   setSelected as setSelectedAction,
   setOrder as setOrderAction,
   setMessages as setMessagesAction,
@@ -27,8 +24,8 @@ import {
   DeleteConfiguration,
   Filter,
   MessageSearchOptions,
+  SearchCriteria,
 } from "./message-types";
-import { HasType } from "../../enum/has-type";
 import { SortDirection } from "../../enum/sort-direction";
 import Message from "../../classes/message";
 import Attachment from "../../classes/attachment";
@@ -57,17 +54,8 @@ const useMessageSlice = () => {
   const useOrderBy = (): keyof Message | Maybe =>
     useAppSelector((state: RootState) => state.message.orderBy);
 
-  const useSearchBeforeDate = (): Date | Maybe =>
-    useAppSelector((state: RootState) => state.message.searchBeforeDate);
-
-  const useSearchAfterDate = (): Date | Maybe =>
-    useAppSelector((state: RootState) => state.message.searchAfterDate);
-
-  const useSearchMessageContent = (): string | Maybe =>
-    useAppSelector((state: RootState) => state.message.searchMessageContent);
-
-  const useSelectedHasTypes = (): HasType[] =>
-    useAppSelector((state: RootState) => state.message.selectedHasTypes);
+  const useSearchCriteria = (): SearchCriteria =>
+    useAppSelector((state: RootState) => state.message.searchCriteria);
 
   const state = {
     messages: useMessages,
@@ -77,30 +65,15 @@ const useMessageSlice = () => {
     isLoading: useIsLoading,
     order: useOrder,
     orderBy: useOrderBy,
-    searchBeforeDate: useSearchBeforeDate,
-    searchAfterDate: useSearchAfterDate,
-    searchMessageContent: useSearchMessageContent,
-    selectedHasTypes: useSelectedHasTypes,
+    searchCriteria: useSearchCriteria,
+  };
+
+  const setSearchCriteria = (criteria: Partial<SearchCriteria>): void => {
+    dispatch(setSearchCriteriaAction(criteria));
   };
 
   const setIsLoading = (value: boolean): void => {
     dispatch(setIsLoadingAction(value));
-  };
-
-  const setSelectedHasTypes = (hasTypes: HasType[]) => {
-    dispatch(setSelectedHasTypesAction(hasTypes));
-  };
-
-  const setSearchMessageContent = (content: string | Maybe) => {
-    dispatch(setSearchMessageContentAction(content));
-  };
-
-  const setSearchBeforeDate = (date: Date | Maybe) => {
-    dispatch(setSearchBeforeDateAction(date));
-  };
-
-  const setSearchAfterDate = (date: Date | Maybe) => {
-    dispatch(setSearchAfterDateAction(date));
   };
 
   const setSelected = (messageIds: Snowflake[]) => {
@@ -157,14 +130,14 @@ const useMessageSlice = () => {
   const deleteReaction = (
     channelId: Snowflake,
     messageId: Snowflake,
-    emoji: string
+    emoji: string,
   ) => {
     dispatch(deleteReactionAction(channelId, messageId, emoji));
   };
 
   const deleteMessages = (
     messages: Message[],
-    deleteConfig?: DeleteConfiguration
+    deleteConfig?: DeleteConfiguration,
   ) => {
     dispatch(deleteMessagesAction(messages, deleteConfig));
   };
@@ -172,7 +145,7 @@ const useMessageSlice = () => {
   const getMessageData = (
     guildId: string | Maybe,
     channelId: string | Maybe,
-    options: Partial<MessageSearchOptions> = {}
+    options: Partial<MessageSearchOptions> = {},
   ) => {
     return dispatch(getMessageDataAction(guildId, channelId, options));
   };
@@ -184,10 +157,7 @@ const useMessageSlice = () => {
   return {
     state,
     setIsLoading,
-    setSelectedHasTypes,
-    setSearchMessageContent,
-    setSearchBeforeDate,
-    setSearchAfterDate,
+    setSearchCriteria,
     setSelected,
     setOrder,
     setMessages,

@@ -69,10 +69,13 @@ function ChannelMessages() {
   } = useMessageSlice();
   const messages = messageState.messages();
   const messagesLoading = messageState.isLoading();
-  const searchBeforeDate = messageState.searchBeforeDate();
-  const searchAfterDate = messageState.searchAfterDate();
-  const searchMessageContent = messageState.searchMessageContent();
-  const selectedHasTypes = messageState.selectedHasTypes();
+  const searchCriteria = messageState.searchCriteria();
+  const {
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes,
+  } = searchCriteria;
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
   const selectedMessages = messageState.selectedMessages();

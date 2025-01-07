@@ -13,10 +13,7 @@ export type MessageState = {
   isLoading: boolean | Maybe;
   order: SortDirection;
   orderBy: keyof Message;
-  searchBeforeDate: Date | Maybe;
-  searchAfterDate: Date | Maybe;
-  searchMessageContent: string | Maybe;
-  selectedHasTypes: HasType[];
+  searchCriteria: SearchCriteria;
 };
 
 export type Filter =
@@ -70,4 +67,12 @@ export type SearchMessageProps = {
 export type MessageSearchOptions = {
   preFilterUserId: string | Maybe;
   excludeReactions: boolean | Maybe;
+};
+
+export type SearchCriteria = {
+  searchBeforeDate: Date | Maybe;
+  searchAfterDate: Date | Maybe;
+  searchMessageContent: string | Maybe;
+  selectedHasTypes: HasType[];
+  userIds: string[];
 };

@@ -25,10 +25,13 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
 
   const { state: messageState, resetAdvancedFilters } = useMessageSlice();
   const messagesLoading = messageState.isLoading();
-  const searchAfterDate = messageState.searchAfterDate();
-  const searchBeforeDate = messageState.searchBeforeDate();
-  const searchMessageContent = messageState.searchMessageContent();
-  const selectedHasTypes = messageState.selectedHasTypes();
+  const searchCriteria = messageState.searchCriteria();
+  const {
+    searchAfterDate,
+    searchBeforeDate,
+    searchMessageContent,
+    selectedHasTypes,
+  } = searchCriteria;
 
   const filtersActive = [
     searchAfterDate,
@@ -73,7 +76,7 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
         startIcon={filtersActive ? <FilterListIcon /> : <FilterListOffIcon />}
         variant="contained"
       >
-        {`Advanced Filtering${filtersActive ? " (Active)" : ""}`}
+        {`Search Criteria${filtersActive ? " (Active)" : ""}`}
       </Button>
 
       <AdvancedFilterModal
