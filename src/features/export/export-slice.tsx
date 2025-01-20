@@ -1079,7 +1079,6 @@ export const exportChannels =
     channels: Channel[],
     exportUtils: ExportUtils,
     format: ExportType,
-    userId?: Snowflake,
   ): AppThunk =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
@@ -1106,9 +1105,7 @@ export const exportChannels =
       let exportMessages: Message[] = [];
 
       const messageData = await dispatch(
-        getMessageData(selectedGuild?.id, entity.id, {
-          preFilterUserId: userId,
-        }),
+        getMessageData(selectedGuild?.id, entity.id),
       );
 
       if (messageData) {

@@ -9,7 +9,6 @@ const initialState: DmState = {
   dms: [],
   selectedDms: [],
   isLoading: null,
-  preFilterUserId: null,
   preFilterUsers: [],
 };
 
@@ -22,27 +21,20 @@ export const dmSlice = createSlice({
     },
     setDms: (state, { payload }: { payload: Channel[] }): void => {
       state.dms = payload.map((dm) =>
-        Object.assign(dm, { name: _getDmName(dm) })
+        Object.assign(dm, { name: _getDmName(dm) }),
       );
     },
     resetDm: (state): void => {
-      state.preFilterUserId = null;
       state.preFilterUsers = [];
       state.selectedDms = [];
     },
-    setPreFilterUserId: (
-      state,
-      { payload }: { payload: Snowflake | Maybe }
-    ): void => {
-      state.preFilterUserId = payload;
-    },
     setSelectedDms: (
       state,
-      { payload }: { payload: SetSelectedDmsProps }
+      { payload }: { payload: SetSelectedDmsProps },
     ): void => {
       const { dmIds, preFilterUser } = payload;
       const selectedDms = state.dms.filter((dm) =>
-        dmIds.some((id) => id === dm.id)
+        dmIds.some((id) => id === dm.id),
       );
 
       state.selectedDms = selectedDms;
@@ -58,20 +50,14 @@ export const dmSlice = createSlice({
       });
 
       state.preFilterUsers = [...recipients, preFilterUser].filter(
-        (r) => !state.preFilterUsers.some((p) => p.id === r.id)
+        (r) => !state.preFilterUsers.some((p) => p.id === r.id),
       );
-      state.preFilterUserId = null;
     },
   },
 });
 
-export const {
-  setIsLoading,
-  setDms,
-  resetDm,
-  setPreFilterUserId,
-  setSelectedDms,
-} = dmSlice.actions;
+export const { setIsLoading, setDms, resetDm, setSelectedDms } =
+  dmSlice.actions;
 
 export const getDms = (): AppThunk => async (dispatch, getState) => {
   const { settings } = getState().app;
@@ -79,7 +65,7 @@ export const getDms = (): AppThunk => async (dispatch, getState) => {
   if (token) {
     dispatch(setIsLoading(true));
     const { success, data } = await new DiscordService(
-      settings
+      settings,
     ).fetchDirectMessages(token);
     if (success && data) {
       dispatch(setDms(data));
@@ -93,14 +79,13 @@ export const mutateSelectedDms =
   (dispatch, getState) => {
     const { currentUser } = getState().user;
     if (currentUser) {
-      dispatch(setPreFilterUserId(null));
       dispatch(resetMessageData());
       dispatch(resetFilters());
       dispatch(
         setSelectedDms({
           preFilterUser: { name: currentUser.username, id: currentUser.id },
           dmIds,
-        })
+        }),
       );
     }
   };

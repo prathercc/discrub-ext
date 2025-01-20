@@ -22,9 +22,7 @@ import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
 import { useMessageSlice } from "../../../features/message/use-message-slice";
 import { useChannelSlice } from "../../../features/channel/use-channel-slice";
-import { useGuildSlice } from "../../../features/guild/use-guild-slice";
 import { useDmSlice } from "../../../features/dm/use-dm-slice";
-import { useUserSlice } from "../../../features/user/use-user-slice";
 import { useAppSlice } from "../../../features/app/use-app-slice";
 import { isMessage } from "../../../app/guards";
 import { usePurgeSlice } from "../../../features/purge/use-purge-slice";
@@ -49,15 +47,8 @@ const PurgeModal = ({
   const { state: channelState, resetChannel } = useChannelSlice();
   const channels = channelState.channels();
 
-  const { state: guildState, setPreFilterUserId } = useGuildSlice();
-  const preFilterUserId = guildState.preFilterUserId();
-
-  const { state: dmState, setPreFilterUserId: setDmPreFilterUserId } =
-    useDmSlice();
+  const { state: dmState } = useDmSlice();
   const selectedDms = dmState.selectedDms();
-
-  const { state: userState } = useUserSlice();
-  const currentUser = userState.currentUser();
 
   const {
     state: appState,
@@ -82,9 +73,6 @@ const PurgeModal = ({
     if (dialogOpen) {
       resetModify();
       setIsModifying(false);
-      if (!isDm) {
-        setPreFilterUserId(currentUser?.id);
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen]);
@@ -94,19 +82,14 @@ const PurgeModal = ({
       // We are actively deleting, we need to send a cancel request
       setDiscrubCancelled(true);
     }
-    if (isDm) {
-      setDmPreFilterUserId(null);
-    } else {
-      setPreFilterUserId(null);
+    if (!isDm) {
       resetChannel();
     }
     setDiscrubPaused(false);
     setDialogOpen(false);
   };
 
-  const dialogBtnDisabled = Boolean(
-    active || entity || (!isDm && !preFilterUserId)
-  );
+  const dialogBtnDisabled = Boolean(active || entity);
 
   const dmDialogText = `Are you sure you want to purge ${
     selectedDms.length > 1 ? "these DM's" : "this DM"
@@ -158,11 +141,7 @@ const PurgeModal = ({
             </DialogContentText>
           </Stack>
           {!isDm && !finishedPurge && (
-            <PrefilterUser
-              isDm={false}
-              purge
-              disabled={Boolean(messagesLoading)}
-            />
+            <PrefilterUser isDm={false} disabled={Boolean(messagesLoading)} />
           )}
           {active && isMessage(entity) && (
             <>

@@ -161,7 +161,7 @@ const useExportSlice = () => {
     message,
   }: FormattedInnerHtmlProps): string => {
     return dispatch(
-      getFormattedInnerHtmlAction({ content, exportView, isReply, message })
+      getFormattedInnerHtmlAction({ content, exportView, isReply, message }),
     );
   };
 
@@ -169,7 +169,7 @@ const useExportSlice = () => {
     messages: Message[],
     entityName: string,
     exportUtils: ExportUtils,
-    format: ExportType
+    format: ExportType,
   ): void => {
     dispatch(exportMessagesAction(messages, entityName, exportUtils, format));
   };
@@ -178,9 +178,8 @@ const useExportSlice = () => {
     channels: Channel[],
     exportUtils: ExportUtils,
     format: ExportType,
-    userId?: Snowflake
   ) => {
-    dispatch(exportChannelsAction(channels, exportUtils, format, userId));
+    dispatch(exportChannelsAction(channels, exportUtils, format));
   };
 
   return {

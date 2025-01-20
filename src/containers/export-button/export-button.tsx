@@ -53,24 +53,24 @@ const ExportButton = ({
   } = useAppSlice();
   const settings = appState.settings();
   const folderingThreads = stringToBool(
-    settings.exportSeparateThreadAndForumPosts
+    settings.exportSeparateThreadAndForumPosts,
   );
   const artistMode = stringToBool(settings.exportUseArtistMode);
   const previewMedia = stringToTypedArray<MediaType>(
-    settings.exportPreviewMedia_2
+    settings.exportPreviewMedia_2,
   );
   const isPreviewingImages = previewMedia.some((mt) => mt === MediaType.IMAGES);
   const isPreviewingVideos = previewMedia.some((mt) => mt === MediaType.VIDEOS);
   const isPreviewingAudio = previewMedia.some((mt) => mt === MediaType.AUDIO);
 
   const downloadMedia = stringToTypedArray<MediaType>(
-    settings.exportDownloadMedia_2
+    settings.exportDownloadMedia_2,
   );
   const isDownloadingImages = downloadMedia.some(
-    (mt) => mt === MediaType.IMAGES
+    (mt) => mt === MediaType.IMAGES,
   );
   const isDownloadingVideos = downloadMedia.some(
-    (mt) => mt === MediaType.VIDEOS
+    (mt) => mt === MediaType.VIDEOS,
   );
   const isDownloadingAudio = downloadMedia.some((mt) => mt === MediaType.AUDIO);
 
@@ -81,7 +81,6 @@ const ExportButton = ({
 
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
-  const userId = guildState.preFilterUserId();
 
   const { state: dmState } = useDmSlice();
   const selectedDms = dmState.selectedDms();
@@ -110,7 +109,7 @@ const ExportButton = ({
   const exportUtils = new ExportUtils(
     contentRef,
     (e: boolean) => setIsGenerating(e),
-    getZipName()
+    getZipName(),
   );
 
   const handleDialogClose = () => {
@@ -132,16 +131,11 @@ const ExportButton = ({
         channelsToExport = [...selectedDms];
       } else if (selectedGuild) {
         channelsToExport = channels.filter((c) =>
-          selectedExportChannels.some((id) => id === c.id)
+          selectedExportChannels.some((id) => id === c.id),
         );
       }
       if (channelsToExport.length) {
-        exportChannels(
-          channelsToExport,
-          exportUtils,
-          format,
-          userId || undefined
-        );
+        exportChannels(channelsToExport, exportUtils, format);
       }
     } else {
       const entity = isDm ? selectedDms[0] : selectedChannel || selectedGuild;
@@ -151,7 +145,7 @@ const ExportButton = ({
           messagesToExport,
           entity.name || entity.id,
           exportUtils,
-          format
+          format,
         );
       }
     }
@@ -220,7 +214,7 @@ const ExportButton = ({
 
       const accessory = punctuateStringArr(exportAccessories);
       descriptionArr.push(
-        `Messages ${accessory.length ? `(${accessory})` : ""}`
+        `Messages ${accessory.length ? `(${accessory})` : ""}`,
       );
     }
 
@@ -238,7 +232,7 @@ const ExportButton = ({
       descriptionArr.push(
         `Attached & Embedded ${punctuateStringArr(downloadArr)}${
           artistMode ? " (Artist Mode)" : ""
-        }`
+        }`,
       );
     }
     if (!isDm) {

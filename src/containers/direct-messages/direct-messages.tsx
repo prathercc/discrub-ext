@@ -52,7 +52,6 @@ function DirectMessages() {
   const { state: dmState, getDms, setSelectedDms } = useDmSlice();
   const selectedDms = dmState.selectedDms();
   const dms = dmState.dms();
-  const preFilterUserId = dmState.preFilterUserId();
 
   const {
     state: messageState,
@@ -126,7 +125,7 @@ function DirectMessages() {
   };
 
   const fetchDmData = async () => {
-    getMessageData(null, selectedDms[0].id, { preFilterUserId });
+    getMessageData(null, selectedDms[0].id);
     setSearchTouched(true);
     setExpanded(false);
   };

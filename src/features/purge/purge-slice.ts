@@ -17,7 +17,7 @@ import { PurgeState } from "./purge-types";
 import { AppThunk } from "../../app/store";
 import Channel from "../../classes/channel";
 import Message from "../../classes/message";
-import { isDm, isRemovableMessage } from "../../utils";
+import { isRemovableMessage } from "../../utils";
 
 const initialState: PurgeState = {
   isLoading: null,
@@ -33,7 +33,7 @@ export const purgeSlice = createSlice({
     },
     setPurgeChannel: (
       state,
-      { payload }: { payload: Channel | null }
+      { payload }: { payload: Channel | null },
     ): void => {
       state.purgeChannel = payload;
     },
@@ -47,7 +47,7 @@ export const purge =
   async (dispatch, getState) => {
     const { currentUser } = getState().user;
     if (currentUser) {
-      const { selectedGuild, preFilterUserId } = getState().guild;
+      const { selectedGuild } = getState().guild;
       dispatch(setIsModifying(true));
       for (const entity of channels) {
         const { discrubCancelled } = getState().app;
@@ -56,14 +56,13 @@ export const purge =
         dispatch(setPurgeChannel(entity));
         dispatch(setModifyEntity(null));
         await dispatch(
-          notify({ message: "Searching for messages...", timeout: 1 })
+          notify({ message: "Searching for messages...", timeout: 1 }),
         );
         dispatch(resetMessageData());
         await dispatch(
           getMessageData(selectedGuild?.id, entity.id, {
-            preFilterUserId: isDm(entity) ? currentUser.id : preFilterUserId,
             excludeReactions: true,
-          })
+          }),
         );
         const selectedMessages: Message[] = getState().message.messages;
         const selectedCount = selectedMessages.length;
@@ -81,7 +80,7 @@ export const purge =
             liftThreadRestrictions({
               channelId: currentRow.channel_id,
               noPermissionThreadIds: threadIds,
-            })
+            }),
           );
 
           const modifyEntity = Object.assign(new Message({ ...currentRow }), {
@@ -92,14 +91,14 @@ export const purge =
           dispatch(setModifyEntity(modifyEntity));
 
           const isMissingPermission = threadIds.some(
-            (tId) => tId === currentRow.channel_id
+            (tId) => tId === currentRow.channel_id,
           );
           if (isMissingPermission) {
             await dispatch(
               notify({
                 message: "Permission missing for message, skipping delete",
                 timeout: 1,
-              })
+              }),
             );
           } else if (isRemovableMessage(currentRow)) {
             const success = await dispatch(deleteMessage(currentRow));
@@ -108,7 +107,7 @@ export const purge =
                 notify({
                   message: "You do not have permission to modify this message!",
                   timeout: 0.5,
-                })
+                }),
               );
             }
           }

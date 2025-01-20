@@ -3,7 +3,6 @@ import {
   setIsLoading as setIsLoadingAction,
   setDms as setDmsAction,
   resetDm as resetDmAction,
-  setPreFilterUserId as setPreFilterUserIdAction,
   getDms as getDmsAction,
   mutateSelectedDms as mutateSelectedDmsAction,
 } from "./dm-slice";
@@ -23,9 +22,6 @@ const useDmSlice = () => {
   const useIsLoading = (): boolean | Maybe =>
     useAppSelector((state: RootState) => state.dm.isLoading);
 
-  const usePreFilterUserId = (): Snowflake | Maybe =>
-    useAppSelector((state: RootState) => state.dm.preFilterUserId);
-
   const usePreFilterUsers = (): PreFilterUser[] =>
     useAppSelector((state: RootState) => state.dm.preFilterUsers);
 
@@ -33,7 +29,6 @@ const useDmSlice = () => {
     dms: useDms,
     selectedDms: useSelectedDms,
     isLoading: useIsLoading,
-    preFilterUserId: usePreFilterUserId,
     preFilterUsers: usePreFilterUsers,
   };
 
@@ -49,10 +44,6 @@ const useDmSlice = () => {
     dispatch(resetDmAction());
   };
 
-  const setPreFilterUserId = (userId: Snowflake | Maybe) => {
-    dispatch(setPreFilterUserIdAction(userId));
-  };
-
   const getDms = () => {
     dispatch(getDmsAction());
   };
@@ -66,7 +57,6 @@ const useDmSlice = () => {
     setIsLoading,
     setDms,
     resetDm,
-    setPreFilterUserId,
     getDms,
     setSelectedDms,
   };

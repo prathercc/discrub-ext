@@ -22,7 +22,11 @@ import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
 import AdvancedFiltering from "../advanced-filtering/advanced-filtering";
 import TokenNotFound from "../../components/token-not-found";
-import { isRemovableMessage, sortByProperty } from "../../utils";
+import {
+  isCriteriaActive,
+  isRemovableMessage,
+  sortByProperty,
+} from "../../utils";
 import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -53,7 +57,6 @@ function ChannelMessages() {
   const { state: guildState, changeGuild, getGuilds } = useGuildSlice();
   const guilds = guildState.guilds();
   const selectedGuild = guildState.selectedGuild();
-  const preFilterUserId = guildState.preFilterUserId();
 
   const { state: channelState, changeChannel, loadChannel } = useChannelSlice();
   const channels = channelState.channels();
@@ -70,12 +73,6 @@ function ChannelMessages() {
   const messages = messageState.messages();
   const messagesLoading = messageState.isLoading();
   const searchCriteria = messageState.searchCriteria();
-  const {
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes,
-  } = searchCriteria;
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
   const selectedMessages = messageState.selectedMessages();
@@ -137,7 +134,7 @@ function ChannelMessages() {
   };
 
   const fetchChannelData = () => {
-    getMessageData(selectedGuild?.id, selectedChannel?.id, { preFilterUserId });
+    getMessageData(selectedGuild?.id, selectedChannel?.id);
     setSearchTouched(true);
     setExpanded(false);
   };
@@ -152,14 +149,6 @@ function ChannelMessages() {
     setSearchTouched(false);
   };
 
-  const advancedFilterActive = [
-    preFilterUserId,
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes.length,
-  ].some((c) => c);
-
   const pauseCancelDisabled = !messagesLoading;
   const guildFieldDisabled = messagesLoading || discrubCancelled;
   const channelFieldDisabled =
@@ -167,7 +156,7 @@ function ChannelMessages() {
   const searchBtnDisabled =
     !selectedGuild?.id ||
     messagesLoading ||
-    (!advancedFilterActive && !selectedChannel?.id) ||
+    (!isCriteriaActive(searchCriteria) && !selectedChannel?.id) ||
     discrubCancelled;
   const purgeDisabled = Boolean(
     !selectedGuild?.id ||

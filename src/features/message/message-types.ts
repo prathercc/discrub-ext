@@ -56,16 +56,7 @@ export type MessageData = {
   messages: Message[];
 };
 
-export type SearchMessageProps = {
-  preFilterUserId: string | Maybe;
-  searchAfterDate: Date | Maybe;
-  searchBeforeDate: Date | Maybe;
-  searchMessageContent: string | Maybe;
-  selectedHasTypes: string[];
-};
-
 export type MessageSearchOptions = {
-  preFilterUserId: string | Maybe;
   excludeReactions: boolean | Maybe;
 };
 

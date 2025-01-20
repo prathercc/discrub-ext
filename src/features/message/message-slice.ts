@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   getEncodedEmoji,
+  isCriteriaActive,
   isDm,
   isGuildForum,
   isRemovableMessage,
@@ -42,7 +43,6 @@ import {
   MessageSearchOptions,
   MessageState,
   SearchCriteria,
-  SearchMessageProps,
 } from "./message-types";
 import { SortDirection } from "../../enum/sort-direction";
 import { FilterType } from "../../enum/filter-type";
@@ -927,12 +927,7 @@ export const getMessageData =
   async (dispatch, getState) => {
     dispatch(resetMessageData());
     const { token } = getState().user;
-    const {
-      searchBeforeDate,
-      searchAfterDate,
-      searchMessageContent,
-      selectedHasTypes,
-    } = getState().message.searchCriteria;
+    const { searchCriteria } = getState().message;
     const { settings } = getState().app;
 
     if (token) {
@@ -941,28 +936,9 @@ export const getMessageData =
       let retArr: Message[] = [];
       let retThreads: Channel[] = [];
 
-      const criteriaExists = [
-        options.preFilterUserId,
-        searchBeforeDate,
-        searchAfterDate,
-        searchMessageContent,
-        selectedHasTypes.length,
-      ].some((c) => c);
-
-      if (criteriaExists) {
+      if (isCriteriaActive(searchCriteria)) {
         ({ messages: retArr, threads: retThreads } = await dispatch(
-          _getSearchMessages(
-            channelId,
-            guildId,
-            {
-              preFilterUserId: options.preFilterUserId,
-              searchBeforeDate,
-              searchAfterDate,
-              searchMessageContent,
-              selectedHasTypes,
-            },
-            options,
-          ),
+          _getSearchMessages(channelId, guildId, searchCriteria, options),
         ));
       } else if (channelId) {
         ({ messages: retArr, threads: retThreads } = await dispatch(
@@ -1233,7 +1209,7 @@ const _getSearchMessages =
   (
     channelId: Snowflake | Maybe,
     guildId: Snowflake | Maybe,
-    searchCriteria: Partial<SearchMessageProps>,
+    searchCriteria: SearchCriteria,
     { excludeReactions }: Partial<MessageSearchOptions> = {},
   ): AppThunk<Promise<MessageData>> =>
   async (dispatch, getState) => {
@@ -1327,6 +1303,7 @@ const _getMessages =
   async (dispatch, getState) => {
     const { channels } = getState().channel;
     const { dms } = getState().dm;
+    const { searchCriteria } = getState().message;
     const channel =
       channels.find((c) => channelId === c.id) ||
       dms.find((d) => channelId === d.id);
@@ -1336,7 +1313,7 @@ const _getMessages =
     if (channel) {
       if (isGuildForum(channel)) {
         const { threads } = await dispatch(
-          _getSearchMessages(channelId, channel.guild_id, {}),
+          _getSearchMessages(channelId, channel.guild_id, searchCriteria),
         );
         threads.forEach((t) => {
           if (!trackedThreads.some((tt) => tt.id === t.id)) {

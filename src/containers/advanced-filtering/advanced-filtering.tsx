@@ -6,47 +6,25 @@ import { useGuildSlice } from "../../features/guild/use-guild-slice";
 import { useDmSlice } from "../../features/dm/use-dm-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import AdvancedFilterModal from "./components/advanced-filter-modal";
+import { isCriteriaActive } from "../../utils.ts";
 
 type AdvancedFilteringProps = {
   isDm?: boolean;
 };
 
 function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
-  const { state: guildState, setPreFilterUserId } = useGuildSlice();
+  const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
 
-  const { state: dmState, setPreFilterUserId: dmSetPreFilterUserId } =
-    useDmSlice();
+  const { state: dmState } = useDmSlice();
   const selectedDms = dmState.selectedDms();
-
-  const preFilterUserId = isDm
-    ? dmState.preFilterUserId()
-    : guildState.preFilterUserId();
 
   const { state: messageState, resetAdvancedFilters } = useMessageSlice();
   const messagesLoading = messageState.isLoading();
   const searchCriteria = messageState.searchCriteria();
-  const {
-    searchAfterDate,
-    searchBeforeDate,
-    searchMessageContent,
-    selectedHasTypes,
-  } = searchCriteria;
-
-  const filtersActive = [
-    searchAfterDate,
-    searchBeforeDate,
-    searchMessageContent,
-    selectedHasTypes,
-    preFilterUserId,
-  ].some((val) => (Array.isArray(val) ? !!val.length : !!val));
+  const filtersActive = isCriteriaActive(searchCriteria);
 
   const [open, setOpen] = useState(false);
-
-  const handleResetFilters = () => {
-    isDm ? dmSetPreFilterUserId(null) : setPreFilterUserId(null);
-    resetAdvancedFilters();
-  };
 
   const handleToggle = () => {
     setOpen(!open);
@@ -83,7 +61,7 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
         isDm={isDm}
         open={open}
         handleModalToggle={handleToggle}
-        handleResetFilters={handleResetFilters}
+        handleResetFilters={resetAdvancedFilters}
         filtersActive={filtersActive}
       />
     </Stack>

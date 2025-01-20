@@ -19,6 +19,7 @@ import {
 } from "./features/export/export-types";
 import { ReactingUser } from "./components/reaction-list-item-button";
 import { MessageType } from "./enum/message-type";
+import { SearchCriteria } from "./features/message/message-types.ts";
 
 /**
  *
@@ -481,4 +482,21 @@ export const isRemovableMessage = (message: Message): boolean => {
     MessageType.CHANNEL_ICON_CHANGE,
     MessageType.THREAD_STARTER_MESSAGE,
   ].some((t) => messageTypeEquals(message.type, t));
+};
+
+export const isCriteriaActive = (searchCritera: SearchCriteria) => {
+  const {
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes,
+    userIds,
+  } = searchCritera;
+  return [
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes.length,
+    userIds.length,
+  ].some((c) => c);
 };

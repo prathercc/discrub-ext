@@ -4,7 +4,6 @@ import {
   setGuilds as setGuildsAction,
   setGuild as setGuildAction,
   resetGuild as resetGuildAction,
-  setPreFilterUserId as setPreFilterUserIdAction,
   setPreFilterUsers as setPreFilterUsersAction,
   getRoles as getRolesAction,
   getGuilds as getGuildsAction,
@@ -29,9 +28,6 @@ const useGuildSlice = () => {
       }
     });
 
-  const usePreFilterUserId = (): Snowflake | Maybe =>
-    useAppSelector((state: RootState) => state.guild.preFilterUserId);
-
   const usePreFilterUsers = (): PreFilterUser[] =>
     useAppSelector((state: RootState) => state.guild.preFilterUsers);
 
@@ -41,7 +37,6 @@ const useGuildSlice = () => {
   const state = {
     guilds: useGuilds,
     selectedGuild: useSelectedGuild,
-    preFilterUserId: usePreFilterUserId,
     preFilterUsers: usePreFilterUsers,
     isLoading: useIsLoading,
   };
@@ -60,10 +55,6 @@ const useGuildSlice = () => {
 
   const resetGuild = () => {
     dispatch(resetGuildAction());
-  };
-
-  const setPreFilterUserId = (userId: Snowflake | Maybe) => {
-    dispatch(setPreFilterUserIdAction(userId));
   };
 
   const setPreFilterUsers = (preFilterUsers: PreFilterUser[]) => {
@@ -92,7 +83,6 @@ const useGuildSlice = () => {
     setGuilds,
     setGuild,
     resetGuild,
-    setPreFilterUserId,
     setPreFilterUsers,
     getRoles,
     getGuilds,

@@ -2,6 +2,7 @@ import { Autocomplete, Chip } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import ClearIcon from "@mui/icons-material/Clear";
 import CopyAdornment from "../../components/copy-adornment.tsx";
+import { forwardRef } from "react";
 
 type EnhancedAutocompleteProps = {
   disabled?: boolean;
@@ -19,23 +20,30 @@ type EnhancedAutocompleteProps = {
   label: string;
 };
 
-const EnhancedAutocomplete = ({
-  disabled = false,
-  multiple = false,
-  options = [],
-  freeSolo = false,
-  fullWidth = true,
-  value,
-  onChange,
-  onInputChange,
-  getOptionLabel,
-  tags = false,
-  label,
-  copyValue,
-  copyName,
-}: EnhancedAutocompleteProps) => {
+// TODO: Add the ability to remove entries from the option list
+const EnhancedAutocomplete = forwardRef<
+  HTMLInputElement,
+  EnhancedAutocompleteProps
+>((props, ref) => {
+  const {
+    disabled = false,
+    multiple = false,
+    options = [],
+    freeSolo = false,
+    fullWidth = true,
+    value,
+    onChange,
+    onInputChange,
+    getOptionLabel,
+    tags = false,
+    label,
+    copyValue,
+    copyName,
+  } = props;
+
   return (
     <Autocomplete
+      ref={ref}
       clearIcon={<ClearIcon />}
       disabled={disabled}
       multiple={multiple}
@@ -89,6 +97,6 @@ const EnhancedAutocomplete = ({
       getOptionLabel={getOptionLabel}
     />
   );
-};
+});
 
 export default EnhancedAutocomplete;

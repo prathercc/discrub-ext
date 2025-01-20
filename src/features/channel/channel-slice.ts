@@ -5,7 +5,6 @@ import {
   resetMessageData,
 } from "../message/message-slice";
 import Channel from "../../classes/channel";
-import { setPreFilterUserId } from "../guild/guild-slice";
 import { ChannelState } from "./channel-types";
 import { AppThunk } from "../../app/store";
 import { ChannelType } from "../../enum/channel-type";
@@ -30,7 +29,7 @@ export const channelSlice = createSlice({
     },
     setChannel: (state, { payload }: { payload: Snowflake | null }): void => {
       const selectedChannel = state.channels.find(
-        (channel) => channel.id === payload
+        (channel) => channel.id === payload,
       );
       state.selectedChannel = selectedChannel || null;
     },
@@ -39,7 +38,7 @@ export const channelSlice = createSlice({
     },
     setSelectedExportChannels: (
       state,
-      { payload }: { payload: Snowflake[] }
+      { payload }: { payload: Snowflake[] },
     ): void => {
       state.selectedExportChannels = payload;
     },
@@ -62,11 +61,13 @@ export const getChannels =
     if (guildId && token) {
       dispatch(setIsLoading(true));
       const { success, data } = await new DiscordService(
-        settings
+        settings,
       ).fetchChannels(token, guildId);
       if (success && data) {
         dispatch(
-          setChannels(data.filter((c) => c.type !== ChannelType.GUILD_CATEGORY))
+          setChannels(
+            data.filter((c) => c.type !== ChannelType.GUILD_CATEGORY),
+          ),
         );
       } else {
         dispatch(setChannels([]));
@@ -80,7 +81,6 @@ export const changeChannel =
   async (dispatch) => {
     if (!channelId) {
       dispatch(resetAdvancedFilters());
-      dispatch(setPreFilterUserId(null));
     }
     dispatch(resetFilters());
     dispatch(resetMessageData());
@@ -98,7 +98,7 @@ export const loadChannel =
     if (token && channelId && !channels.map((c) => c.id).includes(channelId)) {
       const { data, success } = await new DiscordService(settings).fetchChannel(
         token,
-        channelId
+        channelId,
       );
       if (success && data && data.guild_id === selectedGuild?.id) {
         dispatch(setChannels([...channels, data]));

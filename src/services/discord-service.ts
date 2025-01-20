@@ -8,7 +8,7 @@ import { User } from "../classes/user";
 import { QueryStringParam } from "../enum/query-string-param";
 import { ReactionType } from "../enum/reaction-type";
 import { AppSettings } from "../features/app/app-types";
-import { SearchMessageProps } from "../features/message/message-types";
+import { SearchCriteria } from "../features/message/message-types";
 import { AllowedMentionObject } from "../types/allowed-mention-object";
 import { ComponentObject } from "../types/component-object";
 import { DefaultReactionObject } from "../types/default-reaction-object";
@@ -90,7 +90,7 @@ class DiscordService {
     Math.random() * (max - min) + min;
 
   withSearchDelay = async <T = void>(
-    func: () => Promise<DiscordApiResponse<T>>
+    func: () => Promise<DiscordApiResponse<T>>,
   ) => {
     if (this.searchDelaySecs > 0) {
       const delay = this.calculateRandomNumber(this.searchDelaySecs);
@@ -102,7 +102,7 @@ class DiscordService {
   };
 
   withDeleteDelay = async <T = void>(
-    func: () => Promise<DiscordApiResponse<T>>
+    func: () => Promise<DiscordApiResponse<T>>,
   ) => {
     if (this.deleteDelaySecs > 0) {
       const delay = this.calculateRandomNumber(this.deleteDelaySecs);
@@ -115,7 +115,7 @@ class DiscordService {
 
   withRetry = async <T = void>(
     promise: () => Promise<Response>,
-    isBlob: boolean = false
+    isBlob: boolean = false,
   ): Promise<DiscordApiResponse<T>> => {
     let apiResponse: DiscordApiResponse<T> = { success: false };
     try {
@@ -163,8 +163,8 @@ class DiscordService {
             authorization: authorization,
             "user-agent": this.userAgent,
           },
-        })
-      )
+        }),
+      ),
     );
 
   fetchUserData = (authorization: string) =>
@@ -176,7 +176,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchGuildUser = (guildId: string, userId: string, authorization: string) =>
@@ -189,8 +189,8 @@ class DiscordService {
             authorization: authorization,
             "user-agent": this.userAgent,
           },
-        })
-      )
+        }),
+      ),
     );
 
   fetchDirectMessages = (authorization: string) =>
@@ -202,7 +202,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchGuilds = (authorization: string) =>
@@ -214,7 +214,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchRoles = (guildId: string, authorization: string) =>
@@ -226,7 +226,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchChannels = (authorization: string, guildId: string) =>
@@ -238,7 +238,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchChannel = (authorization: string, channelId: string) =>
@@ -251,14 +251,14 @@ class DiscordService {
             authorization: authorization,
             "user-agent": this.userAgent,
           },
-        })
-      )
+        }),
+      ),
     );
 
   editChannel = (
     authorization: string,
     channelId: string,
-    updateObj: ThreadModify | GuildChannelModify
+    updateObj: ThreadModify | GuildChannelModify,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry<Channel>(() =>
@@ -270,15 +270,15 @@ class DiscordService {
             "user-agent": this.userAgent,
           },
           body: JSON.stringify({ ...updateObj }),
-        })
-      )
+        }),
+      ),
     );
 
   editMessage = (
     authorization: string,
     messageId: string,
     updateProps: MessageModify,
-    channelId: string
+    channelId: string,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry<Message>(() =>
@@ -292,15 +292,15 @@ class DiscordService {
               "user-agent": this.userAgent,
             },
             body: JSON.stringify({ ...updateProps }),
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   deleteMessage = (
     authorization: string,
     messageId: string,
-    channelId: string
+    channelId: string,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry(() =>
@@ -313,16 +313,16 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   fetchMessageData = (
     authorization: string,
     lastId: string,
     channelId: string,
-    queryParam: QueryStringParam = QueryStringParam.BEFORE
+    queryParam: QueryStringParam = QueryStringParam.BEFORE,
   ) =>
     this.withSearchDelay(() =>
       this.withRetry<Message[]>(() =>
@@ -337,9 +337,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   fetchSearchMessageData = (
@@ -347,17 +347,16 @@ class DiscordService {
     offset: number,
     channelId: string | Maybe,
     guildId: string | Maybe,
-    searchCriteria: Partial<SearchMessageProps>
+    searchCriteria: SearchCriteria,
   ) => {
     const {
-      preFilterUserId,
+      userIds,
       searchAfterDate,
       searchBeforeDate,
       searchMessageContent,
       selectedHasTypes,
     } = searchCriteria;
     const urlSearchParams = new URLSearchParams({
-      author_id: preFilterUserId || "null",
       min_id: searchAfterDate
         ? this.generateSnowflake(searchAfterDate)
         : "null",
@@ -368,7 +367,10 @@ class DiscordService {
       channel_id: guildId && channelId ? channelId : "null",
       include_nsfw: "true",
     });
-    selectedHasTypes?.forEach((type: string) => {
+    userIds.forEach((userId: string) => {
+      urlSearchParams.append("author_id", userId);
+    });
+    selectedHasTypes.forEach((type: string) => {
       urlSearchParams.append("has", type);
     });
     const nullKeys: string[] = [];
@@ -400,9 +402,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
   };
 
@@ -418,9 +420,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   fetchPublicThreads = (authorization: string, channelId: string) =>
@@ -435,9 +437,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   createDm = (authorization: string, recipient_id: string) =>
@@ -450,12 +452,12 @@ class DiscordService {
           "user-agent": this.userAgent,
         },
         body: JSON.stringify({ recipient_id }),
-      })
+      }),
     );
 
   sendFriendRequest = (
     authorization: string,
-    props: { username: string; discriminator: string }
+    props: { username: string; discriminator: string },
   ) =>
     this.withRetry<unknown>(() =>
       fetch(`${this.DISCORD_USERS_ENDPOINT}/@me/relationships`, {
@@ -466,7 +468,7 @@ class DiscordService {
           "user-agent": this.userAgent,
         },
         body: JSON.stringify(props),
-      })
+      }),
     );
 
   deleteFriendRequest = (authorization: string, userId: string) =>
@@ -478,7 +480,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   getRelationships = (authorization: string) =>
@@ -490,12 +492,12 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   downloadFile = (downloadUrl: string) =>
     this.withSearchDelay(() =>
-      this.withRetry<Blob>(() => fetch(downloadUrl), true)
+      this.withRetry<Blob>(() => fetch(downloadUrl), true),
     );
 
   getReactions = (
@@ -504,7 +506,7 @@ class DiscordService {
     messageId: Snowflake,
     emoji: string,
     type: ReactionType,
-    lastId?: Snowflake | null
+    lastId?: Snowflake | null,
   ) =>
     this.withSearchDelay(() =>
       this.withRetry<User[]>(() =>
@@ -521,16 +523,16 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   deleteReaction = (
     authorization: string,
     channelId: Snowflake,
     messageId: Snowflake,
-    emoji: string
+    emoji: string,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry(() =>
@@ -543,9 +545,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 }
 

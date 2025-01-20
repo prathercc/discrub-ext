@@ -16,7 +16,6 @@ import DiscordService from "../../services/discord-service";
 const initialState: GuildState = {
   guilds: [],
   selectedGuild: null,
-  preFilterUserId: null,
   preFilterUsers: [],
   isLoading: null,
 };
@@ -37,17 +36,10 @@ export const guildSlice = createSlice({
     },
     resetGuild: (state): void => {
       state.selectedGuild = null;
-      state.preFilterUserId = null;
-    },
-    setPreFilterUserId: (
-      state,
-      { payload }: { payload: Snowflake | Maybe }
-    ): void => {
-      state.preFilterUserId = payload;
     },
     setPreFilterUsers: (
       state,
-      { payload }: { payload: PreFilterUser[] }
+      { payload }: { payload: PreFilterUser[] },
     ): void => {
       state.preFilterUsers = payload;
     },
@@ -59,7 +51,6 @@ export const {
   setGuilds,
   setGuild,
   resetGuild,
-  setPreFilterUserId,
   setPreFilterUsers,
 } = guildSlice.actions;
 
@@ -73,7 +64,7 @@ export const getRoles =
     if (guild && !guild.roles && token) {
       const { data, success } = await new DiscordService(settings).fetchRoles(
         guildId,
-        token
+        token,
       );
       if (success && data) {
         const updatedGuilds = guilds.map((g) => {
@@ -96,7 +87,7 @@ export const getGuilds = (): AppThunk => async (dispatch, getState) => {
   if (token) {
     dispatch(setIsLoading(true));
     const { success, data } = await new DiscordService(settings).fetchGuilds(
-      token
+      token,
     );
     if (success && data) {
       dispatch(setGuilds(data.map((guild) => new Guild(guild))));
@@ -134,7 +125,7 @@ export const getPreFilterUsers =
         (key) => {
           const mapping = userMap[key];
           return { name: mapping.userName, id: key };
-        }
+        },
       );
 
       const filteredPreFilters: PreFilterUser[] = [
@@ -142,7 +133,7 @@ export const getPreFilterUsers =
           (mapping) =>
             mapping.id !== currentUser.id &&
             Boolean(userMap[mapping.id].guilds[guildId]) &&
-            mapping.name !== "User Not Found"
+            mapping.name !== "User Not Found",
         ),
         { id: currentUser.id, name: currentUser.username },
       ].sort((a, b) => sortByProperty(a, b, "name", "asc"));
