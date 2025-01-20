@@ -5,6 +5,7 @@ import {
   isDm,
   isGuildForum,
   isRemovableMessage,
+  isUserDataStale,
   messageTypeEquals,
   sortByProperty,
   stringToBool,
@@ -1062,7 +1063,7 @@ const _collectUserNames =
   (userMap: ExportUserMap): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
-    const { displayNameLookup } = settings;
+    const { displayNameLookup, appUserDataRefreshRate } = settings;
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
@@ -1073,14 +1074,18 @@ const _collectUserNames =
         if (getState().app.discrubCancelled) break;
         await dispatch(checkDiscrubPaused());
         const mapping = existingUserMap[userId] || updateMap[userId];
-        const { userName, displayName } = mapping;
+        const { userName, displayName, timestamp } = mapping;
 
         const status = `Alias Lookup (${i + 1} of ${
           userIds.length
         }): ${userId}`;
         dispatch(setStatus(status));
 
-        if (!userName && !displayName) {
+        const isMissingOrStale =
+          (!userName && !displayName) ||
+          isUserDataStale(timestamp, appUserDataRefreshRate);
+
+        if (isMissingOrStale) {
           const { success, data } = await new DiscordService(settings).getUser(
             token,
             userId,
@@ -1091,6 +1096,7 @@ const _collectUserNames =
               userName: data.username,
               displayName: data.global_name,
               avatar: data.avatar,
+              timestamp: Date.now(),
             };
           } else {
             const errorMsg = `Unable to retrieve data from userId: ${userId}`;
@@ -1107,7 +1113,7 @@ const _collectUserGuildData =
   (userMap: ExportUserMap, guildId: Snowflake): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
-    const { serverNickNameLookup } = settings;
+    const { serverNickNameLookup, appUserDataRefreshRate } = settings;
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
@@ -1125,7 +1131,14 @@ const _collectUserGuildData =
         }): ${userId}`;
         dispatch(setStatus(status));
 
-        if (!userGuilds[guildId]) {
+        const isMissingOrStale =
+          !userGuilds[guildId] ||
+          isUserDataStale(
+            userGuilds[guildId].timestamp,
+            appUserDataRefreshRate,
+          );
+
+        if (isMissingOrStale) {
           const { success, data } = await new DiscordService(
             settings,
           ).fetchGuildUser(guildId, userId, token);
@@ -1139,6 +1152,7 @@ const _collectUserGuildData =
                   roles: data.roles,
                   nick: data.nick,
                   joinedAt: format(parseISO(data.joined_at), "MMM d, yyyy"),
+                  timestamp: Date.now(),
                 },
               },
             };
@@ -1149,7 +1163,12 @@ const _collectUserGuildData =
               ...userMapping,
               guilds: {
                 ...userGuilds,
-                [guildId]: { roles: [], nick: null, joinedAt: null },
+                [guildId]: {
+                  roles: [],
+                  nick: null,
+                  joinedAt: null,
+                  timestamp: Date.now(),
+                },
               },
             };
           }

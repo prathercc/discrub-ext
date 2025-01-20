@@ -56,8 +56,10 @@ export type ExportUserMap = {
         roles: Snowflake[];
         nick: string | Maybe;
         joinedAt: string | Maybe;
+        timestamp: number;
       };
     };
+    timestamp: number;
   };
 };
 

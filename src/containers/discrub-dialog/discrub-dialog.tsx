@@ -18,6 +18,7 @@ import Settings from "./components/settings";
 import { initializeSettings } from "../../services/chrome-service";
 import AnnouncementComponent from "./components/announcement-component";
 import { stringToBool } from "../../utils.ts";
+import { useExportSlice } from "../../features/export/use-export-slice.ts";
 
 function DiscrubDialog() {
   const { palette } = useTheme();
@@ -26,6 +27,7 @@ function DiscrubDialog() {
   const { resetAdvancedFilters, resetMessageData, resetFilters } =
     useMessageSlice();
 
+  const { setExportUserMap } = useExportSlice();
   const { resetGuild } = useGuildSlice();
   const { resetDm } = useDmSlice();
   const { resetChannel } = useChannelSlice();
@@ -50,6 +52,7 @@ function DiscrubDialog() {
     const init = async () => {
       const settings = await initializeSettings();
       setSettings(settings);
+      setExportUserMap(JSON.parse(settings.cachedUserMap));
     };
     getUserData();
     init();

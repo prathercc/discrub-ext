@@ -20,6 +20,8 @@ import {
 import { ReactingUser } from "./components/reaction-list-item-button";
 import { MessageType } from "./enum/message-type";
 import { SearchCriteria } from "./features/message/message-types.ts";
+import { isAfter, toDate, addSeconds, addDays } from "date-fns";
+import { UserDataRefreshRate } from "./enum/user-data-refresh-rate.ts";
 
 /**
  *
@@ -499,4 +501,42 @@ export const isCriteriaActive = (searchCritera: SearchCriteria) => {
     selectedHasTypes.length,
     userIds.length,
   ].some((c) => c);
+};
+
+export const isUserDataStale = (
+  timestamp: number = new Date().getTime(),
+  appUserDataRefreshRate: string,
+) => {
+  if (appUserDataRefreshRate === UserDataRefreshRate.ALWAYS) {
+    return true;
+  }
+
+  const today = new Date();
+  let staleDate = toDate(timestamp);
+
+  switch (appUserDataRefreshRate) {
+    case UserDataRefreshRate.HOURLY:
+      staleDate = addSeconds(staleDate, 3600);
+      break;
+    case UserDataRefreshRate.DAILY: {
+      staleDate = addDays(staleDate, 1);
+      break;
+    }
+    case UserDataRefreshRate.WEEKLY: {
+      staleDate = addDays(staleDate, 7);
+      break;
+    }
+    case UserDataRefreshRate.MONTHLY: {
+      staleDate = addDays(staleDate, 30);
+      break;
+    }
+    case UserDataRefreshRate.NEVER: {
+      staleDate = addDays(staleDate, 5000);
+      break;
+    }
+    default:
+      break;
+  }
+
+  return isAfter(today, staleDate);
 };

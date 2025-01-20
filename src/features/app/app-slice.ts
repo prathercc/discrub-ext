@@ -6,6 +6,7 @@ import { AppThunk } from "../../app/store";
 import { DiscrubSetting } from "../../enum/discrub-setting";
 import { SortDirection } from "../../enum/sort-direction";
 import { ResolutionType } from "../../enum/resolution-type";
+import { UserDataRefreshRate } from "../../enum/user-data-refresh-rate.ts";
 
 const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
@@ -23,6 +24,9 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
 
   [DiscrubSetting.APP_SHOW_KOFI_FEED]: "true",
+  [DiscrubSetting.APP_USER_DATA_REFRESH_RATE]: UserDataRefreshRate.DAILY,
+
+  [DiscrubSetting.CACHED_USER_MAP]: "{}",
 };
 
 const emptyTask: AppTask = {

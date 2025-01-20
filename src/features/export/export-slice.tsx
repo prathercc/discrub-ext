@@ -62,6 +62,8 @@ import DiscordService from "../../services/discord-service";
 import { MediaType } from "../../enum/media-type";
 import { isAttachment } from "../../app/guards.ts";
 import hljs from "highlight.js";
+import { setSetting } from "../../services/chrome-service.ts";
+import { DiscrubSetting } from "../../enum/discrub-setting.ts";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -91,6 +93,7 @@ export const exportSlice = createSlice({
       state,
       { payload }: { payload: ExportUserMap },
     ): void => {
+      setSetting(DiscrubSetting.CACHED_USER_MAP, JSON.stringify(payload));
       state.exportMaps.userMap = payload;
     },
     setExportEmojiMap: (

@@ -13,6 +13,7 @@ function Settings({ settings, onChangeSettings }: SettingsProps) {
     DiscrubSetting.REACTIONS_ENABLED,
     DiscrubSetting.SERVER_NICKNAME_LOOKUP,
     DiscrubSetting.DISPLAY_NAME_LOOKUP,
+    DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
     DiscrubSetting.RANDOM_DELETE_DELAY,
     DiscrubSetting.RANDOM_SEARCH_DELAY,
   ];
