@@ -49,9 +49,7 @@ export const dmSlice = createSlice({
         }
       });
 
-      state.preFilterUsers = [...recipients, preFilterUser].filter(
-        (r) => !state.preFilterUsers.some((p) => p.id === r.id),
-      );
+      state.preFilterUsers = [...recipients, preFilterUser];
     },
   },
 });
