@@ -10,7 +10,9 @@ import ChannelSelection from "./channel-selection";
 import Config from "../../discrub-dialog/components/config";
 import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
-import ExportTabs, { ExportTab } from "./export-tabs.tsx";
+import EnhancedTabs, {
+  EnhancedTab,
+} from "../../../common-components/enhanced-tabs/enhanced-tabs.tsx";
 
 type BulkContentProps = {
   isDm?: boolean;
@@ -90,7 +92,7 @@ const BulkContent = ({
     );
   }
 
-  const channelSelectionTab: ExportTab = {
+  const channelSelectionTab: EnhancedTab = {
     label: "Channel Selection",
     getComponent: () => (
       <>
@@ -114,18 +116,18 @@ const BulkContent = ({
       </>
     ),
   };
-  const configurationTab: ExportTab = {
+  const configurationTab: EnhancedTab = {
     label: "Configuration",
     getComponent: () =>
       getExportSettings(onChangeSettings, visibleSettings, settings),
   };
-  const guildTabs: ExportTab[] = [channelSelectionTab, configurationTab];
-  const dmTabs: ExportTab[] = [configurationTab];
+  const guildTabs: EnhancedTab[] = [channelSelectionTab, configurationTab];
+  const dmTabs: EnhancedTab[] = [configurationTab];
 
   return (
     <DialogContent>
-      {!isExporting && !isDm && <ExportTabs tabs={guildTabs} />}
-      {!isExporting && isDm && <ExportTabs tabs={dmTabs} />}
+      {!isExporting && !isDm && <EnhancedTabs tabs={guildTabs} />}
+      {!isExporting && isDm && <EnhancedTabs tabs={dmTabs} />}
       {isExporting && <Progress />}
     </DialogContent>
   );

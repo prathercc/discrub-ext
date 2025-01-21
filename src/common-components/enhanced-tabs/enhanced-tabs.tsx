@@ -1,12 +1,12 @@
 import { AppBar, Box, Tab, Tabs, useTheme } from "@mui/material";
 import { ReactNode, useState } from "react";
 
-export type ExportTab = { label: string; getComponent: () => ReactNode };
-type ExportTabsProps = {
-  tabs: ExportTab[];
+export type EnhancedTab = { label: string; getComponent: () => ReactNode };
+type EnhancedTabsProps = {
+  tabs: EnhancedTab[];
 };
 
-const ExportTabs = ({ tabs }: ExportTabsProps) => {
+const EnhancedTabs = ({ tabs }: EnhancedTabsProps) => {
   const theme = useTheme();
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   return (
@@ -28,4 +28,4 @@ const ExportTabs = ({ tabs }: ExportTabsProps) => {
   );
 };
 
-export default ExportTabs;
+export default EnhancedTabs;
