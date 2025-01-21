@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { Stack, Button } from "@mui/material";
+import { Button } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
-import { useGuildSlice } from "../../features/guild/use-guild-slice";
-import { useDmSlice } from "../../features/dm/use-dm-slice";
-import { useMessageSlice } from "../../features/message/use-message-slice";
-import AdvancedFilterModal from "./components/advanced-filter-modal";
-import { isCriteriaActive } from "../../utils.ts";
+import { useGuildSlice } from "../../../features/guild/use-guild-slice.ts";
+import { useDmSlice } from "../../../features/dm/use-dm-slice.ts";
+import { useMessageSlice } from "../../../features/message/use-message-slice.ts";
+import SearchCriteriaModal from "./search-criteria-modal.tsx";
+import { isCriteriaActive } from "../../../utils.ts";
 
-type AdvancedFilteringProps = {
+type SearchCriteriaButtonProps = {
   isDm?: boolean;
 };
 
-function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
+function SearchCriteriaButton({ isDm = false }: SearchCriteriaButtonProps) {
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
 
@@ -40,12 +40,7 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
   };
 
   return (
-    <Stack
-      direction="column"
-      justifyContent="center"
-      alignItems="flex-end"
-      spacing={1}
-    >
+    <>
       <Button
         sx={{ userSelect: "none !important" }}
         disabled={getChildrenDisabled()}
@@ -57,15 +52,15 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
         {`Search Criteria${filtersActive ? " (Active)" : ""}`}
       </Button>
 
-      <AdvancedFilterModal
+      <SearchCriteriaModal
         isDm={isDm}
         open={open}
         handleModalToggle={handleToggle}
         handleResetFilters={resetAdvancedFilters}
         filtersActive={filtersActive}
       />
-    </Stack>
+    </>
   );
 }
 
-export default AdvancedFiltering;
+export default SearchCriteriaButton;
