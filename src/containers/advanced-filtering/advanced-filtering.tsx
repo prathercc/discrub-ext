@@ -33,7 +33,7 @@ function AdvancedFiltering({ isDm = false }: AdvancedFilteringProps) {
   const getChildrenDisabled = (): boolean => {
     if (messagesLoading) return true;
     if (isDm) {
-      return selectedDms.length !== 1;
+      return !selectedDms.length;
     } else {
       return !selectedGuild;
     }
