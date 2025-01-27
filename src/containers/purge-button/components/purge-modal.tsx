@@ -67,7 +67,9 @@ const PurgeModal = ({
       ]);
     } else if (!active) {
       setPurgeInstruction((prevState) =>
-        prevState === PurgeInstruction.PURGING
+        [PurgeInstruction.PURGING, PurgeInstruction.SEARCHING].some(
+          (pi) => pi === prevState,
+        )
           ? PurgeInstruction.OPERATION_COMPLETE
           : prevState,
       );
