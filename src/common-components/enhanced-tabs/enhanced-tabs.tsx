@@ -1,7 +1,11 @@
 import { AppBar, Box, Tab, Tabs, useTheme } from "@mui/material";
 import { ReactNode, useState } from "react";
 
-export type EnhancedTab = { label: string; getComponent: () => ReactNode };
+export type EnhancedTab = {
+  label: string;
+  disabled?: boolean;
+  getComponent: () => ReactNode;
+};
 type EnhancedTabsProps = {
   tabs: EnhancedTab[];
 };
@@ -19,7 +23,7 @@ const EnhancedTabs = ({ tabs }: EnhancedTabsProps) => {
           centered
         >
           {tabs.map((tab) => (
-            <Tab label={tab.label} />
+            <Tab disabled={!!tab.disabled} label={tab.label} />
           ))}
         </Tabs>
       </AppBar>

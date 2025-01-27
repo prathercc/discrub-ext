@@ -21,6 +21,7 @@
     "@types/chrome": "^0.0.256",
     "@types/firefox-webext-browser": "^120.0.4",
     "bytes": "^3.1.2",
+    "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.1.0",
     "debounce": "^2.0.0",

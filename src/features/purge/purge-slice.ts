@@ -7,13 +7,13 @@ import {
 import { liftThreadRestrictions } from "../thread/thread-slice";
 import {
   checkDiscrubPaused,
+  resetModify,
   setDiscrubCancelled,
   setIsModifying,
   setModifyEntity,
   setTimeoutMessage as notify,
-  resetModify,
 } from "../app/app-slice";
-import { PurgeState } from "./purge-types";
+import { PurgeState, PurgeStatus } from "./purge-types";
 import { AppThunk } from "../../app/store";
 import Channel from "../../classes/channel";
 import Message from "../../classes/message";
@@ -55,9 +55,6 @@ export const purge =
         await dispatch(checkDiscrubPaused());
         dispatch(setPurgeChannel(entity));
         dispatch(setModifyEntity(null));
-        await dispatch(
-          notify({ message: "Searching for messages...", timeout: 1 }),
-        );
         dispatch(resetMessageData());
         await dispatch(
           getMessageData(selectedGuild?.id, entity.id, {
@@ -83,9 +80,10 @@ export const purge =
             }),
           );
 
-          const modifyEntity = Object.assign(new Message({ ...currentRow }), {
+          let modifyEntity = Object.assign(new Message({ ...currentRow }), {
             _index: count + 1,
             _total: selectedCount,
+            _status: PurgeStatus.IN_PROGRESS,
           });
 
           dispatch(setModifyEntity(modifyEntity));
@@ -94,23 +92,14 @@ export const purge =
             (tId) => tId === currentRow.channel_id,
           );
           if (isMissingPermission) {
-            await dispatch(
-              notify({
-                message: "Permission missing for message, skipping delete",
-                timeout: 1,
-              }),
-            );
+            modifyEntity._status = PurgeStatus.MISSING_PERMISSION;
           } else if (isRemovableMessage(currentRow)) {
             const success = await dispatch(deleteMessage(currentRow));
-            if (!success) {
-              await dispatch(
-                notify({
-                  message: "You do not have permission to modify this message!",
-                  timeout: 0.5,
-                }),
-              );
-            }
+            modifyEntity._status = success
+              ? PurgeStatus.REMOVED
+              : PurgeStatus.MISSING_PERMISSION;
           }
+          dispatch(setModifyEntity(modifyEntity));
         }
       }
       dispatch(resetModify());

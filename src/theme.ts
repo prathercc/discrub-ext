@@ -83,8 +83,13 @@ export const theme: ThemeOptions = createTheme({
 });
 
 export const scrollbarOverrides = {
+  "scrollbar-height": "5px",
+  "scrollbar-width": "5px",
+  "scrollbar-thumb": { background: "#f1f1f1" },
+  "scrollbar-track": { background: "#888" },
   "&::-webkit-scrollbar": {
     width: "5px",
+    height: "5px",
   },
   "&::-webkit-scrollbar-thumb": {
     background: "#f1f1f1",
