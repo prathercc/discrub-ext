@@ -67,5 +67,6 @@ export type SearchCriteria = {
   searchMessageContent: string | Maybe;
   selectedHasTypes: HasType[];
   userIds: string[];
+  mentionIds: string[];
   isPinned: IsPinnedType;
 };

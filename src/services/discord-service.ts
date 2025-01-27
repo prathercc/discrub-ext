@@ -356,6 +356,7 @@ class DiscordService {
       searchMessageContent,
       selectedHasTypes,
       isPinned,
+      mentionIds,
     } = searchCriteria;
     const urlSearchParams = new URLSearchParams({
       min_id: searchAfterDate
@@ -371,6 +372,9 @@ class DiscordService {
     });
     userIds.forEach((userId: string) => {
       urlSearchParams.append("author_id", userId);
+    });
+    mentionIds.forEach((userId: string) => {
+      urlSearchParams.append("mentions", userId);
     });
     selectedHasTypes.forEach((type: string) => {
       urlSearchParams.append("has", type);

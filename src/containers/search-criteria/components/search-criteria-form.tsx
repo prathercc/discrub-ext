@@ -4,13 +4,15 @@ import BeforeAndAfterFields from "../../../components/before-and-after-fields";
 import MessageContains from "./message-contains";
 import HasType from "./has-type";
 import IsPinned from "./is-pinned.tsx";
+import MentionedUsers from "./mentioned-users.tsx";
 
 export enum VisibleSearchCriteria {
-  SEARCH_BY_USER = "PREFILTER_USERS",
+  SEARCH_BY_USER = "SEARCH_BY_USERS",
   SEARCH_BY_DATE = "SEARCH_BY_DATE",
   SEARCH_BY_MESSAGE = "SEARCH_BY_MESSAGE",
   SEARCH_BY_TYPE = "SEARCH_BY_TYPE",
   SEARCH_BY_PINNED = "SEARCH_BY_PINNED",
+  SEARCH_BY_MENTIONS = "SEARCH_BY_MENTIONS",
 }
 
 export const defaultCriteria = [
@@ -19,6 +21,7 @@ export const defaultCriteria = [
   VisibleSearchCriteria.SEARCH_BY_MESSAGE,
   VisibleSearchCriteria.SEARCH_BY_TYPE,
   VisibleSearchCriteria.SEARCH_BY_PINNED,
+  VisibleSearchCriteria.SEARCH_BY_MENTIONS,
 ];
 
 type SearchCriteriaFormProps = {
@@ -46,6 +49,9 @@ const SearchCriteriaForm = ({
       )}
       {visibleCriteria.includes(VisibleSearchCriteria.SEARCH_BY_PINNED) && (
         <IsPinned disabled={false} />
+      )}
+      {visibleCriteria.includes(VisibleSearchCriteria.SEARCH_BY_MENTIONS) && (
+        <MentionedUsers isDm={isDm} />
       )}
     </Stack>
   );

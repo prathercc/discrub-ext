@@ -86,6 +86,7 @@ const initialState: MessageState = {
     searchMessageContent: null,
     selectedHasTypes: [],
     userIds: [],
+    mentionIds: [],
     isPinned: IsPinnedType.UNSET,
   },
 };

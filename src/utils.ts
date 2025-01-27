@@ -495,6 +495,7 @@ export const isCriteriaActive = (searchCritera: SearchCriteria) => {
     selectedHasTypes,
     userIds,
     isPinned,
+    mentionIds,
   } = searchCritera;
   return [
     searchBeforeDate,
@@ -503,6 +504,7 @@ export const isCriteriaActive = (searchCritera: SearchCriteria) => {
     selectedHasTypes.length,
     userIds.length,
     isPinned !== IsPinnedType.UNSET,
+    mentionIds.length,
   ].some((c) => c);
 };
 
