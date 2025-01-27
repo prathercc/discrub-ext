@@ -4,6 +4,7 @@ import { FilterName } from "../../enum/filter-name";
 import { FilterType } from "../../enum/filter-type";
 import { HasType } from "../../enum/has-type";
 import { SortDirection } from "../../enum/sort-direction";
+import { IsPinnedType } from "../../enum/is-pinned-type.ts";
 
 export type MessageState = {
   messages: Message[]; // Message objects
@@ -66,4 +67,5 @@ export type SearchCriteria = {
   searchMessageContent: string | Maybe;
   selectedHasTypes: HasType[];
   userIds: string[];
+  isPinned: IsPinnedType;
 };

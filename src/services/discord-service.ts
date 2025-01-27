@@ -355,6 +355,7 @@ class DiscordService {
       searchBeforeDate,
       searchMessageContent,
       selectedHasTypes,
+      isPinned,
     } = searchCriteria;
     const urlSearchParams = new URLSearchParams({
       min_id: searchAfterDate
@@ -366,6 +367,7 @@ class DiscordService {
       content: searchMessageContent || "null",
       channel_id: guildId && channelId ? channelId : "null",
       include_nsfw: "true",
+      pinned: isPinned,
     });
     userIds.forEach((userId: string) => {
       urlSearchParams.append("author_id", userId);

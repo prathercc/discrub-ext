@@ -20,8 +20,9 @@ import {
 import { ReactingUser } from "./components/reaction-list-item-button";
 import { MessageType } from "./enum/message-type";
 import { SearchCriteria } from "./features/message/message-types.ts";
-import { isAfter, toDate, addSeconds, addDays } from "date-fns";
+import { addDays, addSeconds, isAfter, toDate } from "date-fns";
 import { UserDataRefreshRate } from "./enum/user-data-refresh-rate.ts";
+import { IsPinnedType } from "./enum/is-pinned-type.ts";
 
 /**
  *
@@ -493,6 +494,7 @@ export const isCriteriaActive = (searchCritera: SearchCriteria) => {
     searchMessageContent,
     selectedHasTypes,
     userIds,
+    isPinned,
   } = searchCritera;
   return [
     searchBeforeDate,
@@ -500,6 +502,7 @@ export const isCriteriaActive = (searchCritera: SearchCriteria) => {
     searchMessageContent,
     selectedHasTypes.length,
     userIds.length,
+    isPinned !== IsPinnedType.UNSET,
   ].some((c) => c);
 };
 

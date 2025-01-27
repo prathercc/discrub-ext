@@ -62,6 +62,7 @@ import { Reaction } from "../../classes/reaction";
 import { ReactionType } from "../../enum/reaction-type";
 import { MessageCategory } from "../../enum/message-category";
 import DiscordService from "../../services/discord-service";
+import { IsPinnedType } from "../../enum/is-pinned-type.ts";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -85,6 +86,7 @@ const initialState: MessageState = {
     searchMessageContent: null,
     selectedHasTypes: [],
     userIds: [],
+    isPinned: IsPinnedType.UNSET,
   },
 };
 
