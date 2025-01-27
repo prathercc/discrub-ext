@@ -4,6 +4,7 @@ import { useGuildSlice } from "../features/guild/use-guild-slice";
 import EnhancedAutocomplete from "../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 import { useMessageSlice } from "../features/message/use-message-slice.ts";
 import { useState } from "react";
+import Box from "@mui/material/Box";
 
 type PrefilterUserProps = {
   isDm?: boolean;
@@ -31,29 +32,31 @@ function PrefilterUser({ isDm = false, disabled = false }: PrefilterUserProps) {
       description="Search messages by User(s)"
       placement="left"
     >
-      <EnhancedAutocomplete
-        disabled={disabled}
-        label="Users"
-        onChange={(value) => {
-          if (Array.isArray(value)) {
-            setFilterUsers(value);
-            setSearchCriteria({ userIds: value });
-            // TODO: Perhaps we can perform User lookups here for new entries, add to prefilterUsers if id belongs to a valid User.
+      <Box>
+        <EnhancedAutocomplete
+          disabled={disabled}
+          label="Users"
+          onChange={(value) => {
+            if (Array.isArray(value)) {
+              setFilterUsers(value);
+              setSearchCriteria({ userIds: value });
+              // TODO: Perhaps we can perform User lookups here for new entries, add to prefilterUsers if id belongs to a valid User.
+            }
+          }}
+          onInputChange={(value) => {
+            if (Array.isArray(value) && !filterUsers.length) {
+              setSearchCriteria({ userIds: value });
+            }
+          }}
+          freeSolo
+          options={users?.map((user) => user.id)}
+          value={userIds}
+          multiple
+          getOptionLabel={(id) =>
+            users.find((user) => user.id === id)?.name || id
           }
-        }}
-        onInputChange={(value) => {
-          if (Array.isArray(value) && !filterUsers.length) {
-            setSearchCriteria({ userIds: value });
-          }
-        }}
-        freeSolo
-        options={users?.map((user) => user.id)}
-        value={userIds}
-        multiple
-        getOptionLabel={(id) =>
-          users.find((user) => user.id === id)?.name || id
-        }
-      />
+        />
+      </Box>
     </Tooltip>
   );
 }
