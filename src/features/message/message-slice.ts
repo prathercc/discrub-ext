@@ -87,6 +87,7 @@ const initialState: MessageState = {
     selectedHasTypes: [],
     userIds: [],
     mentionIds: [],
+    channelIds: [],
     isPinned: IsPinnedType.UNSET,
   },
 };

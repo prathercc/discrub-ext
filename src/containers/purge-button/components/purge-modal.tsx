@@ -5,12 +5,14 @@ import EnhancedTabs, {
   EnhancedTab,
 } from "../../../common-components/enhanced-tabs/enhanced-tabs.tsx";
 import SearchCriteria, {
+  purgeCriteria,
   SearchCriteriaComponentType,
 } from "../../search-criteria/search-criteria.tsx";
 import PurgeContent from "./purge-content.tsx";
 import Message from "../../../classes/message.ts";
 import { isMessage } from "../../../app/guards.ts";
 import PurgeStatusHeader from "./purge-status-header.tsx";
+import { useMessageSlice } from "../../../features/message/use-message-slice.ts";
 
 type PurgeModalProps = {
   dialogOpen: boolean;
@@ -32,6 +34,7 @@ const PurgeModal = ({
   setDialogOpen,
   isDm = false,
 }: PurgeModalProps) => {
+  const { setSearchCriteria } = useMessageSlice();
   const [purgeInstruction, setPurgeInstruction] = useState<PurgeInstruction>(
     PurgeInstruction.AWAITING_INSTRUCTION,
   );
@@ -50,6 +53,8 @@ const PurgeModal = ({
       setIsModifying(false);
       setPurgedMessages([]);
       setPurgeInstruction(PurgeInstruction.AWAITING_INSTRUCTION);
+    } else {
+      setSearchCriteria({ channelIds: [] });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogOpen]);
@@ -83,6 +88,7 @@ const PurgeModal = ({
       <SearchCriteria
         isDm={isDm}
         componentType={SearchCriteriaComponentType.Form}
+        visibleCriteria={purgeCriteria}
       />
     ),
   };

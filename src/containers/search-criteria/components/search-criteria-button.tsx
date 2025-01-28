@@ -7,12 +7,17 @@ import { useDmSlice } from "../../../features/dm/use-dm-slice.ts";
 import { useMessageSlice } from "../../../features/message/use-message-slice.ts";
 import SearchCriteriaModal from "./search-criteria-modal.tsx";
 import { isCriteriaActive } from "../../../utils.ts";
+import { VisibleSearchCriteria } from "../search-criteria.tsx";
 
 type SearchCriteriaButtonProps = {
   isDm?: boolean;
+  visibleCriteria: VisibleSearchCriteria[];
 };
 
-function SearchCriteriaButton({ isDm = false }: SearchCriteriaButtonProps) {
+function SearchCriteriaButton({
+  isDm = false,
+  visibleCriteria,
+}: SearchCriteriaButtonProps) {
   const { state: guildState } = useGuildSlice();
   const selectedGuild = guildState.selectedGuild();
 
@@ -58,6 +63,7 @@ function SearchCriteriaButton({ isDm = false }: SearchCriteriaButtonProps) {
         handleModalToggle={handleToggle}
         handleResetFilters={resetAdvancedFilters}
         filtersActive={filtersActive}
+        visibleCriteria={visibleCriteria}
       />
     </>
   );

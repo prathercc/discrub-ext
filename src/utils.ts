@@ -496,6 +496,7 @@ export const isCriteriaActive = (searchCritera: SearchCriteria) => {
     userIds,
     isPinned,
     mentionIds,
+    channelIds,
   } = searchCritera;
   return [
     searchBeforeDate,
@@ -505,6 +506,7 @@ export const isCriteriaActive = (searchCritera: SearchCriteria) => {
     userIds.length,
     isPinned !== IsPinnedType.UNSET,
     mentionIds.length,
+    channelIds.length,
   ].some((c) => c);
 };
 
@@ -576,4 +578,34 @@ export const getSortedGuilds = (guilds: Guild[]) => {
         "name",
       ),
     );
+};
+
+/**
+ * Sort and return messages by their date
+ * @param messages
+ * @param sortDirection
+ */
+export const getSortedMessages = (
+  messages: Message[],
+  sortDirection: SortDirection = SortDirection.DESCENDING,
+) => {
+  return messages
+    .map((m) => new Message({ ...m }))
+    .sort((a, b) =>
+      sortByProperty(
+        Object.assign(a, { date: new Date(a.timestamp) }),
+        Object.assign(b, { date: new Date(b.timestamp) }),
+        "date",
+        sortDirection,
+      ),
+    );
+};
+
+export const isExportingOrPurging = (
+  task: AppTask,
+  isExporting: boolean,
+  isGenerating: boolean,
+) => {
+  const { active, entity } = task;
+  return [active, entity, isGenerating, isExporting].some((c) => !!c);
 };

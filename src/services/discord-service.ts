@@ -342,13 +342,11 @@ class DiscordService {
       ),
     );
 
-  fetchSearchMessageData = (
-    authorization: string,
-    offset: number,
-    channelId: string | Maybe,
-    guildId: string | Maybe,
+  _getSearchParams = (
+    guildId: string | null,
+    channelId: string | null,
     searchCriteria: SearchCriteria,
-  ) => {
+  ): string => {
     const {
       userIds,
       searchAfterDate,
@@ -357,7 +355,11 @@ class DiscordService {
       selectedHasTypes,
       isPinned,
       mentionIds,
+      channelIds,
     } = searchCriteria;
+
+    const isDmSearch = !guildId && channelId;
+
     const urlSearchParams = new URLSearchParams({
       min_id: searchAfterDate
         ? this.generateSnowflake(searchAfterDate)
@@ -366,12 +368,15 @@ class DiscordService {
         ? this.generateSnowflake(searchBeforeDate)
         : "null",
       content: searchMessageContent || "null",
-      channel_id: guildId && channelId ? channelId : "null",
+      channel_id: isDmSearch ? "null" : channelId || "null",
       include_nsfw: "true",
       pinned: isPinned,
     });
     userIds.forEach((userId: string) => {
       urlSearchParams.append("author_id", userId);
+    });
+    channelIds.forEach((channelId: string) => {
+      urlSearchParams.append("channel_id", channelId);
     });
     mentionIds.forEach((userId: string) => {
       urlSearchParams.append("mentions", userId);
@@ -389,27 +394,54 @@ class DiscordService {
       urlSearchParams.delete(key);
     });
 
+    return urlSearchParams.toString();
+  };
+
+  _getSearchPath = (
+    guildId: string | null,
+    channelId: string | null,
+    offset: number,
+    searchCriteria: SearchCriteria,
+  ) => {
+    const searchParams = this._getSearchParams(
+      guildId,
+      channelId,
+      searchCriteria,
+    );
+    const endpoint = guildId
+      ? this.DISCORD_GUILDS_ENDPOINT
+      : this.DISCORD_CHANNELS_ENDPOINT;
+    const resourceId = guildId || channelId;
+    const offsetQuery = `${offset > 0 ? `&offset=${offset}` : ""}`;
+    return `${endpoint}/${resourceId}/messages/search?${searchParams}${
+      offsetQuery
+    }`;
+  };
+
+  fetchSearchMessageData = (
+    authorization: string,
+    offset: number,
+    channelId: string | null,
+    guildId: string | null,
+    searchCriteria: SearchCriteria,
+  ) => {
+    const searchPath = this._getSearchPath(
+      guildId,
+      channelId,
+      offset,
+      searchCriteria,
+    );
+
     return this.withSearchDelay(() =>
       this.withRetry<SearchMessageResult>(() =>
-        fetch(
-          `${
-            guildId
-              ? this.DISCORD_GUILDS_ENDPOINT
-              : this.DISCORD_CHANNELS_ENDPOINT
-          }/${
-            guildId || channelId
-          }/messages/search?${urlSearchParams.toString()}${
-            offset > 0 ? `&offset=${offset}` : ""
-          }`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: authorization,
-              "user-agent": this.userAgent,
-            },
+        fetch(searchPath, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authorization,
+            "user-agent": this.userAgent,
           },
-        ),
+        }),
       ),
     );
   };

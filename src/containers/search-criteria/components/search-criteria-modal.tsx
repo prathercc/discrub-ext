@@ -7,6 +7,7 @@ import {
   DialogContent,
 } from "@mui/material";
 import SearchCriteriaForm from "./search-criteria-form.tsx";
+import { VisibleSearchCriteria } from "../search-criteria.tsx";
 
 type SearchCriteriaModalProps = {
   open: boolean;
@@ -14,6 +15,7 @@ type SearchCriteriaModalProps = {
   isDm: boolean;
   handleResetFilters: () => void;
   filtersActive: boolean;
+  visibleCriteria: VisibleSearchCriteria[];
 };
 
 const SearchCriteriaModal = ({
@@ -22,6 +24,7 @@ const SearchCriteriaModal = ({
   isDm,
   handleResetFilters,
   filtersActive,
+  visibleCriteria,
 }: SearchCriteriaModalProps) => {
   const handleReset = () => {
     handleResetFilters();
@@ -34,7 +37,7 @@ const SearchCriteriaModal = ({
         <Typography variant="h5">Search Criteria</Typography>
       </DialogTitle>
       <DialogContent>
-        <SearchCriteriaForm isDm={isDm} />
+        <SearchCriteriaForm visibleCriteria={visibleCriteria} isDm={isDm} />
       </DialogContent>
       <DialogActions>
         <Button color="primary" variant="contained" onClick={handleReset}>

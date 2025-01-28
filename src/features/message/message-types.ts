@@ -68,5 +68,6 @@ export type SearchCriteria = {
   selectedHasTypes: HasType[];
   userIds: string[];
   mentionIds: string[];
+  channelIds: string[];
   isPinned: IsPinnedType;
 };

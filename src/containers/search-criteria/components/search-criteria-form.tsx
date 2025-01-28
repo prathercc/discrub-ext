@@ -5,33 +5,17 @@ import MessageContains from "./message-contains";
 import HasType from "./has-type";
 import IsPinned from "./is-pinned.tsx";
 import MentionedUsers from "./mentioned-users.tsx";
-
-export enum VisibleSearchCriteria {
-  SEARCH_BY_USER = "SEARCH_BY_USERS",
-  SEARCH_BY_DATE = "SEARCH_BY_DATE",
-  SEARCH_BY_MESSAGE = "SEARCH_BY_MESSAGE",
-  SEARCH_BY_TYPE = "SEARCH_BY_TYPE",
-  SEARCH_BY_PINNED = "SEARCH_BY_PINNED",
-  SEARCH_BY_MENTIONS = "SEARCH_BY_MENTIONS",
-}
-
-export const defaultCriteria = [
-  VisibleSearchCriteria.SEARCH_BY_USER,
-  VisibleSearchCriteria.SEARCH_BY_DATE,
-  VisibleSearchCriteria.SEARCH_BY_MESSAGE,
-  VisibleSearchCriteria.SEARCH_BY_TYPE,
-  VisibleSearchCriteria.SEARCH_BY_PINNED,
-  VisibleSearchCriteria.SEARCH_BY_MENTIONS,
-];
+import SearchChannels from "./search-channels.tsx";
+import { VisibleSearchCriteria } from "../search-criteria.tsx";
 
 type SearchCriteriaFormProps = {
   isDm: boolean;
-  visibleCriteria?: VisibleSearchCriteria[];
+  visibleCriteria: VisibleSearchCriteria[];
 };
 
 const SearchCriteriaForm = ({
   isDm,
-  visibleCriteria = defaultCriteria,
+  visibleCriteria,
 }: SearchCriteriaFormProps) => {
   return (
     <Stack direction="column" spacing={1}>
@@ -52,6 +36,9 @@ const SearchCriteriaForm = ({
       )}
       {visibleCriteria.includes(VisibleSearchCriteria.SEARCH_BY_MENTIONS) && (
         <MentionedUsers isDm={isDm} />
+      )}
+      {visibleCriteria.includes(VisibleSearchCriteria.SEARCH_BY_CHANNELS) && (
+        <SearchChannels />
       )}
     </Stack>
   );
