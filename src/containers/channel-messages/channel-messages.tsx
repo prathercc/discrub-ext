@@ -22,9 +22,10 @@ import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
 import TokenNotFound from "../../components/token-not-found";
 import {
+  getSortedChannels,
+  getSortedGuilds,
   isCriteriaActive,
   isRemovableMessage,
-  sortByProperty,
 } from "../../utils";
 import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
@@ -38,8 +39,6 @@ import { useChannelSlice } from "../../features/channel/use-channel-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
 import EntityIcon from "../../components/entity-icon";
-import Channel from "../../classes/channel";
-import Guild from "../../classes/guild";
 import Message from "../../classes/message";
 import { SortDirection } from "../../enum/sort-direction";
 import TableMessage from "../../components/table-message";
@@ -175,24 +174,8 @@ function ChannelMessages() {
       discrubCancelled,
   );
 
-  const sortedGuilds = guilds
-    .map((g) => new Guild({ ...g }))
-    .sort((a, b) =>
-      sortByProperty(
-        { name: a.name.toLowerCase() },
-        { name: b.name.toLowerCase() },
-        "name",
-      ),
-    );
-  const sortedChannels = channels
-    .map((c) => new Channel({ ...c }))
-    .sort((a, b) =>
-      sortByProperty(
-        { name: String(a.name).toLowerCase() },
-        { name: String(b.name).toLowerCase() },
-        "name",
-      ),
-    );
+  const sortedGuilds = getSortedGuilds(guilds);
+  const sortedChannels = getSortedChannels(channels);
 
   useEffect(() => {
     if (token) getGuilds();

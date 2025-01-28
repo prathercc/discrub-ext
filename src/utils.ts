@@ -545,3 +545,35 @@ export const isUserDataStale = (
 
   return isAfter(today, staleDate);
 };
+
+/**
+ * Sort and return the provided Channel array by name.
+ * @param channels
+ */
+export const getSortedChannels = (channels: Channel[]) => {
+  return channels
+    .map((c) => new Channel({ ...c }))
+    .sort((a, b) =>
+      sortByProperty(
+        { name: String(a.name).toLowerCase() },
+        { name: String(b.name).toLowerCase() },
+        "name",
+      ),
+    );
+};
+
+/**
+ * Sort and return the provided Guild array by name.
+ * @param guilds
+ */
+export const getSortedGuilds = (guilds: Guild[]) => {
+  return guilds
+    .map((g) => new Guild({ ...g }))
+    .sort((a, b) =>
+      sortByProperty(
+        { name: a.name.toLowerCase() },
+        { name: b.name.toLowerCase() },
+        "name",
+      ),
+    );
+};
