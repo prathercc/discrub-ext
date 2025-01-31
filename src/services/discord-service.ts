@@ -372,6 +372,11 @@ class DiscordService {
       include_nsfw: "true",
       pinned: isPinned,
     });
+
+    if (urlSearchParams.get("channel_id") === "null") {
+      urlSearchParams.delete("channel_id");
+    }
+
     userIds.forEach((userId: string) => {
       urlSearchParams.append("author_id", userId);
     });
