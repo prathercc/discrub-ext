@@ -23,6 +23,8 @@ import { SearchCriteria } from "./features/message/message-types.ts";
 import { addDays, addSeconds, isAfter, toDate } from "date-fns";
 import { UserDataRefreshRate } from "./enum/user-data-refresh-rate.ts";
 import { IsPinnedType } from "./enum/is-pinned-type.ts";
+import { SortDirection } from "./enum/sort-direction.ts";
+import { START_OFFSET } from "./features/message/contants.ts";
 
 /**
  *
@@ -601,11 +603,9 @@ export const getSortedMessages = (
     );
 };
 
-export const isExportingOrPurging = (
-  task: AppTask,
-  isExporting: boolean,
-  isGenerating: boolean,
+export const isSearchComplete = (
+  searchOffSet: number = START_OFFSET,
+  completeCount: number = START_OFFSET,
 ) => {
-  const { active, entity } = task;
-  return [active, entity, isGenerating, isExporting].some((c) => !!c);
+  return searchOffSet >= completeCount;
 };

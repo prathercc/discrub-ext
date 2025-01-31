@@ -135,7 +135,7 @@ function ChannelMessages() {
   };
 
   const fetchChannelData = () => {
-    getMessageData(selectedGuild?.id, selectedChannel?.id);
+    getMessageData(selectedGuild?.id || null, selectedChannel?.id || null);
     setSearchTouched(true);
     setExpanded(false);
   };

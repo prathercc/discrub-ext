@@ -40,9 +40,9 @@ const PurgeModal = ({
   );
   const [purgedMessages, setPurgedMessages] = useState<PurgedMessage[]>([]);
   const { state: appState, resetModify, setIsModifying } = useAppSlice();
+  const isPaused = appState.discrubPaused();
   const task = appState.task();
   const { active, entity } = task;
-  const index = isMessage(entity) ? Number(entity?._index) : 0;
   const total = isMessage(entity) ? Number(entity?._total) : 0;
 
   const handleClose = () => setDialogOpen(false);
@@ -120,8 +120,8 @@ const PurgeModal = ({
         }}
       >
         <PurgeStatusHeader
+          isPaused={isPaused}
           purgeInstruction={purgeInstruction}
-          index={index}
           total={total}
         />
         <EnhancedTabs tabs={tabs} />

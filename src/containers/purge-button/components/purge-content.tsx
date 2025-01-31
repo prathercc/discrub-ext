@@ -5,13 +5,13 @@ import CancelButton from "../../../components/cancel-button.tsx";
 import PauseButton from "../../../components/pause-button.tsx";
 import Button from "@mui/material/Button";
 import { useMessageSlice } from "../../../features/message/use-message-slice.ts";
-import { useChannelSlice } from "../../../features/channel/use-channel-slice.ts";
 import { usePurgeSlice } from "../../../features/purge/use-purge-slice.ts";
 import { useDmSlice } from "../../../features/dm/use-dm-slice.ts";
 import Box from "@mui/material/Box";
 import PurgeMessage from "./purge-message.tsx";
 import { PurgedMessage } from "./purge-modal.tsx";
 import { isCriteriaActive } from "../../../utils.ts";
+import { useGuildSlice } from "../../../features/guild/use-guild-slice.ts";
 
 type PurgeContentProps = {
   isDm?: boolean;
@@ -35,8 +35,8 @@ const PurgeContent = ({
   const { state: messageState } = useMessageSlice();
   const searchCriteria = messageState.searchCriteria();
 
-  const { state: channelState, resetChannel } = useChannelSlice();
-  const channels = channelState.channels();
+  const { state: guildState } = useGuildSlice();
+  const selectedGuild = guildState.selectedGuild();
 
   const { state: dmState } = useDmSlice();
   const selectedDms = dmState.selectedDms();
@@ -48,9 +48,7 @@ const PurgeContent = ({
       // We are actively deleting, we need to send a cancel request
       setDiscrubCancelled(true);
     }
-    if (!isDm) {
-      resetChannel(); // TODO: Is this REALLY something we should be doing here? Shouldn't the purge process handle all of this separately?
-    }
+
     setDiscrubPaused(false);
     if (!active) {
       handleClose();
@@ -60,8 +58,8 @@ const PurgeContent = ({
   const handlePurge = () => {
     if (isDm && !!selectedDms.length) {
       purge([...selectedDms]);
-    } else if (!isDm && channels.length) {
-      purge([...channels]);
+    } else if (!isDm && selectedGuild) {
+      purge([selectedGuild]);
     }
   };
   const getUserListItem = (props: ListChildComponentProps) => {

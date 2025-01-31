@@ -37,9 +37,8 @@ const SearchCriteriaForm = ({
       {visibleCriteria.includes(VisibleSearchCriteria.SEARCH_BY_MENTIONS) && (
         <MentionedUsers isDm={isDm} />
       )}
-      {visibleCriteria.includes(VisibleSearchCriteria.SEARCH_BY_CHANNELS) && (
-        <SearchChannels />
-      )}
+      {visibleCriteria.includes(VisibleSearchCriteria.SEARCH_BY_CHANNELS) &&
+        !isDm && <SearchChannels />}
     </Stack>
   );
 };

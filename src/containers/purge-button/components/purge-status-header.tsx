@@ -10,18 +10,18 @@ import "../css/purge-status-header.css";
 
 type PurgeStatusHeaderProps = {
   purgeInstruction: PurgeInstruction;
-  index: number;
   total: number;
+  isPaused: boolean;
 };
 
 const PurgeStatusHeader = ({
   purgeInstruction,
-  index,
   total,
+  isPaused,
 }: PurgeStatusHeaderProps) => {
   const map = {
     [PurgeInstruction.PURGING]: {
-      message: `Message ${index} of ${total}`,
+      message: `Messages Remaining: ~${total}`,
       getIcon: () => <ConstructionIcon />,
     },
     [PurgeInstruction.AWAITING_INSTRUCTION]: {
@@ -49,10 +49,10 @@ const PurgeStatusHeader = ({
     >
       <Box
         className={classNames({
-          "operation-running": [
-            PurgeInstruction.PURGING,
-            PurgeInstruction.SEARCHING,
-          ].some((pi) => pi === purgeInstruction),
+          "operation-running":
+            [PurgeInstruction.PURGING, PurgeInstruction.SEARCHING].some(
+              (pi) => pi === purgeInstruction,
+            ) && !isPaused,
         })}
       >
         {map[purgeInstruction].getIcon()}

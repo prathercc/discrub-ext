@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   ArchivedThreadProps,
-  LiftPermissionProps,
   ThreadState,
   ThreadsFromMessagesProps,
 } from "./thread-types";
@@ -43,7 +42,7 @@ export const getArchivedThreads =
       const { success: privateSuccess, data: privateData } =
         await new DiscordService(settings).fetchPrivateThreads(
           token,
-          channelId
+          channelId,
         );
 
       if (publicSuccess && publicData) {
@@ -56,8 +55,8 @@ export const getArchivedThreads =
       return threadArr.filter(
         (archivedThread) =>
           !knownThreads.some(
-            (knownThread) => knownThread.id === archivedThread.id
-          )
+            (knownThread) => knownThread.id === archivedThread.id,
+          ),
       );
     } else {
       return [];
@@ -76,7 +75,7 @@ export const unarchiveThread =
         {
           archived: false,
           locked: false,
-        }
+        },
       );
 
       if (success) {
@@ -88,8 +87,8 @@ export const unarchiveThread =
                 if (thread.id === data.id) {
                   return data;
                 } else return thread;
-              })
-            )
+              }),
+            ),
           );
         }
         return data;
@@ -97,21 +96,28 @@ export const unarchiveThread =
     }
   };
 
+/**
+ * Attempt to lift restrictions for a Thread
+ * @param threadId
+ * @param skipIds An array of thread id that should be skipped
+ * @param threads An optional array of Thread that can be referenced, only use this parameter to override the threads that exist in Thread State
+ * @returns The skipIds array, appended with the thread ids that failed to have their restrictions lifted.
+ */
 export const liftThreadRestrictions =
-  ({
-    channelId,
-    noPermissionThreadIds,
-  }: LiftPermissionProps): AppThunk<Promise<Snowflake[]>> =>
+  (
+    threadId: string,
+    skipIds: string[],
+    threads: Channel[] = [],
+  ): AppThunk<Promise<string[]>> =>
   async (dispatch, getState) => {
-    const foundThread = getState().thread.threads.find(
-      (t) => t.id === channelId
-    );
-    const retArr = [...noPermissionThreadIds];
+    const threadList = threads || getState().thread.threads;
+    const foundThread = threadList.find((t) => t.id === threadId);
+    const retArr = [...skipIds];
     const removeRestriction =
       foundThread &&
       (foundThread.thread_metadata?.archived ||
         foundThread.thread_metadata?.locked) &&
-      !noPermissionThreadIds.some((tId) => tId === foundThread.id);
+      !skipIds.some((skipId) => skipId === foundThread.id);
 
     if (removeRestriction) {
       const thread = await dispatch(unarchiveThread(foundThread.id));
@@ -135,7 +141,7 @@ export const getThreadsFromMessages = ({
 
   return foundThreads.filter(
     (thread) =>
-      !knownThreads.some((knownThread) => knownThread.id === thread.id)
+      !knownThreads.some((knownThread) => knownThread.id === thread.id),
   );
 };
 

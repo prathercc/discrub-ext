@@ -10,11 +10,6 @@ export type ArchivedThreadProps = {
   knownThreads: Channel[];
 };
 
-export type LiftPermissionProps = {
-  channelId: string;
-  noPermissionThreadIds: string[];
-};
-
 export type ThreadsFromMessagesProps = {
   messages: Message[];
   knownThreads: Channel[];

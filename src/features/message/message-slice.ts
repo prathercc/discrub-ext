@@ -1,13 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   getEncodedEmoji,
+  getSortedMessages,
   isCriteriaActive,
   isDm,
   isGuildForum,
   isRemovableMessage,
+  isSearchComplete,
   isUserDataStale,
   messageTypeEquals,
-  sortByProperty,
   stringToBool,
 } from "../../utils";
 import Message from "../../classes/message";
@@ -44,6 +45,7 @@ import {
   MessageSearchOptions,
   MessageState,
   SearchCriteria,
+  SearchResultData,
 } from "./message-types";
 import { SortDirection } from "../../enum/sort-direction";
 import { FilterType } from "../../enum/filter-type";
@@ -63,6 +65,7 @@ import { ReactionType } from "../../enum/reaction-type";
 import { MessageCategory } from "../../enum/message-category";
 import DiscordService from "../../services/discord-service";
 import { IsPinnedType } from "../../enum/is-pinned-type.ts";
+import { MAX_OFFSET, OFFSET_INCREMENT, START_OFFSET } from "./contants.ts";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -574,12 +577,7 @@ export const deleteAttachment =
         (message.content && message.content.length > 0) ||
         message.attachments.length > 1;
 
-      await dispatch(
-        liftThreadRestrictions({
-          channelId: message.channel_id,
-          noPermissionThreadIds: [],
-        }),
-      );
+      await dispatch(liftThreadRestrictions(message.channel_id, []));
 
       dispatch(setIsModifying(true));
       if (shouldEdit) {
@@ -667,10 +665,7 @@ export const editMessages =
       if (await dispatch(isAppStopped())) break;
 
       noPermissionThreadIds = await dispatch(
-        liftThreadRestrictions({
-          channelId: message.channel_id,
-          noPermissionThreadIds,
-        }),
+        liftThreadRestrictions(message.channel_id, noPermissionThreadIds),
       );
 
       dispatch(setModifyEntity(message));
@@ -712,9 +707,14 @@ export const editMessages =
     dispatch(setDiscrubCancelled(false));
   };
 
-export const deleteMessage =
+/**
+ * Delete a message without updating Message State
+ * @param message
+ * @returns The result of the deletion
+ */
+export const deleteRawMessage =
   (message: Message): AppThunk<Promise<boolean>> =>
-  async (dispatch, getState) => {
+  async (_dispatch, getState) => {
     const { settings } = getState().app;
     const { token } = getState().user;
 
@@ -725,27 +725,37 @@ export const deleteMessage =
         message.channel_id,
       );
       if (success) {
-        const { messages, filteredMessages, selectedMessages } =
-          getState().message;
-        const updatedMessages = messages.filter(
-          ({ id: messageId }) => messageId !== message.id,
-        );
-        const updatedFilterMessages = filteredMessages.filter(
-          ({ id: messageId }) => messageId !== message.id,
-        );
-        const updatedSelectMessages = selectedMessages.filter(
-          (messageId) => messageId !== message.id,
-        );
-
-        dispatch(setMessages(updatedMessages));
-        dispatch(setFilteredMessages(updatedFilterMessages));
-        dispatch(setSelected(updatedSelectMessages));
-
         return true;
       }
     }
 
     return false;
+  };
+
+export const deleteMessage =
+  (message: Message): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    const result = await dispatch(deleteRawMessage(message));
+
+    if (result) {
+      const { messages, filteredMessages, selectedMessages } =
+        getState().message;
+      const updatedMessages = messages.filter(
+        ({ id: messageId }) => messageId !== message.id,
+      );
+      const updatedFilterMessages = filteredMessages.filter(
+        ({ id: messageId }) => messageId !== message.id,
+      );
+      const updatedSelectMessages = selectedMessages.filter(
+        (messageId) => messageId !== message.id,
+      );
+
+      dispatch(setMessages(updatedMessages));
+      dispatch(setFilteredMessages(updatedFilterMessages));
+      dispatch(setSelected(updatedSelectMessages));
+    }
+
+    return result;
   };
 
 export const deleteMessages =
@@ -763,10 +773,7 @@ export const deleteMessages =
       if (await dispatch(isAppStopped())) break;
 
       noPermissionThreadIds = await dispatch(
-        liftThreadRestrictions({
-          channelId: currentRow.channel_id,
-          noPermissionThreadIds,
-        }),
+        liftThreadRestrictions(currentRow.channel_id, noPermissionThreadIds),
       );
 
       dispatch(
@@ -918,89 +925,85 @@ const _generateReactionMap =
     dispatch(setExportReactionMap(reactionMap));
   };
 
-export const getMessageData =
+/**
+ * Retrieve message data without mutating MessageState
+ * @param guildId
+ * @param channelId
+ * @param options
+ */
+export const retrieveMessages =
   (
-    guildId: Snowflake | Maybe,
-    channelId: Snowflake | Maybe,
+    guildId: string | null,
+    channelId: string | null,
     options: Partial<MessageSearchOptions> = {},
-  ): AppThunk<Promise<MessageData | void>> =>
+  ): AppThunk<Promise<MessageData & Partial<SearchResultData>>> =>
   async (dispatch, getState) => {
-    dispatch(resetMessageData());
     const { token } = getState().user;
-    const { searchCriteria } = getState().message;
     const { settings } = getState().app;
+    const searchCriteria: SearchCriteria = {
+      ...getState().message.searchCriteria,
+      ...(options.searchCriteriaOverrides || {}),
+    };
+
+    let payload: MessageData & Partial<SearchResultData> = {
+      messages: [],
+      threads: [],
+      totalMessages: 0,
+      offset: 0,
+      searchCriteria: searchCriteria,
+    };
 
     if (token) {
-      dispatch(setIsLoading(true));
-
-      let retArr: Message[] = [];
-      let retThreads: Channel[] = [];
-
       if (isCriteriaActive(searchCriteria)) {
-        ({ messages: retArr, threads: retThreads } = await dispatch(
+        payload = await dispatch(
           _getSearchMessages(channelId, guildId, searchCriteria, options),
-        ));
+        );
       } else if (channelId) {
-        ({ messages: retArr, threads: retThreads } = await dispatch(
-          _getMessages(channelId),
-        ));
+        payload = await dispatch(_getMessages(channelId));
       }
-
-      let payload: MessageData = {
-        threads: [],
-        messages: [],
-      };
 
       if (!getState().app.discrubCancelled) {
         const reactionsEnabled = stringToBool(settings.reactionsEnabled);
         if (!options.excludeReactions && reactionsEnabled) {
-          await dispatch(_generateReactionMap(retArr));
+          await dispatch(_generateReactionMap(payload.messages));
         }
-        const userMap = await dispatch(_getUserMap(retArr));
-        await dispatch(_collectUserNames(userMap));
-        if (guildId) {
-          await dispatch(_collectUserGuildData(userMap, guildId));
-          dispatch(getPreFilterUsers(guildId));
-        }
-
-        if (!getState().app.discrubCancelled) {
-          payload = {
-            threads: retThreads,
-            messages: retArr,
-          };
+        if (!options.excludeUserLookups) {
+          const userMap = await dispatch(_getUserMap(payload.messages));
+          await dispatch(_collectUserNames(userMap));
+          if (guildId) {
+            await dispatch(_collectUserGuildData(userMap, guildId));
+            dispatch(getPreFilterUsers(guildId));
+          }
         }
       }
-      const sortedMessages = payload.messages
-        .map((m) => new Message({ ...m }))
-        .sort((a, b) =>
-          sortByProperty(
-            Object.assign(a, { date: new Date(a.timestamp) }),
-            Object.assign(b, { date: new Date(b.timestamp) }),
-            "date",
-            "desc",
-          ),
-        );
-      dispatch(setThreads(payload.threads));
-      dispatch(setMessages(sortedMessages));
-      dispatch(setIsLoading(false));
       dispatch(resetStatus());
-
-      const { active, entity } = getState().app.task;
-      const { isGenerating, isExporting } = getState().export;
-      const purgingOrExporting = [
-        active,
-        entity,
-        isGenerating,
-        isExporting,
-      ].some((c) => !!c);
-
-      if (!purgingOrExporting) {
-        // If we are purging or exporting, we need to allow those respective slices to handle this.
-        dispatch(setDiscrubCancelled(false));
-      }
-
-      return payload;
     }
+
+    return payload;
+  };
+
+export const getMessageData =
+  (
+    guildId: string | null,
+    channelId: string | null,
+    options: Partial<MessageSearchOptions> = {},
+  ): AppThunk<Promise<MessageData & Partial<SearchResultData>>> =>
+  async (dispatch, _getState) => {
+    dispatch(resetMessageData());
+    dispatch(setIsLoading(true));
+
+    const payload = await dispatch(
+      retrieveMessages(guildId, channelId, options),
+    );
+
+    dispatch(setThreads(payload.threads));
+    dispatch(setMessages(getSortedMessages(payload.messages)));
+    dispatch(setIsLoading(false));
+    dispatch(resetStatus());
+
+    dispatch(setDiscrubCancelled(false)); // TODO: What if we are exporting?
+
+    return payload;
   };
 
 const _getUserMap =
@@ -1220,76 +1223,161 @@ const _resolveMessageReactions =
     return retArr;
   };
 
+const _getNextSearchData = (
+  message: Message,
+  offset: number,
+  totalMessages: number,
+  isEndConditionMet: boolean,
+  searchCriteria: SearchCriteria,
+  endOffSet?: number,
+) => {
+  const searchData = {
+    offset: offset,
+    isEndConditionMet: isEndConditionMet,
+    searchCriteria: searchCriteria,
+  };
+  const nextOffSet = offset + OFFSET_INCREMENT;
+  const isMaxOffset = offset === MAX_OFFSET;
+  const isLimitedResults =
+    !!endOffSet && isSearchComplete(nextOffSet, endOffSet);
+  const isAllResults = isSearchComplete(nextOffSet, totalMessages);
+
+  if (isMaxOffset) {
+    Object.assign(searchData, {
+      offset: START_OFFSET,
+      searchCriteria: {
+        ...searchCriteria,
+        searchBeforeDate: parseISO(message.timestamp),
+      },
+    });
+  } else if (isAllResults) {
+    Object.assign(searchData, {
+      isEndConditionMet: true,
+      offset: START_OFFSET,
+    });
+  } else if (isLimitedResults) {
+    Object.assign(searchData, { isEndConditionMet: true, offset: nextOffSet });
+  } else {
+    Object.assign(searchData, { offset: nextOffSet });
+  }
+
+  return searchData;
+};
+
+const _getNextSearchStatus = (
+  threads: Channel[],
+  messages: Message[],
+  totalMessages: number,
+  channel?: Channel,
+) => {
+  let status = "";
+  if (isGuildForum(channel)) {
+    status = `Fetched ${threads.length} Threads`;
+  } else {
+    const channelName = channel?.name || "";
+    const ratio = `${messages.length} / ${totalMessages}`;
+    status = `Fetched ${ratio} Messages ${channelName}`;
+  }
+  return status;
+};
+
 const _getSearchMessages =
   (
-    channelId: Snowflake | Maybe,
-    guildId: Snowflake | Maybe,
+    channelId: string | null,
+    guildId: string | null,
     searchCriteria: SearchCriteria,
-    { excludeReactions }: Partial<MessageSearchOptions> = {},
-  ): AppThunk<Promise<MessageData>> =>
+    {
+      excludeReactions,
+      startOffSet,
+      endOffSet,
+    }: Partial<MessageSearchOptions> = {},
+  ): AppThunk<Promise<MessageData & SearchResultData>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
     const { token } = getState().user;
     const { channels } = getState().channel;
     const { dms } = getState().dm;
-    const channel =
-      channels.find((c) => c.id === channelId) ||
-      dms.find((c) => c.id === channelId);
-    let retArr: Message[] = [];
-    const retThreads: Channel[] = [];
+    const combinedChannels = [...channels, ...dms];
+    const channel = combinedChannels.find((c) => c.id === channelId);
+
+    let knownMessages: Message[] = [];
+    const knownThreads: Channel[] = [];
+    let { offset, isEndConditionMet, criteria, totalMessages } = {
+      offset: startOffSet || 0,
+      isEndConditionMet: false,
+      criteria: { ...searchCriteria },
+      totalMessages: 0,
+    };
 
     if (token) {
-      let offset = 0;
-      let reachedEnd = false;
-      let criteria = { ...searchCriteria };
-      let totalMessages = 0;
-      while (!reachedEnd) {
-        await dispatch(checkDiscrubPaused());
-        if (getState().app.discrubCancelled) break;
+      while (!isEndConditionMet) {
+        if (await dispatch(isAppStopped())) break;
 
         const { success, data } = await new DiscordService(
           settings,
         ).fetchSearchMessageData(token, offset, channelId, guildId, criteria);
 
         if (success && data) {
-          const { total_results, messages = [], threads = [] } = data || {};
-          if (!totalMessages && total_results) {
-            totalMessages = total_results;
-          }
-          if (messages.length === 0) break;
-          for (const th of threads)
-            if (!retThreads.find((eTh) => eTh.id === th.id))
-              retThreads.push(th);
-          const foundMessages = messages.flat();
-          // Max offset is 5000, need to reset offset and update/set searchBeforeDate
-          if (offset === 5000) {
-            const { timestamp } = foundMessages[foundMessages.length - 1];
-            criteria = { ...criteria, searchBeforeDate: parseISO(timestamp) };
-            offset = 0;
-          } else if (offset >= total_results) reachedEnd = true;
-          else offset += 25;
+          let { total_results, messages = [], threads = [] } = data;
+          const isResultsFound = !!total_results || messages.length > 0;
 
-          for (const m of foundMessages) {
-            if (_messageTypeAllowed(m.type)) retArr.push(m);
+          // Ensure totalMessages is up-to-date so that _getSearchData can assign the correct offset
+          totalMessages = total_results;
+
+          if (!isResultsFound) {
+            break;
           }
 
-          const threadStatus = `Fetched ${retThreads.length} Threads`;
-          const status = `Fetched ${retArr.length}/${totalMessages} Messages ${
-            channel?.name ? `(${channel.name})` : ""
-          }`;
-          dispatch(setStatus(isGuildForum(channel) ? threadStatus : status));
+          for (const t of threads) {
+            const isKnownThread = knownThreads.some((k) => k.id === t.id);
+            if (!isKnownThread) {
+              knownThreads.push(t);
+            }
+          }
+
+          messages = messages.flat();
+          const lastMessage = messages[messages.length - 1];
+          ({
+            isEndConditionMet,
+            offset,
+            searchCriteria: criteria,
+          } = _getNextSearchData(
+            lastMessage,
+            offset,
+            totalMessages,
+            isEndConditionMet,
+            criteria,
+            endOffSet,
+          ));
+
+          for (const m of messages) {
+            if (_messageTypeAllowed(m.type)) knownMessages.push(m);
+          }
+
+          const status = _getNextSearchStatus(
+            knownThreads,
+            knownMessages,
+            totalMessages,
+            channel,
+          );
+          dispatch(setStatus(status));
         } else {
-          reachedEnd = true;
+          isEndConditionMet = true;
         }
       }
+
       const reactionsEnabled = stringToBool(settings.reactionsEnabled);
-      if (!excludeReactions && reactionsEnabled)
-        retArr = await dispatch(_resolveMessageReactions(retArr));
+      if (!excludeReactions && reactionsEnabled) {
+        knownMessages = await dispatch(_resolveMessageReactions(knownMessages));
+      }
     }
     dispatch(resetStatus());
     return {
-      messages: retArr,
-      threads: retThreads,
+      messages: knownMessages,
+      threads: knownThreads,
+      offset: offset, // The next offset to use for an additional search
+      searchCriteria: criteria, // The Search Criteria at the time the search ended (mutated by _getNextSearchData)
+      totalMessages: totalMessages, // The total amount of messages that exist for the search
     };
   };
 
@@ -1328,7 +1416,11 @@ const _getMessages =
     if (channel) {
       if (isGuildForum(channel)) {
         const { threads } = await dispatch(
-          _getSearchMessages(channelId, channel.guild_id, searchCriteria),
+          _getSearchMessages(
+            channelId,
+            channel.guild_id || null,
+            searchCriteria,
+          ),
         );
         threads.forEach((t) => {
           if (!trackedThreads.some((tt) => tt.id === t.id)) {

@@ -143,8 +143,8 @@ const useMessageSlice = () => {
   };
 
   const getMessageData = (
-    guildId: string | Maybe,
-    channelId: string | Maybe,
+    guildId: string | null,
+    channelId: string | null,
     options: Partial<MessageSearchOptions> = {},
   ) => {
     return dispatch(getMessageDataAction(guildId, channelId, options));

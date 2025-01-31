@@ -1096,7 +1096,7 @@ export const exportChannels =
       let exportMessages: Message[] = [];
 
       const messageData = await dispatch(
-        getMessageData(selectedGuild?.id, entity.id),
+        getMessageData(selectedGuild?.id || null, entity.id),
       );
 
       if (messageData) {

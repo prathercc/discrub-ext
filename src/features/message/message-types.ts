@@ -57,8 +57,18 @@ export type MessageData = {
   messages: Message[];
 };
 
+export type SearchResultData = {
+  offset: number;
+  searchCriteria: SearchCriteria;
+  totalMessages: number;
+};
+
 export type MessageSearchOptions = {
-  excludeReactions: boolean | Maybe;
+  excludeReactions?: boolean;
+  excludeUserLookups?: boolean;
+  startOffSet?: number;
+  endOffSet?: number;
+  searchCriteriaOverrides?: Partial<SearchCriteria>;
 };
 
 export type SearchCriteria = {
