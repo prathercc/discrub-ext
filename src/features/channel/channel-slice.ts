@@ -1,9 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {
-  resetAdvancedFilters,
-  resetFilters,
-  resetMessageData,
-} from "../message/message-slice";
+import { resetFilters, resetMessageData } from "../message/message-slice";
 import Channel from "../../classes/channel";
 import { ChannelState } from "./channel-types";
 import { AppThunk } from "../../app/store";
@@ -79,9 +75,6 @@ export const getChannels =
 export const changeChannel =
   (channelId: Snowflake | null): AppThunk =>
   async (dispatch) => {
-    if (!channelId) {
-      dispatch(resetAdvancedFilters());
-    }
     dispatch(resetFilters());
     dispatch(resetMessageData());
     dispatch(setChannel(channelId));
