@@ -20,7 +20,6 @@ import {
   setThreads,
 } from "../thread/thread-slice";
 import {
-  checkDiscrubPaused,
   resetModify,
   setDiscrubCancelled,
   setIsModifying,
@@ -28,6 +27,7 @@ import {
   setTimeoutMessage as notify,
   setStatus,
   resetStatus,
+  isAppStopped,
 } from "../app/app-slice";
 import { MessageRegex } from "../../enum/message-regex";
 import {
@@ -664,8 +664,7 @@ export const editMessages =
     dispatch(setIsModifying(true));
     let noPermissionThreadIds: Snowflake[] = [];
     for (const message of messages) {
-      if (getState().app.discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
 
       noPermissionThreadIds = await dispatch(
         liftThreadRestrictions({
@@ -761,8 +760,7 @@ export const deleteMessages =
     dispatch(setIsModifying(true));
     let noPermissionThreadIds: Snowflake[] = [];
     for (const [count, currentRow] of messages.entries()) {
-      if (getState().app.discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
 
       noPermissionThreadIds = await dispatch(
         liftThreadRestrictions({
@@ -857,8 +855,7 @@ const _fetchReactingUserIds =
       let reachedEnd = false;
       let lastId = null;
       while (!reachedEnd) {
-        if (getState().app.discrubCancelled || !token) break;
-        await dispatch(checkDiscrubPaused());
+        if ((await dispatch(isAppStopped())) || !token) break;
         const { success, data } = await new DiscordService(
           settings,
         ).getReactions(
@@ -894,8 +891,7 @@ const _generateReactionMap =
     const filteredMessages = messages.filter((m) => !!m.reactions?.length);
     for (const [mI, message] of filteredMessages.entries()) {
       reactionMap[message.id] = {};
-      if (getState().app.discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
 
       if (message.reactions?.length && token) {
         for (const [i, reaction] of message.reactions.entries()) {
@@ -910,8 +906,7 @@ const _generateReactionMap =
           } ${brackets}${emoji.name}${brackets}`;
           dispatch(setStatus(status));
 
-          if (getState().app.discrubCancelled || !encodedEmoji) break;
-          await dispatch(checkDiscrubPaused());
+          if ((await dispatch(isAppStopped())) || !encodedEmoji) break;
 
           reactionMap[message.id][encodedEmoji] = await dispatch(
             _fetchReactingUserIds(message, encodedEmoji),
@@ -1075,8 +1070,7 @@ const _collectUserNames =
     if (token && stringToBool(displayNameLookup)) {
       const userIds = Object.keys(updateMap);
       for (const [i, userId] of userIds.entries()) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         const mapping = existingUserMap[userId] || updateMap[userId];
         const { userName, displayName, timestamp } = mapping;
 
@@ -1125,8 +1119,7 @@ const _collectUserGuildData =
     if (token && stringToBool(serverNickNameLookup)) {
       const userIds = Object.keys(updateMap);
       for (const [i, userId] of userIds.entries()) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         const userMapping = existingUserMap[userId] || updateMap[userId];
         const userGuilds = userMapping.guilds;
 
@@ -1193,8 +1186,7 @@ const _resolveMessageReactions =
 
     if (token) {
       for (const [i, message] of messages.entries()) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
 
         const status = `Reaction Allocation (${i + 1} of ${messages.length}): ${
           message.id
@@ -1385,8 +1377,7 @@ const _getMessagesFromChannel =
 
     if (token) {
       while (!reachedEnd) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         const { success, data } = await new DiscordService(
           settings,
         ).fetchMessageData(token, lastId, channelId);

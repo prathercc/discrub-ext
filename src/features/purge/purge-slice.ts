@@ -6,7 +6,7 @@ import {
 } from "../message/message-slice";
 import { liftThreadRestrictions } from "../thread/thread-slice";
 import {
-  checkDiscrubPaused,
+  isAppStopped,
   resetModify,
   setDiscrubCancelled,
   setIsModifying,

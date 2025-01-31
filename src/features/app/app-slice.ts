@@ -87,9 +87,11 @@ export const {
   setSettings,
 } = appSlice.actions;
 
-export const checkDiscrubPaused =
-  (): AppThunk<Promise<void>> => async (_, getState) => {
+export const isAppStopped =
+  (): AppThunk<Promise<boolean>> => async (_, getState) => {
+    if (getState().app.discrubCancelled) return true;
     while (getState().app.discrubPaused) await wait(2);
+    return getState().app.discrubCancelled;
   };
 
 /**
