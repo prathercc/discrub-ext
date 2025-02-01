@@ -16,22 +16,26 @@ export type AppState = {
   settings: AppSettings;
 };
 
-export type AppTaskMessage = Message & {
+export type AppTaskStatus = {
   _index?: number;
   _total?: number;
   _status?: string;
+  _offset?: number;
 };
 
 export type AppTaskEntity =
-  | AppTaskMessage
-  | Channel
-  | User
-  | Guild
-  | Reaction
-  | Emoji
-  | Role
-  | Attachment
-  | Embed
+  | ((
+      | Message
+      | Channel
+      | User
+      | Guild
+      | Reaction
+      | Emoji
+      | Role
+      | Attachment
+      | Embed
+    ) &
+      AppTaskStatus)
   | Maybe;
 
 export type AppTask = {

@@ -65,6 +65,10 @@ export const purge =
         const offset = payload.offset || START_OFFSET;
         if (offset === START_OFFSET) isResetPurge = true;
 
+        dispatch(
+          setModifyEntity({ _offset: offset, _total: payload.totalMessages }),
+        );
+
         const options = {
           excludeReactions: true,
           excludeUserLookups: true,
@@ -74,6 +78,9 @@ export const purge =
         };
 
         payload = await dispatch(retrieveMessages(guildId, channelId, options));
+
+        // Message ids that deletes should not be attempted for
+        const skipMessageIds = [...trackedMessageIds];
 
         payload.messages.forEach((m) => {
           if (!trackedMessageIds.some((id) => id === m.id)) {
@@ -86,9 +93,15 @@ export const purge =
         if (payload.offset === START_OFFSET && isResetPurge) break;
 
         await dispatch(
-          _purgeMessages(payload.messages, payload.threads, skipThreadIds, {
-            totalMessages: payload.totalMessages,
-          }),
+          _purgeMessages(
+            payload.messages,
+            payload.threads,
+            skipThreadIds,
+            skipMessageIds,
+            {
+              totalMessages: payload.totalMessages,
+            },
+          ),
         );
       } while (!isSearchComplete(payload.offset, payload.totalMessages));
     }
@@ -101,10 +114,14 @@ export const _purgeMessages =
     messages: Message[],
     threads: Channel[],
     skipThreadIds: string[],
+    skipMessageIds: string[],
     { totalMessages }: Partial<SearchResultData> = {},
   ): AppThunk<Promise<void>> =>
   async (dispatch, _getState) => {
-    for (const [index, message] of messages.entries()) {
+    const filteredMessages = messages.filter(
+      (m) => !skipMessageIds.some((id) => id === m.id),
+    );
+    for (const [index, message] of filteredMessages.entries()) {
       if (await dispatch(isAppStopped())) break;
 
       skipThreadIds = await dispatch(

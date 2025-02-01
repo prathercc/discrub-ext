@@ -121,7 +121,10 @@ const ExportButton = ({
       setSelectedExportChannels([]);
     }
     setDiscrubPaused(false);
-    setDialogOpen(false);
+
+    if (!(isGenerating || isExporting)) {
+      setDialogOpen(false);
+    }
   };
 
   const handleExportSelected = async (format: ExportType = ExportType.JSON) => {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { Dialog, DialogContent } from "@mui/material";
 import { useAppSlice } from "../../../features/app/use-app-slice";
 import EnhancedTabs, {
   EnhancedTab,
@@ -13,6 +13,9 @@ import Message from "../../../classes/message.ts";
 import { isMessage } from "../../../app/guards.ts";
 import PurgeStatusHeader from "./purge-status-header.tsx";
 import { useMessageSlice } from "../../../features/message/use-message-slice.ts";
+import Config from "../../discrub-dialog/components/config.tsx";
+import { DiscrubSetting } from "../../../enum/discrub-setting.ts";
+import EnhancedDialogTitle from "../../../common-components/enhanced-dialog/enhanced-dialog-title.tsx";
 
 type PurgeModalProps = {
   dialogOpen: boolean;
@@ -39,13 +42,33 @@ const PurgeModal = ({
     PurgeInstruction.AWAITING_INSTRUCTION,
   );
   const [purgedMessages, setPurgedMessages] = useState<PurgedMessage[]>([]);
-  const { state: appState, resetModify, setIsModifying } = useAppSlice();
+  const {
+    state: appState,
+    resetModify,
+    setIsModifying,
+    setSettings,
+    setDiscrubCancelled,
+    setDiscrubPaused,
+  } = useAppSlice();
+  const settings = appState.settings();
   const isPaused = appState.discrubPaused();
   const task = appState.task();
   const { active, entity } = task;
-  const total = isMessage(entity) ? Number(entity?._total) : 0;
+  const total = Number(entity?._total);
+  const offset = Number(entity?._offset);
 
-  const handleClose = () => setDialogOpen(false);
+  const handleCancel = () => {
+    if (!!entity || active) {
+      // We are actively deleting, we need to send a cancel request
+      setDiscrubCancelled(true);
+    }
+
+    setDiscrubPaused(false);
+
+    if (!active) {
+      setDialogOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (dialogOpen) {
@@ -60,7 +83,7 @@ const PurgeModal = ({
   }, [dialogOpen]);
 
   useEffect(() => {
-    if (active && !entity) {
+    if (active && !isMessage(entity)) {
       setPurgeInstruction(PurgeInstruction.SEARCHING);
     } else if (active && isMessage(entity)) {
       setPurgeInstruction(PurgeInstruction.PURGING);
@@ -92,30 +115,47 @@ const PurgeModal = ({
       />
     ),
   };
+
+  const settingsTab: EnhancedTab = {
+    label: "Settings",
+    disabled: active,
+    getComponent: () => (
+      <Config
+        settings={settings}
+        visibleSettings={[
+          DiscrubSetting.RANDOM_DELETE_DELAY,
+          DiscrubSetting.RANDOM_SEARCH_DELAY,
+        ]}
+        onChangeSettings={setSettings}
+      />
+    ),
+  };
+
   const purgeTab: EnhancedTab = {
     label: "Purge",
     getComponent: () => (
       <PurgeContent
         purgedMessages={purgedMessages}
         isDm={isDm}
-        handleClose={handleClose}
+        handleCancel={handleCancel}
       />
     ),
   };
-  const tabs: EnhancedTab[] = [criteriaTab, purgeTab];
+  const tabs: EnhancedTab[] = [criteriaTab, settingsTab, purgeTab];
 
   return (
     <Dialog
-      onClose={active ? () => {} : handleClose}
+      PaperProps={{ sx: { minWidth: "500px", minHeight: "500px" } }}
       hideBackdrop
       open={dialogOpen}
     >
-      <DialogTitle>Purge Messages</DialogTitle>
+      <EnhancedDialogTitle title="Purge Messages" onClose={handleCancel} />
       <DialogContent
         sx={{
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: "flex-start",
+          gap: 1,
           alignItems: "center",
         }}
       >
@@ -123,6 +163,7 @@ const PurgeModal = ({
           isPaused={isPaused}
           purgeInstruction={purgeInstruction}
           total={total}
+          offset={offset}
         />
         <EnhancedTabs tabs={tabs} />
       </DialogContent>

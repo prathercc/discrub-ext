@@ -16,19 +16,15 @@ import { useGuildSlice } from "../../../features/guild/use-guild-slice.ts";
 type PurgeContentProps = {
   isDm?: boolean;
   purgedMessages: PurgedMessage[];
-  handleClose: () => void;
+  handleCancel: () => void;
 };
 
 const PurgeContent = ({
   isDm,
   purgedMessages,
-  handleClose,
+  handleCancel,
 }: PurgeContentProps) => {
-  const {
-    state: appState,
-    setDiscrubCancelled,
-    setDiscrubPaused,
-  } = useAppSlice();
+  const { state: appState } = useAppSlice();
   const task = appState.task();
   const { active, entity } = task;
 
@@ -42,18 +38,6 @@ const PurgeContent = ({
   const selectedDms = dmState.selectedDms();
 
   const { purge } = usePurgeSlice();
-
-  const handleCancel = async () => {
-    if (!!entity || active) {
-      // We are actively deleting, we need to send a cancel request
-      setDiscrubCancelled(true);
-    }
-
-    setDiscrubPaused(false);
-    if (!active) {
-      handleClose();
-    }
-  };
 
   const handlePurge = () => {
     if (isDm && !!selectedDms.length) {

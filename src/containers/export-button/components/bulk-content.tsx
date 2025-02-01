@@ -13,6 +13,10 @@ import { DiscrubSetting } from "../../../enum/discrub-setting";
 import EnhancedTabs, {
   EnhancedTab,
 } from "../../../common-components/enhanced-tabs/enhanced-tabs.tsx";
+import SearchCriteria, {
+  defaultCriteria,
+  SearchCriteriaComponentType,
+} from "../../search-criteria/search-criteria.tsx";
 
 type BulkContentProps = {
   isDm?: boolean;
@@ -93,7 +97,7 @@ const BulkContent = ({
   }
 
   const channelSelectionTab: EnhancedTab = {
-    label: "Channel Selection",
+    label: "Channels",
     getComponent: () => (
       <>
         <DialogContentText>
@@ -116,13 +120,47 @@ const BulkContent = ({
       </>
     ),
   };
+
+  const criteriaTab: EnhancedTab = {
+    label: "Criteria",
+    getComponent: () => (
+      <SearchCriteria
+        isDm={isDm}
+        componentType={SearchCriteriaComponentType.Form}
+        visibleCriteria={defaultCriteria}
+      />
+    ),
+  };
+
   const configurationTab: EnhancedTab = {
     label: "Configuration",
     getComponent: () =>
       getExportSettings(onChangeSettings, visibleSettings, settings),
   };
-  const guildTabs: EnhancedTab[] = [channelSelectionTab, configurationTab];
-  const dmTabs: EnhancedTab[] = [configurationTab];
+
+  const settingsTab: EnhancedTab = {
+    label: "Settings",
+    getComponent: () =>
+      getExportSettings(
+        onChangeSettings,
+        [
+          DiscrubSetting.RANDOM_SEARCH_DELAY,
+          DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
+          DiscrubSetting.REACTIONS_ENABLED,
+          DiscrubSetting.DISPLAY_NAME_LOOKUP,
+          ...(isDm ? [] : [DiscrubSetting.SERVER_NICKNAME_LOOKUP]),
+        ],
+        settings,
+      ),
+  };
+
+  const guildTabs: EnhancedTab[] = [
+    channelSelectionTab,
+    configurationTab,
+    settingsTab,
+    criteriaTab,
+  ];
+  const dmTabs: EnhancedTab[] = [configurationTab, settingsTab, criteriaTab];
 
   return (
     <DialogContent>

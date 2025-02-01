@@ -4,12 +4,13 @@ import MessageMock from "../../message-mock/message-mock.tsx";
 import PurgeMessageStatus, {
   PURGE_MESSAGE_STATUS_ID,
 } from "./purge-message-status.tsx";
-import { AppTaskMessage } from "../../../features/app/app-types.ts";
+import { AppTaskStatus } from "../../../features/app/app-types.ts";
 import { PurgeStatus } from "../../../features/purge/purge-types.ts";
+import Message from "../../../classes/message.ts";
 
 type PurgeMessageProps = {
   style: React.CSSProperties;
-  message: AppTaskMessage;
+  message: Message & AppTaskStatus;
 };
 
 const PurgeMessage = ({ style, message }: PurgeMessageProps) => {

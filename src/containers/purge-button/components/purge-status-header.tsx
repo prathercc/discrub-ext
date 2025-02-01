@@ -11,17 +11,19 @@ import "../css/purge-status-header.css";
 type PurgeStatusHeaderProps = {
   purgeInstruction: PurgeInstruction;
   total: number;
+  offset: number;
   isPaused: boolean;
 };
 
 const PurgeStatusHeader = ({
   purgeInstruction,
   total,
+  offset,
   isPaused,
 }: PurgeStatusHeaderProps) => {
   const map = {
     [PurgeInstruction.PURGING]: {
-      message: `Messages Remaining: ~${total}`,
+      message: `Messages Remaining: ${total}`,
       getIcon: () => <ConstructionIcon />,
     },
     [PurgeInstruction.AWAITING_INSTRUCTION]: {
@@ -33,7 +35,7 @@ const PurgeStatusHeader = ({
       getIcon: () => <CleanHandsIcon />,
     },
     [PurgeInstruction.SEARCHING]: {
-      message: purgeInstruction,
+      message: `Searching - ${offset} / ${total}`,
       getIcon: () => <SearchIcon />,
     },
   };

@@ -1,7 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { wait } from "../../utils";
-import { AppTask, AppState, Timeout, AppSettings } from "./app-types";
-import Message from "../../classes/message";
+import {
+  AppTask,
+  AppState,
+  Timeout,
+  AppSettings,
+  AppTaskEntity,
+} from "./app-types";
 import { AppThunk } from "../../app/store";
 import { DiscrubSetting } from "../../enum/discrub-setting";
 import { SortDirection } from "../../enum/sort-direction";
@@ -55,10 +60,7 @@ export const appSlice = createSlice({
     setIsModifying: (state, { payload }: { payload: boolean }): void => {
       state.task.active = payload;
     },
-    setModifyEntity: (
-      state,
-      { payload }: { payload: Message | Maybe },
-    ): void => {
+    setModifyEntity: (state, { payload }: { payload: AppTaskEntity }): void => {
       state.task.entity = payload;
     },
     setStatus: (state, { payload }: { payload: string | Maybe }): void => {

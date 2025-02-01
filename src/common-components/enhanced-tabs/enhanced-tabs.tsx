@@ -17,10 +17,11 @@ const EnhancedTabs = ({ tabs }: EnhancedTabsProps) => {
     <Box sx={{ width: "100%" }}>
       <AppBar position="static" sx={{ marginBottom: theme.spacing(1) }}>
         <Tabs
-          variant="fullWidth"
           value={selectedTabIndex}
           onChange={(_, idx) => setSelectedTabIndex(idx)}
           centered
+          variant="scrollable"
+          scrollButtons="auto"
         >
           {tabs.map((tab) => (
             <Tab disabled={!!tab.disabled} label={tab.label} />
