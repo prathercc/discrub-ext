@@ -1,12 +1,17 @@
-import { Button } from "@mui/material";
+import { Button, SxProps } from "@mui/material";
 import { useAppSlice } from "../features/app/use-app-slice";
 
 type CancelButtonProps = {
   disabled?: boolean;
   onCancel?: () => void;
+  sx?: SxProps;
 };
 
-const CancelButton = ({ onCancel, disabled = false }: CancelButtonProps) => {
+const CancelButton = ({
+  onCancel,
+  disabled = false,
+  sx = {},
+}: CancelButtonProps) => {
   const {
     state: appState,
     setDiscrubCancelled,
@@ -29,6 +34,7 @@ const CancelButton = ({ onCancel, disabled = false }: CancelButtonProps) => {
       color="secondary"
       variant="contained"
       onClick={handleCancel}
+      sx={{ ...sx }}
     >
       Cancel
     </Button>

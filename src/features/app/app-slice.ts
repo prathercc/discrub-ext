@@ -1,11 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { wait } from "../../utils";
-import { AppTask, AppState, Timeout, AppSettings } from "./app-types";
-import Message from "../../classes/message";
+import {
+  AppTask,
+  AppState,
+  Timeout,
+  AppSettings,
+  AppTaskEntity,
+} from "./app-types";
 import { AppThunk } from "../../app/store";
 import { DiscrubSetting } from "../../enum/discrub-setting";
 import { SortDirection } from "../../enum/sort-direction";
 import { ResolutionType } from "../../enum/resolution-type";
+import { UserDataRefreshRate } from "../../enum/user-data-refresh-rate.ts";
 
 const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
@@ -23,6 +29,9 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
 
   [DiscrubSetting.APP_SHOW_KOFI_FEED]: "true",
+  [DiscrubSetting.APP_USER_DATA_REFRESH_RATE]: UserDataRefreshRate.DAILY,
+
+  [DiscrubSetting.CACHED_USER_MAP]: "{}",
 };
 
 const emptyTask: AppTask = {
@@ -51,10 +60,7 @@ export const appSlice = createSlice({
     setIsModifying: (state, { payload }: { payload: boolean }): void => {
       state.task.active = payload;
     },
-    setModifyEntity: (
-      state,
-      { payload }: { payload: Message | Maybe },
-    ): void => {
+    setModifyEntity: (state, { payload }: { payload: AppTaskEntity }): void => {
       state.task.entity = payload;
     },
     setStatus: (state, { payload }: { payload: string | Maybe }): void => {
@@ -83,9 +89,11 @@ export const {
   setSettings,
 } = appSlice.actions;
 
-export const checkDiscrubPaused =
-  (): AppThunk<Promise<void>> => async (_, getState) => {
+export const isAppStopped =
+  (): AppThunk<Promise<boolean>> => async (_, getState) => {
+    if (getState().app.discrubCancelled) return true;
     while (getState().app.discrubPaused) await wait(2);
+    return getState().app.discrubCancelled;
   };
 
 /**

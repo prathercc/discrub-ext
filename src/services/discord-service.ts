@@ -8,7 +8,7 @@ import { User } from "../classes/user";
 import { QueryStringParam } from "../enum/query-string-param";
 import { ReactionType } from "../enum/reaction-type";
 import { AppSettings } from "../features/app/app-types";
-import { SearchMessageProps } from "../features/message/message-types";
+import { SearchCriteria } from "../features/message/message-types";
 import { AllowedMentionObject } from "../types/allowed-mention-object";
 import { ComponentObject } from "../types/component-object";
 import { DefaultReactionObject } from "../types/default-reaction-object";
@@ -90,7 +90,7 @@ class DiscordService {
     Math.random() * (max - min) + min;
 
   withSearchDelay = async <T = void>(
-    func: () => Promise<DiscordApiResponse<T>>
+    func: () => Promise<DiscordApiResponse<T>>,
   ) => {
     if (this.searchDelaySecs > 0) {
       const delay = this.calculateRandomNumber(this.searchDelaySecs);
@@ -102,7 +102,7 @@ class DiscordService {
   };
 
   withDeleteDelay = async <T = void>(
-    func: () => Promise<DiscordApiResponse<T>>
+    func: () => Promise<DiscordApiResponse<T>>,
   ) => {
     if (this.deleteDelaySecs > 0) {
       const delay = this.calculateRandomNumber(this.deleteDelaySecs);
@@ -115,7 +115,7 @@ class DiscordService {
 
   withRetry = async <T = void>(
     promise: () => Promise<Response>,
-    isBlob: boolean = false
+    isBlob: boolean = false,
   ): Promise<DiscordApiResponse<T>> => {
     let apiResponse: DiscordApiResponse<T> = { success: false };
     try {
@@ -163,8 +163,8 @@ class DiscordService {
             authorization: authorization,
             "user-agent": this.userAgent,
           },
-        })
-      )
+        }),
+      ),
     );
 
   fetchUserData = (authorization: string) =>
@@ -176,7 +176,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchGuildUser = (guildId: string, userId: string, authorization: string) =>
@@ -189,8 +189,8 @@ class DiscordService {
             authorization: authorization,
             "user-agent": this.userAgent,
           },
-        })
-      )
+        }),
+      ),
     );
 
   fetchDirectMessages = (authorization: string) =>
@@ -202,7 +202,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchGuilds = (authorization: string) =>
@@ -214,7 +214,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchRoles = (guildId: string, authorization: string) =>
@@ -226,7 +226,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchChannels = (authorization: string, guildId: string) =>
@@ -238,7 +238,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   fetchChannel = (authorization: string, channelId: string) =>
@@ -251,14 +251,14 @@ class DiscordService {
             authorization: authorization,
             "user-agent": this.userAgent,
           },
-        })
-      )
+        }),
+      ),
     );
 
   editChannel = (
     authorization: string,
     channelId: string,
-    updateObj: ThreadModify | GuildChannelModify
+    updateObj: ThreadModify | GuildChannelModify,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry<Channel>(() =>
@@ -270,15 +270,15 @@ class DiscordService {
             "user-agent": this.userAgent,
           },
           body: JSON.stringify({ ...updateObj }),
-        })
-      )
+        }),
+      ),
     );
 
   editMessage = (
     authorization: string,
     messageId: string,
     updateProps: MessageModify,
-    channelId: string
+    channelId: string,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry<Message>(() =>
@@ -292,15 +292,15 @@ class DiscordService {
               "user-agent": this.userAgent,
             },
             body: JSON.stringify({ ...updateProps }),
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   deleteMessage = (
     authorization: string,
     messageId: string,
-    channelId: string
+    channelId: string,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry(() =>
@@ -313,16 +313,16 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   fetchMessageData = (
     authorization: string,
     lastId: string,
     channelId: string,
-    queryParam: QueryStringParam = QueryStringParam.BEFORE
+    queryParam: QueryStringParam = QueryStringParam.BEFORE,
   ) =>
     this.withSearchDelay(() =>
       this.withRetry<Message[]>(() =>
@@ -337,27 +337,30 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
-  fetchSearchMessageData = (
-    authorization: string,
-    offset: number,
-    channelId: string | Maybe,
-    guildId: string | Maybe,
-    searchCriteria: Partial<SearchMessageProps>
-  ) => {
+  _getSearchParams = (
+    guildId: string | null,
+    channelId: string | null,
+    searchCriteria: SearchCriteria,
+  ): string => {
     const {
-      preFilterUserId,
+      userIds,
       searchAfterDate,
       searchBeforeDate,
       searchMessageContent,
       selectedHasTypes,
+      isPinned,
+      mentionIds,
+      channelIds,
     } = searchCriteria;
+
+    const isDmSearch = !guildId && channelId;
+
     const urlSearchParams = new URLSearchParams({
-      author_id: preFilterUserId || "null",
       min_id: searchAfterDate
         ? this.generateSnowflake(searchAfterDate)
         : "null",
@@ -365,10 +368,25 @@ class DiscordService {
         ? this.generateSnowflake(searchBeforeDate)
         : "null",
       content: searchMessageContent || "null",
-      channel_id: guildId && channelId ? channelId : "null",
+      channel_id: isDmSearch ? "null" : channelId || "null",
       include_nsfw: "true",
+      pinned: isPinned,
     });
-    selectedHasTypes?.forEach((type: string) => {
+
+    if (urlSearchParams.get("channel_id") === "null") {
+      urlSearchParams.delete("channel_id");
+    }
+
+    userIds.forEach((userId: string) => {
+      urlSearchParams.append("author_id", userId);
+    });
+    channelIds.forEach((channelId: string) => {
+      urlSearchParams.append("channel_id", channelId);
+    });
+    mentionIds.forEach((userId: string) => {
+      urlSearchParams.append("mentions", userId);
+    });
+    selectedHasTypes.forEach((type: string) => {
       urlSearchParams.append("has", type);
     });
     const nullKeys: string[] = [];
@@ -381,28 +399,55 @@ class DiscordService {
       urlSearchParams.delete(key);
     });
 
+    return urlSearchParams.toString();
+  };
+
+  _getSearchPath = (
+    guildId: string | null,
+    channelId: string | null,
+    offset: number,
+    searchCriteria: SearchCriteria,
+  ) => {
+    const searchParams = this._getSearchParams(
+      guildId,
+      channelId,
+      searchCriteria,
+    );
+    const endpoint = guildId
+      ? this.DISCORD_GUILDS_ENDPOINT
+      : this.DISCORD_CHANNELS_ENDPOINT;
+    const resourceId = guildId || channelId;
+    const offsetQuery = `${offset > 0 ? `&offset=${offset}` : ""}`;
+    return `${endpoint}/${resourceId}/messages/search?${searchParams}${
+      offsetQuery
+    }`;
+  };
+
+  fetchSearchMessageData = (
+    authorization: string,
+    offset: number,
+    channelId: string | null,
+    guildId: string | null,
+    searchCriteria: SearchCriteria,
+  ) => {
+    const searchPath = this._getSearchPath(
+      guildId,
+      channelId,
+      offset,
+      searchCriteria,
+    );
+
     return this.withSearchDelay(() =>
       this.withRetry<SearchMessageResult>(() =>
-        fetch(
-          `${
-            guildId
-              ? this.DISCORD_GUILDS_ENDPOINT
-              : this.DISCORD_CHANNELS_ENDPOINT
-          }/${
-            guildId || channelId
-          }/messages/search?${urlSearchParams.toString()}${
-            offset > 0 ? `&offset=${offset}` : ""
-          }`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: authorization,
-              "user-agent": this.userAgent,
-            },
-          }
-        )
-      )
+        fetch(searchPath, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authorization,
+            "user-agent": this.userAgent,
+          },
+        }),
+      ),
     );
   };
 
@@ -418,9 +463,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   fetchPublicThreads = (authorization: string, channelId: string) =>
@@ -435,9 +480,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   createDm = (authorization: string, recipient_id: string) =>
@@ -450,12 +495,12 @@ class DiscordService {
           "user-agent": this.userAgent,
         },
         body: JSON.stringify({ recipient_id }),
-      })
+      }),
     );
 
   sendFriendRequest = (
     authorization: string,
-    props: { username: string; discriminator: string }
+    props: { username: string; discriminator: string },
   ) =>
     this.withRetry<unknown>(() =>
       fetch(`${this.DISCORD_USERS_ENDPOINT}/@me/relationships`, {
@@ -466,7 +511,7 @@ class DiscordService {
           "user-agent": this.userAgent,
         },
         body: JSON.stringify(props),
-      })
+      }),
     );
 
   deleteFriendRequest = (authorization: string, userId: string) =>
@@ -478,7 +523,7 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   getRelationships = (authorization: string) =>
@@ -490,12 +535,12 @@ class DiscordService {
           authorization: authorization,
           "user-agent": this.userAgent,
         },
-      })
+      }),
     );
 
   downloadFile = (downloadUrl: string) =>
     this.withSearchDelay(() =>
-      this.withRetry<Blob>(() => fetch(downloadUrl), true)
+      this.withRetry<Blob>(() => fetch(downloadUrl), true),
     );
 
   getReactions = (
@@ -504,7 +549,7 @@ class DiscordService {
     messageId: Snowflake,
     emoji: string,
     type: ReactionType,
-    lastId?: Snowflake | null
+    lastId?: Snowflake | null,
   ) =>
     this.withSearchDelay(() =>
       this.withRetry<User[]>(() =>
@@ -521,16 +566,16 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 
   deleteReaction = (
     authorization: string,
     channelId: Snowflake,
     messageId: Snowflake,
-    emoji: string
+    emoji: string,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry(() =>
@@ -543,9 +588,9 @@ class DiscordService {
               authorization: authorization,
               "user-agent": this.userAgent,
             },
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
 }
 

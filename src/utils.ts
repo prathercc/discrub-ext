@@ -19,6 +19,12 @@ import {
 } from "./features/export/export-types";
 import { ReactingUser } from "./components/reaction-list-item-button";
 import { MessageType } from "./enum/message-type";
+import { SearchCriteria } from "./features/message/message-types.ts";
+import { addDays, addSeconds, isAfter, toDate } from "date-fns";
+import { UserDataRefreshRate } from "./enum/user-data-refresh-rate.ts";
+import { IsPinnedType } from "./enum/is-pinned-type.ts";
+import { SortDirection } from "./enum/sort-direction.ts";
+import { START_OFFSET } from "./features/message/contants.ts";
 
 /**
  *
@@ -481,4 +487,125 @@ export const isRemovableMessage = (message: Message): boolean => {
     MessageType.CHANNEL_ICON_CHANGE,
     MessageType.THREAD_STARTER_MESSAGE,
   ].some((t) => messageTypeEquals(message.type, t));
+};
+
+export const isCriteriaActive = (searchCritera: SearchCriteria) => {
+  const {
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes,
+    userIds,
+    isPinned,
+    mentionIds,
+    channelIds,
+  } = searchCritera;
+  return [
+    searchBeforeDate,
+    searchAfterDate,
+    searchMessageContent,
+    selectedHasTypes.length,
+    userIds.length,
+    isPinned !== IsPinnedType.UNSET,
+    mentionIds.length,
+    channelIds.length,
+  ].some((c) => c);
+};
+
+export const isUserDataStale = (
+  timestamp: number = new Date().getTime(),
+  appUserDataRefreshRate: string,
+) => {
+  if (appUserDataRefreshRate === UserDataRefreshRate.ALWAYS) {
+    return true;
+  }
+
+  const today = new Date();
+  let staleDate = toDate(timestamp);
+
+  switch (appUserDataRefreshRate) {
+    case UserDataRefreshRate.HOURLY:
+      staleDate = addSeconds(staleDate, 3600);
+      break;
+    case UserDataRefreshRate.DAILY: {
+      staleDate = addDays(staleDate, 1);
+      break;
+    }
+    case UserDataRefreshRate.WEEKLY: {
+      staleDate = addDays(staleDate, 7);
+      break;
+    }
+    case UserDataRefreshRate.MONTHLY: {
+      staleDate = addDays(staleDate, 30);
+      break;
+    }
+    case UserDataRefreshRate.NEVER: {
+      staleDate = addDays(staleDate, 5000);
+      break;
+    }
+    default:
+      break;
+  }
+
+  return isAfter(today, staleDate);
+};
+
+/**
+ * Sort and return the provided Channel array by name.
+ * @param channels
+ */
+export const getSortedChannels = (channels: Channel[]) => {
+  return channels
+    .map((c) => new Channel({ ...c }))
+    .sort((a, b) =>
+      sortByProperty(
+        { name: String(a.name).toLowerCase() },
+        { name: String(b.name).toLowerCase() },
+        "name",
+      ),
+    );
+};
+
+/**
+ * Sort and return the provided Guild array by name.
+ * @param guilds
+ */
+export const getSortedGuilds = (guilds: Guild[]) => {
+  return guilds
+    .map((g) => new Guild({ ...g }))
+    .sort((a, b) =>
+      sortByProperty(
+        { name: a.name.toLowerCase() },
+        { name: b.name.toLowerCase() },
+        "name",
+      ),
+    );
+};
+
+/**
+ * Sort and return messages by their date
+ * @param messages
+ * @param sortDirection
+ */
+export const getSortedMessages = (
+  messages: Message[],
+  sortDirection: SortDirection = SortDirection.DESCENDING,
+) => {
+  return messages
+    .map((m) => new Message({ ...m }))
+    .sort((a, b) =>
+      sortByProperty(
+        Object.assign(a, { date: new Date(a.timestamp) }),
+        Object.assign(b, { date: new Date(b.timestamp) }),
+        "date",
+        sortDirection,
+      ),
+    );
+};
+
+export const isSearchComplete = (
+  searchOffSet: number = START_OFFSET,
+  completeCount: number = START_OFFSET,
+) => {
+  return searchOffSet >= completeCount;
 };

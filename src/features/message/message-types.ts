@@ -4,6 +4,7 @@ import { FilterName } from "../../enum/filter-name";
 import { FilterType } from "../../enum/filter-type";
 import { HasType } from "../../enum/has-type";
 import { SortDirection } from "../../enum/sort-direction";
+import { IsPinnedType } from "../../enum/is-pinned-type.ts";
 
 export type MessageState = {
   messages: Message[]; // Message objects
@@ -13,10 +14,7 @@ export type MessageState = {
   isLoading: boolean | Maybe;
   order: SortDirection;
   orderBy: keyof Message;
-  searchBeforeDate: Date | Maybe;
-  searchAfterDate: Date | Maybe;
-  searchMessageContent: string | Maybe;
-  selectedHasTypes: HasType[];
+  searchCriteria: SearchCriteria;
 };
 
 export type Filter =
@@ -59,15 +57,27 @@ export type MessageData = {
   messages: Message[];
 };
 
-export type SearchMessageProps = {
-  preFilterUserId: string | Maybe;
-  searchAfterDate: Date | Maybe;
-  searchBeforeDate: Date | Maybe;
-  searchMessageContent: string | Maybe;
-  selectedHasTypes: string[];
+export type SearchResultData = {
+  offset: number;
+  searchCriteria: SearchCriteria;
+  totalMessages: number;
 };
 
 export type MessageSearchOptions = {
-  preFilterUserId: string | Maybe;
-  excludeReactions: boolean | Maybe;
+  excludeReactions?: boolean;
+  excludeUserLookups?: boolean;
+  startOffSet?: number;
+  endOffSet?: number;
+  searchCriteriaOverrides?: Partial<SearchCriteria>;
+};
+
+export type SearchCriteria = {
+  searchBeforeDate: Date | Maybe;
+  searchAfterDate: Date | Maybe;
+  searchMessageContent: string | Maybe;
+  selectedHasTypes: HasType[];
+  userIds: string[];
+  mentionIds: string[];
+  channelIds: string[];
+  isPinned: IsPinnedType;
 };

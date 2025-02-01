@@ -1,97 +1,62 @@
-import {
-  Autocomplete,
-  AutocompleteInputChangeReason,
-  TextField,
-} from "@mui/material";
 import Tooltip from "../common-components/tooltip/tooltip";
-import ClearIcon from "@mui/icons-material/Clear";
 import { useDmSlice } from "../features/dm/use-dm-slice";
 import { useGuildSlice } from "../features/guild/use-guild-slice";
+import EnhancedAutocomplete from "../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
+import { useMessageSlice } from "../features/message/use-message-slice.ts";
+import { useState } from "react";
+import Box from "@mui/material/Box";
 
 type PrefilterUserProps = {
   isDm?: boolean;
-  purge?: boolean;
   disabled?: boolean;
 };
 
-function PrefilterUser({
-  isDm = false,
-  purge = false,
-  disabled = false,
-}: PrefilterUserProps) {
-  const { state: dmState, setPreFilterUserId: setDmPreFilterUserId } =
-    useDmSlice();
-  const dmPreFilterUserId = dmState.preFilterUserId();
+function PrefilterUser({ isDm = false, disabled = false }: PrefilterUserProps) {
+  const [filterUsers, setFilterUsers] = useState<string[]>([]);
+
+  const { state: messageState, setSearchCriteria } = useMessageSlice();
+  const { userIds } = messageState.searchCriteria();
+
+  const { state: dmState } = useDmSlice();
   const dmPreFilterUsers = dmState.preFilterUsers();
 
-  const { state: guildState, setPreFilterUserId } = useGuildSlice();
-  const preFilterUserId = guildState.preFilterUserId();
+  const { state: guildState } = useGuildSlice();
   const preFilterUsers = guildState.preFilterUsers();
 
   const users = isDm ? dmPreFilterUsers : preFilterUsers;
-  const value = isDm ? dmPreFilterUserId : preFilterUserId;
-
-  const handleSetUserId = (id: Snowflake | Maybe) => {
-    isDm ? setDmPreFilterUserId(id) : setPreFilterUserId(id);
-  };
-
-  const getDisplayValue = (): string => {
-    const foundUser = users.find((user) => user.id === value);
-    return foundUser?.name || (isDm || !value ? "" : value);
-  };
-
-  const handleChange = (
-    _: React.SyntheticEvent<Element, Event>,
-    newValue: string,
-    reason: AutocompleteInputChangeReason
-  ) => {
-    if (reason === "input") {
-      handleSetUserId(newValue);
-    } else if (reason === "reset") {
-      const foundUser = users.find((user) => user.name === newValue);
-      handleSetUserId(foundUser ? foundUser.id : null);
-    } else {
-      handleSetUserId(null);
-    }
-  };
-
-  const toolTipTitle = isDm
-    ? "Messages By"
-    : `${purge ? "Purge" : "Messages"} By`;
-
-  const toolTipDescription = isDm
-    ? "Search messages by User"
-    : `${purge ? "Purge" : "Search"} messages by User or User Id`;
-
-  const textfieldLabel = isDm
-    ? "Messages By"
-    : `${purge ? "Purge" : "Messages"} By`;
 
   return (
     <Tooltip
       arrow
-      title={toolTipTitle}
-      description={toolTipDescription}
+      title="Messages By"
+      description="Search messages by User(s)"
       placement="left"
     >
-      <Autocomplete
-        sx={{ width: "100%" }}
-        clearIcon={<ClearIcon />}
-        freeSolo={!isDm}
-        onInputChange={handleChange}
-        options={users?.map((user) => user.name || user.id)}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="filled"
-            fullWidth
-            size="small"
-            label={textfieldLabel}
-          />
-        )}
-        value={getDisplayValue()}
-        disabled={disabled}
-      />
+      <Box>
+        <EnhancedAutocomplete
+          disabled={disabled}
+          label="Users"
+          onChange={(value) => {
+            if (Array.isArray(value)) {
+              setFilterUsers(value);
+              setSearchCriteria({ userIds: value });
+              // TODO: Perhaps we can perform User lookups here for new entries, add to prefilterUsers if id belongs to a valid User.
+            }
+          }}
+          onInputChange={(value) => {
+            if (Array.isArray(value) && !filterUsers.length) {
+              setSearchCriteria({ userIds: value });
+            }
+          }}
+          freeSolo
+          options={users?.map((user) => user.id)}
+          value={userIds}
+          multiple
+          getOptionLabel={(id) =>
+            users.find((user) => user.id === id)?.name || id
+          }
+        />
+      </Box>
     </Tooltip>
   );
 }

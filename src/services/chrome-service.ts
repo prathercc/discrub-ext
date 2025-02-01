@@ -4,6 +4,7 @@ import { DiscrubSetting } from "../enum/discrub-setting";
 import { ResolutionType } from "../enum/resolution-type";
 import { SortDirection } from "../enum/sort-direction";
 import { AppSettings } from "../features/app/app-types";
+import { UserDataRefreshRate } from "../enum/user-data-refresh-rate.ts";
 
 type ChromeCallback = (param: string) => Promise<void> | void | Maybe;
 
@@ -48,6 +49,12 @@ const defaultSettings = [
   },
 
   { name: DiscrubSetting.APP_SHOW_KOFI_FEED, value: "true" },
+  {
+    name: DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
+    value: UserDataRefreshRate.DAILY,
+  },
+
+  { name: DiscrubSetting.CACHED_USER_MAP, value: "{}" },
 ];
 
 export const initializeSettings = async () => {
@@ -94,6 +101,11 @@ export const getSettings = async (): Promise<AppSettings> => {
 
     [DiscrubSetting.APP_SHOW_KOFI_FEED]:
       chromeSettings[DiscrubSetting.APP_SHOW_KOFI_FEED],
+    [DiscrubSetting.APP_USER_DATA_REFRESH_RATE]:
+      chromeSettings[DiscrubSetting.APP_USER_DATA_REFRESH_RATE],
+
+    [DiscrubSetting.CACHED_USER_MAP]:
+      chromeSettings[DiscrubSetting.CACHED_USER_MAP],
   };
 };
 

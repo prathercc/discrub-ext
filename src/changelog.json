@@ -1,5 +1,18 @@
 [
   {
+    "version": "1.12.5",
+    "changes": [
+      "Search Criteria can now support selections with multiple Users.",
+      "Purge Dialog has been overhauled.",
+      "User data can now be cached, to prevent unnecessary lookups, new setting has been added to adjust frequency of refresh.",
+      "Add Pinned to Search Criteria.",
+      "Add Mentioned Users to Search Criteria.",
+      "Add Channels to Search Criteria (Purge only).",
+      "Purging now deletes messages as they are found.",
+      "Show settings on Export dialog."
+    ]
+  },
+  {
     "version": "1.12.4",
     "changes": [
       "Paginate Ko-Fi Feed and make feed hide-able.",

@@ -1,27 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {
-  deleteMessage,
-  getMessageData,
-  resetMessageData,
-} from "../message/message-slice";
+import { deleteRawMessage, retrieveMessages } from "../message/message-slice";
 import { liftThreadRestrictions } from "../thread/thread-slice";
 import {
-  checkDiscrubPaused,
+  isAppStopped,
+  resetModify,
   setDiscrubCancelled,
   setIsModifying,
   setModifyEntity,
-  setTimeoutMessage as notify,
-  resetModify,
 } from "../app/app-slice";
-import { PurgeState } from "./purge-types";
+import { PurgeState, PurgeStatus } from "./purge-types";
 import { AppThunk } from "../../app/store";
 import Channel from "../../classes/channel";
 import Message from "../../classes/message";
-import { isDm, isRemovableMessage } from "../../utils";
+import { isRemovableMessage, isSearchComplete } from "../../utils";
+import Guild from "../../classes/guild.ts";
+import { isGuild } from "../../app/guards.ts";
+import { MessageData, SearchResultData } from "../message/message-types.ts";
+import { OFFSET_INCREMENT, START_OFFSET } from "../message/contants.ts";
 
 const initialState: PurgeState = {
   isLoading: null,
-  purgeChannel: null,
 };
 
 export const purgeSlice = createSlice({
@@ -31,93 +29,125 @@ export const purgeSlice = createSlice({
     setIsLoading: (state, { payload }: { payload: boolean }): void => {
       state.isLoading = payload;
     },
-    setPurgeChannel: (
-      state,
-      { payload }: { payload: Channel | null }
-    ): void => {
-      state.purgeChannel = payload;
-    },
   },
 });
 
-export const { setIsLoading, setPurgeChannel } = purgeSlice.actions;
+export const { setIsLoading } = purgeSlice.actions;
 
+/**
+ * Purge messages from an array of DMs or Guilds.
+ * @param entities
+ */
 export const purge =
-  (channels: Channel[]): AppThunk =>
+  (entities: Channel[] | Guild[]): AppThunk =>
   async (dispatch, getState) => {
-    const { currentUser } = getState().user;
-    if (currentUser) {
-      const { selectedGuild, preFilterUserId } = getState().guild;
-      dispatch(setIsModifying(true));
-      for (const entity of channels) {
-        const { discrubCancelled } = getState().app;
-        if (discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
-        dispatch(setPurgeChannel(entity));
-        dispatch(setModifyEntity(null));
-        await dispatch(
-          notify({ message: "Searching for messages...", timeout: 1 })
+    const { searchCriteria } = getState().message;
+
+    dispatch(setIsModifying(true));
+    for (const entity of entities) {
+      if (await dispatch(isAppStopped())) break;
+      let payload: MessageData & Partial<SearchResultData> = {
+        messages: [],
+        threads: [],
+        totalMessages: 0,
+        offset: START_OFFSET,
+        searchCriteria: searchCriteria,
+      };
+
+      const guildId = isGuild(entity) ? entity.id : null;
+      const channelId = isGuild(entity) ? null : entity.id;
+
+      let isResetPurge = false;
+      let skipThreadIds: string[] = [];
+      const trackedMessageIds: string[] = [];
+
+      do {
+        const offset = payload.offset || START_OFFSET;
+        if (offset === START_OFFSET) isResetPurge = true;
+
+        dispatch(
+          setModifyEntity({ _offset: offset, _total: payload.totalMessages }),
         );
-        dispatch(resetMessageData());
-        await dispatch(
-          getMessageData(selectedGuild?.id, entity.id, {
-            preFilterUserId: isDm(entity) ? currentUser.id : preFilterUserId,
-            excludeReactions: true,
-          })
-        );
-        const selectedMessages: Message[] = getState().message.messages;
-        const selectedCount = selectedMessages.length;
-        if (selectedCount === 0) {
-          await dispatch(notify({ message: "Still searching...", timeout: 1 }));
-        }
 
-        let threadIds: Snowflake[] = []; // Thread Id's that we do NOT have permission to modify
-        for (const [count, currentRow] of selectedMessages.entries()) {
-          const { discrubCancelled } = getState().app;
-          if (discrubCancelled) break;
-          await dispatch(checkDiscrubPaused());
+        const options = {
+          excludeReactions: true,
+          excludeUserLookups: true,
+          startOffSet: offset,
+          endOffSet: offset + OFFSET_INCREMENT,
+          searchCriteriaOverrides: { ...(payload.searchCriteria || {}) },
+        };
 
-          threadIds = await dispatch(
-            liftThreadRestrictions({
-              channelId: currentRow.channel_id,
-              noPermissionThreadIds: threadIds,
-            })
-          );
+        payload = await dispatch(retrieveMessages(guildId, channelId, options));
 
-          const modifyEntity = Object.assign(new Message({ ...currentRow }), {
-            _index: count + 1,
-            _total: selectedCount,
-          });
+        // Message ids that deletes should not be attempted for
+        const skipMessageIds = [...trackedMessageIds];
 
-          dispatch(setModifyEntity(modifyEntity));
-
-          const isMissingPermission = threadIds.some(
-            (tId) => tId === currentRow.channel_id
-          );
-          if (isMissingPermission) {
-            await dispatch(
-              notify({
-                message: "Permission missing for message, skipping delete",
-                timeout: 1,
-              })
-            );
-          } else if (isRemovableMessage(currentRow)) {
-            const success = await dispatch(deleteMessage(currentRow));
-            if (!success) {
-              await dispatch(
-                notify({
-                  message: "You do not have permission to modify this message!",
-                  timeout: 0.5,
-                })
-              );
-            }
+        payload.messages.forEach((m) => {
+          if (!trackedMessageIds.some((id) => id === m.id)) {
+            trackedMessageIds.push(m.id);
+            isResetPurge = false; // Unique Messages still exist
           }
-        }
+        });
+
+        // We have restarted twice without seeing a unique message, Purge is complete.
+        if (payload.offset === START_OFFSET && isResetPurge) break;
+
+        await dispatch(
+          _purgeMessages(
+            payload.messages,
+            payload.threads,
+            skipThreadIds,
+            skipMessageIds,
+            {
+              totalMessages: payload.totalMessages,
+            },
+          ),
+        );
+      } while (!isSearchComplete(payload.offset, payload.totalMessages));
+    }
+    dispatch(resetModify());
+    dispatch(setDiscrubCancelled(false));
+  };
+
+export const _purgeMessages =
+  (
+    messages: Message[],
+    threads: Channel[],
+    skipThreadIds: string[],
+    skipMessageIds: string[],
+    { totalMessages }: Partial<SearchResultData> = {},
+  ): AppThunk<Promise<void>> =>
+  async (dispatch, _getState) => {
+    const filteredMessages = messages.filter(
+      (m) => !skipMessageIds.some((id) => id === m.id),
+    );
+    for (const [index, message] of filteredMessages.entries()) {
+      if (await dispatch(isAppStopped())) break;
+
+      skipThreadIds = await dispatch(
+        liftThreadRestrictions(message.channel_id, skipThreadIds, threads),
+      );
+
+      let modifyEntity = Object.assign(new Message({ ...message }), {
+        _index: index + 1,
+        _total: Number(totalMessages) - index,
+        _status: PurgeStatus.IN_PROGRESS,
+      });
+
+      dispatch(setModifyEntity(modifyEntity));
+
+      const isMissingPermission = skipThreadIds.some(
+        (id) => id === message.channel_id,
+      );
+      if (isMissingPermission) {
+        modifyEntity._status = PurgeStatus.MISSING_PERMISSION;
+      } else if (isRemovableMessage(message)) {
+        const success = await dispatch(deleteRawMessage(message));
+        modifyEntity._status = success
+          ? PurgeStatus.REMOVED
+          : PurgeStatus.MISSING_PERMISSION;
       }
-      dispatch(resetModify());
-      dispatch(resetMessageData());
-      dispatch(setDiscrubCancelled(false));
-      dispatch(setPurgeChannel(null));
+      dispatch(setModifyEntity(modifyEntity));
     }
   };
 

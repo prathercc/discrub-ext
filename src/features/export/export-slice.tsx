@@ -22,7 +22,7 @@ import {
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
 import {
-  checkDiscrubPaused,
+  isAppStopped,
   resetStatus,
   setDiscrubCancelled,
   setStatus,
@@ -62,6 +62,8 @@ import DiscordService from "../../services/discord-service";
 import { MediaType } from "../../enum/media-type";
 import { isAttachment } from "../../app/guards.ts";
 import hljs from "highlight.js";
+import { setSetting } from "../../services/chrome-service.ts";
+import { DiscrubSetting } from "../../enum/discrub-setting.ts";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -91,6 +93,7 @@ export const exportSlice = createSlice({
       state,
       { payload }: { payload: ExportUserMap },
     ): void => {
+      setSetting(DiscrubSetting.CACHED_USER_MAP, JSON.stringify(payload));
       state.exportMaps.userMap = payload;
     },
     setExportEmojiMap: (
@@ -241,9 +244,7 @@ const _downloadFilesFromMessage =
       if (shouldPerformDownload) {
         const downloadUrls = getMediaUrls(entity);
         for (const [dI, downloadUrl] of downloadUrls.entries()) {
-          const { discrubCancelled } = getState().app;
-          if (discrubCancelled) break;
-          await dispatch(checkDiscrubPaused());
+          if (await dispatch(isAppStopped())) break;
           const { exportMaps } = getState().export;
           const map = exportMaps.mediaMap;
 
@@ -279,9 +280,8 @@ const _downloadRoles =
   async (dispatch, getState) => {
     const guildRoles = guild.roles || [];
     for (const [_, role] of guildRoles.entries()) {
-      const { discrubCancelled, settings } = getState().app;
-      if (discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      const { settings } = getState().app;
+      if (await dispatch(isAppStopped())) break;
 
       const { exportMaps } = getState().export;
       const iconUrl = resolveRoleUrl(role.id, role.icon).remote;
@@ -332,9 +332,8 @@ const _downloadAvatarFromMessage =
     }
 
     for (const [_, aL] of avatarLookups.entries()) {
-      const { discrubCancelled, settings } = getState().app;
-      if (discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      const { settings } = getState().app;
+      if (await dispatch(isAppStopped())) break;
 
       const { avatarMap } = getState().export.exportMaps;
       const idAndAvatar = `${aL.id}/${aL.avatar}`;
@@ -740,9 +739,7 @@ const _downloadEmojisFromMessage =
 
     if (emojiReferences.length) {
       for (const { id, name } of emojiReferences) {
-        const { discrubCancelled } = getState().app;
-        if (discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         const { exportMaps } = getState().export;
         if (!exportMaps.emojiMap[id]) {
           const { success, data } = await new DiscordService(
@@ -785,12 +782,10 @@ const _processMessages =
     paths,
     exportUtils,
   }: ProcessMessagesProps): AppThunk<Promise<void>> =>
-  async (dispatch, getState) => {
+  async (dispatch, _getState) => {
     for (const [i, message] of messages.entries()) {
       await wait(!i ? 3 : 0);
-      const { discrubCancelled } = getState().app;
-      if (discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
 
       await dispatch(
         _downloadFilesFromMessage({ message, exportUtils, paths, index: i }),
@@ -960,9 +955,7 @@ const _compressMessages =
 
       while (getState().export.currentPage <= totalPages) {
         const currentPage = getState().export.currentPage;
-        const { discrubCancelled } = getState().app;
-        await dispatch(checkDiscrubPaused());
-        if (discrubCancelled) break;
+        if (await dispatch(isAppStopped())) break;
         if (format === ExportType.MEDIA) {
           dispatch(setStatus("Cleaning up..."));
         } else {
@@ -1044,8 +1037,7 @@ export const exportMessages =
 
     await dispatch(_processMessages({ messages, paths, exportUtils }));
 
-    if (messages.length > 0 && !getState().app.discrubCancelled) {
-      await dispatch(checkDiscrubPaused());
+    if (messages.length > 0 && !(await dispatch(isAppStopped()))) {
       await dispatch(
         _compressMessages({
           messages,
@@ -1057,8 +1049,7 @@ export const exportMessages =
       );
     }
 
-    await dispatch(checkDiscrubPaused());
-    if (!getState().app.discrubCancelled) {
+    if (!(await dispatch(isAppStopped()))) {
       dispatch(setStatus("Preparing Archive"));
       await exportUtils.generateZip();
     }
@@ -1079,7 +1070,6 @@ export const exportChannels =
     channels: Channel[],
     exportUtils: ExportUtils,
     format: ExportType,
-    userId?: Snowflake,
   ): AppThunk =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
@@ -1105,10 +1095,9 @@ export const exportChannels =
 
       let exportMessages: Message[] = [];
 
+      //TODO: Use retrieveMessages instead
       const messageData = await dispatch(
-        getMessageData(selectedGuild?.id, entity.id, {
-          preFilterUserId: userId,
-        }),
+        getMessageData(selectedGuild?.id || null, entity.id),
       );
 
       if (messageData) {
@@ -1132,8 +1121,7 @@ export const exportChannels =
       );
 
       if (exportMessages.length > 0) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         await dispatch(
           _compressMessages({
             messages: exportMessages,
@@ -1145,11 +1133,9 @@ export const exportChannels =
         );
       }
 
-      if (getState().app.discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
     }
-    await dispatch(checkDiscrubPaused());
-    if (!getState().app.discrubCancelled) {
+    if (!(await dispatch(isAppStopped()))) {
       dispatch(setStatus("Preparing Archive"));
       await exportUtils.generateZip();
     }

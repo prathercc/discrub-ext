@@ -50,8 +50,8 @@ function Tags() {
 
   const { state: messageState, getMessageData } = useMessageSlice();
   const messagesLoading = messageState.isLoading();
-  const searchBeforeDate = messageState.searchBeforeDate();
-  const searchAfterDate = messageState.searchAfterDate();
+  const searchCriteria = messageState.searchCriteria();
+  const { searchBeforeDate, searchAfterDate } = searchCriteria;
 
   const { state: appState } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
@@ -93,8 +93,8 @@ function Tags() {
       sortByProperty(
         { name: a.name.toLowerCase() },
         { name: b.name.toLowerCase() },
-        "name"
-      )
+        "name",
+      ),
     );
   const sortedChannels = channels
     .map((c) => new Channel({ ...c }))
@@ -102,26 +102,26 @@ function Tags() {
       sortByProperty(
         { name: String(a.name).toLowerCase() },
         { name: String(b.name).toLowerCase() },
-        "name"
-      )
+        "name",
+      ),
     );
 
   const downloadCsv = (
     content: unknown[] = [],
-    type = Tag.TAGS_MADE_BY_USER
+    type = Tag.TAGS_MADE_BY_USER,
   ) => {
     if (!generateBtnDisabled) {
       const dateFormat = "MMM do yyyy";
       const fileName = `${selectedGuild.name} ${selectedChannel.name} ${format(
         searchAfterDate,
-        dateFormat
+        dateFormat,
       )} to ${format(searchBeforeDate, dateFormat)} ${getTagName(type)}.csv`;
 
       const element = document.createElement("a");
       element.setAttribute(
         "href",
         "data:text/plain;charset=utf-8," +
-          encodeURIComponent(Papa.unparse(content))
+          encodeURIComponent(Papa.unparse(content)),
       );
       element.setAttribute("download", getSafeExportName(fileName));
       element.style.display = "none";
@@ -141,13 +141,13 @@ function Tags() {
       let { messages } = (await getMessageData(
         selectedGuild.id,
         selectedChannel.id,
-        { excludeReactions: true }
+        { excludeReactions: true },
       )) || { messages: [] };
       const mentionMap: MentionMap = {};
 
       if (skipReplies) {
         messages = messages.filter(
-          (message) => !messageTypeEquals(message.type, MessageType.REPLY)
+          (message) => !messageTypeEquals(message.type, MessageType.REPLY),
         );
       }
 

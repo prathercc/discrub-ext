@@ -28,13 +28,9 @@ function BeforeAndAfterFields({
     label: "Messages Before",
   },
 }: BeforeAndAfterFieldsProps) {
-  const {
-    state: messageState,
-    setSearchAfterDate,
-    setSearchBeforeDate,
-  } = useMessageSlice();
-  const searchAfterDate = messageState.searchAfterDate();
-  const searchBeforeDate = messageState.searchBeforeDate();
+  const { state: messageState, setSearchCriteria } = useMessageSlice();
+  const searchCriteria = messageState.searchCriteria();
+  const { searchAfterDate, searchBeforeDate } = searchCriteria;
 
   return (
     <Stack
@@ -50,7 +46,7 @@ function BeforeAndAfterFields({
         placement="left"
       >
         <DateTimePicker
-          onDateChange={(e) => setSearchAfterDate(e)}
+          onDateChange={(e) => setSearchCriteria({ searchAfterDate: e })}
           label={afterProps.label}
           disabled={disabled}
           value={searchAfterDate}
@@ -63,7 +59,7 @@ function BeforeAndAfterFields({
         placement="right"
       >
         <DateTimePicker
-          onDateChange={(e) => setSearchBeforeDate(e)}
+          onDateChange={(e) => setSearchCriteria({ searchBeforeDate: e })}
           label={beforeProps.label}
           disabled={disabled}
           value={searchBeforeDate}

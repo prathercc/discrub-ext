@@ -1,11 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   getEncodedEmoji,
+  getSortedMessages,
+  isCriteriaActive,
   isDm,
   isGuildForum,
   isRemovableMessage,
+  isSearchComplete,
+  isUserDataStale,
   messageTypeEquals,
-  sortByProperty,
   stringToBool,
 } from "../../utils";
 import Message from "../../classes/message";
@@ -18,7 +21,6 @@ import {
   setThreads,
 } from "../thread/thread-slice";
 import {
-  checkDiscrubPaused,
   resetModify,
   setDiscrubCancelled,
   setIsModifying,
@@ -26,6 +28,7 @@ import {
   setTimeoutMessage as notify,
   setStatus,
   resetStatus,
+  isAppStopped,
 } from "../app/app-slice";
 import { MessageRegex } from "../../enum/message-regex";
 import {
@@ -41,10 +44,10 @@ import {
   MessageData,
   MessageSearchOptions,
   MessageState,
-  SearchMessageProps,
+  SearchCriteria,
+  SearchResultData,
 } from "./message-types";
 import { SortDirection } from "../../enum/sort-direction";
-import { HasType } from "../../enum/has-type";
 import { FilterType } from "../../enum/filter-type";
 import { FilterName } from "../../enum/filter-name";
 import Attachment from "../../classes/attachment";
@@ -61,11 +64,13 @@ import { Reaction } from "../../classes/reaction";
 import { ReactionType } from "../../enum/reaction-type";
 import { MessageCategory } from "../../enum/message-category";
 import DiscordService from "../../services/discord-service";
+import { IsPinnedType } from "../../enum/is-pinned-type.ts";
+import { MAX_OFFSET, OFFSET_INCREMENT, START_OFFSET } from "./contants.ts";
 
 const _descendingComparator = <Message>(
   a: Message,
   b: Message,
-  orderBy: keyof Message
+  orderBy: keyof Message,
 ) => {
   return b[orderBy] < a[orderBy] ? -1 : b[orderBy] > a[orderBy] ? 1 : 0;
 };
@@ -78,10 +83,16 @@ const initialState: MessageState = {
   isLoading: null,
   order: SortDirection.ASCENDING,
   orderBy: "timestamp",
-  searchBeforeDate: null,
-  searchAfterDate: null,
-  searchMessageContent: null,
-  selectedHasTypes: [],
+  searchCriteria: {
+    searchBeforeDate: null,
+    searchAfterDate: null,
+    searchMessageContent: null,
+    selectedHasTypes: [],
+    userIds: [],
+    mentionIds: [],
+    channelIds: [],
+    isPinned: IsPinnedType.UNSET,
+  },
 };
 
 export const messageSlice = createSlice({
@@ -91,33 +102,20 @@ export const messageSlice = createSlice({
     setIsLoading: (state, { payload }: { payload: boolean }): void => {
       state.isLoading = payload;
     },
-    setSelectedHasTypes: (state, { payload }: { payload: HasType[] }): void => {
-      state.selectedHasTypes = payload;
-    },
-    setSearchMessageContent: (
+    setSearchCriteria: (
       state,
-      { payload }: { payload: string | Maybe }
+      { payload }: { payload: Partial<SearchCriteria> },
     ): void => {
-      state.searchMessageContent = payload;
-    },
-    setSearchBeforeDate: (
-      state,
-      { payload }: { payload: Date | Maybe }
-    ): void => {
-      state.searchBeforeDate = payload;
-    },
-    setSearchAfterDate: (
-      state,
-      { payload }: { payload: Date | Maybe }
-    ): void => {
-      state.searchAfterDate = payload;
+      state.searchCriteria = { ...state.searchCriteria, ...payload };
     },
     setSelected: (state, { payload }: { payload: Snowflake[] }): void => {
       state.selectedMessages = payload;
     },
     setOrder: (
       state,
-      { payload }: { payload: { order: SortDirection; orderBy: keyof Message } }
+      {
+        payload,
+      }: { payload: { order: SortDirection; orderBy: keyof Message } },
     ): void => {
       const { order, orderBy } = payload;
       state.order = order;
@@ -125,12 +123,12 @@ export const messageSlice = createSlice({
       state.messages = state.messages.sort(
         payload.order === SortDirection.DESCENDING
           ? (a, b) => _descendingComparator(a, b, orderBy)
-          : (a, b) => -_descendingComparator(a, b, orderBy)
+          : (a, b) => -_descendingComparator(a, b, orderBy),
       );
       state.filteredMessages = state.filteredMessages.sort(
         payload.order === SortDirection.DESCENDING
           ? (a, b) => _descendingComparator(a, b, orderBy)
-          : (a, b) => -_descendingComparator(a, b, orderBy)
+          : (a, b) => -_descendingComparator(a, b, orderBy),
       );
     },
     setMessages: (state, { payload }: { payload: Message[] }): void => {
@@ -149,15 +147,12 @@ export const messageSlice = createSlice({
       state.filteredMessages = [];
     },
     resetAdvancedFilters: (state): void => {
-      state.searchBeforeDate = null;
-      state.searchAfterDate = null;
-      state.searchMessageContent = null;
-      state.selectedHasTypes = [];
+      state.searchCriteria = initialState.searchCriteria;
     },
     updateFilters: (state, { payload }: { payload: Filter }): void => {
       const { filterName, filterValue, filterType } = payload;
       const filteredList = state.filters.filter(
-        (x) => x.filterName !== filterName
+        (x) => x.filterName !== filterName,
       );
       let retFilters: Filter[] = [];
       if (filterType === FilterType.TEXT) {
@@ -209,7 +204,7 @@ export const messageSlice = createSlice({
         } else {
           // Remove the toggle from filters
           retFilters = filteredList.filter(
-            (filter) => filter.filterName !== filterName
+            (filter) => filter.filterName !== filterName,
           );
         }
       } else if (filterType === FilterType.ARRAY) {
@@ -238,7 +233,7 @@ const _filterMessageType = (
   _filterValue: string[],
   message: Message,
   inverseActive: boolean,
-  threads: Channel[]
+  threads: Channel[],
 ): boolean => {
   const messageHasType = _filterValue.some((fv) => {
     return (
@@ -263,7 +258,7 @@ const _filterMessageType = (
 const _filterThread = (
   filterValue: Snowflake,
   message: Message,
-  inverseActive: boolean
+  inverseActive: boolean,
 ): boolean => {
   const { channel_id, thread } = message;
   const isFromThread = channel_id === filterValue || thread?.id === filterValue;
@@ -281,7 +276,7 @@ const _filterThread = (
 const _filterEndTime = (
   filterValue: Date,
   message: Message,
-  inverseActive: boolean
+  inverseActive: boolean,
 ): boolean => {
   const endTime = filterValue.getTime();
   const rowTime = Date.parse(message.timestamp);
@@ -300,7 +295,7 @@ const _filterEndTime = (
 const _filterStartTime = (
   filterValue: Date,
   message: Message,
-  inverseActive: boolean
+  inverseActive: boolean,
 ): boolean => {
   const startTime = filterValue.getTime();
   const rowTime = Date.parse(message.timestamp);
@@ -320,7 +315,7 @@ const _filterText = (
   filterName: keyof Message,
   filterValue: string | string[],
   message: Message,
-  inverseActive: boolean
+  inverseActive: boolean,
 ): boolean => {
   const messagePropertyValue = message[filterName];
   if (typeof messagePropertyValue === "string") {
@@ -340,12 +335,12 @@ const _filterText = (
 const _filterAttachmentName = (
   filterValue: string | string[],
   message: Message,
-  inverseActive: boolean
+  inverseActive: boolean,
 ) => {
   const csvAttachments = message.attachments.map((a) => a.filename).join();
   const attachmentsIncludeValue = Array.isArray(filterValue)
     ? filterValue.some((fv) =>
-        csvAttachments.toLowerCase().includes(fv.toLowerCase())
+        csvAttachments.toLowerCase().includes(fv.toLowerCase()),
       )
     : csvAttachments.toLowerCase().includes(filterValue.toLowerCase());
 
@@ -361,7 +356,7 @@ const _filterAttachmentName = (
 const _filterMessageContent = (
   filterValue: string | string[],
   message: Message,
-  inverseActive: boolean
+  inverseActive: boolean,
 ) => {
   const contentContainsValue = Array.isArray(filterValue)
     ? filterValue.some((fv) => message.content.includes(fv))
@@ -382,14 +377,14 @@ const _filterMessageContent = (
         ].some((prop) =>
           Array.isArray(filterValue)
             ? filterValue.some((fv) => prop?.includes(fv))
-            : prop?.includes(filterValue)
+            : prop?.includes(filterValue),
         ) ||
           fields?.some((field) =>
             [field.name, field.value].some((fieldProp) =>
               Array.isArray(filterValue)
                 ? filterValue.some((fv) => fieldProp?.includes(fv))
-                : fieldProp?.includes(filterValue)
-            )
+                : fieldProp?.includes(filterValue),
+            ),
           ))
       );
     });
@@ -408,10 +403,7 @@ const _filterMessageContent = (
 
 export const {
   setIsLoading,
-  setSelectedHasTypes,
-  setSearchMessageContent,
-  setSearchBeforeDate,
-  setSearchAfterDate,
+  setSearchCriteria,
   setSelected,
   setOrder,
   setMessages,
@@ -443,20 +435,20 @@ export const filterMessages =
                 criteriaMet = _filterAttachmentName(
                   param.filterValue,
                   x,
-                  inverseActive
+                  inverseActive,
                 );
               } else if (param.filterName === FilterName.CONTENT) {
                 criteriaMet = _filterMessageContent(
                   param.filterValue,
                   x,
-                  inverseActive
+                  inverseActive,
                 );
               } else {
                 criteriaMet = _filterText(
                   param.filterName,
                   param.filterValue,
                   x,
-                  inverseActive
+                  inverseActive,
                 );
               }
               return criteriaMet;
@@ -465,13 +457,13 @@ export const filterMessages =
                 criteriaMet = _filterStartTime(
                   param.filterValue,
                   x,
-                  inverseActive
+                  inverseActive,
                 );
               } else if (param.filterName === FilterName.END_TIME) {
                 criteriaMet = _filterEndTime(
                   param.filterValue,
                   x,
-                  inverseActive
+                  inverseActive,
                 );
               }
             } else if (param.filterType === FilterType.THREAD) {
@@ -483,7 +475,7 @@ export const filterMessages =
                   param.filterValue,
                   x,
                   inverseActive,
-                  threads
+                  threads,
                 );
               }
             }
@@ -498,8 +490,8 @@ export const filterMessages =
       setSelected(
         retArr
           .filter((m) => state.selectedMessages.some((mId) => m.id === mId))
-          .map((m) => m.id)
-      )
+          .map((m) => m.id),
+      ),
     );
   };
 
@@ -507,7 +499,7 @@ export const deleteReaction =
   (
     channelId: Snowflake,
     messageId: Snowflake,
-    emoji: string
+    emoji: string,
   ): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
@@ -516,10 +508,10 @@ export const deleteReaction =
     const { messages, filteredMessages } = getState().message;
     const message = messages.find((m) => m.id === messageId);
     const reaction = message?.reactions?.find(
-      (r) => getEncodedEmoji(r.emoji) === emoji
+      (r) => getEncodedEmoji(r.emoji) === emoji,
     );
     const isBurst = !!reactionMap[messageId]?.[emoji]?.find(
-      (r) => r.id === currentUser?.id
+      (r) => r.id === currentUser?.id,
     )?.burst;
 
     if (token && message && reaction) {
@@ -528,7 +520,7 @@ export const deleteReaction =
         token,
         channelId,
         messageId,
-        emoji
+        emoji,
       );
       if (success) {
         const updatedMessage = {
@@ -556,14 +548,14 @@ export const deleteReaction =
           return m;
         });
         const updatedFilterMessages = filteredMessages.map((message) =>
-          message.id === updatedMessage.id ? updatedMessage : message
+          message.id === updatedMessage.id ? updatedMessage : message,
         );
         const updatedReactionMap = {
           ...reactionMap,
           [messageId]: {
             ...reactionMap[messageId],
             [emoji]: reactionMap[messageId][emoji].filter(
-              (er) => er.id !== currentUser?.id
+              (er) => er.id !== currentUser?.id,
             ),
           },
         };
@@ -585,18 +577,13 @@ export const deleteAttachment =
         (message.content && message.content.length > 0) ||
         message.attachments.length > 1;
 
-      await dispatch(
-        liftThreadRestrictions({
-          channelId: message.channel_id,
-          noPermissionThreadIds: [],
-        })
-      );
+      await dispatch(liftThreadRestrictions(message.channel_id, []));
 
       dispatch(setIsModifying(true));
       if (shouldEdit) {
         const updatedMessage = Object.assign(new Message({ ...message }), {
           attachments: message.attachments.filter(
-            (attch) => attch.id !== attachment.id
+            (attch) => attch.id !== attachment.id,
           ),
         });
         const success = await dispatch(updateMessage(updatedMessage));
@@ -605,7 +592,7 @@ export const deleteAttachment =
             notify({
               message: "Entire message must be deleted to remove attachment!",
               timeout: 0.5,
-            })
+            }),
           );
         } else {
           dispatch(setModifyEntity(updatedMessage));
@@ -617,7 +604,7 @@ export const deleteAttachment =
             notify({
               message: "You do not have permission to delete this attachment!",
               timeout: 0.5,
-            })
+            }),
           );
         } else {
           dispatch(setModifyEntity(null));
@@ -642,17 +629,17 @@ export const updateMessage =
           content: message.content,
           attachments: message.attachments,
         },
-        message.channel_id
+        message.channel_id,
       );
 
       if (success && data) {
         const { messages, filteredMessages } = getState().message;
         const updatedMessage = new Message(data);
         const updatedMessages = messages.map((message) =>
-          message.id === updatedMessage.id ? updatedMessage : message
+          message.id === updatedMessage.id ? updatedMessage : message,
         );
         const updatedFilterMessages = filteredMessages.map((message) =>
-          message.id === updatedMessage.id ? updatedMessage : message
+          message.id === updatedMessage.id ? updatedMessage : message,
         );
         const updatedModifyMessage =
           modifyMessage?.id === updatedMessage.id
@@ -675,27 +662,23 @@ export const editMessages =
     dispatch(setIsModifying(true));
     let noPermissionThreadIds: Snowflake[] = [];
     for (const message of messages) {
-      if (getState().app.discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
 
       noPermissionThreadIds = await dispatch(
-        liftThreadRestrictions({
-          channelId: message.channel_id,
-          noPermissionThreadIds,
-        })
+        liftThreadRestrictions(message.channel_id, noPermissionThreadIds),
       );
 
       dispatch(setModifyEntity(message));
 
       const isMissingPermission = noPermissionThreadIds.some(
-        (tId) => tId === message.channel_id
+        (tId) => tId === message.channel_id,
       );
       if (isMissingPermission) {
         await dispatch(
           notify({
             message: "Permission missing for message, skipping edit",
             timeout: 1,
-          })
+          }),
         );
       } else {
         let success = false;
@@ -705,8 +688,8 @@ export const editMessages =
             updateMessage(
               Object.assign(new Message({ ...message }), {
                 content: updateText,
-              })
-            )
+              }),
+            ),
           );
         }
 
@@ -715,7 +698,7 @@ export const editMessages =
             notify({
               message: "You do not have permission to modify this message!",
               timeout: 2,
-            })
+            }),
           );
         }
       }
@@ -724,9 +707,14 @@ export const editMessages =
     dispatch(setDiscrubCancelled(false));
   };
 
-export const deleteMessage =
+/**
+ * Delete a message without updating Message State
+ * @param message
+ * @returns The result of the deletion
+ */
+export const deleteRawMessage =
   (message: Message): AppThunk<Promise<boolean>> =>
-  async (dispatch, getState) => {
+  async (_dispatch, getState) => {
     const { settings } = getState().app;
     const { token } = getState().user;
 
@@ -734,30 +722,40 @@ export const deleteMessage =
       const { success } = await new DiscordService(settings).deleteMessage(
         token,
         message.id,
-        message.channel_id
+        message.channel_id,
       );
       if (success) {
-        const { messages, filteredMessages, selectedMessages } =
-          getState().message;
-        const updatedMessages = messages.filter(
-          ({ id: messageId }) => messageId !== message.id
-        );
-        const updatedFilterMessages = filteredMessages.filter(
-          ({ id: messageId }) => messageId !== message.id
-        );
-        const updatedSelectMessages = selectedMessages.filter(
-          (messageId) => messageId !== message.id
-        );
-
-        dispatch(setMessages(updatedMessages));
-        dispatch(setFilteredMessages(updatedFilterMessages));
-        dispatch(setSelected(updatedSelectMessages));
-
         return true;
       }
     }
 
     return false;
+  };
+
+export const deleteMessage =
+  (message: Message): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    const result = await dispatch(deleteRawMessage(message));
+
+    if (result) {
+      const { messages, filteredMessages, selectedMessages } =
+        getState().message;
+      const updatedMessages = messages.filter(
+        ({ id: messageId }) => messageId !== message.id,
+      );
+      const updatedFilterMessages = filteredMessages.filter(
+        ({ id: messageId }) => messageId !== message.id,
+      );
+      const updatedSelectMessages = selectedMessages.filter(
+        (messageId) => messageId !== message.id,
+      );
+
+      dispatch(setMessages(updatedMessages));
+      dispatch(setFilteredMessages(updatedFilterMessages));
+      dispatch(setSelected(updatedSelectMessages));
+    }
+
+    return result;
   };
 
 export const deleteMessages =
@@ -766,20 +764,16 @@ export const deleteMessages =
     deleteConfig: DeleteConfiguration = {
       attachments: true,
       messages: true,
-    }
+    },
   ): AppThunk =>
   async (dispatch, getState) => {
     dispatch(setIsModifying(true));
     let noPermissionThreadIds: Snowflake[] = [];
     for (const [count, currentRow] of messages.entries()) {
-      if (getState().app.discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
 
       noPermissionThreadIds = await dispatch(
-        liftThreadRestrictions({
-          channelId: currentRow.channel_id,
-          noPermissionThreadIds,
-        })
+        liftThreadRestrictions(currentRow.channel_id, noPermissionThreadIds),
       );
 
       dispatch(
@@ -787,18 +781,18 @@ export const deleteMessages =
           Object.assign(new Message({ ...currentRow }), {
             _index: count + 1,
             _total: messages.length,
-          })
-        )
+          }),
+        ),
       );
       const isMissingPermission = noPermissionThreadIds.some(
-        (tId) => tId === currentRow.channel_id
+        (tId) => tId === currentRow.channel_id,
       );
       if (isMissingPermission) {
         await dispatch(
           notify({
             message: "Permission missing for message, skipping delete",
             timeout: 1,
-          })
+          }),
         );
       } else {
         const shouldDelete =
@@ -810,7 +804,7 @@ export const deleteMessages =
 
         if (shouldDelete && !getState().app.discrubCancelled) {
           const success = await dispatch(
-            deleteMessage(new Message({ ...currentRow }))
+            deleteMessage(new Message({ ...currentRow })),
           );
 
           if (!success) {
@@ -818,7 +812,7 @@ export const deleteMessages =
               notify({
                 message: "You do not have permission to modify this message!",
                 timeout: 2,
-              })
+              }),
             );
           }
         } else if (shouldEdit && !getState().app.discrubCancelled) {
@@ -826,16 +820,18 @@ export const deleteMessages =
             updateMessage(
               Object.assign(
                 new Message({ ...currentRow }),
-                deleteConfig.attachments ? { attachments: [] } : { content: "" }
-              )
-            )
+                deleteConfig.attachments
+                  ? { attachments: [] }
+                  : { content: "" },
+              ),
+            ),
           );
           if (!success) {
             await dispatch(
               notify({
                 message: "You do not have permission to modify this message!",
                 timeout: 2,
-              })
+              }),
             );
           }
         } else break;
@@ -855,7 +851,7 @@ export const resetMessageData = (): AppThunk => (dispatch) => {
 const _fetchReactingUserIds =
   (
     message: Message,
-    encodedEmoji: string
+    encodedEmoji: string,
   ): AppThunk<Promise<ExportReaction[]>> =>
   async (dispatch, getState) => {
     const exportReactions: ExportReaction[] = [];
@@ -866,24 +862,23 @@ const _fetchReactingUserIds =
       let reachedEnd = false;
       let lastId = null;
       while (!reachedEnd) {
-        if (getState().app.discrubCancelled || !token) break;
-        await dispatch(checkDiscrubPaused());
+        if ((await dispatch(isAppStopped())) || !token) break;
         const { success, data } = await new DiscordService(
-          settings
+          settings,
         ).getReactions(
           token,
           message.channel_id,
           message.id,
           encodedEmoji,
           type,
-          lastId
+          lastId,
         );
         if (success && data && data.length) {
           data.forEach((u) =>
             exportReactions.push({
               id: u.id,
               burst: type === ReactionType.BURST,
-            })
+            }),
           );
           lastId = data[data.length - 1].id;
         } else {
@@ -903,8 +898,7 @@ const _generateReactionMap =
     const filteredMessages = messages.filter((m) => !!m.reactions?.length);
     for (const [mI, message] of filteredMessages.entries()) {
       reactionMap[message.id] = {};
-      if (getState().app.discrubCancelled) break;
-      await dispatch(checkDiscrubPaused());
+      if (await dispatch(isAppStopped())) break;
 
       if (message.reactions?.length && token) {
         for (const [i, reaction] of message.reactions.entries()) {
@@ -919,11 +913,10 @@ const _generateReactionMap =
           } ${brackets}${emoji.name}${brackets}`;
           dispatch(setStatus(status));
 
-          if (getState().app.discrubCancelled || !encodedEmoji) break;
-          await dispatch(checkDiscrubPaused());
+          if ((await dispatch(isAppStopped())) || !encodedEmoji) break;
 
           reactionMap[message.id][encodedEmoji] = await dispatch(
-            _fetchReactingUserIds(message, encodedEmoji)
+            _fetchReactingUserIds(message, encodedEmoji),
           );
         }
       }
@@ -932,113 +925,85 @@ const _generateReactionMap =
     dispatch(setExportReactionMap(reactionMap));
   };
 
-export const getMessageData =
+/**
+ * Retrieve message data without mutating MessageState
+ * @param guildId
+ * @param channelId
+ * @param options
+ */
+export const retrieveMessages =
   (
-    guildId: Snowflake | Maybe,
-    channelId: Snowflake | Maybe,
-    options: Partial<MessageSearchOptions> = {}
-  ): AppThunk<Promise<MessageData | void>> =>
+    guildId: string | null,
+    channelId: string | null,
+    options: Partial<MessageSearchOptions> = {},
+  ): AppThunk<Promise<MessageData & Partial<SearchResultData>>> =>
   async (dispatch, getState) => {
-    dispatch(resetMessageData());
     const { token } = getState().user;
-    const {
-      searchBeforeDate,
-      searchAfterDate,
-      searchMessageContent,
-      selectedHasTypes,
-    } = getState().message;
     const { settings } = getState().app;
+    const searchCriteria: SearchCriteria = {
+      ...getState().message.searchCriteria,
+      ...(options.searchCriteriaOverrides || {}),
+    };
+
+    let payload: MessageData & Partial<SearchResultData> = {
+      messages: [],
+      threads: [],
+      totalMessages: 0,
+      offset: 0,
+      searchCriteria: searchCriteria,
+    };
 
     if (token) {
-      dispatch(setIsLoading(true));
-
-      let retArr: Message[] = [];
-      let retThreads: Channel[] = [];
-
-      const criteriaExists = [
-        options.preFilterUserId,
-        searchBeforeDate,
-        searchAfterDate,
-        searchMessageContent,
-        selectedHasTypes.length,
-      ].some((c) => c);
-
-      if (criteriaExists) {
-        ({ messages: retArr, threads: retThreads } = await dispatch(
-          _getSearchMessages(
-            channelId,
-            guildId,
-            {
-              preFilterUserId: options.preFilterUserId,
-              searchBeforeDate,
-              searchAfterDate,
-              searchMessageContent,
-              selectedHasTypes,
-            },
-            options
-          )
-        ));
+      if (isCriteriaActive(searchCriteria)) {
+        payload = await dispatch(
+          _getSearchMessages(channelId, guildId, searchCriteria, options),
+        );
       } else if (channelId) {
-        ({ messages: retArr, threads: retThreads } = await dispatch(
-          _getMessages(channelId)
-        ));
+        payload = await dispatch(_getMessages(channelId));
       }
-
-      let payload: MessageData = {
-        threads: [],
-        messages: [],
-      };
 
       if (!getState().app.discrubCancelled) {
         const reactionsEnabled = stringToBool(settings.reactionsEnabled);
         if (!options.excludeReactions && reactionsEnabled) {
-          await dispatch(_generateReactionMap(retArr));
+          await dispatch(_generateReactionMap(payload.messages));
         }
-        const userMap = await dispatch(_getUserMap(retArr));
-        await dispatch(_collectUserNames(userMap));
-        if (guildId) {
-          await dispatch(_collectUserGuildData(userMap, guildId));
-          dispatch(getPreFilterUsers(guildId));
-        }
-
-        if (!getState().app.discrubCancelled) {
-          payload = {
-            threads: retThreads,
-            messages: retArr,
-          };
+        if (!options.excludeUserLookups) {
+          const userMap = await dispatch(_getUserMap(payload.messages));
+          await dispatch(_collectUserNames(userMap));
+          if (guildId) {
+            await dispatch(_collectUserGuildData(userMap, guildId));
+            dispatch(getPreFilterUsers(guildId));
+          }
         }
       }
-      const sortedMessages = payload.messages
-        .map((m) => new Message({ ...m }))
-        .sort((a, b) =>
-          sortByProperty(
-            Object.assign(a, { date: new Date(a.timestamp) }),
-            Object.assign(b, { date: new Date(b.timestamp) }),
-            "date",
-            "desc"
-          )
-        );
-      dispatch(setThreads(payload.threads));
-      dispatch(setMessages(sortedMessages));
-      dispatch(setIsLoading(false));
       dispatch(resetStatus());
-
-      const { active, entity } = getState().app.task;
-      const { isGenerating, isExporting } = getState().export;
-      const purgingOrExporting = [
-        active,
-        entity,
-        isGenerating,
-        isExporting,
-      ].some((c) => !!c);
-
-      if (!purgingOrExporting) {
-        // If we are purging or exporting, we need to allow those respective slices to handle this.
-        dispatch(setDiscrubCancelled(false));
-      }
-
-      return payload;
     }
+
+    return payload;
+  };
+
+export const getMessageData =
+  (
+    guildId: string | null,
+    channelId: string | null,
+    options: Partial<MessageSearchOptions> = {},
+  ): AppThunk<Promise<MessageData & Partial<SearchResultData>>> =>
+  async (dispatch, _getState) => {
+    dispatch(resetMessageData());
+    dispatch(setIsLoading(true));
+
+    const payload = await dispatch(
+      retrieveMessages(guildId, channelId, options),
+    );
+
+    dispatch(setThreads(payload.threads));
+    dispatch(setMessages(getSortedMessages(payload.messages)));
+    dispatch(setIsLoading(false));
+    dispatch(resetStatus());
+
+    dispatch(setDiscrubCancelled(false)); // TODO: What if we are exporting?
+
+    return payload;
   };
 
 const _getUserMap =
@@ -1075,7 +1040,7 @@ const _getUserMap =
           if (mentionId && !userMap[mentionId]) {
             userMap[mentionId] = existingUserMap[mentionId] || defaultMapping;
           }
-        }
+        },
       );
 
       if (reactionsEnabled) {
@@ -1100,7 +1065,7 @@ const _collectUserNames =
   (userMap: ExportUserMap): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
-    const { displayNameLookup } = settings;
+    const { displayNameLookup, appUserDataRefreshRate } = settings;
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
@@ -1108,20 +1073,23 @@ const _collectUserNames =
     if (token && stringToBool(displayNameLookup)) {
       const userIds = Object.keys(updateMap);
       for (const [i, userId] of userIds.entries()) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         const mapping = existingUserMap[userId] || updateMap[userId];
-        const { userName, displayName } = mapping;
+        const { userName, displayName, timestamp } = mapping;
 
         const status = `Alias Lookup (${i + 1} of ${
           userIds.length
         }): ${userId}`;
         dispatch(setStatus(status));
 
-        if (!userName && !displayName) {
+        const isMissingOrStale =
+          (!userName && !displayName) ||
+          isUserDataStale(timestamp, appUserDataRefreshRate);
+
+        if (isMissingOrStale) {
           const { success, data } = await new DiscordService(settings).getUser(
             token,
-            userId
+            userId,
           );
           if (success && data) {
             updateMap[userId] = {
@@ -1129,6 +1097,7 @@ const _collectUserNames =
               userName: data.username,
               displayName: data.global_name,
               avatar: data.avatar,
+              timestamp: Date.now(),
             };
           } else {
             const errorMsg = `Unable to retrieve data from userId: ${userId}`;
@@ -1145,7 +1114,7 @@ const _collectUserGuildData =
   (userMap: ExportUserMap, guildId: Snowflake): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
-    const { serverNickNameLookup } = settings;
+    const { serverNickNameLookup, appUserDataRefreshRate } = settings;
     const { token } = getState().user;
     const { userMap: existingUserMap } = getState().export.exportMaps;
     const updateMap = { ...userMap };
@@ -1153,8 +1122,7 @@ const _collectUserGuildData =
     if (token && stringToBool(serverNickNameLookup)) {
       const userIds = Object.keys(updateMap);
       for (const [i, userId] of userIds.entries()) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         const userMapping = existingUserMap[userId] || updateMap[userId];
         const userGuilds = userMapping.guilds;
 
@@ -1163,9 +1131,16 @@ const _collectUserGuildData =
         }): ${userId}`;
         dispatch(setStatus(status));
 
-        if (!userGuilds[guildId]) {
+        const isMissingOrStale =
+          !userGuilds[guildId] ||
+          isUserDataStale(
+            userGuilds[guildId].timestamp,
+            appUserDataRefreshRate,
+          );
+
+        if (isMissingOrStale) {
           const { success, data } = await new DiscordService(
-            settings
+            settings,
           ).fetchGuildUser(guildId, userId, token);
 
           if (success && data) {
@@ -1177,6 +1152,7 @@ const _collectUserGuildData =
                   roles: data.roles,
                   nick: data.nick,
                   joinedAt: format(parseISO(data.joined_at), "MMM d, yyyy"),
+                  timestamp: Date.now(),
                 },
               },
             };
@@ -1187,7 +1163,12 @@ const _collectUserGuildData =
               ...userMapping,
               guilds: {
                 ...userGuilds,
-                [guildId]: { roles: [], nick: null, joinedAt: null },
+                [guildId]: {
+                  roles: [],
+                  nick: null,
+                  joinedAt: null,
+                  timestamp: Date.now(),
+                },
               },
             };
           }
@@ -1208,8 +1189,7 @@ const _resolveMessageReactions =
 
     if (token) {
       for (const [i, message] of messages.entries()) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
 
         const status = `Reaction Allocation (${i + 1} of ${messages.length}): ${
           message.id
@@ -1218,12 +1198,12 @@ const _resolveMessageReactions =
 
         if (!trackMap[message.id]) {
           const { success, data } = await new DiscordService(
-            settings
+            settings,
           ).fetchMessageData(
             token,
             message.id,
             message.channel_id,
-            QueryStringParam.AROUND
+            QueryStringParam.AROUND,
           );
 
           if (success && data) {
@@ -1243,76 +1223,161 @@ const _resolveMessageReactions =
     return retArr;
   };
 
+const _getNextSearchData = (
+  message: Message,
+  offset: number,
+  totalMessages: number,
+  isEndConditionMet: boolean,
+  searchCriteria: SearchCriteria,
+  endOffSet?: number,
+) => {
+  const searchData = {
+    offset: offset,
+    isEndConditionMet: isEndConditionMet,
+    searchCriteria: searchCriteria,
+  };
+  const nextOffSet = offset + OFFSET_INCREMENT;
+  const isMaxOffset = offset === MAX_OFFSET;
+  const isLimitedResults =
+    !!endOffSet && isSearchComplete(nextOffSet, endOffSet);
+  const isAllResults = isSearchComplete(nextOffSet, totalMessages);
+
+  if (isMaxOffset) {
+    Object.assign(searchData, {
+      offset: START_OFFSET,
+      searchCriteria: {
+        ...searchCriteria,
+        searchBeforeDate: parseISO(message.timestamp),
+      },
+    });
+  } else if (isAllResults) {
+    Object.assign(searchData, {
+      isEndConditionMet: true,
+      offset: START_OFFSET,
+    });
+  } else if (isLimitedResults) {
+    Object.assign(searchData, { isEndConditionMet: true, offset: nextOffSet });
+  } else {
+    Object.assign(searchData, { offset: nextOffSet });
+  }
+
+  return searchData;
+};
+
+const _getNextSearchStatus = (
+  threads: Channel[],
+  messages: Message[],
+  totalMessages: number,
+  channel?: Channel,
+) => {
+  let status = "";
+  if (isGuildForum(channel)) {
+    status = `Fetched ${threads.length} Threads`;
+  } else {
+    const channelName = channel?.name || "";
+    const ratio = `${messages.length} / ${totalMessages}`;
+    status = `Fetched ${ratio} Messages ${channelName}`;
+  }
+  return status;
+};
+
 const _getSearchMessages =
   (
-    channelId: Snowflake | Maybe,
-    guildId: Snowflake | Maybe,
-    searchCriteria: Partial<SearchMessageProps>,
-    { excludeReactions }: Partial<MessageSearchOptions> = {}
-  ): AppThunk<Promise<MessageData>> =>
+    channelId: string | null,
+    guildId: string | null,
+    searchCriteria: SearchCriteria,
+    {
+      excludeReactions,
+      startOffSet,
+      endOffSet,
+    }: Partial<MessageSearchOptions> = {},
+  ): AppThunk<Promise<MessageData & SearchResultData>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
     const { token } = getState().user;
     const { channels } = getState().channel;
     const { dms } = getState().dm;
-    const channel =
-      channels.find((c) => c.id === channelId) ||
-      dms.find((c) => c.id === channelId);
-    let retArr: Message[] = [];
-    const retThreads: Channel[] = [];
+    const combinedChannels = [...channels, ...dms];
+    const channel = combinedChannels.find((c) => c.id === channelId);
+
+    let knownMessages: Message[] = [];
+    const knownThreads: Channel[] = [];
+    let { offset, isEndConditionMet, criteria, totalMessages } = {
+      offset: startOffSet || 0,
+      isEndConditionMet: false,
+      criteria: { ...searchCriteria },
+      totalMessages: 0,
+    };
 
     if (token) {
-      let offset = 0;
-      let reachedEnd = false;
-      let criteria = { ...searchCriteria };
-      let totalMessages = 0;
-      while (!reachedEnd) {
-        await dispatch(checkDiscrubPaused());
-        if (getState().app.discrubCancelled) break;
+      while (!isEndConditionMet) {
+        if (await dispatch(isAppStopped())) break;
 
         const { success, data } = await new DiscordService(
-          settings
+          settings,
         ).fetchSearchMessageData(token, offset, channelId, guildId, criteria);
 
         if (success && data) {
-          const { total_results, messages = [], threads = [] } = data || {};
-          if (!totalMessages && total_results) {
-            totalMessages = total_results;
-          }
-          if (messages.length === 0) break;
-          for (const th of threads)
-            if (!retThreads.find((eTh) => eTh.id === th.id))
-              retThreads.push(th);
-          const foundMessages = messages.flat();
-          // Max offset is 5000, need to reset offset and update/set searchBeforeDate
-          if (offset === 5000) {
-            const { timestamp } = foundMessages[foundMessages.length - 1];
-            criteria = { ...criteria, searchBeforeDate: parseISO(timestamp) };
-            offset = 0;
-          } else if (offset >= total_results) reachedEnd = true;
-          else offset += 25;
+          let { total_results, messages = [], threads = [] } = data;
+          const isResultsFound = !!total_results || messages.length > 0;
 
-          for (const m of foundMessages) {
-            if (_messageTypeAllowed(m.type)) retArr.push(m);
+          // Ensure totalMessages is up-to-date so that _getSearchData can assign the correct offset
+          totalMessages = total_results;
+
+          if (!isResultsFound) {
+            break;
           }
 
-          const threadStatus = `Fetched ${retThreads.length} Threads`;
-          const status = `Fetched ${retArr.length}/${totalMessages} Messages ${
-            channel?.name ? `(${channel.name})` : ""
-          }`;
-          dispatch(setStatus(isGuildForum(channel) ? threadStatus : status));
+          for (const t of threads) {
+            const isKnownThread = knownThreads.some((k) => k.id === t.id);
+            if (!isKnownThread) {
+              knownThreads.push(t);
+            }
+          }
+
+          messages = messages.flat();
+          const lastMessage = messages[messages.length - 1];
+          ({
+            isEndConditionMet,
+            offset,
+            searchCriteria: criteria,
+          } = _getNextSearchData(
+            lastMessage,
+            offset,
+            totalMessages,
+            isEndConditionMet,
+            criteria,
+            endOffSet,
+          ));
+
+          for (const m of messages) {
+            if (_messageTypeAllowed(m.type)) knownMessages.push(m);
+          }
+
+          const status = _getNextSearchStatus(
+            knownThreads,
+            knownMessages,
+            totalMessages,
+            channel,
+          );
+          dispatch(setStatus(status));
         } else {
-          reachedEnd = true;
+          isEndConditionMet = true;
         }
       }
+
       const reactionsEnabled = stringToBool(settings.reactionsEnabled);
-      if (!excludeReactions && reactionsEnabled)
-        retArr = await dispatch(_resolveMessageReactions(retArr));
+      if (!excludeReactions && reactionsEnabled) {
+        knownMessages = await dispatch(_resolveMessageReactions(knownMessages));
+      }
     }
     dispatch(resetStatus());
     return {
-      messages: retArr,
-      threads: retThreads,
+      messages: knownMessages,
+      threads: knownThreads,
+      offset: offset, // The next offset to use for an additional search
+      searchCriteria: criteria, // The Search Criteria at the time the search ended (mutated by _getNextSearchData)
+      totalMessages: totalMessages, // The total amount of messages that exist for the search
     };
   };
 
@@ -1341,6 +1406,7 @@ const _getMessages =
   async (dispatch, getState) => {
     const { channels } = getState().channel;
     const { dms } = getState().dm;
+    const { searchCriteria } = getState().message;
     const channel =
       channels.find((c) => channelId === c.id) ||
       dms.find((d) => channelId === d.id);
@@ -1350,7 +1416,11 @@ const _getMessages =
     if (channel) {
       if (isGuildForum(channel)) {
         const { threads } = await dispatch(
-          _getSearchMessages(channelId, channel.guild_id, {})
+          _getSearchMessages(
+            channelId,
+            channel.guild_id || null,
+            searchCriteria,
+          ),
         );
         threads.forEach((t) => {
           if (!trackedThreads.some((tt) => tt.id === t.id)) {
@@ -1359,7 +1429,7 @@ const _getMessages =
         });
       } else {
         (await dispatch(_getMessagesFromChannel(channelId))).forEach((m) =>
-          messages.push(m)
+          messages.push(m),
         );
       }
 
@@ -1371,13 +1441,13 @@ const _getMessages =
         threadsFromMessages.forEach((ft) => trackedThreads.push(ft));
 
         const archivedThreads = await dispatch(
-          getArchivedThreads({ channelId, knownThreads: trackedThreads })
+          getArchivedThreads({ channelId, knownThreads: trackedThreads }),
         );
         archivedThreads.forEach((at) => trackedThreads.push(at));
 
         for (const thread of trackedThreads) {
           (await dispatch(_getMessagesFromChannel(thread.id))).forEach((m) =>
-            messages.push(m)
+            messages.push(m),
           );
         }
       }
@@ -1399,17 +1469,16 @@ const _getMessagesFromChannel =
 
     if (token) {
       while (!reachedEnd) {
-        if (getState().app.discrubCancelled) break;
-        await dispatch(checkDiscrubPaused());
+        if (await dispatch(isAppStopped())) break;
         const { success, data } = await new DiscordService(
-          settings
+          settings,
         ).fetchMessageData(token, lastId, channelId);
 
         if (success && data) {
           if (data.length < 100) reachedEnd = true;
           if (data.length > 0) lastId = data[data.length - 1].id;
           const hasValidMessages = Boolean(
-            data[0]?.content || data[0]?.attachments
+            data[0]?.content || data[0]?.attachments,
           );
           if (hasValidMessages) {
             data

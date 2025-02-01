@@ -5,6 +5,7 @@ import {
 } from "./purge-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import Channel from "../../classes/channel";
+import Guild from "../../classes/guild.ts";
 
 const usePurgeSlice = () => {
   const dispatch = useAppDispatch();
@@ -12,12 +13,8 @@ const usePurgeSlice = () => {
   const useIsLoading = (): boolean | Maybe =>
     useAppSelector((state: RootState) => state.purge.isLoading);
 
-  const usePurgeChannel = (): Channel | null =>
-    useAppSelector((state: RootState) => state.purge.purgeChannel);
-
   const state = {
     isLoading: useIsLoading,
-    purgeChannel: usePurgeChannel,
   };
 
   const setIsLoading = (value: boolean): void => {
@@ -27,8 +24,8 @@ const usePurgeSlice = () => {
   /**
    * Iterates through the provided array and deletes every message from each Channel.
    */
-  const purge = (channels: Channel[]) => {
-    dispatch(purgeAction(channels));
+  const purge = (entities: Channel[] | Guild[]) => {
+    dispatch(purgeAction(entities));
   };
 
   return {

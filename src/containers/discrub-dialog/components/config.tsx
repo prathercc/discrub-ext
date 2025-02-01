@@ -29,6 +29,7 @@ import { stringToBool } from "../../../utils";
 import { ResolutionType } from "../../../enum/resolution-type";
 import { MediaType } from "../../../enum/media-type";
 import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
+import { UserDataRefreshRate } from "../../../enum/user-data-refresh-rate.ts";
 
 type ConfigProps = {
   settings: AppSettings;
@@ -98,6 +99,20 @@ function Config({
       ],
       description:
         "Having this setting set to 'Yes' will ensure that User mentions are correctly displayed, even if the mentioned User is not apart of the conversation. It is recommended to keep this setting enabled.",
+    },
+    {
+      name: DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
+      label: "User Data Refresh Rate",
+      options: [
+        { value: UserDataRefreshRate.ALWAYS, name: "Always" },
+        { value: UserDataRefreshRate.HOURLY, name: "Hourly" },
+        { value: UserDataRefreshRate.DAILY, name: "Daily" },
+        { value: UserDataRefreshRate.WEEKLY, name: "Weekly" },
+        { value: UserDataRefreshRate.MONTHLY, name: "Monthly" },
+        { value: UserDataRefreshRate.NEVER, name: "Never" },
+      ],
+      description:
+        "The rate at which User data will be refreshed (Display Name, Server Nickname & Roles).",
     },
     {
       name: DiscrubSetting.RANDOM_DELETE_DELAY,

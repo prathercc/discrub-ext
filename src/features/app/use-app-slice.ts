@@ -7,7 +7,6 @@ import {
   setStatus as setStatusAction,
   resetStatus as resetStatusAction,
   resetModify as resetModifyAction,
-  checkDiscrubPaused as checkDiscrubPausedAction,
   setTimeoutMessage as setTimeoutMessageAction,
   setSettings as setSettingsAction,
 } from "./app-slice";
@@ -68,10 +67,6 @@ const useAppSlice = () => {
     dispatch(setSettingsAction(settings));
   };
 
-  const checkDiscrubPaused = async (): Promise<void> => {
-    await dispatch(checkDiscrubPausedAction());
-  };
-
   /**
    *
    * @param {String} message Message content
@@ -80,7 +75,7 @@ const useAppSlice = () => {
    */
   const setTimeoutMessage = async (
     message: string,
-    timeout: number
+    timeout: number,
   ): Promise<void> => {
     await dispatch(setTimeoutMessageAction({ message, timeout }));
   };
@@ -94,7 +89,6 @@ const useAppSlice = () => {
     setStatus,
     resetStatus,
     resetModify,
-    checkDiscrubPaused,
     setTimeoutMessage,
     setSettings,
   };

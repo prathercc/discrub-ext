@@ -10,7 +10,13 @@ import ChannelSelection from "./channel-selection";
 import Config from "../../discrub-dialog/components/config";
 import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
-import ExportTabs, { ExportTab } from "./export-tabs.tsx";
+import EnhancedTabs, {
+  EnhancedTab,
+} from "../../../common-components/enhanced-tabs/enhanced-tabs.tsx";
+import SearchCriteria, {
+  defaultCriteria,
+  SearchCriteriaComponentType,
+} from "../../search-criteria/search-criteria.tsx";
 
 type BulkContentProps = {
   isDm?: boolean;
@@ -90,8 +96,8 @@ const BulkContent = ({
     );
   }
 
-  const channelSelectionTab: ExportTab = {
-    label: "Channel Selection",
+  const channelSelectionTab: EnhancedTab = {
+    label: "Channels",
     getComponent: () => (
       <>
         <DialogContentText>
@@ -114,18 +120,52 @@ const BulkContent = ({
       </>
     ),
   };
-  const configurationTab: ExportTab = {
+
+  const criteriaTab: EnhancedTab = {
+    label: "Criteria",
+    getComponent: () => (
+      <SearchCriteria
+        isDm={isDm}
+        componentType={SearchCriteriaComponentType.Form}
+        visibleCriteria={defaultCriteria}
+      />
+    ),
+  };
+
+  const configurationTab: EnhancedTab = {
     label: "Configuration",
     getComponent: () =>
       getExportSettings(onChangeSettings, visibleSettings, settings),
   };
-  const guildTabs: ExportTab[] = [channelSelectionTab, configurationTab];
-  const dmTabs: ExportTab[] = [configurationTab];
+
+  const settingsTab: EnhancedTab = {
+    label: "Settings",
+    getComponent: () =>
+      getExportSettings(
+        onChangeSettings,
+        [
+          DiscrubSetting.RANDOM_SEARCH_DELAY,
+          DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
+          DiscrubSetting.REACTIONS_ENABLED,
+          DiscrubSetting.DISPLAY_NAME_LOOKUP,
+          ...(isDm ? [] : [DiscrubSetting.SERVER_NICKNAME_LOOKUP]),
+        ],
+        settings,
+      ),
+  };
+
+  const guildTabs: EnhancedTab[] = [
+    channelSelectionTab,
+    configurationTab,
+    settingsTab,
+    criteriaTab,
+  ];
+  const dmTabs: EnhancedTab[] = [configurationTab, settingsTab, criteriaTab];
 
   return (
     <DialogContent>
-      {!isExporting && !isDm && <ExportTabs tabs={guildTabs} />}
-      {!isExporting && isDm && <ExportTabs tabs={dmTabs} />}
+      {!isExporting && !isDm && <EnhancedTabs tabs={guildTabs} />}
+      {!isExporting && isDm && <EnhancedTabs tabs={dmTabs} />}
       {isExporting && <Progress />}
     </DialogContent>
   );
