@@ -14,4 +14,7 @@ export enum DiscrubSetting {
   EXPORT_IMAGE_RES_MODE = "exportImageResMode",
 
   APP_SHOW_KOFI_FEED = "appShowKoFiFeed",
+  APP_USER_DATA_REFRESH_RATE = "appUserDataRefreshRate",
+
+  CACHED_USER_MAP = "cachedUserMap",
 }

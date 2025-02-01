@@ -1,7 +1,8 @@
-import { Dialog, DialogTitle } from "@mui/material";
+import { Dialog } from "@mui/material";
 import { ExportType } from "../../../enum/export-type";
 import ExportModalActions from "./export-modal-actions";
 import React from "react";
+import EnhancedDialogTitle from "../../../common-components/enhanced-dialog/enhanced-dialog-title.tsx";
 
 type ExportModalProps = {
   handleExportSelected: (val: ExportType) => void;
@@ -27,10 +28,10 @@ const ExportModal = ({
   return (
     <Dialog
       hideBackdrop
-      PaperProps={{ sx: { minWidth: "500px" } }}
+      PaperProps={{ sx: { minWidth: "500px", minHeight: "500px" } }}
       open={dialogOpen}
     >
-      <DialogTitle>{dialogTitle}</DialogTitle>
+      <EnhancedDialogTitle title={dialogTitle} onClose={onCancel} />
       {ContentComponent}
       <ExportModalActions
         handleExportSelected={handleExportSelected}

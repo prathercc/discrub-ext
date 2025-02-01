@@ -1,25 +1,30 @@
 import { AppBar, Box, Tab, Tabs, useTheme } from "@mui/material";
 import { ReactNode, useState } from "react";
 
-export type ExportTab = { label: string; getComponent: () => ReactNode };
-type ExportTabsProps = {
-  tabs: ExportTab[];
+export type EnhancedTab = {
+  label: string;
+  disabled?: boolean;
+  getComponent: () => ReactNode;
+};
+type EnhancedTabsProps = {
+  tabs: EnhancedTab[];
 };
 
-const ExportTabs = ({ tabs }: ExportTabsProps) => {
+const EnhancedTabs = ({ tabs }: EnhancedTabsProps) => {
   const theme = useTheme();
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   return (
     <Box sx={{ width: "100%" }}>
       <AppBar position="static" sx={{ marginBottom: theme.spacing(1) }}>
         <Tabs
-          variant="fullWidth"
           value={selectedTabIndex}
           onChange={(_, idx) => setSelectedTabIndex(idx)}
           centered
+          variant="scrollable"
+          scrollButtons="auto"
         >
           {tabs.map((tab) => (
-            <Tab label={tab.label} />
+            <Tab disabled={!!tab.disabled} label={tab.label} />
           ))}
         </Tabs>
       </AppBar>
@@ -28,4 +33,4 @@ const ExportTabs = ({ tabs }: ExportTabsProps) => {
   );
 };
 
-export default ExportTabs;
+export default EnhancedTabs;

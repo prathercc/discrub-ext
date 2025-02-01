@@ -8,21 +8,25 @@ import Table, {
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
-  Stack,
-  Typography,
-  Paper,
-  TextField,
-  Button,
   Autocomplete,
-  IconButton,
+  Button,
   Collapse,
+  IconButton,
   LinearProgress,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
-import AdvancedFiltering from "../advanced-filtering/advanced-filtering";
 import TokenNotFound from "../../components/token-not-found";
-import { isRemovableMessage, sortByProperty } from "../../utils";
+import {
+  getSortedChannels,
+  getSortedGuilds,
+  isCriteriaActive,
+  isRemovableMessage,
+} from "../../utils";
 import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -35,8 +39,6 @@ import { useChannelSlice } from "../../features/channel/use-channel-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
 import EntityIcon from "../../components/entity-icon";
-import Channel from "../../classes/channel";
-import Guild from "../../classes/guild";
 import Message from "../../classes/message";
 import { SortDirection } from "../../enum/sort-direction";
 import TableMessage from "../../components/table-message";
@@ -44,6 +46,9 @@ import AttachmentModal from "../../components/attachment-modal";
 import EmbedModal from "../../components/embed-modal";
 import MessageTableToolbar from "../message-table-toolbar/message-table-toolbar";
 import ReactionModal from "../../components/reaction-modal";
+import SearchCriteria, {
+  SearchCriteriaComponentType,
+} from "../search-criteria/search-criteria.tsx";
 
 function ChannelMessages() {
   const { state: userState } = useUserSlice();
@@ -53,7 +58,6 @@ function ChannelMessages() {
   const { state: guildState, changeGuild, getGuilds } = useGuildSlice();
   const guilds = guildState.guilds();
   const selectedGuild = guildState.selectedGuild();
-  const preFilterUserId = guildState.preFilterUserId();
 
   const { state: channelState, changeChannel, loadChannel } = useChannelSlice();
   const channels = channelState.channels();
@@ -69,10 +73,7 @@ function ChannelMessages() {
   } = useMessageSlice();
   const messages = messageState.messages();
   const messagesLoading = messageState.isLoading();
-  const searchBeforeDate = messageState.searchBeforeDate();
-  const searchAfterDate = messageState.searchAfterDate();
-  const searchMessageContent = messageState.searchMessageContent();
-  const selectedHasTypes = messageState.selectedHasTypes();
+  const searchCriteria = messageState.searchCriteria();
   const filters = messageState.filters();
   const filteredMessages = messageState.filteredMessages();
   const selectedMessages = messageState.selectedMessages();
@@ -134,7 +135,7 @@ function ChannelMessages() {
   };
 
   const fetchChannelData = () => {
-    getMessageData(selectedGuild?.id, selectedChannel?.id, { preFilterUserId });
+    getMessageData(selectedGuild?.id || null, selectedChannel?.id || null);
     setSearchTouched(true);
     setExpanded(false);
   };
@@ -149,14 +150,6 @@ function ChannelMessages() {
     setSearchTouched(false);
   };
 
-  const advancedFilterActive = [
-    preFilterUserId,
-    searchBeforeDate,
-    searchAfterDate,
-    searchMessageContent,
-    selectedHasTypes.length,
-  ].some((c) => c);
-
   const pauseCancelDisabled = !messagesLoading;
   const guildFieldDisabled = messagesLoading || discrubCancelled;
   const channelFieldDisabled =
@@ -164,14 +157,13 @@ function ChannelMessages() {
   const searchBtnDisabled =
     !selectedGuild?.id ||
     messagesLoading ||
-    (!advancedFilterActive && !selectedChannel?.id) ||
+    (!isCriteriaActive(searchCriteria) && !selectedChannel?.id) ||
     discrubCancelled;
   const purgeDisabled = Boolean(
     !selectedGuild?.id ||
       messagesLoading ||
       selectedChannel?.id ||
       messages.length > 0 ||
-      advancedFilterActive ||
       discrubCancelled,
   );
   const exportDisabled = Boolean(
@@ -182,24 +174,8 @@ function ChannelMessages() {
       discrubCancelled,
   );
 
-  const sortedGuilds = guilds
-    .map((g) => new Guild({ ...g }))
-    .sort((a, b) =>
-      sortByProperty(
-        { name: a.name.toLowerCase() },
-        { name: b.name.toLowerCase() },
-        "name",
-      ),
-    );
-  const sortedChannels = channels
-    .map((c) => new Channel({ ...c }))
-    .sort((a, b) =>
-      sortByProperty(
-        { name: String(a.name).toLowerCase() },
-        { name: String(b.name).toLowerCase() },
-        "name",
-      ),
-    );
+  const sortedGuilds = getSortedGuilds(guilds);
+  const sortedChannels = getSortedChannels(channels);
 
   useEffect(() => {
     if (token) getGuilds();
@@ -358,7 +334,16 @@ function ChannelMessages() {
                     />
                   </Stack>
 
-                  <AdvancedFiltering />
+                  <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="flex-end"
+                    spacing={1}
+                  >
+                    <SearchCriteria
+                      componentType={SearchCriteriaComponentType.Button}
+                    />
+                  </Stack>
                 </Stack>
               </Collapse>
               <Stack

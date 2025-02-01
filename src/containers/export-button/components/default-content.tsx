@@ -2,7 +2,9 @@ import { DialogContent, DialogContentText, Typography } from "@mui/material";
 import Progress from "./progress";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
 import { AppSettings } from "../../../features/app/app-types";
-import ExportTabs, { ExportTab } from "./export-tabs.tsx";
+import EnhancedTabs, {
+  EnhancedTab,
+} from "../../../common-components/enhanced-tabs/enhanced-tabs.tsx";
 import { getExportSettings } from "./bulk-content.tsx";
 
 type DefaultContentProps = {
@@ -34,12 +36,12 @@ const DefaultContent = ({
     );
   }
 
-  const configurationTab: ExportTab = {
+  const configurationTab: EnhancedTab = {
     label: "Configuration",
     getComponent: () =>
       getExportSettings(onChangeSettings, visibleSettings, settings),
   };
-  const tabs: ExportTab[] = [configurationTab];
+  const tabs: EnhancedTab[] = [configurationTab];
 
   return (
     <DialogContent>
@@ -50,7 +52,7 @@ const DefaultContent = ({
               <strong>{messageCount}</strong> messages are available to export
             </Typography>
           </DialogContentText>
-          <ExportTabs tabs={tabs} />
+          <EnhancedTabs tabs={tabs} />
         </>
       )}
       {isExporting && <Progress />}

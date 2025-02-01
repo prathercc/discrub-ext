@@ -31,23 +31,23 @@ const useThreadSlice = () => {
 
   const getArchivedThreads = async (
     channelId: string,
-    knownThreads: Channel[]
+    knownThreads: Channel[],
   ): Promise<Channel[]> => {
     const threads = await dispatch(
-      getArchivedThreadsAction({ channelId, knownThreads })
+      getArchivedThreadsAction({ channelId, knownThreads }),
     );
     return threads;
   };
 
   const getThreadsFromMessages = (
     messages: Message[],
-    knownThreads: Channel[]
+    knownThreads: Channel[],
   ): Channel[] => {
     return getThreadsFromMessagesAction({ messages, knownThreads });
   };
 
   const unarchiveThread = async (
-    threadId: string
+    threadId: string,
   ): Promise<Maybe | Channel> => {
     const thread = await dispatch(unarchiveThreadAction(threadId));
     return thread;
@@ -61,10 +61,10 @@ const useThreadSlice = () => {
    */
   const liftThreadRestrictions = async (
     channelId: string,
-    noPermissionThreadIds: string[]
+    noPermissionThreadIds: string[],
   ): Promise<string[]> => {
     const noPermissionIds = await dispatch(
-      liftThreadRestrictionsAction({ channelId, noPermissionThreadIds })
+      liftThreadRestrictionsAction(channelId, noPermissionThreadIds),
     );
 
     return noPermissionIds;

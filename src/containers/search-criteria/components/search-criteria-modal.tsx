@@ -5,28 +5,27 @@ import {
   DialogTitle,
   DialogActions,
   DialogContent,
-  Stack,
 } from "@mui/material";
-import PrefilterUser from "../../../components/prefilter-user";
-import BeforeAndAfterFields from "../../../components/before-and-after-fields";
-import MessageContains from "./message-contains";
-import HasType from "./has-type";
+import SearchCriteriaForm from "./search-criteria-form.tsx";
+import { VisibleSearchCriteria } from "../search-criteria.tsx";
 
-type AdvancedFilterModalProps = {
+type SearchCriteriaModalProps = {
   open: boolean;
   handleModalToggle: () => void;
   isDm: boolean;
   handleResetFilters: () => void;
   filtersActive: boolean;
+  visibleCriteria: VisibleSearchCriteria[];
 };
 
-const AdvancedFilterModal = ({
+const SearchCriteriaModal = ({
   handleModalToggle,
   open,
   isDm,
   handleResetFilters,
   filtersActive,
-}: AdvancedFilterModalProps) => {
+  visibleCriteria,
+}: SearchCriteriaModalProps) => {
   const handleReset = () => {
     handleResetFilters();
     handleModalToggle();
@@ -35,15 +34,10 @@ const AdvancedFilterModal = ({
   return (
     <Dialog hideBackdrop fullWidth open={open} keepMounted={filtersActive}>
       <DialogTitle>
-        <Typography variant="h5">Advanced Filtering</Typography>
+        <Typography variant="h5">Search Criteria</Typography>
       </DialogTitle>
       <DialogContent>
-        <Stack direction="column" spacing={1}>
-          <PrefilterUser isDm={isDm} />
-          <BeforeAndAfterFields disabled={false} />
-          <MessageContains disabled={false} />
-          <HasType disabled={false} />
-        </Stack>
+        <SearchCriteriaForm visibleCriteria={visibleCriteria} isDm={isDm} />
       </DialogContent>
       <DialogActions>
         <Button color="primary" variant="contained" onClick={handleReset}>
@@ -60,4 +54,4 @@ const AdvancedFilterModal = ({
     </Dialog>
   );
 };
-export default AdvancedFilterModal;
+export default SearchCriteriaModal;
