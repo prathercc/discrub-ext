@@ -60,10 +60,14 @@ export const purge =
       let isResetPurge = false;
       let skipThreadIds: string[] = [];
       const trackedMessageIds: string[] = [];
+      let trackedTotalMessages = payload.totalMessages;
 
       do {
         const offset = payload.offset || START_OFFSET;
+
+        // Prepare to end Purge if no new messages are found on next reset
         if (offset === START_OFFSET) isResetPurge = true;
+        //
 
         dispatch(
           setModifyEntity({ _offset: offset, _total: payload.totalMessages }),
@@ -79,18 +83,34 @@ export const purge =
 
         payload = await dispatch(retrieveMessages(guildId, channelId, options));
 
-        // Message ids that deletes should not be attempted for
+        // Check if Discord search total_results has updated
+        const isTotalMessagesUpdated =
+          trackedTotalMessages !== START_OFFSET &&
+          payload.totalMessages !== trackedTotalMessages;
+        if (isTotalMessagesUpdated) {
+          payload.offset = START_OFFSET; // Since messages have shifted, we should reset the offset
+          isResetPurge = false; // Since messages have shifted, Purge should not end
+        }
+        //
+
+        // Capture the total amount of messages found by the search
+        trackedTotalMessages = payload.totalMessages;
+        //
+
+        // Message ids where a delete attempt should not occur
         const skipMessageIds = [...trackedMessageIds];
+        //
 
         payload.messages.forEach((m) => {
           if (!trackedMessageIds.some((id) => id === m.id)) {
             trackedMessageIds.push(m.id);
-            isResetPurge = false; // Unique Messages still exist
+            isResetPurge = false; // Unique Messages still exist, Purge should not end
           }
         });
 
         // We have restarted twice without seeing a unique message, Purge is complete.
         if (payload.offset === START_OFFSET && isResetPurge) break;
+        //
 
         await dispatch(
           _purgeMessages(

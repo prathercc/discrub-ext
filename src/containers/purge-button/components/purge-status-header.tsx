@@ -23,7 +23,7 @@ const PurgeStatusHeader = ({
 }: PurgeStatusHeaderProps) => {
   const map = {
     [PurgeInstruction.PURGING]: {
-      message: `Messages Remaining: ${total}`,
+      message: `Est. Messages Remaining: ${total}`,
       getIcon: () => <ConstructionIcon />,
     },
     [PurgeInstruction.AWAITING_INSTRUCTION]: {
