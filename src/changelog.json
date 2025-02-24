@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.12.6",
+    "changes": [
+      "Resolve issue with Purge after reaching max search offset of 5000.",
+      "Prevent message skips during Purge process."
+    ]
+  },
+  {
     "version": "1.12.5",
     "changes": [
       "Search Criteria can now support selections with multiple Users.",

@@ -1244,6 +1244,8 @@ const _getNextSearchData = (
 
   if (isMaxOffset) {
     Object.assign(searchData, {
+      isEndConditionMet:
+        isLimitedResults || isAllResults || searchData.isEndConditionMet,
       offset: START_OFFSET,
       searchCriteria: {
         ...searchCriteria,
