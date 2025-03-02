@@ -25,6 +25,8 @@ import FormatListNumberedRtlIcon from "@mui/icons-material/FormatListNumberedRtl
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import AutoDeleteIcon from "@mui/icons-material/AutoDelete";
 import YoutubeSearchedForIcon from "@mui/icons-material/YoutubeSearchedFor";
+import CloudQueueIcon from "@mui/icons-material/CloudQueue";
+import CloudOffIcon from "@mui/icons-material/CloudOff";
 import { stringToBool } from "../../../utils";
 import { ResolutionType } from "../../../enum/resolution-type";
 import { MediaType } from "../../../enum/media-type";
@@ -246,6 +248,23 @@ function Config({
           <VerticalAlignTopIcon />
         ) : (
           <VerticalAlignBottomIcon />
+        ),
+    },
+    // Purge Settings
+    {
+      name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
+      label: "Keep Attachments",
+      options: [
+        { value: "true", name: "Yes" },
+        { value: "false", name: "No" },
+      ],
+      description:
+        "Keep Attachments will ensure that messages with attached files are preserved, so that other Users can still access the files. Message text will still be removed.",
+      icon: () =>
+        stringToBool(settings.purgeRetainAttachedMedia) ? (
+          <CloudQueueIcon />
+        ) : (
+          <CloudOffIcon />
         ),
     },
   ].filter((control) => visibleSettings.some((hs) => hs === control.name));

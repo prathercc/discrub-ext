@@ -28,6 +28,8 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.EXPORT_MESSAGES_PER_PAGE]: "1000",
   [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
 
+  [DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA]: "false",
+
   [DiscrubSetting.APP_SHOW_KOFI_FEED]: "true",
   [DiscrubSetting.APP_USER_DATA_REFRESH_RATE]: UserDataRefreshRate.DAILY,
 

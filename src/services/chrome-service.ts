@@ -48,6 +48,8 @@ const defaultSettings = [
     value: ResolutionType.HOVER_LIMITED,
   },
 
+  { name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA, value: "false" },
+
   { name: DiscrubSetting.APP_SHOW_KOFI_FEED, value: "true" },
   {
     name: DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
@@ -98,6 +100,9 @@ export const getSettings = async (): Promise<AppSettings> => {
       chromeSettings[DiscrubSetting.EXPORT_MESSAGES_PER_PAGE],
     [DiscrubSetting.EXPORT_IMAGE_RES_MODE]:
       chromeSettings[DiscrubSetting.EXPORT_IMAGE_RES_MODE],
+
+    [DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA]:
+      chromeSettings[DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA],
 
     [DiscrubSetting.APP_SHOW_KOFI_FEED]:
       chromeSettings[DiscrubSetting.APP_SHOW_KOFI_FEED],

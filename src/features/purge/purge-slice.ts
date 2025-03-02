@@ -1,5 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { deleteRawMessage, retrieveMessages } from "../message/message-slice";
+import {
+  deleteRawMessage,
+  retrieveMessages,
+  updateRawMessage,
+} from "../message/message-slice";
 import { liftThreadRestrictions } from "../thread/thread-slice";
 import {
   isAppStopped,
@@ -12,7 +16,11 @@ import { PurgeState, PurgeStatus } from "./purge-types";
 import { AppThunk } from "../../app/store";
 import Channel from "../../classes/channel";
 import Message from "../../classes/message";
-import { isRemovableMessage, isSearchComplete } from "../../utils";
+import {
+  isRemovableMessage,
+  isSearchComplete,
+  stringToBool,
+} from "../../utils";
 import Guild from "../../classes/guild.ts";
 import { isGuild } from "../../app/guards.ts";
 import { MessageData, SearchResultData } from "../message/message-types.ts";
@@ -137,7 +145,7 @@ export const _purgeMessages =
     skipMessageIds: string[],
     { totalMessages }: Partial<SearchResultData> = {},
   ): AppThunk<Promise<void>> =>
-  async (dispatch, _getState) => {
+  async (dispatch, getState) => {
     const filteredMessages = messages.filter(
       (m) => !skipMessageIds.some((id) => id === m.id) && isRemovableMessage(m),
     );
@@ -162,12 +170,48 @@ export const _purgeMessages =
       if (isMissingPermission) {
         modifyEntity._status = PurgeStatus.MISSING_PERMISSION;
       } else {
-        const success = await dispatch(deleteRawMessage(message));
-        modifyEntity._status = success
-          ? PurgeStatus.REMOVED
-          : PurgeStatus.MISSING_PERMISSION;
+        const isRetainingAttachments = stringToBool(
+          getState().app.settings.purgeRetainAttachedMedia,
+        );
+        const isAttachmentMsg = message?.attachments?.length;
+
+        if (isRetainingAttachments && isAttachmentMsg) {
+          await dispatch(_retainAttachmentMessage(message, modifyEntity));
+        } else {
+          const success = await dispatch(deleteRawMessage(message));
+          modifyEntity._status = success
+            ? PurgeStatus.REMOVED
+            : PurgeStatus.MISSING_PERMISSION;
+        }
       }
       dispatch(setModifyEntity(modifyEntity));
+    }
+  };
+
+/**
+ * Attempt to retain message attachments during Purge by clearing message text only
+ * @param message
+ * @param modifyEntity
+ */
+export const _retainAttachmentMessage =
+  (
+    message: Message,
+    modifyEntity: Message & {
+      _index: number;
+      _total: number;
+      _status: PurgeStatus;
+    },
+  ): AppThunk<Promise<void>> =>
+  async (dispatch, _getState) => {
+    if (message.content.length) {
+      const { success } = await dispatch(
+        updateRawMessage(Object.assign(message, { content: "" })),
+      );
+      modifyEntity._status = success
+        ? PurgeStatus.ATTACHMENTS_KEPT
+        : PurgeStatus.MISSING_PERMISSION;
+    } else {
+      modifyEntity._status = PurgeStatus.ATTACHMENTS_KEPT;
     }
   };
 

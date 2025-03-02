@@ -125,6 +125,7 @@ const PurgeModal = ({
         visibleSettings={[
           DiscrubSetting.RANDOM_DELETE_DELAY,
           DiscrubSetting.RANDOM_SEARCH_DELAY,
+          DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
         ]}
         onChangeSettings={setSettings}
       />

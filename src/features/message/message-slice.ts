@@ -614,14 +614,19 @@ export const deleteAttachment =
     }
   };
 
-export const updateMessage =
-  (message: Message): AppThunk<Promise<boolean>> =>
-  async (dispatch, getState) => {
+/**
+ * Update a message without changing Message State
+ * @param message
+ * @returns The result of the update
+ */
+export const updateRawMessage =
+  (message: Message): AppThunk<Promise<{ success: boolean; data: Message }>> =>
+  async (_dispatch, getState) => {
     const { settings } = getState().app;
     const { token } = getState().user;
-    const { entity: modifyMessage } = getState().app.task;
+    let retObj = { success: false, data: message };
 
-    if (token && isMessage(modifyMessage)) {
+    if (token) {
       const { success, data } = await new DiscordService(settings).editMessage(
         token,
         message.id,
@@ -631,6 +636,21 @@ export const updateMessage =
         },
         message.channel_id,
       );
+      if (success) {
+        retObj = Object.assign(retObj, { success: true, data });
+      }
+    }
+
+    return retObj;
+  };
+
+export const updateMessage =
+  (message: Message): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    const { entity: modifyMessage } = getState().app.task;
+
+    if (isMessage(modifyMessage)) {
+      const { success, data } = await dispatch(updateRawMessage(message));
 
       if (success && data) {
         const { messages, filteredMessages } = getState().message;

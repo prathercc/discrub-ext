@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/Delete";
 import NoEncryptionIcon from "@mui/icons-material/NoEncryption";
 import SyncIcon from "@mui/icons-material/Sync";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { PurgeStatus } from "../../../features/purge/purge-types.ts";
 import "../css/purge-message-status.css";
 import classNames from "classnames";
@@ -26,8 +27,12 @@ const PurgeMessageStatus = ({
       getIcon: () => <NoEncryptionIcon />,
     },
     [PurgeStatus.REMOVED]: {
-      color: "error.dark",
+      color: "success.dark",
       getIcon: () => <DeleteIcon />,
+    },
+    [PurgeStatus.ATTACHMENTS_KEPT]: {
+      color: "success.dark",
+      getIcon: () => <AttachFileIcon />,
     },
   };
 
