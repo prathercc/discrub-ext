@@ -139,7 +139,7 @@ export const _purgeMessages =
   ): AppThunk<Promise<void>> =>
   async (dispatch, _getState) => {
     const filteredMessages = messages.filter(
-      (m) => !skipMessageIds.some((id) => id === m.id),
+      (m) => !skipMessageIds.some((id) => id === m.id) && isRemovableMessage(m),
     );
     for (const [index, message] of filteredMessages.entries()) {
       if (await dispatch(isAppStopped())) break;
@@ -161,7 +161,7 @@ export const _purgeMessages =
       );
       if (isMissingPermission) {
         modifyEntity._status = PurgeStatus.MISSING_PERMISSION;
-      } else if (isRemovableMessage(message)) {
+      } else {
         const success = await dispatch(deleteRawMessage(message));
         modifyEntity._status = success
           ? PurgeStatus.REMOVED
