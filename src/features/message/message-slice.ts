@@ -1102,7 +1102,8 @@ const _getUserMap =
         for (const reaction of message.reactions || []) {
           const encodedEmoji = getEncodedEmoji(reaction.emoji);
           if (encodedEmoji) {
-            const exportReactions = reactionMap[message.id][encodedEmoji] || [];
+            const exportReactions =
+              reactionMap[message.id]?.[encodedEmoji] || [];
             exportReactions.forEach(({ id: reactingUserId }) => {
               if (!userMap[reactingUserId])
                 userMap[reactingUserId] =
