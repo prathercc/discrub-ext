@@ -573,14 +573,15 @@ class DiscordService {
 
   deleteReaction = (
     authorization: string,
-    channelId: Snowflake,
-    messageId: Snowflake,
+    channelId: string,
+    messageId: string,
     emoji: string,
+    userId: string,
   ) =>
     this.withDeleteDelay(() =>
       this.withRetry(() =>
         fetch(
-          `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}/@me`,
+          `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}/${userId}`,
           {
             method: "DELETE",
             headers: {

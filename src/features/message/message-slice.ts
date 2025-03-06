@@ -495,14 +495,58 @@ export const filterMessages =
     );
   };
 
+/**
+ * Delete a reaction without changing message state
+ * @param channelId
+ * @param messageId
+ * @param emoji
+ * @param userId
+ */
+export const deleteRawReaction =
+  (
+    channelId: string,
+    messageId: string,
+    emoji: string,
+    userId: string,
+  ): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    const { settings } = getState().app;
+    const { token, currentUser } = getState().user;
+    const { reactionMap } = getState().export.exportMaps;
+    let success = false;
+
+    if (token) {
+      ({ success } = await new DiscordService(settings).deleteReaction(
+        token,
+        channelId,
+        messageId,
+        emoji,
+        userId === currentUser?.id ? "@me" : userId,
+      ));
+      if (success) {
+        const updatedReactionMap = {
+          ...reactionMap,
+          [messageId]: {
+            ...reactionMap[messageId],
+            [emoji]: reactionMap[messageId][emoji].filter(
+              (er) => er.id !== currentUser?.id,
+            ),
+          },
+        };
+        dispatch(setExportReactionMap(updatedReactionMap));
+      }
+    }
+    return success;
+  };
+
 export const deleteReaction =
   (
     channelId: Snowflake,
     messageId: Snowflake,
     emoji: string,
+    userId: string,
   ): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    const { settings } = getState().app;
     const { token, currentUser } = getState().user;
     const { reactionMap } = getState().export.exportMaps;
     const { messages, filteredMessages } = getState().message;
@@ -516,11 +560,8 @@ export const deleteReaction =
 
     if (token && message && reaction) {
       dispatch(setIsModifying(true));
-      const { success } = await new DiscordService(settings).deleteReaction(
-        token,
-        channelId,
-        messageId,
-        emoji,
+      const success = await dispatch(
+        deleteRawReaction(channelId, messageId, emoji, userId),
       );
       if (success) {
         const updatedMessage = {
@@ -550,19 +591,9 @@ export const deleteReaction =
         const updatedFilterMessages = filteredMessages.map((message) =>
           message.id === updatedMessage.id ? updatedMessage : message,
         );
-        const updatedReactionMap = {
-          ...reactionMap,
-          [messageId]: {
-            ...reactionMap[messageId],
-            [emoji]: reactionMap[messageId][emoji].filter(
-              (er) => er.id !== currentUser?.id,
-            ),
-          },
-        };
         dispatch(setModifyEntity(updatedMessage));
         dispatch(setMessages(updatedMessages));
         dispatch(setFilteredMessages(updatedFilterMessages));
-        dispatch(setExportReactionMap(updatedReactionMap));
       }
       dispatch(setIsModifying(false));
     }
