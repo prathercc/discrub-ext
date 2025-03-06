@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   deleteRawMessage,
+  deleteRawReaction,
   retrieveMessages,
   updateRawMessage,
 } from "../message/message-slice";
@@ -20,11 +21,13 @@ import {
   isRemovableMessage,
   isSearchComplete,
   stringToBool,
+  stringToTypedArray,
 } from "../../utils";
 import Guild from "../../classes/guild.ts";
 import { isGuild } from "../../app/guards.ts";
 import { MessageData, SearchResultData } from "../message/message-types.ts";
 import { OFFSET_INCREMENT, START_OFFSET } from "../message/contants.ts";
+import { AppTaskStatus } from "../app/app-types.ts";
 
 const initialState: PurgeState = {
   isLoading: null,
@@ -147,7 +150,7 @@ export const _purgeMessages =
   ): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const filteredMessages = messages.filter(
-      (m) => !skipMessageIds.some((id) => id === m.id) && isRemovableMessage(m),
+      (m) => !skipMessageIds.some((id) => id === m.id),
     );
     for (const [index, message] of filteredMessages.entries()) {
       if (await dispatch(isAppStopped())) break;
@@ -170,22 +173,76 @@ export const _purgeMessages =
       if (isMissingPermission) {
         modifyEntity._status = PurgeStatus.MISSING_PERMISSION;
       } else {
-        const isRetainingAttachments = stringToBool(
-          getState().app.settings.purgeRetainAttachedMedia,
-        );
-        const isAttachmentMsg = message?.attachments?.length;
-
-        if (isRetainingAttachments && isAttachmentMsg) {
+        const { purgeRetainAttachedMedia, purgeReactionRemovalFrom } =
+          getState().app.settings;
+        const isReactionRemoval = !!purgeReactionRemovalFrom.length;
+        const isRetainedAttachment =
+          stringToBool(purgeRetainAttachedMedia) &&
+          message?.attachments?.length;
+        if (isReactionRemoval) {
+          await dispatch(_removeMessageReactions(message, modifyEntity));
+        } else if (isRetainedAttachment) {
           await dispatch(_retainAttachmentMessage(message, modifyEntity));
-        } else {
+        } else if (isRemovableMessage(message)) {
           const success = await dispatch(deleteRawMessage(message));
           modifyEntity._status = success
             ? PurgeStatus.REMOVED
             : PurgeStatus.MISSING_PERMISSION;
+        } else {
+          modifyEntity._status = PurgeStatus.MESSAGE_NON_REMOVABLE;
         }
       }
       dispatch(setModifyEntity(modifyEntity));
     }
+  };
+
+/**
+ * Attempt to remove message reactions during Purge
+ * @param message
+ * @param modifyEntity
+ */
+export const _removeMessageReactions =
+  (
+    message: Message,
+    modifyEntity: Message & AppTaskStatus,
+  ): AppThunk<Promise<void>> =>
+  async (dispatch, getState) => {
+    const { purgeReactionRemovalFrom } = getState().app.settings;
+    const unReactUserIds = stringToTypedArray<string>(purgeReactionRemovalFrom);
+    const { reactionMap } = getState().export.exportMaps;
+
+    const msgReactionMap = reactionMap[message.id] || {};
+    let total = 0;
+    let succeeded = 0;
+    for (const emoji of Object.keys(msgReactionMap)) {
+      const undoReactions = msgReactionMap[emoji].filter((e) =>
+        unReactUserIds.some((id) => id === e.id),
+      );
+      for (const reaction of undoReactions) {
+        const success = await dispatch(
+          deleteRawReaction(message.channel_id, message.id, emoji, reaction.id),
+        );
+        total = total + 1;
+        if (success) {
+          succeeded = succeeded + 1;
+        }
+      }
+    }
+
+    // Result of reaction removal for the provided message
+    let status = PurgeStatus.NO_REACTIONS_FOUND;
+    if (!!total) {
+      if (succeeded === total) {
+        status = PurgeStatus.REACTIONS_REMOVED;
+      } else if (!!succeeded && succeeded < total) {
+        status = PurgeStatus.REACTIONS_PARTIALLY_REMOVED;
+      } else if (!succeeded) {
+        status = PurgeStatus.MISSING_PERMISSION;
+      }
+    }
+    //
+
+    modifyEntity._status = status;
   };
 
 /**
@@ -196,11 +253,7 @@ export const _purgeMessages =
 export const _retainAttachmentMessage =
   (
     message: Message,
-    modifyEntity: Message & {
-      _index: number;
-      _total: number;
-      _status: PurgeStatus;
-    },
+    modifyEntity: Message & AppTaskStatus,
   ): AppThunk<Promise<void>> =>
   async (dispatch, _getState) => {
     if (message.content.length) {

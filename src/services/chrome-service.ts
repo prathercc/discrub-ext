@@ -49,6 +49,7 @@ const defaultSettings = [
   },
 
   { name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA, value: "false" },
+  { name: DiscrubSetting.PURGE_REACTION_REMOVAL_FROM, value: "" },
 
   { name: DiscrubSetting.APP_SHOW_KOFI_FEED, value: "true" },
   {
@@ -62,7 +63,11 @@ const defaultSettings = [
 export const initializeSettings = async () => {
   for (const setting of defaultSettings) {
     const foundSetting = await chrome.storage.local.get(setting.name);
-    if (!Object.keys(foundSetting).length) {
+    const isPurgeRemovalFrom =
+      setting.name === DiscrubSetting.PURGE_REACTION_REMOVAL_FROM;
+    const isNoSettingFound = !Object.keys(foundSetting).length;
+
+    if (isNoSettingFound || isPurgeRemovalFrom) {
       await chrome.storage.local.set({ [setting.name]: setting.value });
     }
   }
@@ -103,6 +108,8 @@ export const getSettings = async (): Promise<AppSettings> => {
 
     [DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA]:
       chromeSettings[DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA],
+    [DiscrubSetting.PURGE_REACTION_REMOVAL_FROM]:
+      chromeSettings[DiscrubSetting.PURGE_REACTION_REMOVAL_FROM],
 
     [DiscrubSetting.APP_SHOW_KOFI_FEED]:
       chromeSettings[DiscrubSetting.APP_SHOW_KOFI_FEED],

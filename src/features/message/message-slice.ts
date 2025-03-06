@@ -1014,8 +1014,12 @@ export const retrieveMessages =
       }
 
       if (!getState().app.discrubCancelled) {
+        const isReactionRemovalMode = !!settings.purgeReactionRemovalFrom;
         const reactionsEnabled = stringToBool(settings.reactionsEnabled);
-        if (!options.excludeReactions && reactionsEnabled) {
+        const requiresReactionMap =
+          isReactionRemovalMode ||
+          (!options.excludeReactions && reactionsEnabled);
+        if (requiresReactionMap) {
           await dispatch(_generateReactionMap(payload.messages));
         }
         if (!options.excludeUserLookups) {
@@ -1230,6 +1234,10 @@ const _collectUserGuildData =
     }
   };
 
+/**
+ * Attempt to resolve reaction data for the provided messages. Used for when messages are obtained using Discords search API
+ * @param messages
+ */
 const _resolveMessageReactions =
   (messages: Message[]): AppThunk<Promise<Message[]>> =>
   async (dispatch, getState) => {
@@ -1420,7 +1428,8 @@ const _getSearchMessages =
       }
 
       const reactionsEnabled = stringToBool(settings.reactionsEnabled);
-      if (!excludeReactions && reactionsEnabled) {
+      const isReactionRemovalMode = !!settings.purgeReactionRemovalFrom;
+      if (isReactionRemovalMode || (!excludeReactions && reactionsEnabled)) {
         knownMessages = await dispatch(_resolveMessageReactions(knownMessages));
       }
     }

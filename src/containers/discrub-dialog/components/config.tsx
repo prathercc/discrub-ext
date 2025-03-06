@@ -27,17 +27,20 @@ import AutoDeleteIcon from "@mui/icons-material/AutoDelete";
 import YoutubeSearchedForIcon from "@mui/icons-material/YoutubeSearchedFor";
 import CloudQueueIcon from "@mui/icons-material/CloudQueue";
 import CloudOffIcon from "@mui/icons-material/CloudOff";
+import PeopleIcon from "@mui/icons-material/People";
 import { stringToBool } from "../../../utils";
 import { ResolutionType } from "../../../enum/resolution-type";
 import { MediaType } from "../../../enum/media-type";
 import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
 import { UserDataRefreshRate } from "../../../enum/user-data-refresh-rate.ts";
+import { PreFilterUser } from "../../../features/dm/dm-types.ts";
 
 type ConfigProps = {
   settings: AppSettings;
   onChangeSettings: (settings: AppSettings) => void;
   visibleSettings: DiscrubSetting[];
   containerProps?: SxProps<Theme>;
+  criteriaUsers?: PreFilterUser[];
 };
 
 function Config({
@@ -45,6 +48,7 @@ function Config({
   onChangeSettings,
   visibleSettings = [],
   containerProps,
+  criteriaUsers = [],
 }: ConfigProps) {
   const handleChange = async (setting: DiscrubSetting, value: string) => {
     const settings = await setSetting(setting, value);
@@ -252,14 +256,24 @@ function Config({
     },
     // Purge Settings
     {
+      name: DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
+      label: "Remove Reactions From",
+      multiselect: true,
+      options: criteriaUsers.map((u) => ({ value: u.id, name: u.name })),
+      description:
+        "Messages are not deleted. Remove reactions from the specified Users.",
+      icon: () => <PeopleIcon />,
+    },
+    {
       name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
       label: "Keep Attachments",
+      disabled: !!settings.purgeReactionRemovalFrom.length,
       options: [
         { value: "true", name: "Yes" },
         { value: "false", name: "No" },
       ],
       description:
-        "Keep Attachments will ensure that messages with attached files are preserved, so that other Users can still access the files. Message text will still be removed.",
+        "Keep messages with attached files. Message text will still be cleared.",
       icon: () =>
         stringToBool(settings.purgeRetainAttachedMedia) ? (
           <CloudQueueIcon />
@@ -314,10 +328,11 @@ function Config({
                       {control.label}
                     </InputLabel>
                     <Select
+                      disabled={control.disabled}
                       variant="filled"
                       endAdornment={Icon}
                       IconComponent={Icon ? "span" : undefined}
-                      value={getValue(control.name)}
+                      value={control.disabled ? "N/A" : getValue(control.name)}
                       label={control.label}
                       onChange={(e) => {
                         if (
@@ -334,6 +349,9 @@ function Config({
                           </MenuItem>
                         );
                       })}
+                      {control.disabled && (
+                        <MenuItem value="N/A">{"N/A"}</MenuItem>
+                      )}
                     </Select>
                   </>
                 )}

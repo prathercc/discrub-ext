@@ -12,6 +12,7 @@ import { DiscrubSetting } from "../../enum/discrub-setting";
 import { SortDirection } from "../../enum/sort-direction";
 import { ResolutionType } from "../../enum/resolution-type";
 import { UserDataRefreshRate } from "../../enum/user-data-refresh-rate.ts";
+import { setSetting } from "../../services/chrome-service.ts";
 
 const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
@@ -29,6 +30,7 @@ const defaultSettings: AppSettings = {
   [DiscrubSetting.EXPORT_IMAGE_RES_MODE]: ResolutionType.HOVER_LIMITED,
 
   [DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA]: "false",
+  [DiscrubSetting.PURGE_REACTION_REMOVAL_FROM]: "",
 
   [DiscrubSetting.APP_SHOW_KOFI_FEED]: "true",
   [DiscrubSetting.APP_USER_DATA_REFRESH_RATE]: UserDataRefreshRate.DAILY,
@@ -106,6 +108,18 @@ export const setTimeoutMessage =
   async (dispatch) => {
     dispatch(setStatus(message));
     await wait(timeout, () => dispatch(resetStatus()));
+  };
+
+/**
+ * Reset the value of setting: PURGE_REACTION_REMOVAL_FROM
+ */
+export const resetPurgeRemovalFrom =
+  (): AppThunk<Promise<void>> => async (dispatch) => {
+    const settings = await setSetting(
+      DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
+      "",
+    );
+    dispatch(setSettings(settings));
   };
 
 export default appSlice.reducer;
