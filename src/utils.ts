@@ -203,6 +203,25 @@ export const getIconUrl = (entity: Channel | Guild) => {
       ).remote;
     }
 
+    if (entity.type === ChannelType.GUILD_TEXT) {
+      return entity.nsfw
+        ? "resources/media/GUILD_TEXT_NSFW.svg"
+        : "resources/media/GUILD_TEXT.svg";
+    }
+    if (entity.type === ChannelType.GUILD_VOICE) {
+      return "resources/media/GUILD_VOICE.svg";
+    }
+    const isThread = [
+      ChannelType.PUBLIC_THREAD,
+      ChannelType.PRIVATE_THREAD,
+    ].some((t) => t === entity.type);
+    if (entity.type === ChannelType.GUILD_FORUM || isThread) {
+      return "resources/media/GUILD_FORUM.svg";
+    }
+    if (entity.type === ChannelType.GUILD_ANNOUNCEMENT) {
+      return "resources/media/GUILD_ANNOUNCEMENT.svg";
+    }
+
     return "resources/media/default_dm_icon.png";
   }
 };
