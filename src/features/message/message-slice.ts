@@ -1,7 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  defaultGMOMappingData,
   getEncodedEmoji,
+  getGMOMappingData,
   getSortedMessages,
+  getUserMappingData,
   isCriteriaActive,
   isDm,
   isGuildForum,
@@ -37,7 +40,7 @@ import {
   setExportUserMap,
 } from "../export/export-slice";
 import { getPreFilterUsers } from "../guild/guild-slice";
-import { format, isDate, parseISO } from "date-fns";
+import { isDate, parseISO } from "date-fns";
 import {
   DeleteConfiguration,
   Filter,
@@ -1150,10 +1153,7 @@ const _collectUserNames =
           if (success && data) {
             updateMap[userId] = {
               ...mapping,
-              userName: data.username,
-              displayName: data.global_name,
-              avatar: data.avatar,
-              timestamp: Date.now(),
+              ...getUserMappingData(data),
             };
           } else {
             const errorMsg = `Unable to retrieve data from userId: ${userId}`;
@@ -1204,12 +1204,7 @@ const _collectUserGuildData =
               ...userMapping,
               guilds: {
                 ...userGuilds,
-                [guildId]: {
-                  roles: data.roles,
-                  nick: data.nick,
-                  joinedAt: format(parseISO(data.joined_at), "MMM d, yyyy"),
-                  timestamp: Date.now(),
-                },
+                [guildId]: getGMOMappingData(data),
               },
             };
           } else {
@@ -1220,10 +1215,7 @@ const _collectUserGuildData =
               guilds: {
                 ...userGuilds,
                 [guildId]: {
-                  roles: [],
-                  nick: null,
-                  joinedAt: null,
-                  timestamp: Date.now(),
+                  ...defaultGMOMappingData,
                 },
               },
             };

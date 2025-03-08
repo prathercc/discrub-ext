@@ -20,11 +20,20 @@ import {
 import { ReactingUser } from "./components/reaction-list-item-button";
 import { MessageType } from "./enum/message-type";
 import { SearchCriteria } from "./features/message/message-types.ts";
-import { addDays, addSeconds, isAfter, toDate } from "date-fns";
+import {
+  addDays,
+  addSeconds,
+  format,
+  isAfter,
+  parseISO,
+  toDate,
+} from "date-fns";
 import { UserDataRefreshRate } from "./enum/user-data-refresh-rate.ts";
 import { IsPinnedType } from "./enum/is-pinned-type.ts";
 import { SortDirection } from "./enum/sort-direction.ts";
 import { START_OFFSET } from "./features/message/contants.ts";
+import { User } from "./classes/user.ts";
+import { GuildMemberObject } from "./types/guild-member-object.ts";
 
 /**
  *
@@ -225,6 +234,9 @@ export const getIconUrl = (entity: Channel | Guild) => {
     return "resources/media/default_dm_icon.png";
   }
 };
+
+export const getEntityHint = (entity: string) =>
+  `Hint: Manually load a ${entity} by pasting an ID here, then press the Return key 🙂.`;
 
 export const entityIsImage = (entity: Attachment | Embed) => {
   if (isAttachment(entity)) {
@@ -627,4 +639,41 @@ export const isSearchComplete = (
   completeCount: number = START_OFFSET,
 ) => {
   return searchOffSet >= completeCount;
+};
+
+export const getUserMappingData = (user: User) => {
+  return {
+    userName: user.username,
+    displayName: user.global_name,
+    avatar: user.avatar,
+    timestamp: Date.now(),
+  };
+};
+
+export const getGMOMappingData = (gmo: GuildMemberObject) => {
+  return {
+    roles: gmo.roles,
+    nick: gmo.nick,
+    joinedAt: format(parseISO(gmo.joined_at), "MMM d, yyyy"),
+    timestamp: Date.now(),
+  };
+};
+
+export const defaultGMOMappingData = {
+  roles: [],
+  nick: null,
+  joinedAt: null,
+  timestamp: Date.now(),
+};
+
+/**
+ * Filter only for values that do not exist on both a1 and a2
+ * @param value
+ * @param a1
+ * @param a2
+ */
+export const filterBoth = <T>(value: T[], a1: T[], a2: T[]) => {
+  return value.filter(
+    (id) => !a1.some((uId) => uId === id) && !a2.some((uId) => uId === id),
+  );
 };

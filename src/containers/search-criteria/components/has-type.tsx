@@ -1,7 +1,7 @@
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import { useMessageSlice } from "../../../features/message/use-message-slice";
 import { HasType as HasTypeEnum } from "../../../enum/has-type";
-import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
+import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 
 type HasTypeProps = {
   disabled: boolean;
@@ -18,14 +18,18 @@ function HasType({ disabled }: HasTypeProps) {
       description="Messages that contain the specified type(s)."
       placement="left"
     >
-      <MultiValueSelect
-        disabled={disabled}
+      <EnhancedAutocomplete
         label="Messages Containing"
-        onChange={(values) =>
-          setSearchCriteria({ selectedHasTypes: values as HasTypeEnum[] })
-        }
         value={selectedHasTypes}
-        values={Object.values(HasTypeEnum)}
+        options={Object.values(HasTypeEnum)}
+        disabled={disabled}
+        multiple
+        getOptionLabel={(option) => option}
+        onChange={(value) => {
+          if (Array.isArray(value)) {
+            setSearchCriteria({ selectedHasTypes: value as HasTypeEnum[] });
+          }
+        }}
       />
     </Tooltip>
   );
