@@ -27,7 +27,6 @@ function PrefilterUser({ isDm = false, disabled = false }: PrefilterUserProps) {
 
   return (
     <Tooltip
-      arrow
       title="Messages By"
       description="Search messages by User(s)"
       placement="left"

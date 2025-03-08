@@ -57,7 +57,7 @@ const ChannelSelection = ({
                     size="small"
                     edge="start"
                     checked={selectedExportChannels.some(
-                      (cId) => cId === channel.id
+                      (cId) => cId === channel.id,
                     )}
                     tabIndex={-1}
                     disableRipple
@@ -72,7 +72,6 @@ const ChannelSelection = ({
 
       <Stack direction="row" spacing={3}>
         <Tooltip
-          arrow
           title={selectedExportChannels.length ? "Deselect All" : "Select All"}
         >
           <IconButton

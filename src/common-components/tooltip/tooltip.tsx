@@ -5,10 +5,11 @@ import { Tooltip as MuiTooltip, TooltipProps, useTheme } from "@mui/material";
 const Tooltip = (
   props: {
     description?: string;
+    secondaryDescription?: string;
   } & TooltipProps,
 ) => {
   const theme = useTheme();
-  const { title, description, children, ...rest } = props;
+  const { title, description, secondaryDescription, children, ...rest } = props;
   return (
     <MuiTooltip
       disableInteractive
@@ -34,17 +35,32 @@ const Tooltip = (
         >
           <strong>{title}</strong>
           {description && (
-            <Typography
-              sx={{
-                color: theme.palette.text.secondary,
-                lineHeight: 1.1,
-                fontWeight: 550,
-              }}
-              mt={0.5}
-              variant="caption"
-            >
-              {description}
-            </Typography>
+            <>
+              <Typography
+                sx={{
+                  color: theme.palette.text.secondary,
+                  lineHeight: 1.1,
+                  fontWeight: 550,
+                }}
+                mt={0.5}
+                variant="caption"
+              >
+                {description}
+              </Typography>
+              {secondaryDescription && (
+                <Typography
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    lineHeight: 1.1,
+                    fontWeight: 550,
+                  }}
+                  mt={1}
+                  variant="caption"
+                >
+                  {secondaryDescription}
+                </Typography>
+              )}
+            </>
           )}
         </Box>
       }

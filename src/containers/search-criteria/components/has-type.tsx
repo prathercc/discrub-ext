@@ -14,9 +14,8 @@ function HasType({ disabled }: HasTypeProps) {
 
   return (
     <Tooltip
-      arrow
       title="Messages Containing"
-      description="Search messages that contain the following type(s)"
+      description="Messages that contain the specified type(s)."
       placement="left"
     >
       <MultiValueSelect

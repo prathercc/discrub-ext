@@ -22,7 +22,6 @@ function SearchChannels({ disabled = false }: SearchChannelsProps) {
 
   return (
     <Tooltip
-      arrow
       title="Channels"
       description="Search messages that exist only in the specified channels"
       placement="left"

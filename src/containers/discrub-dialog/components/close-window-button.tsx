@@ -7,7 +7,7 @@ import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 const CloseWindowButton = () => {
   return (
     <Box sx={{ position: "fixed", top: "12px", right: "267px" }}>
-      <Tooltip placement="left" arrow title="Quit">
+      <Tooltip placement="left" title="Quit">
         <IconButton
           onClick={() => sendChromeMessage("CLOSE_INJECTED_DIALOG")}
           color="secondary"

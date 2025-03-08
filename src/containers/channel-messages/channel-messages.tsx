@@ -153,7 +153,7 @@ function ChannelMessages() {
   const pauseCancelDisabled = !messagesLoading;
   const guildFieldDisabled = messagesLoading || discrubCancelled;
   const channelFieldDisabled =
-    selectedGuild?.id === null || messagesLoading || discrubCancelled;
+    !selectedGuild?.id || messagesLoading || discrubCancelled;
   const searchBtnDisabled =
     !selectedGuild?.id ||
     messagesLoading ||

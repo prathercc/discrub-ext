@@ -29,7 +29,7 @@ export default function TableMessage({
   setModifyEntity,
 }: TableMessageProps) {
   const hasValidEmbed = row?.embeds?.some(
-    (embed) => embed?.type === EmbedType.RICH
+    (embed) => embed?.type === EmbedType.RICH,
   );
   const hasAttachments = row.attachments.length > 0;
   const hasReactions =
@@ -46,7 +46,6 @@ export default function TableMessage({
         >
           {hasReactions && (
             <Tooltip
-              arrow
               placement={hasAttachments || hasValidEmbed ? "top" : "bottom"}
               title="Reactions"
             >
@@ -64,7 +63,6 @@ export default function TableMessage({
           )}
           {hasAttachments && (
             <Tooltip
-              arrow
               placement={hasValidEmbed ? "top" : "bottom"}
               title="Attachments"
             >
@@ -81,7 +79,7 @@ export default function TableMessage({
             </Tooltip>
           )}
           {hasValidEmbed && (
-            <Tooltip arrow title="Embeds">
+            <Tooltip title="Embeds">
               <IconButton
                 onClick={async (e) => {
                   e.stopPropagation();

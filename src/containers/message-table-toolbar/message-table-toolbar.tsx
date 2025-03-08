@@ -80,7 +80,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
 
   const handleEditMessage = (updateText: string) => {
     const toEdit = messages.filter((m) =>
-      selectedRows.some((smId) => smId === m.id)
+      selectedRows.some((smId) => smId === m.id),
     );
     editMessages(toEdit, updateText);
   };
@@ -112,7 +112,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
           bgcolor: (theme) =>
             alpha(
               theme.palette.primary.main,
-              theme.palette.action.activatedOpacity
+              theme.palette.action.activatedOpacity,
             ),
         }),
       }}
@@ -183,7 +183,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
           </Typography>
           {selectedRows.length > 0 && (
             <Stack justifyContent="flex-end" direction="row">
-              <Tooltip arrow title="Delete">
+              <Tooltip title="Delete">
                 <IconButton
                   disabled={discrubCancelled}
                   onClick={() => setDeleteModalOpen(true)}
@@ -191,7 +191,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
                   <DeleteIcon />
                 </IconButton>
               </Tooltip>
-              <Tooltip arrow title="Edit">
+              <Tooltip title="Edit">
                 <IconButton
                   disabled={discrubCancelled}
                   onClick={() => setEditModalOpen(true)}

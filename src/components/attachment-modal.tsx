@@ -109,7 +109,7 @@ const AttachmentModal = ({
             </Box>
           </Tooltip>
         </Stack>
-        <Tooltip arrow title="Delete">
+        <Tooltip title="Delete">
           <IconButton
             disabled={active}
             onClick={() => handleDeleteAttachment(attachment)}

@@ -30,7 +30,6 @@ function MentionedUsers({
 
   return (
     <Tooltip
-      arrow
       title="Mentions By"
       description="Search messages that mention the specified User(s)"
       placement="left"

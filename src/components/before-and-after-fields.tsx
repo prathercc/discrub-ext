@@ -19,12 +19,12 @@ function BeforeAndAfterFields({
   disabled,
   afterProps = {
     toolTipTitle: "Messages After",
-    toolTipDescription: "Search messages from after the provided date",
+    toolTipDescription: "Messages after the provided date.",
     label: "Messages After",
   },
   beforeProps = {
     toolTipTitle: "Messages Before",
-    toolTipDescription: "Search messages from before the provided date",
+    toolTipDescription: "Messages before the provided date.",
     label: "Messages Before",
   },
 }: BeforeAndAfterFieldsProps) {
@@ -40,7 +40,6 @@ function BeforeAndAfterFields({
       spacing={1}
     >
       <Tooltip
-        arrow
         title={afterProps.toolTipTitle}
         description={afterProps.toolTipDescription}
         placement="left"
@@ -53,7 +52,6 @@ function BeforeAndAfterFields({
         />
       </Tooltip>
       <Tooltip
-        arrow
         title={beforeProps.toolTipTitle}
         description={beforeProps.toolTipDescription}
         placement="right"

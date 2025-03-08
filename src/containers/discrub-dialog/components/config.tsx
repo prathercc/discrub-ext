@@ -225,7 +225,7 @@ function Config({
         { value: "false", name: "No" },
       ],
       description:
-        "Artist Mode will store Attached & Embedded Media into folders named by their Author's username",
+        "Artist Mode will store Attached & Embedded Media into folders named by their Author's username.",
       icon: () =>
         stringToBool(settings.exportUseArtistMode) ? (
           <BrushIcon />
@@ -309,7 +309,11 @@ function Config({
         controls.map((control) => {
           const Icon = control.icon?.();
           return (
-            <Tooltip placement="left" title={control.description}>
+            <Tooltip
+              placement="left"
+              title={control.label}
+              description={control.description}
+            >
               <FormControl fullWidth size="small">
                 {control.numeric && (
                   <TextField

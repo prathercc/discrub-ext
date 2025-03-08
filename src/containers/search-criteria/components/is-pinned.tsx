@@ -21,9 +21,8 @@ function IsPinned({ disabled }: IsPinnedProps) {
 
   return (
     <Tooltip
-      arrow
       title="Pinned Messages"
-      description="Search messages with the specified pin status"
+      description="Messages with the specified pin status."
       placement="left"
     >
       <Box>

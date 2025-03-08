@@ -142,7 +142,7 @@ interface FormatUserData {
  * @param userName
  * @param displayName
  * @param guildNickName
- * @param joinedAt,
+ * @param joinedAt
  * @param roleNames Array of Role names as Strings
  * @returns String formatted User data, to be used as HTML element title prop value
  */

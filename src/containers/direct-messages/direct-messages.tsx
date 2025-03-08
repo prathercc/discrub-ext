@@ -132,7 +132,7 @@ function DirectMessages() {
     setExpanded(false);
   };
 
-  const handleChangeDm = async (ids: Snowflake[]) => {
+  const handleChangeDm = (ids: Snowflake[]) => {
     setSelectedDms(ids);
     setSearchTouched(false);
     if (ids.length > 1) {
