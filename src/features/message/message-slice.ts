@@ -928,12 +928,20 @@ const _fetchReactingUserIds =
           lastId,
         );
         if (success && data && data.length) {
-          data.forEach((u) =>
+          const { userMap } = getState().export.exportMaps;
+          const updateMap = { ...userMap };
+          data.forEach((u) => {
             exportReactions.push({
               id: u.id,
               burst: type === ReactionType.BURST,
-            }),
-          );
+            });
+
+            updateMap[u.id] = {
+              ...getUserMappingData(u),
+              guilds: updateMap[u.id]?.guilds || {},
+            };
+          });
+          dispatch(setExportUserMap(updateMap));
           lastId = data[data.length - 1].id;
         } else {
           reachedEnd = true;
