@@ -14,7 +14,7 @@ import { ResolutionType } from "../../enum/resolution-type";
 import { UserDataRefreshRate } from "../../enum/user-data-refresh-rate.ts";
 import { setSetting } from "../../services/chrome-service.ts";
 
-const defaultSettings: AppSettings = {
+export const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
   [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
