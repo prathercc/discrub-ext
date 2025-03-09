@@ -4,8 +4,6 @@ import { DiscrubSetting } from "../../../enum/discrub-setting";
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import { SortDirection } from "../../../enum/sort-direction";
 import FormatListNumberedRtlIcon from "@mui/icons-material/FormatListNumberedRtl";
-import AutoDeleteIcon from "@mui/icons-material/AutoDelete";
-import YoutubeSearchedForIcon from "@mui/icons-material/YoutubeSearchedFor";
 import { ResolutionType } from "../../../enum/resolution-type";
 import { MediaType } from "../../../enum/media-type";
 import { UserDataRefreshRate } from "../../../enum/user-data-refresh-rate.ts";
@@ -17,6 +15,8 @@ import { useAppSlice } from "../../../features/app/use-app-slice.ts";
 import { useUserSlice } from "../../../features/user/use-user-slice.ts";
 import { filterBoth, getEntityHint } from "../../../utils.ts";
 import { EntityHint } from "../../../enum/entity-hint.ts";
+import { Delay } from "../../../enum/delay.ts";
+import { DelayModifier } from "../../../enum/delay-modifier.ts";
 
 type ConfigProps = {
   visibleSettings: DiscrubSetting[];
@@ -67,6 +67,8 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
     }
   };
 
+  const delayOptions = Object.values(Delay).map((v) => ({ name: v, value: v }));
+
   const controls = [
     // Discrub Settings
     {
@@ -114,22 +116,24 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
         "The rate at which User data will be refreshed (Display Name, Server Nickname & Roles).",
     },
     {
-      name: DiscrubSetting.RANDOM_DELETE_DELAY,
-      label: "Delete/Edit Random Delay (seconds)",
+      name: DiscrubSetting.DELAY_MODIFIER,
+      label: "Delay Spread Seconds",
       description:
-        "Wait a random amount of seconds (from zero and the provided value), between message deletes/edits.",
-      numeric: true,
-      fallbackValue: "0",
-      icon: () => <AutoDeleteIcon />,
+        "The spread in seconds to randomize Modify and Search Delays.",
+      options: Object.values(DelayModifier).map((v) => ({ name: v, value: v })),
     },
     {
-      name: DiscrubSetting.RANDOM_SEARCH_DELAY,
-      label: "Search Random Delay (seconds)",
+      name: DiscrubSetting.DELETE_DELAY,
+      label: "Modify Delay Seconds",
       description:
-        "Wait a random amount of seconds (from zero and the provided value), between message, user, and reaction searches.",
-      numeric: true,
-      fallbackValue: "0",
-      icon: () => <YoutubeSearchedForIcon />,
+        "The amount of seconds to wait between each deletion, edit, or removal.",
+      options: delayOptions,
+    },
+    {
+      name: DiscrubSetting.SEARCH_DELAY,
+      label: "Search Delay Seconds",
+      description: "The amount of seconds to wait between each search.",
+      options: delayOptions,
     },
 
     // Export Settings

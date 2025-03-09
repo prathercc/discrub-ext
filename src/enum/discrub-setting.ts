@@ -2,8 +2,9 @@ export enum DiscrubSetting {
   REACTIONS_ENABLED = "reactionsEnabled",
   SERVER_NICKNAME_LOOKUP = "serverNickNameLookup",
   DISPLAY_NAME_LOOKUP = "displayNameLookup",
-  RANDOM_DELETE_DELAY = "randomDeleteDelay",
-  RANDOM_SEARCH_DELAY = "randomSearchDelay",
+  SEARCH_DELAY = "searchDelay",
+  DELETE_DELAY = "deleteDelay",
+  DELAY_MODIFIER = "delayModifier",
 
   EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS = "exportSeparateThreadAndForumPosts",
   EXPORT_ARTIST_MODE = "exportUseArtistMode",

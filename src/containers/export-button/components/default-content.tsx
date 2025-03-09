@@ -35,7 +35,7 @@ const DefaultContent = ({
   }
 
   const configurationTab: EnhancedTab = {
-    label: "Configuration",
+    label: "Config",
     getComponent: () => getExportSettings(visibleSettings, isDm),
   };
   const tabs: EnhancedTab[] = [configurationTab];

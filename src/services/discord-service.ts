@@ -69,6 +69,7 @@ type SearchMessageResult = {
 class DiscordService {
   searchDelaySecs = 0;
   deleteDelaySecs = 0;
+  delayModifierSecs = 0;
   DISCORD_API_URL = "https://discord.com/api/v10";
   DISCORD_USERS_ENDPOINT = `${this.DISCORD_API_URL}/users`;
   DISCORD_GUILDS_ENDPOINT = `${this.DISCORD_API_URL}/guilds`;
@@ -78,8 +79,9 @@ class DiscordService {
 
   constructor(settings?: AppSettings) {
     if (settings) {
-      this.searchDelaySecs = Number(settings.randomSearchDelay);
-      this.deleteDelaySecs = Number(settings.randomDeleteDelay);
+      this.searchDelaySecs = Number(settings.searchDelay);
+      this.deleteDelaySecs = Number(settings.deleteDelay);
+      this.delayModifierSecs = Number(settings.delayModifier);
     }
   }
 
@@ -92,8 +94,11 @@ class DiscordService {
   withSearchDelay = async <T = void>(
     func: () => Promise<DiscordApiResponse<T>>,
   ) => {
-    if (this.searchDelaySecs > 0) {
-      const delay = this.calculateRandomNumber(this.searchDelaySecs);
+    const isDelaySearch = this.searchDelaySecs > 0;
+    if (isDelaySearch) {
+      const min = this.searchDelaySecs - this.delayModifierSecs;
+      const max = this.searchDelaySecs + this.delayModifierSecs;
+      const delay = this.calculateRandomNumber(max, min);
       console.warn(`Applying Search Delay: ${delay} seconds`);
       await wait(delay);
     }
@@ -104,8 +109,11 @@ class DiscordService {
   withDeleteDelay = async <T = void>(
     func: () => Promise<DiscordApiResponse<T>>,
   ) => {
-    if (this.deleteDelaySecs > 0) {
-      const delay = this.calculateRandomNumber(this.deleteDelaySecs);
+    const isDelayDelete = this.deleteDelaySecs > 0;
+    if (isDelayDelete) {
+      const min = this.deleteDelaySecs - this.delayModifierSecs;
+      const max = this.deleteDelaySecs + this.delayModifierSecs;
+      const delay = this.calculateRandomNumber(max, min);
       console.warn(`Applying Delete/Edit Delay: ${delay} seconds`);
       await wait(delay);
     }

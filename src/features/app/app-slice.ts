@@ -13,13 +13,16 @@ import { SortDirection } from "../../enum/sort-direction";
 import { ResolutionType } from "../../enum/resolution-type";
 import { UserDataRefreshRate } from "../../enum/user-data-refresh-rate.ts";
 import { setSetting } from "../../services/chrome-service.ts";
+import { DelayModifier } from "../../enum/delay-modifier.ts";
+import { Delay } from "../../enum/delay.ts";
 
 export const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
   [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
-  [DiscrubSetting.RANDOM_DELETE_DELAY]: "0",
-  [DiscrubSetting.RANDOM_SEARCH_DELAY]: "0",
+  [DiscrubSetting.SEARCH_DELAY]: Delay.ONE,
+  [DiscrubSetting.DELETE_DELAY]: Delay.TWO,
+  [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_TWO_FIVE,
 
   [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
   [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",

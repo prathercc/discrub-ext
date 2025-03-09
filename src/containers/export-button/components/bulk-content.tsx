@@ -129,7 +129,7 @@ const BulkContent = ({
   };
 
   const configurationTab: EnhancedTab = {
-    label: "Configuration",
+    label: "Config",
     getComponent: () => getExportSettings(visibleSettings, isDm),
   };
 
@@ -138,7 +138,8 @@ const BulkContent = ({
     getComponent: () =>
       getExportSettings(
         [
-          DiscrubSetting.RANDOM_SEARCH_DELAY,
+          DiscrubSetting.DELAY_MODIFIER,
+          DiscrubSetting.SEARCH_DELAY,
           DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
           DiscrubSetting.REACTIONS_ENABLED,
           DiscrubSetting.DISPLAY_NAME_LOOKUP,

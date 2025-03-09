@@ -8,8 +8,9 @@ function Settings() {
     DiscrubSetting.SERVER_NICKNAME_LOOKUP,
     DiscrubSetting.DISPLAY_NAME_LOOKUP,
     DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
-    DiscrubSetting.RANDOM_DELETE_DELAY,
-    DiscrubSetting.RANDOM_SEARCH_DELAY,
+    DiscrubSetting.DELAY_MODIFIER,
+    DiscrubSetting.SEARCH_DELAY,
+    DiscrubSetting.DELETE_DELAY,
   ];
 
   return (
