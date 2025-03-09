@@ -14,6 +14,9 @@ import { defaultSettings } from "../../../features/app/app-slice.ts";
 import { useDmSlice } from "../../../features/dm/use-dm-slice.ts";
 import { useGuildSlice } from "../../../features/guild/use-guild-slice.ts";
 import { useAppSlice } from "../../../features/app/use-app-slice.ts";
+import { useUserSlice } from "../../../features/user/use-user-slice.ts";
+import { filterBoth, getEntityHint } from "../../../utils.ts";
+import { EntityHint } from "../../../enum/entity-hint.ts";
 
 type ConfigProps = {
   visibleSettings: DiscrubSetting[];
@@ -22,6 +25,8 @@ type ConfigProps = {
 };
 
 function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
+  const { clearUserMapping, createUserMapping } = useUserSlice();
+
   const { state: appState, setSettings: onChangeSettings } = useAppSlice();
   const settings = appState.settings();
 
@@ -30,6 +35,7 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
 
   const { state: guildState } = useGuildSlice();
   const preFilterUsers = guildState.preFilterUsers();
+  const selectedGuild = guildState.selectedGuild();
 
   const criteriaUsers = isDm ? dmPreFilterUsers : preFilterUsers;
 
@@ -227,6 +233,7 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
       options: criteriaUsers.map((u) => ({ value: u.id, name: u.name })),
       description:
         "Messages are not deleted. Remove reactions from the specified Users.",
+      secondaryDescription: getEntityHint(EntityHint.USER),
       onSelectAll: () => {
         const removalFromIds =
           getValue(DiscrubSetting.PURGE_REACTION_REMOVAL_FROM)?.split(",") ||
@@ -238,6 +245,27 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
             : getDefaultValue(DiscrubSetting.PURGE_REACTION_REMOVAL_FROM),
         );
       },
+      onOptionRemoval: !isDm ? clearUserMapping : undefined,
+      onChange: (value: string | string[] | null) => {
+        if (Array.isArray(value)) {
+          if (selectedGuild) {
+            const removalFromIds =
+              getValue(DiscrubSetting.PURGE_REACTION_REMOVAL_FROM)?.split(
+                ",",
+              ) || [];
+            filterBoth(
+              value,
+              removalFromIds,
+              criteriaUsers.map(({ id }) => id),
+            ).forEach((id) => createUserMapping(id, selectedGuild.id));
+          }
+          handleChange(
+            DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
+            value.join(),
+          );
+        }
+      },
+      freeSolo: true,
     },
     {
       name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
@@ -282,6 +310,7 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
               placement="left"
               title={control.label}
               description={control.description}
+              secondaryDescription={control.secondaryDescription}
             >
               <FormControl fullWidth size="small">
                 {control.numeric && (
@@ -306,18 +335,23 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
                     }
                     disabled={control.disabled}
                     label={control.label}
-                    onChange={(value) => {
-                      if (Array.isArray(value)) {
-                        handleChange(control.name, value.join());
-                      } else if (typeof value === "string") {
-                        handleChange(control.name, value);
-                      } else if (!value) {
-                        handleChange(
-                          control.name,
-                          getDefaultValue(control.name),
-                        );
-                      }
-                    }}
+                    onChange={
+                      control.onChange
+                        ? control.onChange
+                        : (value) => {
+                            if (Array.isArray(value)) {
+                              handleChange(control.name, value.join());
+                            } else if (typeof value === "string") {
+                              handleChange(control.name, value);
+                            } else if (!value) {
+                              handleChange(
+                                control.name,
+                                getDefaultValue(control.name),
+                              );
+                            }
+                          }
+                    }
+                    freeSolo={control.freeSolo}
                     options={
                       control.disabled
                         ? ["N/A"]
@@ -336,6 +370,7 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
                       value
                     }
                     onSelectAll={control.onSelectAll}
+                    onOptionRemoval={control.onOptionRemoval}
                   />
                 )}
               </FormControl>
