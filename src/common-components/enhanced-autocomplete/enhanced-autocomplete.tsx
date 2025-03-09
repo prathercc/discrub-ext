@@ -78,6 +78,17 @@ const EnhancedAutocomplete = forwardRef<
     return arr;
   };
 
+  const isNonOptionValue = (v: string) => !options.some((o) => o === v);
+
+  const getOptions = () => {
+    let retOptions = options;
+    if (freeSolo) {
+      const nonOptionsFromValue = (value || []).filter(isNonOptionValue);
+      retOptions = [...nonOptionsFromValue, ...retOptions];
+    }
+    return retOptions;
+  };
+
   return (
     <Autocomplete
       {...rest}
@@ -87,7 +98,7 @@ const EnhancedAutocomplete = forwardRef<
       disabled={disabled}
       multiple={multiple}
       id={`enhanced-autocomplete-${label}`}
-      options={options}
+      options={getOptions()}
       freeSolo={freeSolo}
       fullWidth={fullWidth}
       disableCloseOnSelect={multiple}
@@ -117,7 +128,7 @@ const EnhancedAutocomplete = forwardRef<
               />
             )}
             {getOptionLabel ? getOptionLabel(option) : option}
-            {onOptionRemoval && (
+            {onOptionRemoval && !isNonOptionValue(option) && (
               <RemoveOptionAdornment
                 sx={{ position: "absolute", right: 5 }}
                 value={option}
