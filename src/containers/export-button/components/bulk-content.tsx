@@ -29,9 +29,8 @@ type BulkContentProps = {
 };
 
 export const getExportSettings = (
-  onChangeSettings: (settings: AppSettings) => void,
   visibleSettings: DiscrubSetting[],
-  settings: AppSettings,
+  isDm: boolean,
 ) => {
   return (
     <Stack
@@ -47,9 +46,8 @@ export const getExportSettings = (
       alignItems="center"
     >
       <Config
-        onChangeSettings={onChangeSettings}
+        isDm={isDm}
         visibleSettings={visibleSettings}
-        settings={settings}
         containerProps={{ width: "85%" }}
       />
     </Stack>
@@ -62,8 +60,6 @@ const BulkContent = ({
   selectedExportChannels,
   channels,
   setSelectedExportChannels,
-  settings,
-  onChangeSettings,
 }: BulkContentProps) => {
   const handleChannelSelect = (id: Snowflake) => {
     const isSelected = selectedExportChannels.some((cId) => cId === id);
@@ -134,15 +130,13 @@ const BulkContent = ({
 
   const configurationTab: EnhancedTab = {
     label: "Configuration",
-    getComponent: () =>
-      getExportSettings(onChangeSettings, visibleSettings, settings),
+    getComponent: () => getExportSettings(visibleSettings, isDm),
   };
 
   const settingsTab: EnhancedTab = {
     label: "Settings",
     getComponent: () =>
       getExportSettings(
-        onChangeSettings,
         [
           DiscrubSetting.RANDOM_SEARCH_DELAY,
           DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
@@ -150,7 +144,7 @@ const BulkContent = ({
           DiscrubSetting.DISPLAY_NAME_LOOKUP,
           ...(isDm ? [] : [DiscrubSetting.SERVER_NICKNAME_LOOKUP]),
         ],
-        settings,
+        isDm,
       ),
   };
 

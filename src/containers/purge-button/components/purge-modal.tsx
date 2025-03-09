@@ -16,8 +16,6 @@ import { useMessageSlice } from "../../../features/message/use-message-slice.ts"
 import Config from "../../discrub-dialog/components/config.tsx";
 import { DiscrubSetting } from "../../../enum/discrub-setting.ts";
 import EnhancedDialogTitle from "../../../common-components/enhanced-dialog/enhanced-dialog-title.tsx";
-import { useDmSlice } from "../../../features/dm/use-dm-slice.ts";
-import { useGuildSlice } from "../../../features/guild/use-guild-slice.ts";
 
 type PurgeModalProps = {
   dialogOpen: boolean;
@@ -39,14 +37,6 @@ const PurgeModal = ({
   setDialogOpen,
   isDm = false,
 }: PurgeModalProps) => {
-  const { state: dmState } = useDmSlice();
-  const dmPreFilterUsers = dmState.preFilterUsers();
-
-  const { state: guildState } = useGuildSlice();
-  const preFilterUsers = guildState.preFilterUsers();
-
-  const criteriaUsers = isDm ? dmPreFilterUsers : preFilterUsers;
-
   const { setSearchCriteria } = useMessageSlice();
   const [purgeInstruction, setPurgeInstruction] = useState<PurgeInstruction>(
     PurgeInstruction.AWAITING_INSTRUCTION,
@@ -56,11 +46,9 @@ const PurgeModal = ({
     state: appState,
     resetModify,
     setIsModifying,
-    setSettings,
     setDiscrubCancelled,
     setDiscrubPaused,
   } = useAppSlice();
-  const settings = appState.settings();
   const isPaused = appState.discrubPaused();
   const task = appState.task();
   const { active, entity } = task;
@@ -131,15 +119,13 @@ const PurgeModal = ({
     disabled: active,
     getComponent: () => (
       <Config
-        criteriaUsers={criteriaUsers}
-        settings={settings}
+        isDm={isDm}
         visibleSettings={[
           DiscrubSetting.RANDOM_DELETE_DELAY,
           DiscrubSetting.RANDOM_SEARCH_DELAY,
           DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
           DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
         ]}
-        onChangeSettings={setSettings}
       />
     ),
   };

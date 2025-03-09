@@ -18,8 +18,6 @@ type DefaultContentProps = {
 const DefaultContent = ({
   isExporting,
   messageCount,
-  settings,
-  onChangeSettings,
   isDm,
 }: DefaultContentProps) => {
   let visibleSettings = [
@@ -38,8 +36,7 @@ const DefaultContent = ({
 
   const configurationTab: EnhancedTab = {
     label: "Configuration",
-    getComponent: () =>
-      getExportSettings(onChangeSettings, visibleSettings, settings),
+    getComponent: () => getExportSettings(visibleSettings, isDm),
   };
   const tabs: EnhancedTab[] = [configurationTab];
 

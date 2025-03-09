@@ -1,14 +1,8 @@
 import { Paper, Stack, Typography } from "@mui/material";
-import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
 import Config from "./config";
 
-type SettingsProps = {
-  settings: AppSettings;
-  onChangeSettings: (settings: AppSettings) => void;
-};
-
-function Settings({ settings, onChangeSettings }: SettingsProps) {
+function Settings() {
   const visibleSettings = [
     DiscrubSetting.REACTIONS_ENABLED,
     DiscrubSetting.SERVER_NICKNAME_LOOKUP,
@@ -31,11 +25,7 @@ function Settings({ settings, onChangeSettings }: SettingsProps) {
       </Stack>
 
       <Stack sx={{ maxHeight: "600px", overflow: "auto" }}>
-        <Config
-          settings={settings}
-          visibleSettings={visibleSettings}
-          onChangeSettings={onChangeSettings}
-        />
+        <Config visibleSettings={visibleSettings} />
       </Stack>
     </Paper>
   );

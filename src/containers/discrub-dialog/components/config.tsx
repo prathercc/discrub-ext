@@ -1,6 +1,5 @@
 import { FormControl, Stack, SxProps, TextField, Theme } from "@mui/material";
 import { setSetting } from "../../../services/chrome-service";
-import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import { SortDirection } from "../../../enum/sort-direction";
@@ -10,25 +9,30 @@ import YoutubeSearchedForIcon from "@mui/icons-material/YoutubeSearchedFor";
 import { ResolutionType } from "../../../enum/resolution-type";
 import { MediaType } from "../../../enum/media-type";
 import { UserDataRefreshRate } from "../../../enum/user-data-refresh-rate.ts";
-import { PreFilterUser } from "../../../features/dm/dm-types.ts";
 import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 import { defaultSettings } from "../../../features/app/app-slice.ts";
+import { useDmSlice } from "../../../features/dm/use-dm-slice.ts";
+import { useGuildSlice } from "../../../features/guild/use-guild-slice.ts";
+import { useAppSlice } from "../../../features/app/use-app-slice.ts";
 
 type ConfigProps = {
-  settings: AppSettings;
-  onChangeSettings: (settings: AppSettings) => void;
   visibleSettings: DiscrubSetting[];
   containerProps?: SxProps<Theme>;
-  criteriaUsers?: PreFilterUser[];
+  isDm?: boolean;
 };
 
-function Config({
-  settings,
-  onChangeSettings,
-  visibleSettings = [],
-  containerProps,
-  criteriaUsers = [],
-}: ConfigProps) {
+function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
+  const { state: appState, setSettings: onChangeSettings } = useAppSlice();
+  const settings = appState.settings();
+
+  const { state: dmState } = useDmSlice();
+  const dmPreFilterUsers = dmState.preFilterUsers();
+
+  const { state: guildState } = useGuildSlice();
+  const preFilterUsers = guildState.preFilterUsers();
+
+  const criteriaUsers = isDm ? dmPreFilterUsers : preFilterUsers;
+
   const handleChange = async (setting: DiscrubSetting, value: string) => {
     const settings = await setSetting(setting, value);
     onChangeSettings(settings);

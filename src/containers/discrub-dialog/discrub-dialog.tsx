@@ -86,9 +86,7 @@ function DiscrubDialog() {
       {menuIndex === 1 && <DirectMessages />}
       {menuIndex === 2 && <Tags />}
       {menuIndex === 3 && <About />}
-      {menuIndex === 4 && (
-        <Settings settings={settings} onChangeSettings={setSettings} />
-      )}
+      {menuIndex === 4 && <Settings />}
 
       <Box sx={{ position: "fixed", top: "23px", right: "310px", opacity: 1 }}>
         <Stack
