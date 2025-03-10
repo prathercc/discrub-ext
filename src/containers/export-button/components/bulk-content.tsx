@@ -6,7 +6,6 @@ import {
 } from "@mui/material";
 import Progress from "./progress";
 import Channel from "../../../classes/channel";
-import ChannelSelection from "./channel-selection";
 import Config from "../../discrub-dialog/components/config";
 import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
@@ -17,6 +16,15 @@ import SearchCriteria, {
   defaultCriteria,
   SearchCriteriaComponentType,
 } from "../../search-criteria/search-criteria.tsx";
+import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
+import {
+  filterBoth,
+  getEntityHint,
+  getIconUrl,
+  getSortedChannels,
+} from "../../../utils.ts";
+import Tooltip from "../../../common-components/tooltip/tooltip.tsx";
+import { EntityHint } from "../../../enum/entity-hint.ts";
 
 type BulkContentProps = {
   isDm?: boolean;
@@ -26,6 +34,7 @@ type BulkContentProps = {
   setSelectedExportChannels: (ids: Snowflake[]) => void;
   settings: AppSettings;
   onChangeSettings: (settings: AppSettings) => void;
+  loadChannel: (e: string) => void;
 };
 
 export const getExportSettings = (
@@ -60,23 +69,17 @@ const BulkContent = ({
   selectedExportChannels,
   channels,
   setSelectedExportChannels,
+  loadChannel,
 }: BulkContentProps) => {
-  const handleChannelSelect = (id: Snowflake) => {
-    const isSelected = selectedExportChannels.some((cId) => cId === id);
-    if (isSelected) {
-      setSelectedExportChannels([
-        ...selectedExportChannels.filter((cId) => cId !== id),
-      ]);
+  const sortedChannels = getSortedChannels(channels);
+  const handleSelectAll = () => {
+    if (selectedExportChannels.length !== channels.length) {
+      setSelectedExportChannels(channels.map((c) => c.id));
     } else {
-      setSelectedExportChannels([...selectedExportChannels, id]);
+      setSelectedExportChannels([]);
     }
   };
 
-  const toggleSelectAll = (filteredChannels: Channel[]) => {
-    setSelectedExportChannels(
-      selectedExportChannels.length ? [] : filteredChannels.map((c) => c.id),
-    );
-  };
   let visibleSettings = [
     DiscrubSetting.EXPORT_ARTIST_MODE,
     DiscrubSetting.EXPORT_DOWNLOAD_MEDIA,
@@ -97,21 +100,48 @@ const BulkContent = ({
     getComponent: () => (
       <>
         <DialogContentText>
-          <Typography variant="body2">
+          <Typography variant="body1">
             {selectedExportChannels.length
               ? `${selectedExportChannels.length} Channel${
                   selectedExportChannels.length === 1 ? "" : "s"
-                } selected`
-              : "Select Channel(s) to export"}
+                } Selected`
+              : "Select Channels To Export"}
           </Typography>
         </DialogContentText>
-        <Stack direction="row" spacing={3}>
-          <ChannelSelection
-            channels={channels}
-            selectedExportChannels={selectedExportChannels}
-            handleChannelSelect={handleChannelSelect}
-            onSelectAll={toggleSelectAll}
-          />
+        <Stack direction="row" mt={1}>
+          <Tooltip
+            title="Channels"
+            description={getEntityHint(EntityHint.THREAD)}
+          >
+            <EnhancedAutocomplete
+              label="Channels To Export"
+              options={sortedChannels.map((c) => c.id)}
+              value={selectedExportChannels}
+              onChange={(e) => {
+                if (Array.isArray(e)) {
+                  filterBoth(
+                    e,
+                    selectedExportChannels,
+                    channels.map(({ id }) => id),
+                  ).forEach((id) => loadChannel(id));
+                  setSelectedExportChannels(e);
+                }
+              }}
+              onSelectAll={handleSelectAll}
+              getOptionLabel={(e) =>
+                channels.find((c) => c.id === e)?.name || e
+              }
+              getOptionIconSrc={(id) => {
+                const channel = channels.find((c) => c.id === id);
+                return channel && getIconUrl(channel);
+              }}
+              multiple
+              optionIconStyle={{ filter: "invert(50%)" }}
+              copyValue={sortedChannels.map((c) => c.name).join("\r\n")}
+              copyName="Channel List"
+              freeSolo
+            />
+          </Tooltip>
         </Stack>
       </>
     ),

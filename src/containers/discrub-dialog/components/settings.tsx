@@ -26,7 +26,7 @@ function Settings() {
         <Typography variant="caption">Customize your experience</Typography>
       </Stack>
 
-      <Stack sx={{ maxHeight: "600px", overflow: "auto" }}>
+      <Stack sx={{ maxHeight: "470px", overflow: "auto" }}>
         <Config visibleSettings={visibleSettings} />
       </Stack>
     </Paper>
