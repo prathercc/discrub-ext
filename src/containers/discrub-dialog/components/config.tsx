@@ -17,6 +17,7 @@ import { filterBoth, getEntityHint } from "../../../utils.ts";
 import { EntityHint } from "../../../enum/entity-hint.ts";
 import { Delay } from "../../../enum/delay.ts";
 import { DelayModifier } from "../../../enum/delay-modifier.ts";
+import { DateFormat } from "../../../enum/date-format.ts";
 
 type ConfigProps = {
   visibleSettings: DiscrubSetting[];
@@ -134,6 +135,16 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
       label: "Search Delay Seconds",
       description: "The amount of seconds to wait between each search.",
       options: delayOptions,
+    },
+    {
+      name: DiscrubSetting.DATE_FORMAT,
+      label: "Date Format",
+      options: Object.values(DateFormat).map((v) => ({
+        name: v.toUpperCase(),
+        value: v,
+      })),
+      description:
+        "The format in which dates are presented throughout the extension.",
     },
 
     // Export Settings

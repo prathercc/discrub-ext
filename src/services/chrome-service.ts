@@ -7,6 +7,7 @@ import { AppSettings } from "../features/app/app-types";
 import { UserDataRefreshRate } from "../enum/user-data-refresh-rate.ts";
 import { DelayModifier } from "../enum/delay-modifier.ts";
 import { Delay } from "../enum/delay.ts";
+import { DateFormat } from "../enum/date-format.ts";
 
 type ChromeCallback = (param: string) => Promise<void> | void | Maybe;
 
@@ -36,6 +37,7 @@ const defaultSettings = [
     name: DiscrubSetting.DELAY_MODIFIER,
     value: DelayModifier.ZERO_POINT_TWO_FIVE,
   },
+  { name: DiscrubSetting.DATE_FORMAT, value: DateFormat.MMDDYYYY },
 
   {
     name: DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
@@ -96,6 +98,7 @@ export const getSettings = async (): Promise<AppSettings> => {
     [DiscrubSetting.DELETE_DELAY]: chromeSettings[DiscrubSetting.DELETE_DELAY],
     [DiscrubSetting.DELAY_MODIFIER]:
       chromeSettings[DiscrubSetting.DELAY_MODIFIER],
+    [DiscrubSetting.DATE_FORMAT]: chromeSettings[DiscrubSetting.DATE_FORMAT],
 
     [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]:
       chromeSettings[DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS],

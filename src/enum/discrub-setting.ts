@@ -5,6 +5,7 @@ export enum DiscrubSetting {
   SEARCH_DELAY = "searchDelay",
   DELETE_DELAY = "deleteDelay",
   DELAY_MODIFIER = "delayModifier",
+  DATE_FORMAT = "dateFormat",
 
   EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS = "exportSeparateThreadAndForumPosts",
   EXPORT_ARTIST_MODE = "exportUseArtistMode",

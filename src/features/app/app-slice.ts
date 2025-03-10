@@ -15,6 +15,7 @@ import { UserDataRefreshRate } from "../../enum/user-data-refresh-rate.ts";
 import { setSetting } from "../../services/chrome-service.ts";
 import { DelayModifier } from "../../enum/delay-modifier.ts";
 import { Delay } from "../../enum/delay.ts";
+import { DateFormat } from "../../enum/date-format.ts";
 
 export const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
@@ -23,6 +24,7 @@ export const defaultSettings: AppSettings = {
   [DiscrubSetting.SEARCH_DELAY]: Delay.ONE,
   [DiscrubSetting.DELETE_DELAY]: Delay.TWO,
   [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_TWO_FIVE,
+  [DiscrubSetting.DATE_FORMAT]: DateFormat.MMDDYYYY,
 
   [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
   [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",

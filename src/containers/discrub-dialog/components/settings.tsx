@@ -11,6 +11,7 @@ function Settings() {
     DiscrubSetting.DELAY_MODIFIER,
     DiscrubSetting.SEARCH_DELAY,
     DiscrubSetting.DELETE_DELAY,
+    DiscrubSetting.DATE_FORMAT,
   ];
 
   return (

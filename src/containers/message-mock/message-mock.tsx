@@ -76,22 +76,22 @@ const MessageMock = ({
   const isCall = messageTypeEquals(message.type, MessageType.CALL);
   const isPinMessage = messageTypeEquals(
     message.type,
-    MessageType.CHANNEL_PINNED_MESSAGE
+    MessageType.CHANNEL_PINNED_MESSAGE,
   );
   const nonStandardMessage = isNonStandardMessage(message);
 
   const messageDate = parseISO(message.timestamp);
   const tz = getTimeZone(messageDate);
-  const shortDateTime = `${format(messageDate, "MM/dd/yyyy")} ${
+  const shortDateTime = `${format(messageDate, settings.dateFormat)} ${
     isCall ? "" : "at"
   } ${format(messageDate, "HH:mm:ss")} ${tz}`;
   const longDateTime = `${format(
     messageDate,
-    "EEEE, LLLL d, yyyy HH:mm:ss"
+    "EEEE, LLLL d, yyyy HH:mm:ss",
   )} ${tz}`;
 
   const foundThread = threads?.find(
-    (thread) => thread.id === message.id || thread.id === message.channel_id
+    (thread) => thread.id === message.id || thread.id === message.channel_id,
   );
   const repliedToMsg = messageTypeEquals(message.type, MessageType.REPLY)
     ? messages.find((msg) => msg.id === message.message_reference?.message_id)
