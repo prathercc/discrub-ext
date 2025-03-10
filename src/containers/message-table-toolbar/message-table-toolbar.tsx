@@ -103,6 +103,8 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
     handleFilterMessages();
   };
 
+  const zeroSelections = selectedRows.length === 0;
+
   return (
     <Toolbar
       sx={{
@@ -176,31 +178,38 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          sx={{ opacity: selectedRows.length > 0 ? 1 : 0, minHeight: "40px" }}
+          sx={{ minHeight: "40px" }}
         >
           <Typography variant="subtitle1" component="div">
-            {selectedRows.length} selected
+            {zeroSelections ? "No" : selectedRows.length} Message
+            {zeroSelections || selectedRows.length > 1 ? "s" : ""} Selected
           </Typography>
-          {selectedRows.length > 0 && (
-            <Stack justifyContent="flex-end" direction="row">
-              <Tooltip title="Delete">
-                <IconButton
-                  disabled={discrubCancelled}
-                  onClick={() => setDeleteModalOpen(true)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Edit">
-                <IconButton
-                  disabled={discrubCancelled}
-                  onClick={() => setEditModalOpen(true)}
-                >
-                  <EditIcon />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          )}
+
+          <Stack justifyContent="flex-end" direction="row">
+            <Tooltip
+              title="Delete"
+              description="Delete data from every selected message."
+              secondaryDescription="Text or attachments."
+            >
+              <IconButton
+                disabled={discrubCancelled || zeroSelections}
+                onClick={() => setDeleteModalOpen(true)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              title="Edit"
+              description="Modify the text content of every selected message."
+            >
+              <IconButton
+                disabled={discrubCancelled || zeroSelections}
+                onClick={() => setEditModalOpen(true)}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Stack>
       </Stack>
     </Toolbar>
