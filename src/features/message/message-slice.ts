@@ -818,6 +818,7 @@ export const deleteMessages =
     deleteConfig: DeleteConfiguration = {
       attachments: true,
       messages: true,
+      reactions: false,
     },
   ): AppThunk =>
   async (dispatch, getState) => {

@@ -16,13 +16,26 @@ import {
   DialogContent,
   useTheme,
   LinearProgress,
+  Collapse,
 } from "@mui/material";
 import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
-import { isMessage } from "../../../app/guards";
+import { isMessage, isNonNullable } from "../../../app/guards";
 import { DeleteConfiguration } from "../../../features/message/message-types";
 import { AppTask } from "../../../features/app/app-types";
 import MessageMock from "../../message-mock/message-mock";
+import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
+import {
+  ExportReactionMap,
+  ExportUserMap,
+} from "../../../features/export/export-types.ts";
+import Message from "../../../classes/message.ts";
+import { Emoji } from "../../../classes/emoji.ts";
+import {
+  getEncodedEmoji,
+  resolveAvatarUrl,
+  resolveEmojiUrl,
+} from "../../../utils.ts";
 
 type DeleteModalProps = {
   open: boolean;
@@ -30,6 +43,9 @@ type DeleteModalProps = {
   handleDeleteMessage: (deleteConfig: DeleteConfiguration) => void;
   selectedRows: string[];
   task: AppTask;
+  messages: Message[];
+  reactionMap: ExportReactionMap;
+  userMap: ExportUserMap;
 };
 
 const DeleteModal = ({
@@ -38,17 +54,66 @@ const DeleteModal = ({
   selectedRows,
   task,
   handleDeleteMessage,
+  messages,
+  reactionMap,
+  userMap,
 }: DeleteModalProps) => {
   const theme = useTheme();
   const { active, entity, statusText } = task;
-
-  const [deleteConfig, setDeleteConfig] = useState<DeleteConfiguration>({
+  const defaultConfig: DeleteConfiguration = {
     attachments: true,
     messages: true,
-  });
+    reactions: false,
+  };
+
+  const filteredMessages = messages.filter((m) =>
+    selectedRows.some((id) => id === m.id),
+  );
+
+  const getEmojisInUse = () => {
+    const emojis: Emoji[] = [];
+    filteredMessages.forEach((m) => {
+      (m.reactions || []).forEach((r) => {
+        const alreadyExists = emojis.some(
+          (e) => getEncodedEmoji(e) === getEncodedEmoji(r.emoji),
+        );
+        if (!alreadyExists) {
+          emojis.push(r.emoji);
+        }
+      });
+    });
+
+    return emojis;
+  };
+
+  const getReactingUserIds = () => {
+    const userIds: string[] = [];
+    filteredMessages.forEach((m) => {
+      const reactionMapping = reactionMap[m.id] || {};
+      Object.keys(reactionMapping).forEach((key) => {
+        reactionMapping[key].forEach(({ id }) => {
+          const alreadyExists = userIds.some((eId) => eId === id);
+          if (!alreadyExists) {
+            userIds.push(id);
+          }
+        });
+      });
+    });
+    return userIds;
+  };
+
+  const [deleteConfig, setDeleteConfig] =
+    useState<DeleteConfiguration>(defaultConfig);
+
+  const [emojisInUse, setEmojisInUse] = useState<Emoji[]>([]);
+  const [reactingUserIds, setReactingUserIds] = useState<string[]>([]);
+
+  const incompleteReactionDelete =
+    deleteConfig.reactions &&
+    (!deleteConfig.reactingUserIds?.length || !deleteConfig.emojis?.length);
 
   useEffect(() => {
-    setDeleteConfig({ attachments: true, messages: true });
+    setDeleteConfig(defaultConfig);
   }, [open]);
 
   useEffect(() => {
@@ -57,6 +122,40 @@ const DeleteModal = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, selectedRows]);
+
+  const handleToggle = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    property: keyof DeleteConfiguration,
+  ) => {
+    const { checked } = e.target;
+    let newState = deleteConfig;
+    if (property === "reactions") {
+      newState = checked
+        ? {
+            ...deleteConfig,
+            messages: false,
+            attachments: false,
+            reactions: true,
+          }
+        : { ...deleteConfig, reactions: false };
+      setEmojisInUse(checked ? getEmojisInUse() : []);
+      setReactingUserIds(checked ? getReactingUserIds() : []);
+    } else {
+      newState = checked
+        ? { ...deleteConfig, [property]: true, reactions: false }
+        : { ...deleteConfig, [property]: false };
+    }
+    setDeleteConfig(newState);
+  };
+
+  const forms: {
+    label: string;
+    property: keyof Omit<DeleteConfiguration, "reactingUserIds" | "emojis">;
+  }[] = [
+    { label: "Attachments", property: "attachments" },
+    { label: "Messages", property: "messages" },
+    { label: "Reactions", property: "reactions" },
+  ];
 
   return (
     <Dialog hideBackdrop fullWidth open={open}>
@@ -68,38 +167,98 @@ const DeleteModal = ({
       </DialogTitle>
       <DialogContent>
         <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                color="secondary"
+          {forms.map(({ label, property }) => (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  color="secondary"
+                  disabled={active}
+                  checked={deleteConfig[property]}
+                  onChange={(e) => handleToggle(e, property)}
+                />
+              }
+              label={label}
+            />
+          ))}
+
+          <Collapse orientation="vertical" in={deleteConfig.reactions}>
+            <Box display="flex" gap={1}>
+              <EnhancedAutocomplete
                 disabled={active}
-                defaultChecked
-                onChange={(e) => {
-                  setDeleteConfig({
-                    ...deleteConfig,
-                    attachments: e.target.checked,
-                  });
+                label="Reactions From"
+                options={reactingUserIds}
+                value={deleteConfig.reactingUserIds}
+                multiple
+                onSelectAll={() => {
+                  if (
+                    deleteConfig.reactingUserIds?.length !==
+                    reactingUserIds.length
+                  ) {
+                    setDeleteConfig({
+                      ...deleteConfig,
+                      reactingUserIds: reactingUserIds,
+                    });
+                  } else {
+                    setDeleteConfig({ ...deleteConfig, reactingUserIds: [] });
+                  }
+                }}
+                getOptionLabel={(e) => userMap[e]?.userName || e}
+                onChange={(value) => {
+                  if (Array.isArray(value)) {
+                    setDeleteConfig({
+                      ...deleteConfig,
+                      reactingUserIds: value,
+                    });
+                  }
+                }}
+                getOptionIconSrc={(e) => {
+                  const mapping = userMap[e];
+                  return resolveAvatarUrl(e, mapping.avatar)?.remote;
                 }}
               />
-            }
-            label="Attachments"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                color="secondary"
+              <EnhancedAutocomplete
                 disabled={active}
-                defaultChecked
-                onChange={(e) => {
-                  setDeleteConfig({
-                    ...deleteConfig,
-                    messages: e.target.checked,
-                  });
+                label="Emojis"
+                options={emojisInUse
+                  .map((e) => getEncodedEmoji(e))
+                  .filter(isNonNullable)}
+                value={deleteConfig.emojis}
+                multiple
+                onSelectAll={() => {
+                  if (deleteConfig.emojis?.length !== emojisInUse.length) {
+                    setDeleteConfig({
+                      ...deleteConfig,
+                      emojis: emojisInUse
+                        .map((e) => getEncodedEmoji(e))
+                        .filter(isNonNullable),
+                    });
+                  } else {
+                    setDeleteConfig({ ...deleteConfig, emojis: [] });
+                  }
+                }}
+                getOptionLabel={(e) => {
+                  const emoji = emojisInUse.find(
+                    (emoji) => getEncodedEmoji(emoji) === e,
+                  );
+                  return emoji?.name || e;
+                }}
+                onChange={(value) => {
+                  if (Array.isArray(value)) {
+                    setDeleteConfig({ ...deleteConfig, emojis: value });
+                  }
+                }}
+                getOptionIconSrc={(e) => {
+                  const emoji = emojisInUse.find(
+                    (e1) => getEncodedEmoji(e1) === e,
+                  );
+                  return emoji?.id
+                    ? resolveEmojiUrl(emoji.id)?.remote
+                    : undefined;
                 }}
               />
-            }
-            label="Messages"
-          />
+            </Box>
+          </Collapse>
+
           {active && isMessage(entity) && (
             <>
               <Box
@@ -138,7 +297,7 @@ const DeleteModal = ({
         <PauseButton disabled={!active} />
         <Button
           variant="contained"
-          disabled={active}
+          disabled={active || incompleteReactionDelete}
           onClick={() => handleDeleteMessage(deleteConfig)}
           autoFocus
         >
