@@ -107,7 +107,7 @@ export const liftThreadRestrictions =
   (
     threadId: string,
     skipIds: string[],
-    threads: Channel[] = [],
+    threads?: Channel[],
   ): AppThunk<Promise<string[]>> =>
   async (dispatch, getState) => {
     const threadList = threads || getState().thread.threads;
