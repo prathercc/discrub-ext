@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import ModalDebugMessage from "./modal-debug-message";
+import ModalAlert from "./modal-alert.tsx";
 import {
   Typography,
   Button,
@@ -13,6 +13,7 @@ import {
   IconButton,
   useTheme,
   LinearProgress,
+  AlertColor,
 } from "@mui/material";
 import { AppTask } from "../features/app/app-types";
 import Attachment from "../classes/attachment";
@@ -20,6 +21,10 @@ import { isMessage } from "../app/guards";
 import Tooltip from "../common-components/tooltip/tooltip";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { entityIsImage } from "../utils";
+import {
+  ATTACHMENT_REQUIRES_ENTIRE_MSG_REMOVAL,
+  MISSING_PERMISSION_ATTACHMENT,
+} from "../features/message/contants.ts";
 
 type AttachmentModalProps = {
   task: AppTask;
@@ -121,6 +126,15 @@ const AttachmentModal = ({
     );
   };
 
+  const alertSeverity: AlertColor =
+    statusText &&
+    [
+      ATTACHMENT_REQUIRES_ENTIRE_MSG_REMOVAL,
+      MISSING_PERMISSION_ATTACHMENT,
+    ].some((msg) => statusText.includes(msg))
+      ? "error"
+      : "info";
+
   return (
     <Dialog hideBackdrop fullWidth open={open} onClose={handleClose}>
       <DialogTitle>
@@ -139,7 +153,7 @@ const AttachmentModal = ({
               return getAttachment(a);
             })}
         </Stack>
-        <ModalDebugMessage debugMessage={statusText} />
+        <ModalAlert severity={alertSeverity} debugMessage={statusText} />
       </DialogContent>
       <DialogActions sx={{ minHeight: "57px" }}>
         <Stack

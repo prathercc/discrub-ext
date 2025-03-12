@@ -132,8 +132,11 @@ const useMessageSlice = () => {
     messageId: Snowflake,
     emoji: string,
     userId: string,
+    withTask?: boolean,
   ) => {
-    dispatch(deleteReactionAction(channelId, messageId, emoji, userId));
+    dispatch(
+      deleteReactionAction(channelId, messageId, emoji, userId, withTask),
+    );
   };
 
   const deleteMessages = (

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import ModalDebugMessage from "./modal-debug-message";
+import ModalAlert from "./modal-alert.tsx";
 import {
   Typography,
   Button,
@@ -29,6 +29,7 @@ type ReactionModalProps = {
     messageId: Snowflake,
     emoji: string,
     userId: string,
+    withTask: boolean,
   ) => void;
 };
 
@@ -104,6 +105,7 @@ const ReactionModal = ({
                           entity.id,
                           encodedEmoji,
                           e,
+                          true,
                         )
                       }
                     />
@@ -112,7 +114,7 @@ const ReactionModal = ({
             </List>
           </Stack>
         </Stack>
-        <ModalDebugMessage debugMessage={statusText} />
+        <ModalAlert debugMessage={statusText} />
       </DialogContent>
       <DialogActions sx={{ minHeight: "57px" }}>
         <Stack

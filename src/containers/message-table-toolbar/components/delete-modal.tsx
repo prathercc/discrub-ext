@@ -4,7 +4,7 @@ import FormGroup from "@mui/material/FormGroup";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import SouthIcon from "@mui/icons-material/South";
 import Box from "@mui/material/Box";
-import ModalDebugMessage from "../../../components/modal-debug-message";
+import ModalAlert from "../../../components/modal-alert.tsx";
 import {
   Typography,
   Button,
@@ -17,6 +17,7 @@ import {
   useTheme,
   LinearProgress,
   Collapse,
+  AlertColor,
 } from "@mui/material";
 import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
@@ -36,6 +37,12 @@ import {
   resolveAvatarUrl,
   resolveEmojiUrl,
 } from "../../../utils.ts";
+import ReactionStatus from "./reaction-status.tsx";
+import {
+  MISSING_PERMISSION_SKIPPING,
+  MISSING_PERMISSION_TO_MODIFY,
+  REACTION_REMOVE_FAILED_FOR,
+} from "../../../features/message/contants.ts";
 
 type DeleteModalProps = {
   open: boolean;
@@ -64,6 +71,8 @@ const DeleteModal = ({
     attachments: true,
     messages: true,
     reactions: false,
+    reactingUserIds: [],
+    emojis: [],
   };
 
   const filteredMessages = messages.filter((m) =>
@@ -157,6 +166,16 @@ const DeleteModal = ({
     { label: "Reactions", property: "reactions" },
   ];
 
+  const alertSeverity: AlertColor =
+    statusText &&
+    [
+      MISSING_PERMISSION_SKIPPING,
+      MISSING_PERMISSION_TO_MODIFY,
+      REACTION_REMOVE_FAILED_FOR,
+    ].some((msg) => statusText.includes(msg))
+      ? "error"
+      : "info";
+
   return (
     <Dialog hideBackdrop fullWidth open={open}>
       <DialogTitle>
@@ -181,7 +200,11 @@ const DeleteModal = ({
             />
           ))}
 
-          <Collapse orientation="vertical" in={deleteConfig.reactions}>
+          <Collapse
+            sx={{ maxHeight: "45px", mb: 1 }}
+            orientation="vertical"
+            in={deleteConfig.reactions}
+          >
             <Box display="flex" gap={1}>
               <EnhancedAutocomplete
                 disabled={active}
@@ -190,10 +213,10 @@ const DeleteModal = ({
                 value={deleteConfig.reactingUserIds}
                 multiple
                 onSelectAll={() => {
-                  if (
-                    deleteConfig.reactingUserIds?.length !==
-                    reactingUserIds.length
-                  ) {
+                  const isSelectAll =
+                    deleteConfig.reactingUserIds.length !==
+                    reactingUserIds.length;
+                  if (isSelectAll) {
                     setDeleteConfig({
                       ...deleteConfig,
                       reactingUserIds: reactingUserIds,
@@ -225,7 +248,9 @@ const DeleteModal = ({
                 value={deleteConfig.emojis}
                 multiple
                 onSelectAll={() => {
-                  if (deleteConfig.emojis?.length !== emojisInUse.length) {
+                  const isSelectAll =
+                    deleteConfig.emojis.length !== emojisInUse.length;
+                  if (isSelectAll) {
                     setDeleteConfig({
                       ...deleteConfig,
                       emojis: emojisInUse
@@ -282,9 +307,18 @@ const DeleteModal = ({
               >
                 <LinearProgress sx={{ width: "100%" }} />
                 <SouthIcon />
-                <DeleteSweepIcon sx={{ color: theme.palette.error.main }} />
+                {deleteConfig.reactions && (
+                  <ReactionStatus
+                    emojisInUse={emojisInUse}
+                    entity={entity}
+                    userMap={userMap}
+                  />
+                )}
+                {!deleteConfig.reactions && (
+                  <DeleteSweepIcon sx={{ color: theme.palette.error.main }} />
+                )}
               </Stack>
-              <ModalDebugMessage debugMessage={statusText} />
+              <ModalAlert severity={alertSeverity} debugMessage={statusText} />
               <Typography sx={{ display: "block" }} variant="caption">
                 {`Message ${entity._index} of ${entity._total}`}
               </Typography>

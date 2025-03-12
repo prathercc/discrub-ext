@@ -51,8 +51,8 @@ export type DeleteConfiguration = {
   attachments: boolean;
   messages: boolean;
   reactions: boolean;
-  reactingUserIds?: string[];
-  emojis?: string[];
+  reactingUserIds: string[];
+  emojis: string[];
 };
 
 export type MessageData = {

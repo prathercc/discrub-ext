@@ -68,7 +68,16 @@ import { ReactionType } from "../../enum/reaction-type";
 import { MessageCategory } from "../../enum/message-category";
 import DiscordService from "../../services/discord-service";
 import { IsPinnedType } from "../../enum/is-pinned-type.ts";
-import { MAX_OFFSET, OFFSET_INCREMENT, START_OFFSET } from "./contants.ts";
+import {
+  ATTACHMENT_REQUIRES_ENTIRE_MSG_REMOVAL,
+  MAX_OFFSET,
+  MISSING_PERMISSION_ATTACHMENT,
+  MISSING_PERMISSION_SKIPPING,
+  MISSING_PERMISSION_TO_MODIFY,
+  OFFSET_INCREMENT,
+  REACTION_REMOVE_FAILED_FOR,
+  START_OFFSET,
+} from "./contants.ts";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -548,7 +557,8 @@ export const deleteReaction =
     messageId: Snowflake,
     emoji: string,
     userId: string,
-  ): AppThunk<Promise<void>> =>
+    withTask?: boolean,
+  ): AppThunk<Promise<boolean>> =>
   async (dispatch, getState) => {
     const { token, currentUser } = getState().user;
     const { reactionMap } = getState().export.exportMaps;
@@ -560,15 +570,21 @@ export const deleteReaction =
     const isBurst = !!reactionMap[messageId]?.[emoji]?.find(
       (r) => r.id === currentUser?.id,
     )?.burst;
+    let success = false;
 
     if (token && message && reaction) {
-      dispatch(setIsModifying(true));
-      const success = await dispatch(
+      if (withTask) {
+        dispatch(setIsModifying(true));
+      }
+
+      await dispatch(liftThreadRestrictions(channelId, []));
+      success = await dispatch(
         deleteRawReaction(channelId, messageId, emoji, userId),
       );
       if (success) {
         const updatedMessage = {
           ...message,
+
           reactions: message.reactions
             ?.map((r) => {
               if (getEncodedEmoji(r.emoji) === emoji) {
@@ -594,12 +610,14 @@ export const deleteReaction =
         const updatedFilterMessages = filteredMessages.map((message) =>
           message.id === updatedMessage.id ? updatedMessage : message,
         );
-        dispatch(setModifyEntity(updatedMessage));
         dispatch(setMessages(updatedMessages));
         dispatch(setFilteredMessages(updatedFilterMessages));
       }
-      dispatch(setIsModifying(false));
+      if (withTask) {
+        dispatch(setIsModifying(false));
+      }
     }
+    return success;
   };
 
 export const deleteAttachment =
@@ -624,7 +642,7 @@ export const deleteAttachment =
         if (!success) {
           await dispatch(
             notify({
-              message: "Entire message must be deleted to remove attachment!",
+              message: ATTACHMENT_REQUIRES_ENTIRE_MSG_REMOVAL,
               timeout: 0.5,
             }),
           );
@@ -636,7 +654,7 @@ export const deleteAttachment =
         if (!success) {
           await dispatch(
             notify({
-              message: "You do not have permission to delete this attachment!",
+              message: MISSING_PERMISSION_ATTACHMENT,
               timeout: 0.5,
             }),
           );
@@ -819,11 +837,22 @@ export const deleteMessages =
       attachments: true,
       messages: true,
       reactions: false,
+      reactingUserIds: [],
+      emojis: [],
     },
   ): AppThunk =>
   async (dispatch, getState) => {
     dispatch(setIsModifying(true));
     let noPermissionThreadIds: Snowflake[] = [];
+
+    // Check if operation can end early
+    const canEndEarly =
+      deleteConfig.reactions && !messages.some((m) => m.reactions?.length);
+    if (canEndEarly) {
+      return;
+    }
+    // -------------------------------
+
     for (const [count, currentRow] of messages.entries()) {
       if (await dispatch(isAppStopped())) break;
 
@@ -845,7 +874,7 @@ export const deleteMessages =
       if (isMissingPermission) {
         await dispatch(
           notify({
-            message: "Permission missing for message, skipping delete",
+            message: MISSING_PERMISSION_SKIPPING,
             timeout: 1,
           }),
         );
@@ -856,8 +885,13 @@ export const deleteMessages =
             (currentRow.content.length === 0 && deleteConfig.attachments) ||
             (currentRow.attachments.length === 0 && deleteConfig.messages));
         const shouldEdit = deleteConfig.attachments || deleteConfig.messages;
+        const shouldUnReact =
+          deleteConfig.reactions &&
+          deleteConfig.reactingUserIds.length &&
+          deleteConfig.emojis.length;
 
-        if (shouldDelete && !getState().app.discrubCancelled) {
+        if (shouldDelete) {
+          if (await dispatch(isAppStopped())) break;
           const success = await dispatch(
             deleteMessage(new Message({ ...currentRow })),
           );
@@ -865,12 +899,13 @@ export const deleteMessages =
           if (!success) {
             await dispatch(
               notify({
-                message: "You do not have permission to modify this message!",
+                message: MISSING_PERMISSION_TO_MODIFY,
                 timeout: 2,
               }),
             );
           }
-        } else if (shouldEdit && !getState().app.discrubCancelled) {
+        } else if (shouldEdit) {
+          if (await dispatch(isAppStopped())) break;
           const success = await dispatch(
             updateMessage(
               Object.assign(
@@ -884,10 +919,49 @@ export const deleteMessages =
           if (!success) {
             await dispatch(
               notify({
-                message: "You do not have permission to modify this message!",
+                message: MISSING_PERMISSION_TO_MODIFY,
                 timeout: 2,
               }),
             );
+          }
+        } else if (shouldUnReact) {
+          if (await dispatch(isAppStopped())) break;
+          const { reactionMap, userMap } = getState().export.exportMaps;
+          const { task } = getState().app;
+          const reactionMapping = reactionMap[currentRow.id] || {};
+          for (const userId of deleteConfig.reactingUserIds) {
+            for (const emoji of deleteConfig.emojis) {
+              if (await dispatch(isAppStopped())) break;
+              const foundReaction = reactionMapping[emoji]?.find(
+                (er) => er.id === userId,
+              );
+              if (foundReaction) {
+                const userMapping = userMap[userId];
+                dispatch(
+                  setModifyEntity({
+                    ...task.entity,
+                    _data1: userId,
+                    _data2: emoji,
+                  }),
+                );
+                const success = await dispatch(
+                  deleteReaction(
+                    currentRow.channel_id,
+                    currentRow.id,
+                    emoji,
+                    userId,
+                  ),
+                );
+                if (!success) {
+                  await dispatch(
+                    notify({
+                      message: `${REACTION_REMOVE_FAILED_FOR} ${userMapping?.userName || userId}`,
+                      timeout: 2,
+                    }),
+                  );
+                }
+              }
+            }
           }
         } else break;
       }
