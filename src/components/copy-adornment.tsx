@@ -26,7 +26,7 @@ function CopyAdornment({
     <>
       <Tooltip title={`Copy ${copyName}`}>
         <IconButton disabled={disabled} onClick={handleClick} color="secondary">
-          <ContentCopyIcon />
+          <ContentCopyIcon fontSize="small" />
         </IconButton>
       </Tooltip>
       <Snackbar

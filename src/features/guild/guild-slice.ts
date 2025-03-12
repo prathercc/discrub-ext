@@ -12,6 +12,7 @@ import { GuildState } from "./guild-types";
 import { PreFilterUser } from "../dm/dm-types";
 import { AppThunk } from "../../app/store";
 import DiscordService from "../../services/discord-service";
+import { resetPurgeRemovalFrom } from "../app/app-slice.ts";
 
 const initialState: GuildState = {
   guilds: [],
@@ -31,8 +32,7 @@ export const guildSlice = createSlice({
       state.guilds = payload;
     },
     setGuild: (state, { payload }: { payload: Snowflake | Maybe }): void => {
-      const selectedGuild = state.guilds.find((guild) => guild.id === payload);
-      state.selectedGuild = selectedGuild;
+      state.selectedGuild = state.guilds.find((guild) => guild.id === payload);
     },
     resetGuild: (state): void => {
       state.selectedGuild = null;
@@ -112,6 +112,7 @@ export const changeGuild =
     dispatch(resetChannel());
     dispatch(resetFilters());
     dispatch(resetAdvancedFilters());
+    dispatch(resetPurgeRemovalFrom());
     dispatch(resetMessageData());
   };
 

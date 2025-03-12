@@ -26,7 +26,6 @@ function SkipReplies({
       >
         <Typography variant="body2">Spreadsheet Options</Typography>
         <Tooltip
-          arrow
           placement="left"
           title={`${skipReplies ? "Skipping" : "Including"} Reply Tags`}
           description={`Tags from message replies will ${

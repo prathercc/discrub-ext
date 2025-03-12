@@ -1,49 +1,45 @@
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  SxProps,
-  TextField,
-  Theme,
-} from "@mui/material";
+import { FormControl, Stack, SxProps, TextField, Theme } from "@mui/material";
 import { setSetting } from "../../../services/chrome-service";
-import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import { SortDirection } from "../../../enum/sort-direction";
-import BrushIcon from "@mui/icons-material/Brush";
-import FormatColorResetIcon from "@mui/icons-material/FormatColorReset";
-import DownloadIcon from "@mui/icons-material/Download";
-import ImageIcon from "@mui/icons-material/Image";
-import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
-import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
-import FolderIcon from "@mui/icons-material/Folder";
-import FolderOffIcon from "@mui/icons-material/FolderOff";
 import FormatListNumberedRtlIcon from "@mui/icons-material/FormatListNumberedRtl";
-import AspectRatioIcon from "@mui/icons-material/AspectRatio";
-import AutoDeleteIcon from "@mui/icons-material/AutoDelete";
-import YoutubeSearchedForIcon from "@mui/icons-material/YoutubeSearchedFor";
-import { stringToBool } from "../../../utils";
 import { ResolutionType } from "../../../enum/resolution-type";
 import { MediaType } from "../../../enum/media-type";
-import MultiValueSelect from "../../../common-components/multi-value-select/multi-value-select";
 import { UserDataRefreshRate } from "../../../enum/user-data-refresh-rate.ts";
+import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
+import { defaultSettings } from "../../../features/app/app-slice.ts";
+import { useDmSlice } from "../../../features/dm/use-dm-slice.ts";
+import { useGuildSlice } from "../../../features/guild/use-guild-slice.ts";
+import { useAppSlice } from "../../../features/app/use-app-slice.ts";
+import { useUserSlice } from "../../../features/user/use-user-slice.ts";
+import { filterBoth, getEntityHint } from "../../../utils.ts";
+import { EntityHint } from "../../../enum/entity-hint.ts";
+import { Delay } from "../../../enum/delay.ts";
+import { DelayModifier } from "../../../enum/delay-modifier.ts";
+import { DateFormat } from "../../../enum/date-format.ts";
 
 type ConfigProps = {
-  settings: AppSettings;
-  onChangeSettings: (settings: AppSettings) => void;
   visibleSettings: DiscrubSetting[];
   containerProps?: SxProps<Theme>;
+  isDm?: boolean;
 };
 
-function Config({
-  settings,
-  onChangeSettings,
-  visibleSettings = [],
-  containerProps,
-}: ConfigProps) {
+function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
+  const { clearUserMapping, createUserMapping } = useUserSlice();
+
+  const { state: appState, setSettings: onChangeSettings } = useAppSlice();
+  const settings = appState.settings();
+
+  const { state: dmState } = useDmSlice();
+  const dmPreFilterUsers = dmState.preFilterUsers();
+
+  const { state: guildState } = useGuildSlice();
+  const preFilterUsers = guildState.preFilterUsers();
+  const selectedGuild = guildState.selectedGuild();
+
+  const criteriaUsers = isDm ? dmPreFilterUsers : preFilterUsers;
+
   const handleChange = async (setting: DiscrubSetting, value: string) => {
     const settings = await setSetting(setting, value);
     onChangeSettings(settings);
@@ -51,6 +47,10 @@ function Config({
 
   const getValue = (setting: DiscrubSetting) => {
     return settings[setting] || null;
+  };
+
+  const getDefaultValue = (setting: DiscrubSetting) => {
+    return defaultSettings[setting];
   };
 
   const getResolutionModeDesc = (): string => {
@@ -67,6 +67,8 @@ function Config({
         return "";
     }
   };
+
+  const delayOptions = Object.values(Delay).map((v) => ({ name: v, value: v }));
 
   const controls = [
     // Discrub Settings
@@ -115,22 +117,34 @@ function Config({
         "The rate at which User data will be refreshed (Display Name, Server Nickname & Roles).",
     },
     {
-      name: DiscrubSetting.RANDOM_DELETE_DELAY,
-      label: "Delete/Edit Random Delay (seconds)",
+      name: DiscrubSetting.DELAY_MODIFIER,
+      label: "Delay Spread Seconds",
       description:
-        "Wait a random amount of seconds (from zero and the provided value), between message deletes/edits.",
-      numeric: true,
-      fallbackValue: "0",
-      icon: () => <AutoDeleteIcon />,
+        "The spread in seconds to randomize Modify and Search Delays.",
+      options: Object.values(DelayModifier).map((v) => ({ name: v, value: v })),
     },
     {
-      name: DiscrubSetting.RANDOM_SEARCH_DELAY,
-      label: "Search Random Delay (seconds)",
+      name: DiscrubSetting.DELETE_DELAY,
+      label: "Modify Delay Seconds",
       description:
-        "Wait a random amount of seconds (from zero and the provided value), between message, user, and reaction searches.",
-      numeric: true,
-      fallbackValue: "0",
-      icon: () => <YoutubeSearchedForIcon />,
+        "The amount of seconds to wait between each deletion, edit, or removal.",
+      options: delayOptions,
+    },
+    {
+      name: DiscrubSetting.SEARCH_DELAY,
+      label: "Search Delay Seconds",
+      description: "The amount of seconds to wait between each search.",
+      options: delayOptions,
+    },
+    {
+      name: DiscrubSetting.DATE_FORMAT,
+      label: "Date Format",
+      options: Object.values(DateFormat).map((v) => ({
+        name: v.toUpperCase(),
+        value: v,
+      })),
+      description:
+        "The format in which dates are presented throughout the extension.",
     },
 
     // Export Settings
@@ -158,7 +172,6 @@ function Config({
       ],
       description:
         "Exports may be performed more slowly when downloading media.",
-      icon: () => <DownloadIcon />,
     },
     {
       name: DiscrubSetting.EXPORT_PREVIEW_MEDIA,
@@ -175,7 +188,6 @@ function Config({
       ],
       description:
         "Previewing Media on a large number of messages can negatively affect the speed of the export.",
-      icon: () => <ImageIcon />,
     },
     {
       name: DiscrubSetting.EXPORT_IMAGE_RES_MODE,
@@ -193,7 +205,6 @@ function Config({
         },
       ],
       description: getResolutionModeDesc(),
-      icon: () => <AspectRatioIcon />,
     },
     {
       name: DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
@@ -204,12 +215,6 @@ function Config({
       ],
       description:
         "Separating Threads & Forum Posts will store any existing threads or forum posts into separate files for better readability.",
-      icon: () =>
-        stringToBool(settings.exportSeparateThreadAndForumPosts) ? (
-          <FolderIcon />
-        ) : (
-          <FolderOffIcon />
-        ),
     },
     {
       name: DiscrubSetting.EXPORT_ARTIST_MODE,
@@ -219,13 +224,7 @@ function Config({
         { value: "false", name: "No" },
       ],
       description:
-        "Artist Mode will store Attached & Embedded Media into folders named by their Author's username",
-      icon: () =>
-        stringToBool(settings.exportUseArtistMode) ? (
-          <BrushIcon />
-        ) : (
-          <FormatColorResetIcon />
-        ),
+        "Artist Mode will store Attached & Embedded Media into folders named by their Author's username.",
     },
     {
       name: DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER,
@@ -240,13 +239,59 @@ function Config({
           ? "older"
           : "newer"
       } messages at the top.`,
-      icon: () =>
-        getValue(DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER) ===
-        SortDirection.ASCENDING ? (
-          <VerticalAlignTopIcon />
-        ) : (
-          <VerticalAlignBottomIcon />
-        ),
+    },
+    // Purge Settings
+    {
+      name: DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
+      label: "Remove Reactions From",
+      multiselect: true,
+      options: criteriaUsers.map((u) => ({ value: u.id, name: u.name })),
+      description:
+        "Messages are not deleted. Remove reactions from the specified Users.",
+      secondaryDescription: getEntityHint(EntityHint.USER),
+      onSelectAll: () => {
+        const removalFromIds =
+          getValue(DiscrubSetting.PURGE_REACTION_REMOVAL_FROM)?.split(",") ||
+          [];
+        handleChange(
+          DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
+          removalFromIds.length !== criteriaUsers.length
+            ? criteriaUsers.map((u) => u.id).join()
+            : getDefaultValue(DiscrubSetting.PURGE_REACTION_REMOVAL_FROM),
+        );
+      },
+      onOptionRemoval: !isDm ? clearUserMapping : undefined,
+      onChange: (value: string | string[] | null) => {
+        if (Array.isArray(value)) {
+          if (selectedGuild) {
+            const removalFromIds =
+              getValue(DiscrubSetting.PURGE_REACTION_REMOVAL_FROM)?.split(
+                ",",
+              ) || [];
+            filterBoth(
+              value,
+              removalFromIds,
+              criteriaUsers.map(({ id }) => id),
+            ).forEach((id) => createUserMapping(id, selectedGuild.id));
+          }
+          handleChange(
+            DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
+            value.join(),
+          );
+        }
+      },
+      freeSolo: true,
+    },
+    {
+      name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
+      label: "Keep Attachments",
+      disabled: !!settings.purgeReactionRemovalFrom.length,
+      options: [
+        { value: "true", name: "Yes" },
+        { value: "false", name: "No" },
+      ],
+      description:
+        "Keep messages with attached files. Message text will still be cleared.",
     },
   ].filter((control) => visibleSettings.some((hs) => hs === control.name));
 
@@ -276,7 +321,12 @@ function Config({
         controls.map((control) => {
           const Icon = control.icon?.();
           return (
-            <Tooltip placement="left" title={control.description}>
+            <Tooltip
+              placement="left"
+              title={control.label}
+              description={control.description}
+              secondaryDescription={control.secondaryDescription}
+            >
               <FormControl fullWidth size="small">
                 {control.numeric && (
                   <TextField
@@ -289,66 +339,53 @@ function Config({
                     InputProps={{ endAdornment: Icon }}
                   />
                 )}
-                {control.options?.length && !control.multiselect && (
-                  <>
-                    <InputLabel size="small" variant="filled">
-                      {control.label}
-                    </InputLabel>
-                    <Select
-                      variant="filled"
-                      endAdornment={Icon}
-                      IconComponent={Icon ? "span" : undefined}
-                      value={getValue(control.name)}
-                      label={control.label}
-                      onChange={(e) => {
-                        if (
-                          e.target.value !== null &&
-                          e.target.value !== undefined
-                        )
-                          handleChange(control.name, e.target.value);
-                      }}
-                    >
-                      {control.options.map((option) => {
-                        return (
-                          <MenuItem value={option.value}>
-                            {option.name}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </>
-                )}
-                {control.multiselect && (
-                  <MultiValueSelect
+                {control.options?.length && (
+                  <EnhancedAutocomplete
+                    groupBy={
+                      control.categorized
+                        ? (value) =>
+                            control.options.find((o) => o.value === value)
+                              ?.category || ""
+                        : undefined
+                    }
+                    disabled={control.disabled}
                     label={control.label}
-                    onChange={(values) => {
-                      handleChange(control.name, values.join());
-                    }}
+                    onChange={
+                      control.onChange
+                        ? control.onChange
+                        : (value) => {
+                            if (Array.isArray(value)) {
+                              handleChange(control.name, value.join());
+                            } else if (typeof value === "string") {
+                              handleChange(control.name, value);
+                            } else if (!value) {
+                              handleChange(
+                                control.name,
+                                getDefaultValue(control.name),
+                              );
+                            }
+                          }
+                    }
+                    freeSolo={control.freeSolo}
+                    options={
+                      control.disabled
+                        ? ["N/A"]
+                        : control.options.map((o) => o.value)
+                    }
                     value={
-                      getValue(control.name)
-                        ? getValue(control.name)?.split(",") || []
-                        : []
+                      control.disabled
+                        ? ["N/A"]
+                        : getValue(control.name)
+                          ? getValue(control.name)?.split(",") || []
+                          : []
                     }
-                    categories={
-                      control.categorized
-                        ? control.options.reduce((acc: string[], curr) => {
-                            if (!acc.some((cat) => cat === curr.category))
-                              return [...acc, curr.category];
-                            return acc;
-                          }, [])
-                        : undefined
+                    multiple={control.multiselect}
+                    getOptionLabel={(value) =>
+                      control.options.find((o) => o.value === value)?.name ||
+                      value
                     }
-                    categoryMap={
-                      control.categorized
-                        ? control.options.reduce((acc, curr) => {
-                            return { ...acc, [curr.value]: curr.category };
-                          }, {})
-                        : undefined
-                    }
-                    values={control.options.map((o) => o.value)}
-                    displayNameMap={control.options.reduce((acc, curr) => {
-                      return { ...acc, [curr.value]: curr.name };
-                    }, {})}
+                    onSelectAll={control.onSelectAll}
+                    onOptionRemoval={control.onOptionRemoval}
                   />
                 )}
               </FormControl>

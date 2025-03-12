@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import ModalDebugMessage from "./modal-debug-message";
+import ModalAlert from "./modal-alert.tsx";
 import {
   Typography,
   Button,
@@ -19,7 +19,6 @@ import ReactionListItemButton, {
 import { useExportSlice } from "../features/export/use-export-slice";
 import { getEncodedEmoji, getReactingUsers } from "../utils";
 import { useGuildSlice } from "../features/guild/use-guild-slice";
-import { useUserSlice } from "../features/user/use-user-slice";
 
 type ReactionModalProps = {
   task: AppTask;
@@ -28,7 +27,9 @@ type ReactionModalProps = {
   handleReactionDelete: (
     channelId: Snowflake,
     messageId: Snowflake,
-    emoji: string
+    emoji: string,
+    userId: string,
+    withTask: boolean,
   ) => void;
 };
 
@@ -38,9 +39,6 @@ const ReactionModal = ({
   handleClose,
   handleReactionDelete,
 }: ReactionModalProps) => {
-  const { state: userState } = useUserSlice();
-  const currentUser = userState.currentUser();
-
   const { state: exportState } = useExportSlice();
   const userMap = exportState.userMap();
   const reactionMap = exportState.reactionMap();
@@ -92,7 +90,7 @@ const ReactionModal = ({
                     reactingUsers = getReactingUsers(
                       exportReactions,
                       userMap,
-                      selectedGuild
+                      selectedGuild,
                     );
                   }
                   return encodedEmoji ? (
@@ -100,13 +98,14 @@ const ReactionModal = ({
                       key={getEncodedEmoji(r.emoji)}
                       emoji={r.emoji}
                       reactingUsers={reactingUsers}
-                      currentUserId={currentUser?.id}
                       disabled={active}
-                      onReactionDelete={() =>
+                      onReactionDelete={(e) =>
                         handleReactionDelete(
                           entity.channel_id,
                           entity.id,
-                          encodedEmoji
+                          encodedEmoji,
+                          e,
+                          true,
                         )
                       }
                     />
@@ -115,7 +114,7 @@ const ReactionModal = ({
             </List>
           </Stack>
         </Stack>
-        <ModalDebugMessage debugMessage={statusText} />
+        <ModalAlert debugMessage={statusText} />
       </DialogContent>
       <DialogActions sx={{ minHeight: "57px" }}>
         <Stack

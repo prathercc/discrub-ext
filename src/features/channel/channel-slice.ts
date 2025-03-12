@@ -74,7 +74,13 @@ export const getChannels =
 
 export const changeChannel =
   (channelId: Snowflake | null): AppThunk =>
-  async (dispatch) => {
+  async (dispatch, getState) => {
+    const { channels } = getState().channel;
+    const isInList = channels.some(({ id }) => id === channelId);
+    if (channelId && !isInList) {
+      await dispatch(loadChannel(channelId));
+    }
+
     dispatch(resetFilters());
     dispatch(resetMessageData());
     dispatch(setChannel(channelId));

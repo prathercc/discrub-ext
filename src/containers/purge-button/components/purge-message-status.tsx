@@ -3,6 +3,9 @@ import Box from "@mui/material/Box";
 import DeleteIcon from "@mui/icons-material/Delete";
 import NoEncryptionIcon from "@mui/icons-material/NoEncryption";
 import SyncIcon from "@mui/icons-material/Sync";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import AddReactionIcon from "@mui/icons-material/AddReaction";
+import BlurOffIcon from "@mui/icons-material/BlurOff";
 import { PurgeStatus } from "../../../features/purge/purge-types.ts";
 import "../css/purge-message-status.css";
 import classNames from "classnames";
@@ -25,9 +28,29 @@ const PurgeMessageStatus = ({
       color: "warning.dark",
       getIcon: () => <NoEncryptionIcon />,
     },
+    [PurgeStatus.MESSAGE_NON_REMOVABLE]: {
+      color: "warning.dark",
+      getIcon: () => <NoEncryptionIcon />,
+    },
+    [PurgeStatus.REACTIONS_PARTIALLY_REMOVED]: {
+      color: "warning.dark",
+      getIcon: () => <NoEncryptionIcon />,
+    },
     [PurgeStatus.REMOVED]: {
-      color: "error.dark",
+      color: "success.dark",
       getIcon: () => <DeleteIcon />,
+    },
+    [PurgeStatus.ATTACHMENTS_KEPT]: {
+      color: "success.dark",
+      getIcon: () => <AttachFileIcon />,
+    },
+    [PurgeStatus.REACTIONS_REMOVED]: {
+      color: "success.dark",
+      getIcon: () => <AddReactionIcon />,
+    },
+    [PurgeStatus.NO_REACTIONS_FOUND]: {
+      color: "success.dark",
+      getIcon: () => <BlurOffIcon />,
     },
   };
 

@@ -6,28 +6,25 @@ import Table, {
   TableRow,
 } from "../../common-components/table/table";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
-import ClearIcon from "@mui/icons-material/Clear";
 import {
-  Autocomplete,
   Button,
   Collapse,
   IconButton,
   LinearProgress,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import PurgeButton from "../purge-button/purge-button";
 import ExportButton from "../export-button/export-button";
 import TokenNotFound from "../../components/token-not-found";
 import {
+  getEntityHint,
+  getIconUrl,
   getSortedChannels,
   getSortedGuilds,
   isCriteriaActive,
-  isRemovableMessage,
 } from "../../utils";
-import CopyAdornment from "../../components/copy-adornment";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
 import Tooltip from "../../common-components/tooltip/tooltip";
@@ -38,7 +35,6 @@ import { useGuildSlice } from "../../features/guild/use-guild-slice";
 import { useChannelSlice } from "../../features/channel/use-channel-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
-import EntityIcon from "../../components/entity-icon";
 import Message from "../../classes/message";
 import { SortDirection } from "../../enum/sort-direction";
 import TableMessage from "../../components/table-message";
@@ -49,6 +45,8 @@ import ReactionModal from "../../components/reaction-modal";
 import SearchCriteria, {
   SearchCriteriaComponentType,
 } from "../search-criteria/search-criteria.tsx";
+import EnhancedAutocomplete from "../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
+import { EntityHint } from "../../enum/entity-hint.ts";
 
 function ChannelMessages() {
   const { state: userState } = useUserSlice();
@@ -59,7 +57,7 @@ function ChannelMessages() {
   const guilds = guildState.guilds();
   const selectedGuild = guildState.selectedGuild();
 
-  const { state: channelState, changeChannel, loadChannel } = useChannelSlice();
+  const { state: channelState, changeChannel } = useChannelSlice();
   const channels = channelState.channels();
   const selectedChannel = channelState.selectedChannel();
 
@@ -113,7 +111,7 @@ function ChannelMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: isRemovableMessage(m),
+    selectable: true,
     renderRow: (row) => (
       <TableMessage
         settings={settings}
@@ -153,7 +151,7 @@ function ChannelMessages() {
   const pauseCancelDisabled = !messagesLoading;
   const guildFieldDisabled = messagesLoading || discrubCancelled;
   const channelFieldDisabled =
-    selectedGuild?.id === null || messagesLoading || discrubCancelled;
+    !selectedGuild?.id || messagesLoading || discrubCancelled;
   const searchBtnDisabled =
     !selectedGuild?.id ||
     messagesLoading ||
@@ -239,99 +237,57 @@ function ChannelMessages() {
                     alignItems="center"
                     spacing={1}
                   >
-                    <Autocomplete
-                      clearIcon={<ClearIcon />}
-                      onChange={(_, val) => handleGuildChange(val)}
-                      options={sortedGuilds.map((guild) => {
-                        return guild.id;
-                      })}
+                    <EnhancedAutocomplete
+                      label="Server"
+                      options={sortedGuilds.map((g) => g.id)}
                       getOptionLabel={(id) =>
-                        String(guilds.find((guild) => guild.id === id)?.name)
+                        guilds.find((c) => c.id === id)?.name || ""
                       }
-                      renderOption={(params, id) => {
-                        const foundGuild = guilds.find(
-                          (guild) => guild.id === id,
-                        );
-                        return (
-                          <Typography gap="4px" {...params}>
-                            {foundGuild && <EntityIcon entity={foundGuild} />}
-                            {foundGuild?.name}
-                          </Typography>
-                        );
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="filled"
-                          fullWidth
-                          size="small"
-                          label="Server"
-                          sx={{ width: "330px !important" }}
-                          InputProps={{
-                            ...params.InputProps,
-                            startAdornment: (
-                              <>
-                                <CopyAdornment
-                                  copyValue={sortedGuilds
-                                    .map((guild) => guild.name)
-                                    .join("\r\n")}
-                                  copyName="Server List"
-                                  disabled={guildFieldDisabled}
-                                />
-                                {selectedGuild?.id && (
-                                  <EntityIcon entity={selectedGuild} />
-                                )}
-                              </>
-                            ),
-                          }}
-                        />
-                      )}
-                      value={selectedGuild?.id}
+                      value={selectedGuild ? [selectedGuild.id] : []}
                       disabled={guildFieldDisabled}
-                    />
-
-                    <Autocomplete
-                      clearIcon={<ClearIcon />}
-                      onChange={(_, val) => handleChannelChange(val)}
-                      onPaste={async (e) => {
-                        e.preventDefault();
-                        if (selectedGuild) {
-                          const clipboardData = e.clipboardData.getData("text");
-                          loadChannel(clipboardData);
+                      onChange={(value) => {
+                        if (typeof value === "string" || !value) {
+                          handleGuildChange(value);
                         }
                       }}
-                      options={sortedChannels.map((channel) => {
-                        return channel.id;
-                      })}
-                      getOptionLabel={(id) =>
-                        channels.find((channel) => channel.id === id)?.name ||
-                        ""
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="filled"
-                          fullWidth
-                          size="small"
-                          label="Channel"
-                          sx={{ width: "330px !important" }}
-                          InputProps={{
-                            ...params.InputProps,
-                            startAdornment: (
-                              <CopyAdornment
-                                copyValue={sortedChannels
-                                  .map((channel) => channel.name)
-                                  .join("\r\n")}
-                                copyName="Channel List"
-                                disabled={channelFieldDisabled}
-                              />
-                            ),
-                          }}
-                        />
-                      )}
-                      value={selectedChannel?.id}
-                      disabled={channelFieldDisabled}
+                      copyValue={sortedGuilds.map((g) => g.name).join("\r\n")}
+                      copyName="Server List"
+                      getOptionIconSrc={(id) => {
+                        const guild = guilds.find((g) => g.id === id);
+                        return guild && getIconUrl(guild);
+                      }}
                     />
+
+                    <Tooltip
+                      title="Channel"
+                      description={getEntityHint(EntityHint.THREAD)}
+                      placement="top"
+                    >
+                      <EnhancedAutocomplete
+                        label="Channel"
+                        options={sortedChannels.map((c) => c.id)}
+                        getOptionLabel={(id) =>
+                          channels.find((c) => c.id === id)?.name || ""
+                        }
+                        value={selectedChannel ? [selectedChannel.id] : []}
+                        disabled={channelFieldDisabled}
+                        freeSolo
+                        onChange={(value) => {
+                          if (typeof value === "string" || !value) {
+                            handleChannelChange(value);
+                          }
+                        }}
+                        copyValue={sortedChannels
+                          .map((c) => c.name)
+                          .join("\r\n")}
+                        copyName="Channel List"
+                        getOptionIconSrc={(id) => {
+                          const channel = channels.find((c) => c.id === id);
+                          return channel && getIconUrl(channel);
+                        }}
+                        optionIconStyle={{ filter: "invert(50%)" }}
+                      />
+                    </Tooltip>
                   </Stack>
 
                   <Stack

@@ -4,6 +4,7 @@ import Channel from "../../classes/channel";
 import { DmState, PreFilterUser, SetSelectedDmsProps } from "./dm-types";
 import { AppThunk } from "../../app/store";
 import DiscordService from "../../services/discord-service";
+import { resetPurgeRemovalFrom } from "../app/app-slice.ts";
 
 const initialState: DmState = {
   dms: [],
@@ -77,6 +78,7 @@ export const mutateSelectedDms =
   (dispatch, getState) => {
     const { currentUser } = getState().user;
     if (currentUser) {
+      dispatch(resetPurgeRemovalFrom());
       dispatch(resetMessageData());
       dispatch(resetFilters());
       dispatch(

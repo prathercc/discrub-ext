@@ -74,7 +74,11 @@ const ExportButton = ({
   );
   const isDownloadingAudio = downloadMedia.some((mt) => mt === MediaType.AUDIO);
 
-  const { state: channelState, setSelectedExportChannels } = useChannelSlice();
+  const {
+    state: channelState,
+    setSelectedExportChannels,
+    loadChannel,
+  } = useChannelSlice();
   const channels = channelState.channels();
   const selectedExportChannels = channelState.selectedExportChannels();
   const selectedChannel = channelState.selectedChannel();
@@ -169,6 +173,7 @@ const ExportButton = ({
           setSelectedExportChannels={setSelectedExportChannels}
           settings={settings}
           onChangeSettings={setSettings}
+          loadChannel={loadChannel}
         />
       );
     } else
