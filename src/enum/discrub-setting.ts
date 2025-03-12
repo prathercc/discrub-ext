@@ -22,4 +22,5 @@ export enum DiscrubSetting {
   APP_USER_DATA_REFRESH_RATE = "appUserDataRefreshRate",
 
   CACHED_USER_MAP = "cachedUserMap",
+  CACHED_ANNOUNCEMENT_REV = "cachedAnnouncementRev",
 }

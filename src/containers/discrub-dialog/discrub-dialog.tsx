@@ -23,6 +23,7 @@ import { useExportSlice } from "../../features/export/use-export-slice.ts";
 function DiscrubDialog() {
   const { palette } = useTheme();
   const [menuIndex, setMenuIndex] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const { resetAdvancedFilters, resetMessageData, resetFilters } =
     useMessageSlice();
@@ -34,6 +35,7 @@ function DiscrubDialog() {
   const { setDiscrubPaused, setSettings, state: appState } = useAppSlice();
   const settings = appState.settings();
   const showKoFiFeed = stringToBool(settings.appShowKoFiFeed);
+  const currentRevision = settings.cachedAnnouncementRev;
 
   const { getUserData } = useUserSlice();
 
@@ -53,6 +55,7 @@ function DiscrubDialog() {
       const settings = await initializeSettings();
       setSettings(settings);
       setExportUserMap(JSON.parse(settings.cachedUserMap));
+      setIsInitialized(true);
     };
     getUserData();
     init();
@@ -80,7 +83,11 @@ function DiscrubDialog() {
         onChangeSettings={setSettings}
         showKoFiFeed={showKoFiFeed}
       />
-      <AnnouncementComponent />
+      <AnnouncementComponent
+        onChangeSettings={setSettings}
+        currentRevision={currentRevision}
+        isInitialized={isInitialized}
+      />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && <ChannelMessages />}
       {menuIndex === 1 && <DirectMessages />}

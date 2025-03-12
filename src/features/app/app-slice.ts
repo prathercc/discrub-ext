@@ -41,6 +41,7 @@ export const defaultSettings: AppSettings = {
   [DiscrubSetting.APP_USER_DATA_REFRESH_RATE]: UserDataRefreshRate.DAILY,
 
   [DiscrubSetting.CACHED_USER_MAP]: "{}",
+  [DiscrubSetting.CACHED_ANNOUNCEMENT_REV]: "1",
 };
 
 const emptyTask: AppTask = {

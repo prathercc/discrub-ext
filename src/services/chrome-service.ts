@@ -66,6 +66,7 @@ const defaultSettings = [
   },
 
   { name: DiscrubSetting.CACHED_USER_MAP, value: "{}" },
+  { name: DiscrubSetting.CACHED_ANNOUNCEMENT_REV, value: "1" },
 ];
 
 export const initializeSettings = async () => {
@@ -127,6 +128,8 @@ export const getSettings = async (): Promise<AppSettings> => {
 
     [DiscrubSetting.CACHED_USER_MAP]:
       chromeSettings[DiscrubSetting.CACHED_USER_MAP],
+    [DiscrubSetting.CACHED_ANNOUNCEMENT_REV]:
+      chromeSettings[DiscrubSetting.CACHED_ANNOUNCEMENT_REV],
   };
 };
 

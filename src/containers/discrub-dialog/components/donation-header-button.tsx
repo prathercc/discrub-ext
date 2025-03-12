@@ -38,7 +38,6 @@ function DonationHeaderButton({
       <Button
         onClick={handleToggleFeedVisibility}
         startIcon={getIcon()}
-        endIcon={getIcon()}
         color="primary"
         variant="contained"
       >
