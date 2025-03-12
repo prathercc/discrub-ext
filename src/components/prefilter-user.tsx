@@ -4,7 +4,9 @@ import { useGuildSlice } from "../features/guild/use-guild-slice";
 import EnhancedAutocomplete from "../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 import { useMessageSlice } from "../features/message/use-message-slice.ts";
 import { useState } from "react";
-import Box from "@mui/material/Box";
+import { useUserSlice } from "../features/user/use-user-slice.ts";
+import { filterBoth, getEntityHint } from "../utils.ts";
+import { EntityHint } from "../enum/entity-hint.ts";
 
 type PrefilterUserProps = {
   isDm?: boolean;
@@ -14,6 +16,8 @@ type PrefilterUserProps = {
 function PrefilterUser({ isDm = false, disabled = false }: PrefilterUserProps) {
   const [filterUsers, setFilterUsers] = useState<string[]>([]);
 
+  const { clearUserMapping, createUserMapping } = useUserSlice();
+
   const { state: messageState, setSearchCriteria } = useMessageSlice();
   const { userIds } = messageState.searchCriteria();
 
@@ -22,41 +26,58 @@ function PrefilterUser({ isDm = false, disabled = false }: PrefilterUserProps) {
 
   const { state: guildState } = useGuildSlice();
   const preFilterUsers = guildState.preFilterUsers();
+  const selectedGuild = guildState.selectedGuild();
 
   const users = isDm ? dmPreFilterUsers : preFilterUsers;
 
+  const handleSelectAll = () => {
+    if (userIds.length !== users.length) {
+      setSearchCriteria({ userIds: users.map((u) => u.id) });
+    } else {
+      setSearchCriteria({ userIds: [] });
+      setFilterUsers([]);
+    }
+  };
+
   return (
     <Tooltip
-      arrow
       title="Messages By"
-      description="Search messages by User(s)"
+      description="Messages belonging to the specified User(s)."
+      secondaryDescription={!isDm ? getEntityHint(EntityHint.USER) : undefined}
       placement="left"
     >
-      <Box>
-        <EnhancedAutocomplete
-          disabled={disabled}
-          label="Users"
-          onChange={(value) => {
-            if (Array.isArray(value)) {
-              setFilterUsers(value);
-              setSearchCriteria({ userIds: value });
-              // TODO: Perhaps we can perform User lookups here for new entries, add to prefilterUsers if id belongs to a valid User.
+      <EnhancedAutocomplete
+        disabled={disabled}
+        label="Users"
+        onChange={(value) => {
+          if (Array.isArray(value)) {
+            if (selectedGuild) {
+              filterBoth(
+                value,
+                userIds,
+                users.map(({ id }) => id),
+              ).forEach((id) => createUserMapping(id, selectedGuild.id));
             }
-          }}
-          onInputChange={(value) => {
-            if (Array.isArray(value) && !filterUsers.length) {
-              setSearchCriteria({ userIds: value });
-            }
-          }}
-          freeSolo
-          options={users?.map((user) => user.id)}
-          value={userIds}
-          multiple
-          getOptionLabel={(id) =>
-            users.find((user) => user.id === id)?.name || id
+
+            setFilterUsers(value);
+            setSearchCriteria({ userIds: value });
           }
-        />
-      </Box>
+        }}
+        onInputChange={(value) => {
+          if (Array.isArray(value) && !filterUsers.length) {
+            setSearchCriteria({ userIds: value });
+          }
+        }}
+        freeSolo={!isDm}
+        options={users?.map((user) => user.id)}
+        value={userIds}
+        multiple
+        getOptionLabel={(id) =>
+          users.find((user) => user.id === id)?.name || id
+        }
+        onSelectAll={handleSelectAll}
+        onOptionRemoval={!isDm ? clearUserMapping : undefined}
+      />
     </Tooltip>
   );
 }

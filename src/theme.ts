@@ -10,7 +10,7 @@ const textPrimary = "#ffffff";
 const textSecondary = "#d2d5f7";
 
 export const transparancy = {
-  backgroundColor: alpha(backgroundPaper, 0.5),
+  backgroundColor: alpha(backgroundPaper, 0.9),
   backdropFilter: "blur(10px)",
   WebkitBackdropFilter: "blur(10px)", // For Safari support,
 };
@@ -20,6 +20,7 @@ const toolTipStyle = {
   ...transparancy,
   fontWeight: 600,
   fontSize: "0.8rem",
+  border: `1px solid ${textSecondary}`,
 };
 
 export const theme: ThemeOptions = createTheme({

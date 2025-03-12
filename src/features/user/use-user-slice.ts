@@ -5,6 +5,8 @@ import {
   setCurrentUser as setCurrentUserAction,
   getUserData as getUserDataAction,
   getUserDataManaully as getUserDataManaullyAction,
+  clearUserMapping as clearUserMappingAction,
+  createUserMapping as createUserMappingAction,
 } from "./user-slice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { User } from "../../classes/user";
@@ -47,6 +49,14 @@ const useUserSlice = () => {
     return dispatch(getUserDataManaullyAction(token));
   };
 
+  const clearUserMapping = (userId: string) => {
+    dispatch(clearUserMappingAction(userId));
+  };
+
+  const createUserMapping = (userId: string, guildId: string) => {
+    dispatch(createUserMappingAction(userId, guildId));
+  };
+
   return {
     state,
     setIsLoading,
@@ -54,6 +64,8 @@ const useUserSlice = () => {
     setCurrentUser,
     getUserData,
     getUserDataManaully,
+    clearUserMapping,
+    createUserMapping,
   };
 };
 

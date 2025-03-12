@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.12.7",
+    "changes": [
+      "Distinguish non-removable messages in the Purge log, change successful removed message color.",
+      "Add 'Keep Attachments' setting to Purge screen.",
+      "Add ability to remove reactions from other Users.",
+      "Setup reaction Purge functionality.",
+      "Setup reaction deletion for already loaded and selected messages.",
+      "Revamped Search/Modify Delay settings.",
+      "Add Date Format setting.",
+      "Fix bug where message deletes/edit/un-reacts would fail for messages in archived threads.",
+      "Remove restriction that prevents message selection for non-removable messages, so that these types of messages can still have reactions removed from them."
+    ]
+  },
+  {
     "version": "1.12.6",
     "changes": [
       "Resolve issue with Purge after reaching max search offset of 5000.",

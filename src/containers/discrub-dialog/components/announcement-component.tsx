@@ -1,22 +1,44 @@
 import { useEffect, useState } from "react";
-import { Stack, useTheme, Box, Skeleton, Typography } from "@mui/material";
-import {
-  Announcement,
-  fetchAnnouncementData,
-} from "../../../services/github-service";
+import { Stack, useTheme, Box, Button } from "@mui/material";
+import AnnouncementIcon from "@mui/icons-material/Announcement";
+import { fetchAnnouncementData } from "../../../services/github-service";
+import AnnouncementDialog from "./announcement-dialog.tsx";
+import { setSetting } from "../../../services/chrome-service.ts";
+import { DiscrubSetting } from "../../../enum/discrub-setting.ts";
+import { AppSettings } from "../../../features/app/app-types.ts";
 
-function AnnouncementComponent() {
+type AnnouncementComponentProps = {
+  currentRevision: string;
+  onChangeSettings: (settings: AppSettings) => void;
+  isInitialized: boolean;
+};
+
+function AnnouncementComponent({
+  currentRevision,
+  onChangeSettings,
+  isInitialized,
+}: AnnouncementComponentProps) {
   const { palette } = useTheme();
-  const [announcement, setAnnouncement] = useState<Announcement | Maybe>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const getAnnouncementData = async () => {
       const data = await fetchAnnouncementData();
-      setAnnouncement(data);
+      if (data.rev && data.rev !== currentRevision) {
+        const settings = await setSetting(
+          DiscrubSetting.CACHED_ANNOUNCEMENT_REV,
+          data.rev,
+        );
+        onChangeSettings(settings);
+        setDialogOpen(true);
+      }
     };
-    getAnnouncementData();
+    if (isInitialized) {
+      getAnnouncementData();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isInitialized]);
 
   return (
     <Stack
@@ -24,9 +46,9 @@ function AnnouncementComponent() {
       sx={{
         position: "fixed",
         top: "10px",
-        right: "55px",
-        width: "200px",
-        height: "300px",
+        right: "115px",
+        width: "140px",
+        height: "58px",
         backgroundColor: palette.background.default,
         border: `1px solid ${palette.secondary.dark}`,
       }}
@@ -44,33 +66,18 @@ function AnnouncementComponent() {
           padding: "3px",
         }}
       >
-        {announcement ? (
-          <Stack sx={{ flexDirection: "column" }}>
-            <Stack
-              sx={{
-                width: "100%",
-                borderRadius: "5px",
-                backgroundColor: "primary.dark",
-                justifyContent: "center",
-                alignItems: "center",
-                boxShadow: "rgba(232, 217, 217, 0.75) 2px 2px 5px -2px",
-                marginBottom: "15px",
-              }}
-            >
-              <Typography variant="body1">{announcement.title}</Typography>
-            </Stack>
-            <Typography variant="caption">{announcement.date}</Typography>
-            <Typography variant="caption">{announcement.message}</Typography>
-          </Stack>
-        ) : (
-          <Skeleton
-            animation="wave"
-            sx={{ mt: 1 }}
-            variant="rounded"
-            height="90%"
-            width="90%"
-          />
-        )}
+        <Button
+          onClick={() => setDialogOpen(true)}
+          startIcon={<AnnouncementIcon fontSize="small" />}
+          color="primary"
+          variant="contained"
+        >
+          News
+        </Button>
+        <AnnouncementDialog
+          open={dialogOpen}
+          handleClose={() => setDialogOpen(false)}
+        />
       </Box>
     </Stack>
   );

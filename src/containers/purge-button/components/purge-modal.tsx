@@ -46,11 +46,9 @@ const PurgeModal = ({
     state: appState,
     resetModify,
     setIsModifying,
-    setSettings,
     setDiscrubCancelled,
     setDiscrubPaused,
   } = useAppSlice();
-  const settings = appState.settings();
   const isPaused = appState.discrubPaused();
   const task = appState.task();
   const { active, entity } = task;
@@ -121,12 +119,14 @@ const PurgeModal = ({
     disabled: active,
     getComponent: () => (
       <Config
-        settings={settings}
+        isDm={isDm}
         visibleSettings={[
-          DiscrubSetting.RANDOM_DELETE_DELAY,
-          DiscrubSetting.RANDOM_SEARCH_DELAY,
+          DiscrubSetting.DELAY_MODIFIER,
+          DiscrubSetting.SEARCH_DELAY,
+          DiscrubSetting.DELETE_DELAY,
+          DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
+          DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
         ]}
-        onChangeSettings={setSettings}
       />
     ),
   };

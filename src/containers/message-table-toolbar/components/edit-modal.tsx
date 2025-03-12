@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import SouthIcon from "@mui/icons-material/South";
-import ModalDebugMessage from "../../../components/modal-debug-message";
+import ModalAlert from "../../../components/modal-alert.tsx";
 import {
   Typography,
   Button,
@@ -12,6 +12,7 @@ import {
   DialogContent,
   TextField,
   LinearProgress,
+  AlertColor,
 } from "@mui/material";
 import PauseButton from "../../../components/pause-button";
 import CancelButton from "../../../components/cancel-button";
@@ -19,6 +20,7 @@ import { AppTask } from "../../../features/app/app-types";
 import { isMessage } from "../../../app/guards";
 import MessageMock from "../../message-mock/message-mock";
 import Message from "../../../classes/message";
+import { MISSING_PERMISSION_TO_MODIFY } from "../../../features/message/contants.ts";
 
 type EditModalProps = {
   open: boolean;
@@ -42,6 +44,12 @@ const EditModal = ({
       setUpdateText("");
     }
   }, [open]);
+
+  const alertSeverity: AlertColor =
+    statusText &&
+    [MISSING_PERMISSION_TO_MODIFY].some((msg) => statusText.includes(msg))
+      ? "error"
+      : "info";
 
   return (
     <Dialog hideBackdrop fullWidth open={open}>
@@ -98,7 +106,7 @@ const EditModal = ({
                 />
               </Box>
             </Stack>
-            <ModalDebugMessage debugMessage={statusText} />
+            <ModalAlert severity={alertSeverity} debugMessage={statusText} />
           </>
         )}
       </DialogContent>

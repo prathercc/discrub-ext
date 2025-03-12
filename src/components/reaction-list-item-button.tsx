@@ -33,15 +33,13 @@ export type ReactingUser = {
 type ReactionListItemButtonProps = {
   emoji: Emoji;
   reactingUsers: ReactingUser[];
-  currentUserId: Snowflake | Maybe;
   disabled: boolean;
-  onReactionDelete: () => void;
+  onReactionDelete: (userId: string) => void;
 };
 
 const ReactionListItemButton = ({
   emoji,
   reactingUsers,
-  currentUserId,
   disabled,
   onReactionDelete,
 }: ReactionListItemButtonProps) => {
@@ -94,13 +92,16 @@ const ReactionListItemButton = ({
               <VerifiedIcon sx={{ color: theme.palette.secondary.main }} />
             </Tooltip>
           )}
-          {currentUserId === rUser.id && (
+          {
             <Tooltip title="Delete Reaction">
-              <IconButton disabled={disabled} onClick={onReactionDelete}>
+              <IconButton
+                disabled={disabled}
+                onClick={() => onReactionDelete(rUser.id)}
+              >
                 <DeleteForeverIcon color="error" />
               </IconButton>
             </Tooltip>
-          )}
+          }
         </Box>
       </ListItem>
     );

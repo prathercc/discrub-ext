@@ -2,8 +2,10 @@ export enum DiscrubSetting {
   REACTIONS_ENABLED = "reactionsEnabled",
   SERVER_NICKNAME_LOOKUP = "serverNickNameLookup",
   DISPLAY_NAME_LOOKUP = "displayNameLookup",
-  RANDOM_DELETE_DELAY = "randomDeleteDelay",
-  RANDOM_SEARCH_DELAY = "randomSearchDelay",
+  SEARCH_DELAY = "searchDelay",
+  DELETE_DELAY = "deleteDelay",
+  DELAY_MODIFIER = "delayModifier",
+  DATE_FORMAT = "dateFormat",
 
   EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS = "exportSeparateThreadAndForumPosts",
   EXPORT_ARTIST_MODE = "exportUseArtistMode",
@@ -13,8 +15,12 @@ export enum DiscrubSetting {
   EXPORT_MESSAGES_PER_PAGE = "exportMessagesPerPage",
   EXPORT_IMAGE_RES_MODE = "exportImageResMode",
 
+  PURGE_RETAIN_ATTACHED_MEDIA = "purgeRetainAttachedMedia",
+  PURGE_REACTION_REMOVAL_FROM = "purgeReactionRemovalFrom",
+
   APP_SHOW_KOFI_FEED = "appShowKoFiFeed",
   APP_USER_DATA_REFRESH_RATE = "appUserDataRefreshRate",
 
   CACHED_USER_MAP = "cachedUserMap",
+  CACHED_ANNOUNCEMENT_REV = "cachedAnnouncementRev",
 }

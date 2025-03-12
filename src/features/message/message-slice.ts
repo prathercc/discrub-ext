@@ -1,7 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  defaultGMOMappingData,
   getEncodedEmoji,
+  getGMOMappingData,
   getSortedMessages,
+  getUserMappingData,
   isCriteriaActive,
   isDm,
   isGuildForum,
@@ -37,7 +40,7 @@ import {
   setExportUserMap,
 } from "../export/export-slice";
 import { getPreFilterUsers } from "../guild/guild-slice";
-import { format, isDate, parseISO } from "date-fns";
+import { isDate, parseISO } from "date-fns";
 import {
   DeleteConfiguration,
   Filter,
@@ -65,7 +68,16 @@ import { ReactionType } from "../../enum/reaction-type";
 import { MessageCategory } from "../../enum/message-category";
 import DiscordService from "../../services/discord-service";
 import { IsPinnedType } from "../../enum/is-pinned-type.ts";
-import { MAX_OFFSET, OFFSET_INCREMENT, START_OFFSET } from "./contants.ts";
+import {
+  ATTACHMENT_REQUIRES_ENTIRE_MSG_REMOVAL,
+  MAX_OFFSET,
+  MISSING_PERMISSION_ATTACHMENT,
+  MISSING_PERMISSION_SKIPPING,
+  MISSING_PERMISSION_TO_MODIFY,
+  OFFSET_INCREMENT,
+  REACTION_REMOVE_FAILED_FOR,
+  START_OFFSET,
+} from "./contants.ts";
 
 const _descendingComparator = <Message>(
   a: Message,
@@ -495,14 +507,59 @@ export const filterMessages =
     );
   };
 
+/**
+ * Delete a reaction without changing message state
+ * @param channelId
+ * @param messageId
+ * @param emoji
+ * @param userId
+ */
+export const deleteRawReaction =
+  (
+    channelId: string,
+    messageId: string,
+    emoji: string,
+    userId: string,
+  ): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    const { settings } = getState().app;
+    const { token, currentUser } = getState().user;
+    const { reactionMap } = getState().export.exportMaps;
+    let success = false;
+
+    if (token) {
+      ({ success } = await new DiscordService(settings).deleteReaction(
+        token,
+        channelId,
+        messageId,
+        emoji,
+        userId === currentUser?.id ? "@me" : userId,
+      ));
+      if (success) {
+        const updatedReactionMap = {
+          ...reactionMap,
+          [messageId]: {
+            ...reactionMap[messageId],
+            [emoji]: reactionMap[messageId][emoji].filter(
+              (er) => er.id !== currentUser?.id,
+            ),
+          },
+        };
+        dispatch(setExportReactionMap(updatedReactionMap));
+      }
+    }
+    return success;
+  };
+
 export const deleteReaction =
   (
     channelId: Snowflake,
     messageId: Snowflake,
     emoji: string,
-  ): AppThunk<Promise<void>> =>
+    userId: string,
+    withTask?: boolean,
+  ): AppThunk<Promise<boolean>> =>
   async (dispatch, getState) => {
-    const { settings } = getState().app;
     const { token, currentUser } = getState().user;
     const { reactionMap } = getState().export.exportMaps;
     const { messages, filteredMessages } = getState().message;
@@ -513,18 +570,21 @@ export const deleteReaction =
     const isBurst = !!reactionMap[messageId]?.[emoji]?.find(
       (r) => r.id === currentUser?.id,
     )?.burst;
+    let success = false;
 
     if (token && message && reaction) {
-      dispatch(setIsModifying(true));
-      const { success } = await new DiscordService(settings).deleteReaction(
-        token,
-        channelId,
-        messageId,
-        emoji,
+      if (withTask) {
+        dispatch(setIsModifying(true));
+      }
+
+      await dispatch(liftThreadRestrictions(channelId, []));
+      success = await dispatch(
+        deleteRawReaction(channelId, messageId, emoji, userId),
       );
       if (success) {
         const updatedMessage = {
           ...message,
+
           reactions: message.reactions
             ?.map((r) => {
               if (getEncodedEmoji(r.emoji) === emoji) {
@@ -550,22 +610,14 @@ export const deleteReaction =
         const updatedFilterMessages = filteredMessages.map((message) =>
           message.id === updatedMessage.id ? updatedMessage : message,
         );
-        const updatedReactionMap = {
-          ...reactionMap,
-          [messageId]: {
-            ...reactionMap[messageId],
-            [emoji]: reactionMap[messageId][emoji].filter(
-              (er) => er.id !== currentUser?.id,
-            ),
-          },
-        };
-        dispatch(setModifyEntity(updatedMessage));
         dispatch(setMessages(updatedMessages));
         dispatch(setFilteredMessages(updatedFilterMessages));
-        dispatch(setExportReactionMap(updatedReactionMap));
       }
-      dispatch(setIsModifying(false));
+      if (withTask) {
+        dispatch(setIsModifying(false));
+      }
     }
+    return success;
   };
 
 export const deleteAttachment =
@@ -590,7 +642,7 @@ export const deleteAttachment =
         if (!success) {
           await dispatch(
             notify({
-              message: "Entire message must be deleted to remove attachment!",
+              message: ATTACHMENT_REQUIRES_ENTIRE_MSG_REMOVAL,
               timeout: 0.5,
             }),
           );
@@ -602,7 +654,7 @@ export const deleteAttachment =
         if (!success) {
           await dispatch(
             notify({
-              message: "You do not have permission to delete this attachment!",
+              message: MISSING_PERMISSION_ATTACHMENT,
               timeout: 0.5,
             }),
           );
@@ -614,14 +666,19 @@ export const deleteAttachment =
     }
   };
 
-export const updateMessage =
-  (message: Message): AppThunk<Promise<boolean>> =>
-  async (dispatch, getState) => {
+/**
+ * Update a message without changing Message State
+ * @param message
+ * @returns The result of the update
+ */
+export const updateRawMessage =
+  (message: Message): AppThunk<Promise<{ success: boolean; data: Message }>> =>
+  async (_dispatch, getState) => {
     const { settings } = getState().app;
     const { token } = getState().user;
-    const { entity: modifyMessage } = getState().app.task;
+    let retObj = { success: false, data: message };
 
-    if (token && isMessage(modifyMessage)) {
+    if (token) {
       const { success, data } = await new DiscordService(settings).editMessage(
         token,
         message.id,
@@ -631,6 +688,21 @@ export const updateMessage =
         },
         message.channel_id,
       );
+      if (success) {
+        retObj = Object.assign(retObj, { success: true, data });
+      }
+    }
+
+    return retObj;
+  };
+
+export const updateMessage =
+  (message: Message): AppThunk<Promise<boolean>> =>
+  async (dispatch, getState) => {
+    const { entity: modifyMessage } = getState().app.task;
+
+    if (isMessage(modifyMessage)) {
+      const { success, data } = await dispatch(updateRawMessage(message));
 
       if (success && data) {
         const { messages, filteredMessages } = getState().message;
@@ -764,11 +836,23 @@ export const deleteMessages =
     deleteConfig: DeleteConfiguration = {
       attachments: true,
       messages: true,
+      reactions: false,
+      reactingUserIds: [],
+      emojis: [],
     },
   ): AppThunk =>
   async (dispatch, getState) => {
     dispatch(setIsModifying(true));
     let noPermissionThreadIds: Snowflake[] = [];
+
+    // Check if operation can end early
+    const canEndEarly =
+      deleteConfig.reactions && !messages.some((m) => m.reactions?.length);
+    if (canEndEarly) {
+      return;
+    }
+    // -------------------------------
+
     for (const [count, currentRow] of messages.entries()) {
       if (await dispatch(isAppStopped())) break;
 
@@ -790,7 +874,7 @@ export const deleteMessages =
       if (isMissingPermission) {
         await dispatch(
           notify({
-            message: "Permission missing for message, skipping delete",
+            message: MISSING_PERMISSION_SKIPPING,
             timeout: 1,
           }),
         );
@@ -801,8 +885,13 @@ export const deleteMessages =
             (currentRow.content.length === 0 && deleteConfig.attachments) ||
             (currentRow.attachments.length === 0 && deleteConfig.messages));
         const shouldEdit = deleteConfig.attachments || deleteConfig.messages;
+        const shouldUnReact =
+          deleteConfig.reactions &&
+          deleteConfig.reactingUserIds.length &&
+          deleteConfig.emojis.length;
 
-        if (shouldDelete && !getState().app.discrubCancelled) {
+        if (shouldDelete) {
+          if (await dispatch(isAppStopped())) break;
           const success = await dispatch(
             deleteMessage(new Message({ ...currentRow })),
           );
@@ -810,12 +899,13 @@ export const deleteMessages =
           if (!success) {
             await dispatch(
               notify({
-                message: "You do not have permission to modify this message!",
+                message: MISSING_PERMISSION_TO_MODIFY,
                 timeout: 2,
               }),
             );
           }
-        } else if (shouldEdit && !getState().app.discrubCancelled) {
+        } else if (shouldEdit) {
+          if (await dispatch(isAppStopped())) break;
           const success = await dispatch(
             updateMessage(
               Object.assign(
@@ -829,10 +919,49 @@ export const deleteMessages =
           if (!success) {
             await dispatch(
               notify({
-                message: "You do not have permission to modify this message!",
+                message: MISSING_PERMISSION_TO_MODIFY,
                 timeout: 2,
               }),
             );
+          }
+        } else if (shouldUnReact) {
+          if (await dispatch(isAppStopped())) break;
+          const { reactionMap, userMap } = getState().export.exportMaps;
+          const { task } = getState().app;
+          const reactionMapping = reactionMap[currentRow.id] || {};
+          for (const userId of deleteConfig.reactingUserIds) {
+            for (const emoji of deleteConfig.emojis) {
+              if (await dispatch(isAppStopped())) break;
+              const foundReaction = reactionMapping[emoji]?.find(
+                (er) => er.id === userId,
+              );
+              if (foundReaction) {
+                const userMapping = userMap[userId];
+                dispatch(
+                  setModifyEntity({
+                    ...task.entity,
+                    _data1: userId,
+                    _data2: emoji,
+                  }),
+                );
+                const success = await dispatch(
+                  deleteReaction(
+                    currentRow.channel_id,
+                    currentRow.id,
+                    emoji,
+                    userId,
+                  ),
+                );
+                if (!success) {
+                  await dispatch(
+                    notify({
+                      message: `${REACTION_REMOVE_FAILED_FOR} ${userMapping?.userName || userId}`,
+                      timeout: 2,
+                    }),
+                  );
+                }
+              }
+            }
           }
         } else break;
       }
@@ -874,12 +1003,20 @@ const _fetchReactingUserIds =
           lastId,
         );
         if (success && data && data.length) {
-          data.forEach((u) =>
+          const { userMap } = getState().export.exportMaps;
+          const updateMap = { ...userMap };
+          data.forEach((u) => {
             exportReactions.push({
               id: u.id,
               burst: type === ReactionType.BURST,
-            }),
-          );
+            });
+
+            updateMap[u.id] = {
+              ...getUserMappingData(u),
+              guilds: updateMap[u.id]?.guilds || {},
+            };
+          });
+          dispatch(setExportUserMap(updateMap));
           lastId = data[data.length - 1].id;
         } else {
           reachedEnd = true;
@@ -963,8 +1100,12 @@ export const retrieveMessages =
       }
 
       if (!getState().app.discrubCancelled) {
+        const isReactionRemovalMode = !!settings.purgeReactionRemovalFrom;
         const reactionsEnabled = stringToBool(settings.reactionsEnabled);
-        if (!options.excludeReactions && reactionsEnabled) {
+        const requiresReactionMap =
+          isReactionRemovalMode ||
+          (!options.excludeReactions && reactionsEnabled);
+        if (requiresReactionMap) {
           await dispatch(_generateReactionMap(payload.messages));
         }
         if (!options.excludeUserLookups) {
@@ -1047,7 +1188,8 @@ const _getUserMap =
         for (const reaction of message.reactions || []) {
           const encodedEmoji = getEncodedEmoji(reaction.emoji);
           if (encodedEmoji) {
-            const exportReactions = reactionMap[message.id][encodedEmoji] || [];
+            const exportReactions =
+              reactionMap[message.id]?.[encodedEmoji] || [];
             exportReactions.forEach(({ id: reactingUserId }) => {
               if (!userMap[reactingUserId])
                 userMap[reactingUserId] =
@@ -1094,10 +1236,7 @@ const _collectUserNames =
           if (success && data) {
             updateMap[userId] = {
               ...mapping,
-              userName: data.username,
-              displayName: data.global_name,
-              avatar: data.avatar,
-              timestamp: Date.now(),
+              ...getUserMappingData(data),
             };
           } else {
             const errorMsg = `Unable to retrieve data from userId: ${userId}`;
@@ -1148,12 +1287,7 @@ const _collectUserGuildData =
               ...userMapping,
               guilds: {
                 ...userGuilds,
-                [guildId]: {
-                  roles: data.roles,
-                  nick: data.nick,
-                  joinedAt: format(parseISO(data.joined_at), "MMM d, yyyy"),
-                  timestamp: Date.now(),
-                },
+                [guildId]: getGMOMappingData(data),
               },
             };
           } else {
@@ -1164,10 +1298,7 @@ const _collectUserGuildData =
               guilds: {
                 ...userGuilds,
                 [guildId]: {
-                  roles: [],
-                  nick: null,
-                  joinedAt: null,
-                  timestamp: Date.now(),
+                  ...defaultGMOMappingData,
                 },
               },
             };
@@ -1179,6 +1310,10 @@ const _collectUserGuildData =
     }
   };
 
+/**
+ * Attempt to resolve reaction data for the provided messages. Used for when messages are obtained using Discords search API
+ * @param messages
+ */
 const _resolveMessageReactions =
   (messages: Message[]): AppThunk<Promise<Message[]>> =>
   async (dispatch, getState) => {
@@ -1369,7 +1504,8 @@ const _getSearchMessages =
       }
 
       const reactionsEnabled = stringToBool(settings.reactionsEnabled);
-      if (!excludeReactions && reactionsEnabled) {
+      const isReactionRemovalMode = !!settings.purgeReactionRemovalFrom;
+      if (isReactionRemovalMode || (!excludeReactions && reactionsEnabled)) {
         knownMessages = await dispatch(_resolveMessageReactions(knownMessages));
       }
     }

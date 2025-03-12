@@ -12,6 +12,7 @@ import Embed from "../classes/embed";
 import { useExportSlice } from "../features/export/use-export-slice";
 import { EmbedFieldObject } from "../types/embed-field-object";
 import Message from "../classes/message";
+import { useAppSlice } from "../features/app/use-app-slice.ts";
 
 type WebhookEmbedMockProps = {
   embed: Embed;
@@ -25,6 +26,9 @@ const WebhookEmbedMock = ({
   message,
 }: WebhookEmbedMockProps) => {
   const theme = useTheme();
+
+  const { state: appState } = useAppSlice();
+  const settings = appState.settings();
 
   const { state: exportState, getFormattedInnerHtml } = useExportSlice();
   const mediaMap = exportState.mediaMap();
@@ -240,9 +244,9 @@ const WebhookEmbedMock = ({
     if (timestamp) {
       parsedDate = parseISO(timestamp);
       tz = getTimeZone(parsedDate);
-      formattedDate = `${format(parsedDate, "MM/dd/yyyy")} ${format(
+      formattedDate = `${format(parsedDate, settings.dateFormat)} ${format(
         parsedDate,
-        "HH:mm:ss"
+        "HH:mm:ss",
       )} ${tz}`;
     }
 

@@ -23,6 +23,7 @@ import EditModal from "./components/edit-modal";
 import { useThreadSlice } from "../../features/thread/use-thread-slice";
 import ExportButton from "../export-button/export-button";
 import FilterModal from "./components/filter-modal";
+import { useExportSlice } from "../../features/export/use-export-slice.ts";
 
 type MessageTableToolbarProps = {
   selectedRows: string[];
@@ -40,6 +41,10 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
   } = useAppSlice();
   const discrubCancelled = appState.discrubCancelled();
   const task = appState.task();
+
+  const { state: exportState } = useExportSlice();
+  const reactionMap = exportState.reactionMap();
+  const userMap = exportState.userMap();
 
   const {
     state: messageState,
@@ -80,7 +85,7 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
 
   const handleEditMessage = (updateText: string) => {
     const toEdit = messages.filter((m) =>
-      selectedRows.some((smId) => smId === m.id)
+      selectedRows.some((smId) => smId === m.id),
     );
     editMessages(toEdit, updateText);
   };
@@ -103,6 +108,8 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
     handleFilterMessages();
   };
 
+  const zeroSelections = selectedRows.length === 0;
+
   return (
     <Toolbar
       sx={{
@@ -112,12 +119,15 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
           bgcolor: (theme) =>
             alpha(
               theme.palette.primary.main,
-              theme.palette.action.activatedOpacity
+              theme.palette.action.activatedOpacity,
             ),
         }),
       }}
     >
       <DeleteModal
+        messages={messages}
+        reactionMap={reactionMap}
+        userMap={userMap}
         selectedRows={selectedRows}
         open={deleteModalOpen}
         handleClose={handleDeleteModalClose}
@@ -176,31 +186,38 @@ const MessageTableToolbar = ({ selectedRows }: MessageTableToolbarProps) => {
           direction="row"
           justifyContent="space-between"
           alignItems="center"
-          sx={{ opacity: selectedRows.length > 0 ? 1 : 0, minHeight: "40px" }}
+          sx={{ minHeight: "40px" }}
         >
           <Typography variant="subtitle1" component="div">
-            {selectedRows.length} selected
+            {zeroSelections ? "No" : selectedRows.length} Message
+            {zeroSelections || selectedRows.length > 1 ? "s" : ""} Selected
           </Typography>
-          {selectedRows.length > 0 && (
-            <Stack justifyContent="flex-end" direction="row">
-              <Tooltip arrow title="Delete">
-                <IconButton
-                  disabled={discrubCancelled}
-                  onClick={() => setDeleteModalOpen(true)}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip arrow title="Edit">
-                <IconButton
-                  disabled={discrubCancelled}
-                  onClick={() => setEditModalOpen(true)}
-                >
-                  <EditIcon />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          )}
+
+          <Stack justifyContent="flex-end" direction="row">
+            <Tooltip
+              title="Delete"
+              description="Delete data from every selected message."
+              secondaryDescription="Text, attachments, or reactions."
+            >
+              <IconButton
+                disabled={discrubCancelled || zeroSelections}
+                onClick={() => setDeleteModalOpen(true)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              title="Edit"
+              description="Modify the text content of every selected message."
+            >
+              <IconButton
+                disabled={discrubCancelled || zeroSelections}
+                onClick={() => setEditModalOpen(true)}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Stack>
       </Stack>
     </Toolbar>

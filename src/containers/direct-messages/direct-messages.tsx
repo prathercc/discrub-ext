@@ -6,24 +6,19 @@ import Table, {
   TableRow,
 } from "../../common-components/table/table";
 import SentimentDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
-import ClearIcon from "@mui/icons-material/Clear";
 import {
-  Autocomplete,
   Button,
-  Chip,
   Collapse,
   IconButton,
   LinearProgress,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import ExportButton from "../export-button/export-button";
 import PurgeButton from "../purge-button/purge-button";
 import TokenNotFound from "../../components/token-not-found";
-import { isRemovableMessage, sortByProperty } from "../../utils";
-import CopyAdornment from "../../components/copy-adornment";
+import { getIconUrl, sortByProperty } from "../../utils";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
 import Tooltip from "../../common-components/tooltip/tooltip";
@@ -34,7 +29,6 @@ import { useDmSlice } from "../../features/dm/use-dm-slice";
 import { useMessageSlice } from "../../features/message/use-message-slice";
 import { useAppSlice } from "../../features/app/use-app-slice";
 import Channel from "../../classes/channel";
-import EntityIcon from "../../components/entity-icon";
 import Message from "../../classes/message";
 import { SortDirection } from "../../enum/sort-direction";
 import TableMessage from "../../components/table-message";
@@ -45,6 +39,7 @@ import ReactionModal from "../../components/reaction-modal";
 import SearchCriteria, {
   SearchCriteriaComponentType,
 } from "../search-criteria/search-criteria.tsx";
+import EnhancedAutocomplete from "../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 
 function DirectMessages() {
   const { state: userState } = useUserSlice();
@@ -105,7 +100,7 @@ function DirectMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: isRemovableMessage(m),
+    selectable: true,
     renderRow: (row) => (
       <TableMessage
         settings={settings}
@@ -132,11 +127,19 @@ function DirectMessages() {
     setExpanded(false);
   };
 
-  const handleChangeDm = async (ids: Snowflake[]) => {
+  const handleChangeDm = (ids: Snowflake[]) => {
     setSelectedDms(ids);
     setSearchTouched(false);
     if (ids.length > 1) {
       resetAdvancedFilters();
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectedDms.length !== dms.length) {
+      setSelectedDms(dms.map((c) => c.id));
+    } else {
+      setSelectedDms([]);
     }
   };
 
@@ -222,73 +225,27 @@ function DirectMessages() {
                     alignItems="center"
                     spacing={1}
                   >
-                    <Autocomplete
+                    <EnhancedAutocomplete
+                      label="DM"
                       multiple
-                      clearIcon={<ClearIcon />}
-                      onChange={(_, val) => handleChangeDm(val)}
-                      options={sortedDms.map((directMessage) => {
-                        return directMessage.id;
-                      })}
+                      options={sortedDms.map((c) => c.id)}
                       getOptionLabel={(id) =>
-                        String(dms.find((dm) => dm.id === id)?.name)
+                        dms.find((c) => c.id === id)?.name || ""
                       }
-                      renderOption={(params, id) => {
-                        const foundDm = dms.find((dm) => dm.id === id);
-                        return (
-                          <Typography gap="4px" {...params}>
-                            {foundDm && <EntityIcon entity={foundDm} />}
-                            {foundDm?.name}
-                          </Typography>
-                        );
-                      }}
-                      renderTags={(value: readonly string[], getTagProps) =>
-                        value.map((option: string, index: number) => {
-                          const { key, ...tagProps } = getTagProps({ index });
-                          const foundDm = dms.find((dm) => dm.id === option);
-                          return (
-                            <Chip
-                              variant="outlined"
-                              label={String(
-                                dms.find((dm) => dm.id === option)?.name,
-                              )}
-                              key={key}
-                              {...tagProps}
-                              avatar={
-                                foundDm ? (
-                                  <EntityIcon entity={foundDm} />
-                                ) : undefined
-                              }
-                            />
-                          );
-                        })
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="filled"
-                          fullWidth
-                          size="small"
-                          label="DM"
-                          sx={{ width: "670px !important" }}
-                          InputProps={{
-                            ...params.InputProps,
-                            startAdornment: (
-                              <>
-                                <CopyAdornment
-                                  copyValue={sortedDms
-                                    .map((dm) => dm.name)
-                                    .join("\r\n")}
-                                  copyName="DM List"
-                                  disabled={dmFieldDisabled}
-                                />
-                                {params.InputProps.startAdornment}
-                              </>
-                            ),
-                          }}
-                        />
-                      )}
                       value={selectedDms.map((dm) => dm.id)}
                       disabled={dmFieldDisabled}
+                      onChange={(value) => {
+                        if (Array.isArray(value)) {
+                          handleChangeDm(value);
+                        }
+                      }}
+                      copyValue={sortedDms.map((dm) => dm.name).join("\r\n")}
+                      copyName="DM List"
+                      getOptionIconSrc={(id) => {
+                        const dm = dms.find((c) => c.id === id);
+                        return dm && getIconUrl(dm);
+                      }}
+                      onSelectAll={handleSelectAll}
                     />
                   </Stack>
                   <Stack

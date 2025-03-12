@@ -1,21 +1,17 @@
 import { Paper, Stack, Typography } from "@mui/material";
-import { AppSettings } from "../../../features/app/app-types";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
 import Config from "./config";
 
-type SettingsProps = {
-  settings: AppSettings;
-  onChangeSettings: (settings: AppSettings) => void;
-};
-
-function Settings({ settings, onChangeSettings }: SettingsProps) {
+function Settings() {
   const visibleSettings = [
     DiscrubSetting.REACTIONS_ENABLED,
     DiscrubSetting.SERVER_NICKNAME_LOOKUP,
     DiscrubSetting.DISPLAY_NAME_LOOKUP,
     DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
-    DiscrubSetting.RANDOM_DELETE_DELAY,
-    DiscrubSetting.RANDOM_SEARCH_DELAY,
+    DiscrubSetting.DELAY_MODIFIER,
+    DiscrubSetting.SEARCH_DELAY,
+    DiscrubSetting.DELETE_DELAY,
+    DiscrubSetting.DATE_FORMAT,
   ];
 
   return (
@@ -30,12 +26,8 @@ function Settings({ settings, onChangeSettings }: SettingsProps) {
         <Typography variant="caption">Customize your experience</Typography>
       </Stack>
 
-      <Stack sx={{ maxHeight: "600px", overflow: "auto" }}>
-        <Config
-          settings={settings}
-          visibleSettings={visibleSettings}
-          onChangeSettings={onChangeSettings}
-        />
+      <Stack sx={{ maxHeight: "470px", overflow: "auto" }}>
+        <Config visibleSettings={visibleSettings} />
       </Stack>
     </Paper>
   );

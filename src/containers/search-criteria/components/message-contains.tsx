@@ -23,9 +23,8 @@ function MessageContains({ disabled }: MessageContainsProps) {
 
   return (
     <Tooltip
-      arrow
       title="Message Content"
-      description="Search messages by content"
+      description="Messages containing the specified text."
       placement="left"
     >
       <TextField
