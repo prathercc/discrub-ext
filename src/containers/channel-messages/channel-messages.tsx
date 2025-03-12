@@ -24,7 +24,6 @@ import {
   getSortedChannels,
   getSortedGuilds,
   isCriteriaActive,
-  isRemovableMessage,
 } from "../../utils";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
@@ -112,7 +111,7 @@ function ChannelMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: isRemovableMessage(m),
+    selectable: true,
     renderRow: (row) => (
       <TableMessage
         settings={settings}

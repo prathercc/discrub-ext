@@ -18,7 +18,7 @@ import {
 import ExportButton from "../export-button/export-button";
 import PurgeButton from "../purge-button/purge-button";
 import TokenNotFound from "../../components/token-not-found";
-import { getIconUrl, isRemovableMessage, sortByProperty } from "../../utils";
+import { getIconUrl, sortByProperty } from "../../utils";
 import PauseButton from "../../components/pause-button";
 import CancelButton from "../../components/cancel-button";
 import Tooltip from "../../common-components/tooltip/tooltip";
@@ -100,7 +100,7 @@ function DirectMessages() {
     filters.length ? filteredMessages : messages
   ).map((m) => ({
     data: m,
-    selectable: isRemovableMessage(m),
+    selectable: true,
     renderRow: (row) => (
       <TableMessage
         settings={settings}
