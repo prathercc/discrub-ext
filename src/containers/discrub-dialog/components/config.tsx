@@ -18,6 +18,7 @@ import { EntityHint } from "../../../enum/entity-hint.ts";
 import { Delay } from "../../../enum/delay.ts";
 import { DelayModifier } from "../../../enum/delay-modifier.ts";
 import { DateFormat } from "../../../enum/date-format.ts";
+import { TimeFormat } from "../../../enum/time-format.ts";
 
 type ConfigProps = {
   visibleSettings: DiscrubSetting[];
@@ -139,12 +140,30 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
     {
       name: DiscrubSetting.DATE_FORMAT,
       label: "Date Format",
-      options: Object.values(DateFormat).map((v) => ({
-        name: v.toUpperCase(),
-        value: v,
-      })),
+      options: [
+        { name: "Month/Day/Year", value: DateFormat.MMDDYYYY },
+        { name: "Day/Month/Year", value: DateFormat.DDMMYYYY },
+      ],
       description:
         "The format in which dates are presented throughout the extension.",
+    },
+    {
+      name: DiscrubSetting.TIME_FORMAT,
+      label: "Time Format",
+      options: [
+        { name: "24 Hour", value: TimeFormat._24HOUR },
+        {
+          name: "24 Hour With Seconds",
+          value: TimeFormat._24HOUR_WITH_SECONDS,
+        },
+        { name: "12 Hour", value: TimeFormat._12HOUR },
+        {
+          name: "12 Hour With Seconds",
+          value: TimeFormat._12HOUR_WITH_SECONDS,
+        },
+      ],
+      description:
+        "The format in which times are presented throughout the extension.",
     },
 
     // Export Settings

@@ -171,6 +171,7 @@ const BulkContent = ({
           DiscrubSetting.DELAY_MODIFIER,
           DiscrubSetting.SEARCH_DELAY,
           DiscrubSetting.DATE_FORMAT,
+          DiscrubSetting.TIME_FORMAT,
           DiscrubSetting.APP_USER_DATA_REFRESH_RATE,
           DiscrubSetting.REACTIONS_ENABLED,
           DiscrubSetting.DISPLAY_NAME_LOOKUP,

@@ -16,15 +16,22 @@ import { setSetting } from "../../services/chrome-service.ts";
 import { DelayModifier } from "../../enum/delay-modifier.ts";
 import { Delay } from "../../enum/delay.ts";
 import { DateFormat } from "../../enum/date-format.ts";
+import { TimeFormat } from "../../enum/time-format.ts";
+import { BrowserEnvironment } from "../../enum/browser-environment.ts";
 
 export const defaultSettings: AppSettings = {
+  // Extension Use Only
+  [DiscrubSetting.BROWSER_ENV]: BrowserEnvironment.CHROME,
+  //
+
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
   [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
   [DiscrubSetting.SEARCH_DELAY]: Delay.ONE,
   [DiscrubSetting.DELETE_DELAY]: Delay.TWO,
-  [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_TWO_FIVE,
+  [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_FIVE,
   [DiscrubSetting.DATE_FORMAT]: DateFormat.MMDDYYYY,
+  [DiscrubSetting.TIME_FORMAT]: TimeFormat._12HOUR,
 
   [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
   [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",

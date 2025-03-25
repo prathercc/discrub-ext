@@ -8,6 +8,8 @@ import { UserDataRefreshRate } from "../enum/user-data-refresh-rate.ts";
 import { DelayModifier } from "../enum/delay-modifier.ts";
 import { Delay } from "../enum/delay.ts";
 import { DateFormat } from "../enum/date-format.ts";
+import { TimeFormat } from "../enum/time-format.ts";
+import { BrowserEnvironment } from "../enum/browser-environment.ts";
 
 type ChromeCallback = (param: string) => Promise<void> | void | Maybe;
 
@@ -28,6 +30,10 @@ export const sendChromeMessage = (msg: string, callback?: ChromeCallback) => {
 };
 
 const defaultSettings = [
+  // Extension Use Only
+  { name: DiscrubSetting.BROWSER_ENV, value: BrowserEnvironment.CHROME },
+  //
+
   { name: DiscrubSetting.REACTIONS_ENABLED, value: "true" },
   { name: DiscrubSetting.SERVER_NICKNAME_LOOKUP, value: "true" },
   { name: DiscrubSetting.DISPLAY_NAME_LOOKUP, value: "true" },
@@ -35,9 +41,10 @@ const defaultSettings = [
   { name: DiscrubSetting.DELETE_DELAY, value: Delay.TWO },
   {
     name: DiscrubSetting.DELAY_MODIFIER,
-    value: DelayModifier.ZERO_POINT_TWO_FIVE,
+    value: DelayModifier.ZERO_POINT_FIVE,
   },
   { name: DiscrubSetting.DATE_FORMAT, value: DateFormat.MMDDYYYY },
+  { name: DiscrubSetting.TIME_FORMAT, value: TimeFormat._12HOUR },
 
   {
     name: DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
@@ -89,6 +96,10 @@ export const getSettings = async (): Promise<AppSettings> => {
   );
 
   return {
+    // Extension Use Only
+    [DiscrubSetting.BROWSER_ENV]: chromeSettings[DiscrubSetting.BROWSER_ENV],
+    //
+
     [DiscrubSetting.REACTIONS_ENABLED]:
       chromeSettings[DiscrubSetting.REACTIONS_ENABLED],
     [DiscrubSetting.SERVER_NICKNAME_LOOKUP]:
@@ -100,6 +111,7 @@ export const getSettings = async (): Promise<AppSettings> => {
     [DiscrubSetting.DELAY_MODIFIER]:
       chromeSettings[DiscrubSetting.DELAY_MODIFIER],
     [DiscrubSetting.DATE_FORMAT]: chromeSettings[DiscrubSetting.DATE_FORMAT],
+    [DiscrubSetting.TIME_FORMAT]: chromeSettings[DiscrubSetting.TIME_FORMAT],
 
     [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]:
       chromeSettings[DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS],

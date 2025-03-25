@@ -1,11 +1,16 @@
 export enum DiscrubSetting {
+  // Extension Use Only
+  BROWSER_ENV = "browserEnv",
+  //
+
   REACTIONS_ENABLED = "reactionsEnabled",
   SERVER_NICKNAME_LOOKUP = "serverNickNameLookup",
   DISPLAY_NAME_LOOKUP = "displayNameLookup",
-  SEARCH_DELAY = "searchDelay",
-  DELETE_DELAY = "deleteDelay",
-  DELAY_MODIFIER = "delayModifier",
+  SEARCH_DELAY = "searchDelay2",
+  DELETE_DELAY = "deleteDelay2",
+  DELAY_MODIFIER = "delayModifier2",
   DATE_FORMAT = "dateFormat",
+  TIME_FORMAT = "timeFormat",
 
   EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS = "exportSeparateThreadAndForumPosts",
   EXPORT_ARTIST_MODE = "exportUseArtistMode",
