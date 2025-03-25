@@ -1,7 +1,7 @@
 {
   "name": "discrub-ext",
   "private": true,
-  "version": "1.12.7",
+  "version": "1.12.8",
   "type": "module",
   "scripts": {
     "clean_prod_manifest": "cat <<< $(jq 'del(.use_dynamic_url, .web_accessible_resources[].use_dynamic_url)' dist/manifest.json) > dist/manifest.json",
@@ -24,6 +24,7 @@
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.1.0",
+    "date-fns-tz": "^3.2.0",
     "debounce": "^2.0.0",
     "flat": "^6.0.1",
     "highlight.js": "^11.10.0",

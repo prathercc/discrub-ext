@@ -5,9 +5,9 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Box from "@mui/material/Box";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns-tz";
 import { IconButton, useTheme } from "@mui/material";
-import { getColor, getTimeZone } from "../utils";
+import { getColor } from "../utils";
 import Embed from "../classes/embed";
 import { useExportSlice } from "../features/export/use-export-slice";
 import { EmbedFieldObject } from "../types/embed-field-object";
@@ -237,17 +237,12 @@ const WebhookEmbedMock = ({
       mediaMap[String(embed.footer?.proxy_icon_url)] ||
       embed.footer?.proxy_icon_url;
 
-    let parsedDate;
     let formattedDate;
-    let tz;
-
     if (timestamp) {
-      parsedDate = parseISO(timestamp);
-      tz = getTimeZone(parsedDate);
-      formattedDate = `${format(parsedDate, settings.dateFormat)} ${format(
-        parsedDate,
-        "HH:mm:ss",
-      )} ${tz}`;
+      formattedDate = `${format(timestamp, settings.dateFormat)} ${format(
+        timestamp,
+        `${settings.timeFormat} zzz`,
+      )}`;
     }
 
     return (

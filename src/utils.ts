@@ -73,17 +73,6 @@ export const wait = async (seconds: number, callback = () => {}) => {
 
 /**
  *
- * @param date Date object to retrieve timezone from
- * @returns Timezone as String
- */
-export const getTimeZone = (date = new Date()) => {
-  return date
-    .toLocaleTimeString(undefined, { timeZoneName: "short" })
-    .split(" ")[2];
-};
-
-/**
- *
  * @param index The index to check the percentage of
  * @param total The total number that to check the percentage from
  * @returns Percent value from `index` of `total`

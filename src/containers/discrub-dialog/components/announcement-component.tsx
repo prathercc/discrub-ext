@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react";
 import { Stack, useTheme, Box, Button } from "@mui/material";
 import AnnouncementIcon from "@mui/icons-material/Announcement";
-import { fetchAnnouncementData } from "../../../services/github-service";
+import {
+  Announcement,
+  fetchAnnouncementData,
+} from "../../../services/github-service";
 import AnnouncementDialog from "./announcement-dialog.tsx";
 import { setSetting } from "../../../services/chrome-service.ts";
 import { DiscrubSetting } from "../../../enum/discrub-setting.ts";
 import { AppSettings } from "../../../features/app/app-types.ts";
+import { BrowserEnvironment } from "../../../enum/browser-environment.ts";
 
 type AnnouncementComponentProps = {
   currentRevision: string;
   onChangeSettings: (settings: AppSettings) => void;
   isInitialized: boolean;
+  browserEnvironment: BrowserEnvironment;
 };
 
 function AnnouncementComponent({
   currentRevision,
   onChangeSettings,
   isInitialized,
+  browserEnvironment,
 }: AnnouncementComponentProps) {
   const { palette } = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -24,10 +30,19 @@ function AnnouncementComponent({
   useEffect(() => {
     const getAnnouncementData = async () => {
       const data = await fetchAnnouncementData();
-      if (data.rev && data.rev !== currentRevision) {
+      const revKeyMap: Record<BrowserEnvironment, keyof Announcement> = {
+        [BrowserEnvironment.CHROME]: "rev",
+        [BrowserEnvironment.FIREFOX]: "ff_rev",
+      };
+      const showDialog = !!(
+        data?.[revKeyMap[browserEnvironment]] &&
+        data[revKeyMap[browserEnvironment]] !== currentRevision
+      );
+
+      if (showDialog) {
         const settings = await setSetting(
           DiscrubSetting.CACHED_ANNOUNCEMENT_REV,
-          data.rev,
+          data[revKeyMap[browserEnvironment]],
         );
         onChangeSettings(settings);
         setDialogOpen(true);

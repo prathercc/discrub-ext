@@ -40,6 +40,7 @@ import SearchCriteria, {
   SearchCriteriaComponentType,
 } from "../search-criteria/search-criteria.tsx";
 import EnhancedAutocomplete from "../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
+import { ChannelType } from "../../enum/channel-type.ts";
 
 function DirectMessages() {
   const { state: userState } = useUserSlice();
@@ -143,15 +144,22 @@ function DirectMessages() {
     }
   };
 
-  const sortedDms = dms
-    .map((d) => new Channel({ ...d }))
-    .sort((a, b) =>
-      sortByProperty(
-        { name: String(a.name).toLowerCase() },
-        { name: String(b.name).toLowerCase() },
-        "name",
-      ),
-    );
+  const getSorted = (val: Channel[]) => {
+    return val
+      .map((d) => new Channel({ ...d }))
+      .sort((a, b) =>
+        sortByProperty(
+          { name: String(a.name).toLowerCase() },
+          { name: String(b.name).toLowerCase() },
+          "name",
+        ),
+      );
+  };
+
+  const sortedDms: Channel[] = [
+    ...getSorted(dms.filter((dm) => dm.type === ChannelType.DM)),
+    ...getSorted(dms.filter((dm) => dm.type === ChannelType.GROUP_DM)),
+  ];
 
   const dmFieldDisabled = messagesLoading || discrubCancelled;
   const searchDisabled =
@@ -226,6 +234,12 @@ function DirectMessages() {
                     spacing={1}
                   >
                     <EnhancedAutocomplete
+                      groupBy={(id) =>
+                        sortedDms.find((dm) => dm.id === id)?.type ===
+                        ChannelType.DM
+                          ? "DM"
+                          : "Group DM"
+                      }
                       label="DM"
                       multiple
                       options={sortedDms.map((c) => c.id)}

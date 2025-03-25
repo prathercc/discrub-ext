@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.12.8",
+    "changes": [
+      "Resolve display issues with calls lasting over 24 hours.",
+      "Add a Time Format setting with four options to choose from.",
+      "Add some additional options to the Search/Modify Delay and Delay Spread settings.",
+      "Categorize Group DMs versus normal DMs in the Direct Messages screen.",
+      "Use a separate News trigger for Firefox, since Firefox receives updates faster than Chrome."
+    ]
+  },
+  {
     "version": "1.12.7",
     "changes": [
       "Distinguish non-removable messages in the Purge log, change successful removed message color.",

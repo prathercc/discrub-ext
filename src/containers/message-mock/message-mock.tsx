@@ -1,7 +1,6 @@
 import { Stack, Typography, useTheme } from "@mui/material";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns-tz";
 import {
-  getTimeZone,
   isNonStandardMessage,
   messageTypeEquals,
   resolveAvatarUrl,
@@ -80,15 +79,13 @@ const MessageMock = ({
   );
   const nonStandardMessage = isNonStandardMessage(message);
 
-  const messageDate = parseISO(message.timestamp);
-  const tz = getTimeZone(messageDate);
-  const shortDateTime = `${format(messageDate, settings.dateFormat)} ${
+  const shortDateTime = `${format(message.timestamp, settings.dateFormat)} ${
     isCall ? "" : "at"
-  } ${format(messageDate, "HH:mm:ss")} ${tz}`;
+  } ${format(message.timestamp, `${settings.timeFormat} zzz`)}`;
   const longDateTime = `${format(
-    messageDate,
-    "EEEE, LLLL d, yyyy HH:mm:ss",
-  )} ${tz}`;
+    message.timestamp,
+    `EEEE, LLLL d, yyyy ${settings.timeFormat} zzz`,
+  )}`;
 
   const foundThread = threads?.find(
     (thread) => thread.id === message.id || thread.id === message.channel_id,
@@ -167,7 +164,11 @@ const MessageMock = ({
           <AuthorAvatar browserView={browserView} message={message} />
         )}
         {isChained && (
-          <ChainedDate message={message} longDateTime={longDateTime} />
+          <ChainedDate
+            message={message}
+            longDateTime={longDateTime}
+            timeFormat={settings.timeFormat}
+          />
         )}
         <Stack
           direction="column"

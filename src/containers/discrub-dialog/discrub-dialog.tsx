@@ -19,6 +19,7 @@ import { initializeSettings } from "../../services/chrome-service";
 import AnnouncementComponent from "./components/announcement-component";
 import { stringToBool } from "../../utils.ts";
 import { useExportSlice } from "../../features/export/use-export-slice.ts";
+import { BrowserEnvironment } from "../../enum/browser-environment.ts";
 
 function DiscrubDialog() {
   const { palette } = useTheme();
@@ -87,6 +88,7 @@ function DiscrubDialog() {
         onChangeSettings={setSettings}
         currentRevision={currentRevision}
         isInitialized={isInitialized}
+        browserEnvironment={settings.browserEnv as BrowserEnvironment}
       />
       <MenuBar menuIndex={menuIndex} setMenuIndex={handleChangeMenuIndex} />
       {menuIndex === 0 && <ChannelMessages />}
@@ -103,7 +105,7 @@ function DiscrubDialog() {
           spacing={1}
         >
           <Typography color="primary.main" variant="body2">
-            1.12.7
+            1.12.8
           </Typography>
         </Stack>
       </Box>
