@@ -18,7 +18,7 @@ export const sendChromeMessage = (msg: string, callback?: ChromeCallback) => {
 
 const defaultSettings = [
   // Extension Use Only
-  { name: DiscrubSetting.BROWSER_ENV, value: BrowserEnvironment.CHROME },
+  { name: DiscrubSetting.BROWSER_ENV, value: BrowserEnvironment.FIREFOX },
   //
 
   { name: DiscrubSetting.REACTIONS_ENABLED, value: "true" },
@@ -79,7 +79,7 @@ export const initializeSettings = async () => {
 
 export const getSettings = async (): Promise<AppSettings> => {
   const chromeSettings = await browser.storage.local.get(
-    defaultSettings.map((setting) => setting.name)
+    defaultSettings.map((setting) => setting.name),
   );
 
   return {

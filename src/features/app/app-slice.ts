@@ -21,7 +21,7 @@ import { BrowserEnvironment } from "../../enum/browser-environment.ts";
 
 export const defaultSettings: AppSettings = {
   // Extension Use Only
-  [DiscrubSetting.BROWSER_ENV]: BrowserEnvironment.CHROME,
+  [DiscrubSetting.BROWSER_ENV]: BrowserEnvironment.FIREFOX,
   //
 
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
