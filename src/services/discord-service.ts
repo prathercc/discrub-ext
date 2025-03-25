@@ -79,9 +79,9 @@ class DiscordService {
 
   constructor(settings?: AppSettings) {
     if (settings) {
-      this.searchDelaySecs = Number(settings.searchDelay);
-      this.deleteDelaySecs = Number(settings.deleteDelay);
-      this.delayModifierSecs = Number(settings.delayModifier);
+      this.searchDelaySecs = Number(settings.searchDelay2);
+      this.deleteDelaySecs = Number(settings.deleteDelay2);
+      this.delayModifierSecs = Number(settings.delayModifier2);
     }
   }
 
@@ -96,7 +96,7 @@ class DiscordService {
   ) => {
     const isDelaySearch = this.searchDelaySecs > 0;
     if (isDelaySearch) {
-      const min = this.searchDelaySecs - this.delayModifierSecs;
+      const min = Math.max(this.searchDelaySecs - this.delayModifierSecs, 0);
       const max = this.searchDelaySecs + this.delayModifierSecs;
       const delay = this.calculateRandomNumber(max, min);
       console.warn(`Applying Search Delay: ${delay} seconds`);
@@ -111,7 +111,7 @@ class DiscordService {
   ) => {
     const isDelayDelete = this.deleteDelaySecs > 0;
     if (isDelayDelete) {
-      const min = this.deleteDelaySecs - this.delayModifierSecs;
+      const min = Math.max(this.deleteDelaySecs - this.delayModifierSecs, 0);
       const max = this.deleteDelaySecs + this.delayModifierSecs;
       const delay = this.calculateRandomNumber(max, min);
       console.warn(`Applying Delete/Edit Delay: ${delay} seconds`);

@@ -23,7 +23,7 @@ export const defaultSettings: AppSettings = {
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",
   [DiscrubSetting.SEARCH_DELAY]: Delay.ONE,
   [DiscrubSetting.DELETE_DELAY]: Delay.TWO,
-  [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_TWO_FIVE,
+  [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_FIVE,
   [DiscrubSetting.DATE_FORMAT]: DateFormat.MMDDYYYY,
 
   [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",

@@ -35,7 +35,7 @@ const defaultSettings = [
   { name: DiscrubSetting.DELETE_DELAY, value: Delay.TWO },
   {
     name: DiscrubSetting.DELAY_MODIFIER,
-    value: DelayModifier.ZERO_POINT_TWO_FIVE,
+    value: DelayModifier.ZERO_POINT_FIVE,
   },
   { name: DiscrubSetting.DATE_FORMAT, value: DateFormat.MMDDYYYY },
 
