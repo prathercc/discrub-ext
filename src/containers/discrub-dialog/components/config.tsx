@@ -139,10 +139,10 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
     {
       name: DiscrubSetting.DATE_FORMAT,
       label: "Date Format",
-      options: Object.values(DateFormat).map((v) => ({
-        name: v.toUpperCase(),
-        value: v,
-      })),
+      options: [
+        { name: "Month/Day/Year", value: DateFormat.MMDDYYYY },
+        { name: "Day/Month/Year", value: DateFormat.DDMMYYYY },
+      ],
       description:
         "The format in which dates are presented throughout the extension.",
     },
