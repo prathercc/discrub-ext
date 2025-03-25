@@ -1,4 +1,8 @@
 export enum DiscrubSetting {
+  // Extension Use Only
+  BROWSER_ENV = "browserEnv",
+  //
+
   REACTIONS_ENABLED = "reactionsEnabled",
   SERVER_NICKNAME_LOOKUP = "serverNickNameLookup",
   DISPLAY_NAME_LOOKUP = "displayNameLookup",

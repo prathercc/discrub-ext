@@ -17,8 +17,13 @@ import { DelayModifier } from "../../enum/delay-modifier.ts";
 import { Delay } from "../../enum/delay.ts";
 import { DateFormat } from "../../enum/date-format.ts";
 import { TimeFormat } from "../../enum/time-format.ts";
+import { BrowserEnvironment } from "../../enum/browser-environment.ts";
 
 export const defaultSettings: AppSettings = {
+  // Extension Use Only
+  [DiscrubSetting.BROWSER_ENV]: BrowserEnvironment.CHROME,
+  //
+
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
   [DiscrubSetting.SERVER_NICKNAME_LOOKUP]: "false",
   [DiscrubSetting.DISPLAY_NAME_LOOKUP]: "false",

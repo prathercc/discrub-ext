@@ -9,6 +9,7 @@ import { DelayModifier } from "../enum/delay-modifier.ts";
 import { Delay } from "../enum/delay.ts";
 import { DateFormat } from "../enum/date-format.ts";
 import { TimeFormat } from "../enum/time-format.ts";
+import { BrowserEnvironment } from "../enum/browser-environment.ts";
 
 type ChromeCallback = (param: string) => Promise<void> | void | Maybe;
 
@@ -29,6 +30,10 @@ export const sendChromeMessage = (msg: string, callback?: ChromeCallback) => {
 };
 
 const defaultSettings = [
+  // Extension Use Only
+  { name: DiscrubSetting.BROWSER_ENV, value: BrowserEnvironment.CHROME },
+  //
+
   { name: DiscrubSetting.REACTIONS_ENABLED, value: "true" },
   { name: DiscrubSetting.SERVER_NICKNAME_LOOKUP, value: "true" },
   { name: DiscrubSetting.DISPLAY_NAME_LOOKUP, value: "true" },
@@ -91,6 +96,10 @@ export const getSettings = async (): Promise<AppSettings> => {
   );
 
   return {
+    // Extension Use Only
+    [DiscrubSetting.BROWSER_ENV]: chromeSettings[DiscrubSetting.BROWSER_ENV],
+    //
+
     [DiscrubSetting.REACTIONS_ENABLED]:
       chromeSettings[DiscrubSetting.REACTIONS_ENABLED],
     [DiscrubSetting.SERVER_NICKNAME_LOOKUP]:
