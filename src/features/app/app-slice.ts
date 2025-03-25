@@ -16,6 +16,7 @@ import { setSetting } from "../../services/chrome-service.ts";
 import { DelayModifier } from "../../enum/delay-modifier.ts";
 import { Delay } from "../../enum/delay.ts";
 import { DateFormat } from "../../enum/date-format.ts";
+import { TimeFormat } from "../../enum/time-format.ts";
 
 export const defaultSettings: AppSettings = {
   [DiscrubSetting.REACTIONS_ENABLED]: "false",
@@ -25,6 +26,7 @@ export const defaultSettings: AppSettings = {
   [DiscrubSetting.DELETE_DELAY]: Delay.TWO,
   [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_FIVE,
   [DiscrubSetting.DATE_FORMAT]: DateFormat.MMDDYYYY,
+  [DiscrubSetting.TIME_FORMAT]: TimeFormat._12HOUR,
 
   [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
   [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",

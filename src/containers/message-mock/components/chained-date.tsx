@@ -2,12 +2,20 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { format, parseISO } from "date-fns";
 import Message from "../../../classes/message";
 
-type ChainedDateProps = { message: Message; longDateTime: string };
+type ChainedDateProps = {
+  message: Message;
+  longDateTime: string;
+  timeFormat: string;
+};
 
-const ChainedDate = ({ message, longDateTime }: ChainedDateProps) => {
+const ChainedDate = ({
+  message,
+  longDateTime,
+  timeFormat,
+}: ChainedDateProps) => {
   const theme = useTheme();
   const messageDate = parseISO(message.timestamp);
-  const shortTime = format(messageDate, "HH:mm:ss");
+  const shortTime = format(messageDate, timeFormat);
 
   return (
     <Box
