@@ -34,7 +34,7 @@ const CallMessage = ({
       end: parseISO(ended_timestamp),
     });
     duration = formatDuration(rawDuration, {
-      format: ["hours", "minutes", "seconds"],
+      format: ["days", "hours", "minutes", "seconds"],
     });
   }
   return (
