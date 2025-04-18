@@ -1,7 +1,7 @@
 ## Purge a Server or DM
 In the Channel Messages or Direct Messages module, select either a Server or DM(s), and then press the Purge button.
 
-![enter image description here](https://i.imgur.com/uxlGhiO.png)
+<img width="400px" src="https://i.imgur.com/uxlGhiO.png">
 
 A new dialog will then be opened where the following hyperlinks become relevant:
 
@@ -12,10 +12,10 @@ A new dialog will then be opened where the following hyperlinks become relevant:
  
 **Note:** At least one User is required to be selected under the Criteria tab, in order for the Purge button to be enabled.
 
-![enter image description here](https://i.imgur.com/rZimbme.png)
+<img width="400px" src="https://i.imgur.com/rZimbme.png">
 
-![enter image description here](https://i.imgur.com/hyKwooA.png)
+<img width="400px" src="https://i.imgur.com/hyKwooA.png">
 
-![enter image description here](https://i.imgur.com/wFruelw.png)
+<img width="400px" src="https://i.imgur.com/wFruelw.png">
 
 After pressing the Purge button, the process will begin and messages (or just reactions) will have removal attempts made, based on the entered criteria and settings.

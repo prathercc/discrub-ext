@@ -3,9 +3,9 @@ With messages already loaded in the Channel Messages or Direct Messages module, 
 
 **Note:** Any quick filtering you've used **will** apply to the export!
 
-![enter image description here](https://i.imgur.com/MnxdiDr.png)
+<img width="400px" src="https://i.imgur.com/MnxdiDr.png">
 
-![enter image description here](https://i.imgur.com/JEgnBVt.png)
+<img width="400px" src="https://i.imgur.com/JEgnBVt.png">
 
 The Config tab that is visible prior to executing the export process, contains options to help customize the export.
 
@@ -36,7 +36,7 @@ The Config tab that is visible prior to executing the export process, contains o
 
 After setting the desired export configuration, you can now click the Export button and see the list of file format options.
 
-![enter image description here](https://i.imgur.com/m87GJvx.png)
+<img width="400px" src="https://i.imgur.com/m87GJvx.png">
 
  - **JSON** - Each page of messages will be stored in JSON format.
  - **HTML** - Each page of messages will be stored in HTML format.

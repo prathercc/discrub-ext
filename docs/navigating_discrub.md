@@ -1,7 +1,7 @@
 ## Navigating Discrub
 The top left Menu button provides the ability to navigate through the extensions different modules
 
-![enter image description here](https://i.imgur.com/A1MDATQ.png)
+<img width="400px" src="https://i.imgur.com/A1MDATQ.png">
 
 #### Module Summaries:
  - **Channel Messages** - View, manipulate, export, or purge messages belonging to Server Channels.

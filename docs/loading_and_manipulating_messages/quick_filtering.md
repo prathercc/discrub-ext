@@ -3,9 +3,9 @@ After you've loaded messages in either the Channel Messages or Direct Messages m
 
 This button allows you to perform additional filtering to the already loaded messages, typically filtering that Discord does not allow for when searching messages.
 
-![enter image description here](https://i.imgur.com/OS7DY3Y.png)
+<img width="400px" src="https://i.imgur.com/OS7DY3Y.png">
 
-![enter image description here](https://i.imgur.com/o5ZEpkz.png)
+<img width="400px" src="https://i.imgur.com/o5ZEpkz.png">
 
 The filtering options shown above are defined as follows:
 

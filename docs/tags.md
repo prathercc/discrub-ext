@@ -5,10 +5,10 @@ Select a **Tags Starting From** and **Tags Ending On** time to create the time s
 
 Determine whether you'd like tags from replies to be included in the resulting data set.
 
-![enter image description here](https://i.imgur.com/ptOOcjw.png)
+<img width="400px" src="https://i.imgur.com/ptOOcjw.png">
 
-![enter image description here](https://i.imgur.com/0M1Ebv1.png)
+<img width="400px" src="https://i.imgur.com/0M1Ebv1.png">
 
-![enter image description here](https://i.imgur.com/o5WfB5S.png)
+<img width="400px" src="https://i.imgur.com/o5WfB5S.png">
 
 Click the Generate Spreadsheet button to begin the process, and ultimately receive a CSV formatted file.

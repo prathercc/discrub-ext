@@ -1,13 +1,13 @@
 ## Delete Message Data
 After loading messages via the Channel Messages or Direct Messages module, select the messages that you want to remove data from, and then click the white trash icon-button as shown below:
 
-![enter image description here](https://i.imgur.com/z527kt6.png)
+<img width="400px" src="https://i.imgur.com/z527kt6.png">
 
 After clicking the button you will see a new dialog prompting you to select the type of data to remove from the message.
 
-![enter image description here](https://i.imgur.com/Z4Sk0oZ.png)
+<img width="400px" src="https://i.imgur.com/Z4Sk0oZ.png">
 
-![enter image description here](https://i.imgur.com/EjSLRym.png)
+<img width="400px" src="https://i.imgur.com/EjSLRym.png">
 
 Here is an explanation for each option:
 

@@ -5,9 +5,9 @@ After pressing Search, messages will be searched for and after they've all been 
 
 **Note:** Any search criteria that you've entered **will** apply to the search.
 
-![enter image description here](https://i.imgur.com/7QzdGOG.png)
+<img width="400px" src="https://i.imgur.com/7QzdGOG.png">
 
-![enter image description here](https://i.imgur.com/wCnFSqK.png)
+<img width="400px" src="https://i.imgur.com/wCnFSqK.png">
 
-![enter image description here](https://i.imgur.com/rLTzsKp.png)
+<img width="400px" src="https://i.imgur.com/rLTzsKp.png">
 

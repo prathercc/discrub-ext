@@ -5,11 +5,11 @@ Settings are used by the extension to customize your experience, and they can be
  - Export dialog when exporting a Server or DMs.
  - Purge dialog when purging a Server or DMs.
 
-![enter image description here](https://i.imgur.com/ONU2ZGf.png)
+<img width="400px" src="https://i.imgur.com/ONU2ZGf.png">
 
-![enter image description here](https://i.imgur.com/xJYNXLI.png)
+<img width="400px" src="https://i.imgur.com/xJYNXLI.png">
 
-![enter image description here](https://i.imgur.com/OivzlFo.png)
+<img width="400px" src="https://i.imgur.com/OivzlFo.png">
 
 **Note:** The values entered for these settings will persist for each session, so you **will not** need to re-enter these each time you use Discrub.
 
