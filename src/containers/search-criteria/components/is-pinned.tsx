@@ -16,7 +16,6 @@ function IsPinned({ disabled }: IsPinnedProps) {
   const map = {
     [IsPinnedType.UNSET]: "Unset",
     [IsPinnedType.YES]: "Yes",
-    [IsPinnedType.NO]: "No",
   };
 
   return (
