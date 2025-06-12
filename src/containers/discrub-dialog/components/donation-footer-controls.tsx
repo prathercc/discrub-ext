@@ -15,27 +15,9 @@ function DonationFooterControls({
   totalPages,
 }: DonationFooterControlsProps) {
   return (
-    <Stack
-      sx={{
-        ...transparancy,
-        width: "100%",
-        position: "sticky",
-        bottom: "0px",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <Stack sx={donationFooterContainerSx()}>
       {totalPages >= 1 && (
-        <Stack
-          sx={{
-            flexDirection: "row",
-            width: "100%",
-            justifyContent: "space-around",
-            alignItems: "center",
-          }}
-        >
+        <Stack sx={donationFooterStackSx()}>
           <IconButton disabled={page === 1} onClick={() => setPage(page - 1)}>
             <ArrowBackIcon />
           </IconButton>
@@ -53,5 +35,25 @@ function DonationFooterControls({
     </Stack>
   );
 }
+
+const donationFooterContainerSx = () => ({
+  ...transparancy,
+  borderRadius: "30px",
+  border: "1px solid rgba(255, 255, 255, 0.5)",
+  width: "100%",
+  position: "sticky",
+  bottom: "0px",
+  zIndex: 1000,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const donationFooterStackSx = () => ({
+  flexDirection: "row",
+  width: "100%",
+  justifyContent: "space-around",
+  alignItems: "center",
+});
 
 export default DonationFooterControls;
