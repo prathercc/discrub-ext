@@ -6,6 +6,7 @@ const ANNOUNCEMENT_MARKDOWN_ENDPOINT = `${GITHUB_GIST_URL}/5b230f045a910b6b6501e
 export type Announcement = {
   rev: string;
   ff_rev: string;
+  pop_ver: string;
 };
 export const fetchAnnouncementData = (): Promise<Announcement> => {
   return fetch(ANNOUNCEMENT_ENDPOINT, {

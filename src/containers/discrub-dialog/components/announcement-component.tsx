@@ -10,6 +10,7 @@ import { setSetting } from "../../../services/chrome-service.ts";
 import { DiscrubSetting } from "../../../enum/discrub-setting.ts";
 import { AppSettings } from "../../../features/app/app-types.ts";
 import { BrowserEnvironment } from "../../../enum/browser-environment.ts";
+import version from "../../../version.ts";
 
 type AnnouncementComponentProps = {
   currentRevision: string;
@@ -34,12 +35,13 @@ function AnnouncementComponent({
         [BrowserEnvironment.CHROME]: "rev",
         [BrowserEnvironment.FIREFOX]: "ff_rev",
       };
-      const showDialog = !!(
+      const revisionChanged = !!(
         data?.[revKeyMap[browserEnvironment]] &&
         data[revKeyMap[browserEnvironment]] !== currentRevision
       );
+      const versionMatches = data.pop_ver === version;
 
-      if (showDialog) {
+      if (versionMatches && revisionChanged) {
         const settings = await setSetting(
           DiscrubSetting.CACHED_ANNOUNCEMENT_REV,
           data[revKeyMap[browserEnvironment]],
