@@ -20,6 +20,7 @@ import AnnouncementComponent from "./components/announcement-component";
 import { stringToBool } from "../../utils.ts";
 import { useExportSlice } from "../../features/export/use-export-slice.ts";
 import { BrowserEnvironment } from "../../enum/browser-environment.ts";
+import version from "../../version.ts";
 
 function DiscrubDialog() {
   const { palette } = useTheme();
@@ -105,7 +106,7 @@ function DiscrubDialog() {
           spacing={1}
         >
           <Typography color="primary.main" variant="body2">
-            1.12.8
+            {version}
           </Typography>
         </Stack>
       </Box>

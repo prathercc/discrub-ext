@@ -24,73 +24,69 @@ function DonationListButton({ donation }: { donation: Donation }) {
     }
   };
 
-  const getBackgroundColor = (): string => {
-    const { dollars } = donation;
-    if (dollars >= 75) {
-      return "rgba(142, 160, 225, 0.25)";
-    }
-    if (dollars >= 50) {
-      return "rgba(142, 160, 225, 0.2)";
-    }
-    if (dollars < 50 && dollars >= 20) {
-      return "rgba(142, 160, 225, 0.1)";
-    }
-    if (dollars < 20 && dollars >= 10) {
-      return "rgba(142, 160, 225, 0.05)";
-    }
-    return "transparent";
-  };
-
   return (
     <>
       <ListItemButton
-        sx={{
-          padding: "4px 4px 4px 4px",
-          gap: "5px",
-          backgroundColor: getBackgroundColor(),
-          borderRadius: "10px",
-          mt: 1,
-        }}
+        sx={listItemBtnSx(donation.dollars)}
         dense
         onClick={handleClick}
       >
-        {
-          <ListItemIcon
-            sx={{
-              width: "24px",
-              height: "24px",
-              marginRight: "5px",
-              padding: "3px",
-              justifyContent: "center",
-              alignItems: "center",
-              minWidth: "unset",
-              fontWeight: "bold",
-            }}
-          >
-            ${donation.dollars}
-          </ListItemIcon>
-        }
+        <ListItemIcon sx={listItemIconSx()}>${donation.dollars}</ListItemIcon>
         <ListItemText primary={donation.name} secondary={ago} />
-        {donation.message && (
-          <>{collapsed ? <SpeakerNotesOffIcon /> : <ChatIcon />}</>
-        )}
+        {donation.message &&
+          (collapsed ? <SpeakerNotesOffIcon /> : <ChatIcon />)}
       </ListItemButton>
-      <Collapse in={collapsed}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "left",
-            padding: "5px 10px 5px 10px",
-            backgroundColor: "rgb(30, 33, 36)",
-            borderRadius: "5px",
-            opacity: donation.message.length,
-          }}
-        >
-          <Typography variant="caption">{donation.message}</Typography>
-        </Box>
-      </Collapse>
+      {donation.message && (
+        <Collapse in={collapsed}>
+          <Box sx={donationMsgBoxSx()}>
+            <Typography variant="caption">{donation.message}</Typography>
+          </Box>
+        </Collapse>
+      )}
     </>
   );
 }
 
+const donationMsgBoxSx = () => ({
+  display: "flex",
+  justifyContent: "left",
+  padding: "5px 10px 5px 10px",
+  backgroundColor: "rgb(30, 33, 36)",
+  borderRadius: "5px",
+  overflowX: "auto",
+});
+
+const listItemIconSx = () => ({
+  width: "24px",
+  height: "24px",
+  marginRight: "5px",
+  padding: "3px",
+  justifyContent: "center",
+  alignItems: "center",
+  minWidth: "unset",
+  fontWeight: "bold",
+});
+
+const listItemBtnSx = (dollars: number) => {
+  let bgColor = "transparent";
+  if (dollars >= 75) {
+    bgColor = "rgba(142, 160, 225, 0.25)";
+  }
+  if (dollars >= 50) {
+    bgColor = "rgba(142, 160, 225, 0.2)";
+  }
+  if (dollars < 50 && dollars >= 20) {
+    bgColor = "rgba(142, 160, 225, 0.1)";
+  }
+  if (dollars < 20 && dollars >= 10) {
+    bgColor = "rgba(142, 160, 225, 0.05)";
+  }
+  return {
+    padding: "4px 4px 4px 4px",
+    gap: "5px",
+    backgroundColor: bgColor,
+    borderRadius: "10px",
+    mt: 1,
+  };
+};
 export default DonationListButton;

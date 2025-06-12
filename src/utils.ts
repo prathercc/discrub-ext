@@ -167,15 +167,15 @@ export const getRichEmbeds = (message: Message): Embed[] => {
 
 export const getExportFileName = (
   entity: Role | Attachment | Embed,
-  type: string,
+  fileExtension: string,
 ) => {
   if (isRole(entity)) {
-    return `${getSafeExportName(entity.name)}_${entity.id}.${type}`;
+    return `${getSafeExportName(entity.name)}_${entity.id}.${fileExtension}`;
   } else if (isAttachment(entity)) {
-    return `${getSafeExportName(entity.filename)}.${uuidv4()}.${type}`;
+    return `${getSafeExportName(entity.filename)}.${uuidv4()}.${fileExtension}`;
   } else {
     const name = entity.title ? `${entity.title}_` : "";
-    return `${getSafeExportName(name)}.${uuidv4()}.${type}`;
+    return `${getSafeExportName(name)}.${uuidv4()}.${fileExtension}`;
   }
 };
 
