@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stack, useTheme, List, Box, Skeleton } from "@mui/material";
+import { Stack, useTheme, List, Box, Skeleton, Palette } from "@mui/material";
 import DonationListButton from "./donation-list-button";
 import DonationHeaderButton from "./donation-header-button.tsx";
 import { useDonations } from "../../../hooks/donations.ts";
@@ -39,38 +39,14 @@ function DonationComponent({
   };
 
   return (
-    <Stack
-      spacing={2}
-      sx={{
-        position: "fixed",
-        bottom: "53px",
-        left: "55px",
-        width: "200px",
-        height: "611px",
-        backgroundColor: palette.background.default,
-        border: `1px solid ${palette.secondary.dark}`,
-      }}
-    >
-      <Box
-        sx={{
-          height: "100%",
-          overflowY: "scroll",
-          overflowX: "hidden",
-          backgroundColor: "background.paper",
-          color: "text.primary",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          margin: "6px !important",
-          padding: "3px",
-        }}
-      >
+    <Stack spacing={2} sx={donationContainerSx(palette)}>
+      <Box sx={donationBoxSx()}>
         <DonationHeaderButton
           handleToggleFeedVisibility={handleToggleFeedVisibility}
         />
 
         {currentDonations?.length ? (
-          <List sx={{ opacity: showKoFiFeed ? 1 : 0 }}>
+          <List sx={donationListSx(showKoFiFeed)}>
             {currentDonations.map((donation) => (
               <DonationListButton donation={donation} />
             ))}
@@ -98,4 +74,31 @@ function DonationComponent({
   );
 }
 
+const donationContainerSx = (palette: Palette) => ({
+  position: "fixed",
+  bottom: "53px",
+  left: "55px",
+  width: "200px",
+  height: "611px",
+  backgroundColor: "background.default",
+  border: `1px solid ${palette.secondary.dark}`,
+});
+
+const donationBoxSx = () => ({
+  height: "100%",
+  overflowY: "scroll",
+  overflowX: "hidden",
+  backgroundColor: "background.paper",
+  color: "text.primary",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  margin: "6px !important",
+  padding: "3px",
+});
+
+const donationListSx = (showKoFiFeed: boolean) => ({
+  opacity: showKoFiFeed ? 1 : 0,
+  width: "175px",
+});
 export default DonationComponent;

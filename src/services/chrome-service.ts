@@ -21,7 +21,7 @@ const defaultSettings = [
   { name: DiscrubSetting.BROWSER_ENV, value: BrowserEnvironment.FIREFOX },
   //
 
-  { name: DiscrubSetting.REACTIONS_ENABLED, value: "true" },
+  { name: DiscrubSetting.REACTIONS_ENABLED, value: "false" },
   { name: DiscrubSetting.SERVER_NICKNAME_LOOKUP, value: "true" },
   { name: DiscrubSetting.DISPLAY_NAME_LOOKUP, value: "true" },
   { name: DiscrubSetting.SEARCH_DELAY, value: Delay.ONE },

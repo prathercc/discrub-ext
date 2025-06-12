@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.12.9",
+    "changes": [
+      "Make reaction fetching opt-in by default, it now must be manually toggled in settings if using the extension for the first time.",
+      "Remove 'No' option from Pinned Messages search criteria, since the Discord search API seems to ignore that particular case.",
+      "Properly parse file extensions when attachments and embeds are downloaded in an export.",
+      "Fixes for the Ko-Fi feed styling.",
+      "Only automatically show the News dialog when the current extension version matches the value defined by the remote pop_ver."
+    ]
+  },
+  {
     "version": "1.12.8",
     "changes": [
       "Resolve display issues with calls lasting over 24 hours.",

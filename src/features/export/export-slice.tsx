@@ -64,6 +64,7 @@ import { isAttachment } from "../../app/guards.ts";
 import hljs from "highlight.js";
 import { setSetting } from "../../services/chrome-service.ts";
 import { DiscrubSetting } from "../../enum/discrub-setting.ts";
+import { fileTypeFromBlob } from "file-type";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -253,11 +254,13 @@ const _downloadFilesFromMessage =
               settings,
             ).downloadFile(downloadUrl);
             if (success && data) {
-              const blobType = data.type.split("/")?.[1];
+              const { ext: fileExtension } = (await fileTypeFromBlob(data)) || {
+                ext: "",
+              };
               const fileIndex = `${index + 1}_${eI + 1}_${dI + 1}`;
               const fileName = `${fileIndex}_${getExportFileName(
                 entity,
-                blobType,
+                fileExtension,
               )}`;
               await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
 
