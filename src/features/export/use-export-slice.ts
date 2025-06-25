@@ -22,6 +22,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   ExportAvatarMap,
+  ExportData,
   ExportEmojiMap,
   ExportMediaMap,
   ExportReactionMap,
@@ -78,6 +79,9 @@ const useExportSlice = () => {
   const useCurrentExportEntity = (): Guild | Channel | Maybe =>
     useAppSelector((state: RootState) => state.export.currentExportEntity);
 
+  const useExportData = (): ExportData =>
+    useAppSelector((state: RootState) => state.export.exportData);
+
   const state = {
     isExporting: useIsExporting,
     name: useName,
@@ -92,6 +96,7 @@ const useExportSlice = () => {
     reactionMap: useReactionMap,
     exportMessages: useExportMessages,
     currentExportEntity: useCurrentExportEntity,
+    exportData: useExportData,
   };
 
   const setCurrentExportEntity = (entity: Guild | Channel | Maybe): void => {

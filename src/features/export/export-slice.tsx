@@ -34,6 +34,7 @@ import {
   CompressMessagesProps,
   EmojisFromMessageProps,
   ExportAvatarMap,
+  ExportData,
   ExportEmojiMap,
   ExportHtmlProps,
   ExportJsonProps,
@@ -84,6 +85,7 @@ const initialState: ExportState = {
   exportMaps: initialMaps,
   exportMessages: [],
   currentExportEntity: null,
+  exportData: {},
 };
 
 export const exportSlice = createSlice({
@@ -181,6 +183,9 @@ export const exportSlice = createSlice({
     ): void => {
       state.currentExportEntity = payload;
     },
+    setExportData: (state, { payload }: { payload: ExportData }): void => {
+      state.exportData = payload;
+    },
   },
 });
 
@@ -199,6 +204,7 @@ export const {
   setExportMessages,
   setTotalPages,
   setCurrentExportEntity,
+  setExportData,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -954,6 +960,13 @@ const _compressMessages =
           ? Math.ceil(adjustedMessages.length / messagesPerPage)
           : 1;
       dispatch(setTotalPages(totalPages));
+
+      if (threadData?.thread) {
+        dispatch(setExportData({ currentThread: threadData.thread }));
+      } else {
+        const { exportData } = getState().export;
+        dispatch(setExportData({ ...exportData, currentThread: undefined }));
+      }
 
       while (getState().export.currentPage <= totalPages) {
         const currentPage = getState().export.currentPage;

@@ -13,6 +13,7 @@ export type ExportState = {
   exportMaps: ExportMap;
   exportMessages: Message[];
   currentExportEntity: Guild | Channel | Maybe;
+  exportData: ExportData;
 };
 
 export type ExportMap = {
@@ -173,4 +174,8 @@ export type CompressMessagesProps = {
   entityMainDirectory: string;
   exportUtils: ExportUtils;
   threadData?: { thread: Channel; threadNo: number; threadCount: number };
+};
+
+export type ExportData = {
+  currentThread?: Channel;
 };
