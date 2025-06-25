@@ -13,6 +13,7 @@ const ChannelName = ({ channels, message, thread }: ChannelNameProps) => {
 
   return (
     <Typography
+      title="Channel Name"
       variant="caption"
       mt="1px"
       sx={{
@@ -25,7 +26,7 @@ const ChannelName = ({ channels, message, thread }: ChannelNameProps) => {
         channels.find(
           (channel) =>
             channel.id === message.channel_id ||
-            thread?.parent_id === channel.id
+            thread?.parent_id === channel.id,
         )?.name
       }
     </Typography>
