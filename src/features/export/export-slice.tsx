@@ -498,7 +498,6 @@ export const getFormattedInnerHtml =
     content,
     isReply = false,
     exportView = false,
-    message,
   }: FormattedInnerHtmlProps): AppThunk<string> =>
   (dispatch, getState) => {
     const { userMap } = getState().export.exportMaps;
@@ -511,7 +510,7 @@ export const getFormattedInnerHtml =
         rawHtml = rawHtml.replaceAll(
           emojiRef.raw,
           renderToString(
-            dispatch(_getEmoji({ emojiRef, isReply, exportView, message })),
+            dispatch(_getEmoji({ emojiRef, isReply, exportView })),
           ),
         );
       });

@@ -101,7 +101,6 @@ const MessageMock = ({
       content,
       isReply,
       exportView: !browserView,
-      message,
     });
   };
 

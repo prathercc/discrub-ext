@@ -137,14 +137,12 @@ export type GetEmojiProps = {
   emojiRef: EmojiRef;
   isReply: boolean;
   exportView: boolean;
-  message: Message;
 };
 
 export type FormattedInnerHtmlProps = {
   content: string;
   isReply: boolean;
   exportView: boolean;
-  message: Message;
 };
 
 export type EmojisFromMessageProps = {
