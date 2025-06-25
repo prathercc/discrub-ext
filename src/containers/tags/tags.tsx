@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import {
-  getSafeExportName,
+  getOsSafeString,
   messageTypeEquals,
   sortByProperty,
 } from "../../utils";
@@ -123,7 +123,7 @@ function Tags() {
         "data:text/plain;charset=utf-8," +
           encodeURIComponent(Papa.unparse(content)),
       );
-      element.setAttribute("download", getSafeExportName(fileName));
+      element.setAttribute("download", getOsSafeString(fileName));
       element.style.display = "none";
       document.body.appendChild(element);
       element.click();

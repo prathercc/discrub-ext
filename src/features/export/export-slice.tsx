@@ -10,7 +10,7 @@ import {
   getExportFileName,
   getMediaUrls,
   getRoleNames,
-  getSafeExportName,
+  getOsSafeString,
   isDm,
   resolveAvatarUrl,
   resolveEmojiUrl,
@@ -19,6 +19,8 @@ import {
   stringToBool,
   stringToTypedArray,
   wait,
+  getThreadEntityName,
+  filterThreadsByMessages,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
 import {
@@ -216,10 +218,15 @@ const _downloadFilesFromMessage =
   }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
-    const { exportUseArtistMode, exportDownloadMedia_2 } =
-      getState().app.settings;
+    const { threads } = getState().thread;
+    const {
+      exportUseArtistMode,
+      exportDownloadMedia_2,
+      exportSeparateThreadAndForumPosts,
+    } = getState().app.settings;
     const artistMode = stringToBool(exportUseArtistMode);
     const downloadMedia = stringToTypedArray<MediaType>(exportDownloadMedia_2);
+    const folderingThreads = stringToBool(exportSeparateThreadAndForumPosts);
     const isDlImages = downloadMedia.some((mt) => mt === MediaType.IMAGES);
     const isDlVideos = downloadMedia.some((mt) => mt === MediaType.VIDEOS);
     const isDlAudio = downloadMedia.some((mt) => mt === MediaType.AUDIO);
@@ -234,6 +241,14 @@ const _downloadFilesFromMessage =
     let attachments = message.attachments;
 
     let mediaPath = paths.media;
+    if (folderingThreads) {
+      const foundThread = threads.find(
+        (t) => message.thread?.id === t.id || message.channel_id === t.id,
+      );
+      mediaPath = foundThread
+        ? `${mediaPath.substring(0, mediaPath.lastIndexOf("/"))}/${getThreadEntityName(foundThread)}_media`
+        : mediaPath;
+    }
     if (artistMode && message.userName) {
       mediaPath = `${mediaPath}/${message.userName}`;
     }
@@ -756,7 +771,7 @@ const _downloadEmojisFromMessage =
 
           if (success && data) {
             const fileExt = data.type?.split("/")?.[1] || "gif";
-            const emojiFilePath = `emojis/${getSafeExportName(
+            const emojiFilePath = `emojis/${getOsSafeString(
               name,
             )}_${id}.${fileExt}`;
             await exportUtils.addToZip(data, emojiFilePath);
@@ -822,7 +837,7 @@ const _exportHtml = async ({
   const htmlBlob = await exportUtils.generateHTML();
   await exportUtils.addToZip(
     htmlBlob,
-    `${entityMainDirectory}/${getSafeExportName(
+    `${entityMainDirectory}/${getOsSafeString(
       entityName,
     )}_page_${currentPage}.html`,
   );
@@ -864,7 +879,7 @@ const _exportJson =
           type: "text/plain",
         },
       ),
-      `${entityMainDirectory}/${getSafeExportName(
+      `${entityMainDirectory}/${getOsSafeString(
         entityName,
       )}_page_${currentPage}.json`,
     );
@@ -892,7 +907,7 @@ const _exportCsv = async ({
     Papa.unparse(csvData, {
       columns: ["id", ...csvKeys.filter((k) => k !== "id").sort()],
     }),
-    `${entityMainDirectory}/${getSafeExportName(
+    `${entityMainDirectory}/${getOsSafeString(
       entityName,
     )}_page_${currentPage}.csv`,
   );
@@ -919,8 +934,9 @@ const _compressMessages =
     const messagesPerPage = parseInt(exportMessagesPerPage);
     const folderingThreads = stringToBool(exportSeparateThreadAndForumPosts);
 
-    const threads = getState().thread.threads?.filter((t) =>
-      messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id),
+    const threads = filterThreadsByMessages(
+      getState().thread.threads,
+      messages,
     );
 
     let adjustedMessages: Message[] = messages;
@@ -931,7 +947,6 @@ const _compressMessages =
       );
       for (let [i, t] of threads.entries()) {
         const threadNumber = i + 1;
-        const threadName = `Thread ${threadNumber}`;
         const threadMessages = messages.filter(
           (m) => m.thread?.id === t.id || m.channel_id === t.id,
         );
@@ -940,7 +955,7 @@ const _compressMessages =
             _compressMessages({
               messages: threadMessages,
               format,
-              entityName: threadName,
+              entityName: getThreadEntityName(t),
               entityMainDirectory,
               exportUtils,
               threadData: {
@@ -1037,7 +1052,7 @@ export const exportMessages =
     const entity = !!selectedDms.length
       ? selectedDms[0]
       : selectedChannel || selectedGuild;
-    const safeEntityName = getSafeExportName(entityName);
+    const safeEntityName = getOsSafeString(entityName);
     const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
     dispatch(setIsExporting(true));
     dispatch(setName(safeEntityName));
@@ -1100,7 +1115,7 @@ export const exportChannels =
     for (const entity of channels) {
       if (getState().app.discrubCancelled) break;
       dispatch(resetStatus());
-      const safeEntityName = getSafeExportName(entity.name || entity.id);
+      const safeEntityName = getOsSafeString(entity.name || entity.id);
       const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
       dispatch(setCurrentExportEntity(entity));
       dispatch(setName(safeEntityName));
