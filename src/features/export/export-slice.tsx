@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getMessageData, resetMessageData } from "../message/message-slice";
-import { v4 as uuidv4 } from "uuid";
 import {
   entityIsAudio,
   entityIsImage,
