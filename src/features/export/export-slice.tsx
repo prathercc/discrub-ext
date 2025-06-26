@@ -21,6 +21,7 @@ import {
   wait,
   getThreadEntityName,
   filterThreadsByMessages,
+  getFsUUID,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
 import {
@@ -1056,7 +1057,7 @@ export const exportMessages =
       ? selectedDms[0]
       : selectedChannel || selectedGuild;
     const safeEntityName = getOsSafeString(entityName);
-    const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
+    const entityMainDirectory = `${safeEntityName}_${getFsUUID()}`;
     dispatch(setIsExporting(true));
     dispatch(setName(safeEntityName));
     dispatch(setCurrentExportEntity(entity));
@@ -1119,7 +1120,7 @@ export const exportChannels =
       if (getState().app.discrubCancelled) break;
       dispatch(resetStatus());
       const safeEntityName = getOsSafeString(entity.name || entity.id);
-      const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
+      const entityMainDirectory = `${safeEntityName}_${getFsUUID()}`;
       dispatch(setCurrentExportEntity(entity));
       dispatch(setName(safeEntityName));
       if (!isDm(entity)) {

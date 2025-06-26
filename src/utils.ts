@@ -8,7 +8,6 @@ import Message from "./classes/message";
 import Role from "./classes/role";
 import { ChannelType } from "./enum/channel-type";
 import { EmbedType } from "./enum/embed-type";
-import { v4 as uuidv4 } from "uuid";
 import {
   ExportAvatarMap,
   ExportEmojiMap,
@@ -34,6 +33,7 @@ import { START_OFFSET } from "./features/message/contants.ts";
 import { User } from "./classes/user.ts";
 import { GuildMemberObject } from "./types/guild-member-object.ts";
 import filenamify from "filenamify";
+import { nanoid } from "nanoid";
 
 /**
  *
@@ -166,10 +166,10 @@ export const getExportFileName = (
   if (isRole(entity)) {
     return `${getOsSafeString(entity.name)}_${entity.id}.${fileExtension}`;
   } else if (isAttachment(entity)) {
-    return `${getOsSafeString(entity.filename)}.${uuidv4()}.${fileExtension}`;
+    return `${getOsSafeString(entity.filename)}.${getFsUUID()}.${fileExtension}`;
   } else {
     const name = entity.title ? `${entity.title}_` : "";
-    return `${getOsSafeString(name)}.${uuidv4()}.${fileExtension}`;
+    return `${getOsSafeString(name)}.${getFsUUID()}.${fileExtension}`;
   }
 };
 
@@ -678,3 +678,8 @@ export const filterThreadsByMessages = (
     messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id),
   );
 };
+
+/**
+ * Generate a 10-digit long filesystem UUID
+ */
+export const getFsUUID = () => getOsSafeString(nanoid(10));
