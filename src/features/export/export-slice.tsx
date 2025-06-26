@@ -286,6 +286,9 @@ const _downloadFilesFromMessage =
               await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
 
               const sliceIdx = mediaPath.indexOf("/");
+              await exportUtils.addToZip(data, filePath, {
+                lastModified: parseISO(message.timestamp),
+              });
 
               const updatedMediaMap = {
                 ...map,
