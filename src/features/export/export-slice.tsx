@@ -20,6 +20,7 @@ import {
   wait,
   getThreadEntityName,
   filterThreadsByMessages,
+  getPercent,
   getFsUUID,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
@@ -68,6 +69,7 @@ import hljs from "highlight.js";
 import { setSetting } from "../../services/chrome-service.ts";
 import { DiscrubSetting } from "../../enum/discrub-setting.ts";
 import { fileTypeFromBlob } from "file-type";
+import { parseISO } from "date-fns";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -271,6 +273,8 @@ const _downloadFilesFromMessage =
           const map = exportMaps.mediaMap;
 
           if (!map[downloadUrl]) {
+            const status = `Downloading - ${downloadUrl}`;
+            dispatch(setStatus(status));
             const { success, data } = await new DiscordService(
               settings,
             ).downloadFile(downloadUrl);
@@ -283,16 +287,16 @@ const _downloadFilesFromMessage =
                 entity,
                 fileExtension,
               )}`;
-              await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
-
-              const sliceIdx = mediaPath.indexOf("/");
+              const filePath = `${mediaPath}/${fileName}`;
+              const status = `Archiving - ${filePath}`;
+              dispatch(setStatus(status));
               await exportUtils.addToZip(data, filePath, {
                 lastModified: parseISO(message.timestamp),
               });
 
               const updatedMediaMap = {
                 ...map,
-                [downloadUrl]: `${mediaPath.slice(sliceIdx + 1)}/${fileName}`,
+                [downloadUrl]: `${mediaPath.slice(mediaPath.indexOf("/") + 1)}/${fileName}`,
               };
               dispatch(setExportMediaMap(updatedMediaMap));
             }
@@ -367,12 +371,16 @@ const _downloadAvatarFromMessage =
       const { remote: remoteAvatar } = resolveAvatarUrl(aL.id, aL.avatar);
 
       if (!avatarMap[idAndAvatar] && remoteAvatar) {
+        const status = `Downloading - ${remoteAvatar}`;
+        dispatch(setStatus(status));
         const { success, data } = await new DiscordService(
           settings,
         ).downloadFile(remoteAvatar);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
+          const status = `Archiving - ${avatarFilePath}`;
+          dispatch(setStatus(status));
           await exportUtils.addToZip(data, avatarFilePath);
 
           dispatch(
@@ -768,15 +776,20 @@ const _downloadEmojisFromMessage =
         if (await dispatch(isAppStopped())) break;
         const { exportMaps } = getState().export;
         if (!exportMaps.emojiMap[id]) {
+          const downloadUrl = `https://cdn.discordapp.com/emojis/${id}`;
+          const status = `Downloading - ${downloadUrl}`;
+          dispatch(setStatus(status));
           const { success, data } = await new DiscordService(
             settings,
-          ).downloadFile(`https://cdn.discordapp.com/emojis/${id}`);
+          ).downloadFile(downloadUrl);
 
           if (success && data) {
             const fileExt = data.type?.split("/")?.[1] || "gif";
             const emojiFilePath = `emojis/${getOsSafeString(
               name,
             )}_${id}.${fileExt}`;
+            const status = `Archiving - ${emojiFilePath}`;
+            dispatch(setStatus(status));
             await exportUtils.addToZip(data, emojiFilePath);
 
             dispatch(
@@ -814,45 +827,41 @@ const _processMessages =
       if (await dispatch(isAppStopped())) break;
 
       await dispatch(
-        _downloadFilesFromMessage({ message, exportUtils, paths, index: i }),
+        _downloadFilesFromMessage({
+          message,
+          exportUtils,
+          paths,
+          index: i,
+        }),
       );
       await dispatch(_downloadEmojisFromMessage({ message, exportUtils }));
       await dispatch(_downloadAvatarFromMessage({ message, exportUtils }));
 
-      if (i % 10 === 0) {
-        const status = `Processing - Message ${i} of ${messages.length}`;
-        dispatch(setStatus(status));
-        await wait(0.1);
-      }
+      dispatch(
+        setStatus(
+          `Processed ${i + 1} of ${messages.length} messages (${getPercent(i + 1, messages.length)}%)`,
+        ),
+      );
     }
   };
 
 const _exportHtml = async ({
   exportUtils,
   messages,
-  entityMainDirectory,
-  entityName,
-  currentPage,
+  filePath,
 }: ExportHtmlProps) => {
   // TODO: Do we still need to reference messages in case of error?
   // HTML Exports actually are using ExportMessages component ref, NOT the messages passed to _exportHtml
   exportUtils.setExportMessages(messages); // This is purely so that we can reference the messages in the case of an error!
   const htmlBlob = await exportUtils.generateHTML();
-  await exportUtils.addToZip(
-    htmlBlob,
-    `${entityMainDirectory}/${getOsSafeString(
-      entityName,
-    )}_page_${currentPage}.html`,
-  );
+  await exportUtils.addToZip(htmlBlob, filePath);
 };
 
 const _exportJson =
   ({
     exportUtils,
     messages,
-    entityMainDirectory,
-    entityName,
-    currentPage,
+    filePath,
   }: ExportJsonProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { userMap } = getState().export.exportMaps;
@@ -882,18 +891,14 @@ const _exportJson =
           type: "text/plain",
         },
       ),
-      `${entityMainDirectory}/${getOsSafeString(
-        entityName,
-      )}_page_${currentPage}.json`,
+      filePath,
     );
   };
 
 const _exportCsv = async ({
   exportUtils,
   messages,
-  entityMainDirectory,
-  entityName,
-  currentPage,
+  filePath,
 }: ExportHtmlProps) => {
   const csvKeys: string[] = [];
   const csvData: Object[] = messages.map((m) => {
@@ -910,9 +915,7 @@ const _exportCsv = async ({
     Papa.unparse(csvData, {
       columns: ["id", ...csvKeys.filter((k) => k !== "id").sort()],
     }),
-    `${entityMainDirectory}/${getOsSafeString(
-      entityName,
-    )}_page_${currentPage}.csv`,
+    filePath,
   );
 };
 
@@ -926,12 +929,6 @@ const _compressMessages =
     threadData,
   }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    const compressionStr = threadData
-      ? ` Thread ${threadData.threadNo}/${threadData.threadCount}`
-      : "";
-    dispatch(setStatus(`Compressing${compressionStr} - Page ? of ?`));
-    await wait(1);
-
     const { exportSeparateThreadAndForumPosts, exportMessagesPerPage } =
       getState().app.settings;
     const messagesPerPage = parseInt(exportMessagesPerPage);
@@ -988,15 +985,12 @@ const _compressMessages =
 
       while (getState().export.currentPage <= totalPages) {
         const currentPage = getState().export.currentPage;
+        const filePath = `${entityMainDirectory}/${getOsSafeString(entityName)}_page_${currentPage}.${format}`;
         if (await dispatch(isAppStopped())) break;
-        if (format === ExportType.MEDIA) {
-          dispatch(setStatus("Cleaning up..."));
-        } else {
-          const status = `Compressing${compressionStr} - Page ${currentPage} of ${totalPages}`;
-          dispatch(setStatus(status));
+        if (format !== ExportType.MEDIA) {
+          dispatch(setStatus(`Archiving - ${filePath}`));
         }
 
-        await wait(1);
         const startIndex =
           currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
         const exportMessages = adjustedMessages?.slice(
@@ -1011,26 +1005,20 @@ const _compressMessages =
             _exportJson({
               exportUtils,
               messages: exportMessages,
-              entityMainDirectory,
-              entityName,
-              currentPage,
+              filePath,
             }),
           );
         } else if (format === ExportType.HTML) {
           await _exportHtml({
             exportUtils,
             messages: exportMessages,
-            entityMainDirectory,
-            entityName,
-            currentPage,
+            filePath,
           });
         } else if (format === ExportType.CSV) {
           await _exportCsv({
             exportUtils,
             messages: exportMessages,
-            entityMainDirectory,
-            entityName,
-            currentPage,
+            filePath,
           });
         }
         dispatch(setCurrentPage(currentPage + 1));

@@ -1038,16 +1038,12 @@ const _generateReactionMap =
       if (await dispatch(isAppStopped())) break;
 
       if (message.reactions?.length && token) {
-        for (const [i, reaction] of message.reactions.entries()) {
+        for (const [_i, reaction] of message.reactions.entries()) {
           const { emoji } = reaction;
           const encodedEmoji = getEncodedEmoji(emoji);
           const brackets = emoji.id ? ":" : "";
 
-          const status = `[${mI + 1}/${
-            filteredMessages.length
-          }] Reaction Lookup (${i + 1} of ${message.reactions.length}): ${
-            message.id
-          } ${brackets}${emoji.name}${brackets}`;
+          const status = `Retrieving users who reacted with ${brackets}${emoji.name}${brackets} for message ${mI + 1} of ${filteredMessages.length}`;
           dispatch(setStatus(status));
 
           if ((await dispatch(isAppStopped())) || !encodedEmoji) break;
@@ -1214,21 +1210,18 @@ const _collectUserNames =
 
     if (token && stringToBool(displayNameLookup)) {
       const userIds = Object.keys(updateMap);
-      for (const [i, userId] of userIds.entries()) {
+      for (const [_i, userId] of userIds.entries()) {
         if (await dispatch(isAppStopped())) break;
         const mapping = existingUserMap[userId] || updateMap[userId];
         const { userName, displayName, timestamp } = mapping;
-
-        const status = `Alias Lookup (${i + 1} of ${
-          userIds.length
-        }): ${userId}`;
-        dispatch(setStatus(status));
 
         const isMissingOrStale =
           (!userName && !displayName) ||
           isUserDataStale(timestamp, appUserDataRefreshRate);
 
         if (isMissingOrStale) {
+          const status = `Retrieving alias data for ${userName || userId}`;
+          dispatch(setStatus(status));
           const { success, data } = await new DiscordService(settings).getUser(
             token,
             userId,
@@ -1260,15 +1253,10 @@ const _collectUserGuildData =
 
     if (token && stringToBool(serverNickNameLookup)) {
       const userIds = Object.keys(updateMap);
-      for (const [i, userId] of userIds.entries()) {
+      for (const [_i, userId] of userIds.entries()) {
         if (await dispatch(isAppStopped())) break;
         const userMapping = existingUserMap[userId] || updateMap[userId];
         const userGuilds = userMapping.guilds;
-
-        const status = `Guild User Lookup (${i + 1} of ${
-          userIds.length
-        }): ${userId}`;
-        dispatch(setStatus(status));
 
         const isMissingOrStale =
           !userGuilds[guildId] ||
@@ -1278,6 +1266,8 @@ const _collectUserGuildData =
           );
 
         if (isMissingOrStale) {
+          const status = `Retrieving server data for ${userMapping.userName || userId}`;
+          dispatch(setStatus(status));
           const { success, data } = await new DiscordService(
             settings,
           ).fetchGuildUser(guildId, userId, token);
@@ -1326,12 +1316,9 @@ const _resolveMessageReactions =
       for (const [i, message] of messages.entries()) {
         if (await dispatch(isAppStopped())) break;
 
-        const status = `Reaction Allocation (${i + 1} of ${messages.length}): ${
-          message.id
-        }`;
-        dispatch(setStatus(status));
-
         if (!trackMap[message.id]) {
+          const status = `Searching for reactions around message ${i + 1} of ${messages.length}`;
+          dispatch(setStatus(status));
           const { success, data } = await new DiscordService(
             settings,
           ).fetchMessageData(
@@ -1409,11 +1396,9 @@ const _getNextSearchStatus = (
 ) => {
   let status = "";
   if (isGuildForum(channel)) {
-    status = `Fetched ${threads.length} Threads`;
+    status = `Retrieved ${threads.length} threads`;
   } else {
-    const channelName = channel?.name || "";
-    const ratio = `${messages.length} / ${totalMessages}`;
-    status = `Fetched ${ratio} Messages ${channelName}`;
+    status = `Retrieved ${messages.length} of ${totalMessages} messages`;
   }
   return status;
 };
@@ -1623,7 +1608,7 @@ const _getMessagesFromChannel =
               .filter((m) => _messageTypeAllowed(m.type))
               .forEach((m) => messages.push(m));
 
-            const status = `Fetched ${messages.length} Messages`;
+            const status = `Retrieved ${messages.length} messages`;
             dispatch(setStatus(status));
           }
         } else {

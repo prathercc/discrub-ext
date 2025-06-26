@@ -160,9 +160,7 @@ export type ProcessMessagesProps = {
 export type ExportHtmlProps = {
   exportUtils: ExportUtils;
   messages: Message[];
-  entityMainDirectory: string;
-  entityName: string;
-  currentPage: number;
+  filePath: string;
 };
 
 export type ExportJsonProps = ExportHtmlProps;
