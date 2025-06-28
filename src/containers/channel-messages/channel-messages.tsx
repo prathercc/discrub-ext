@@ -47,6 +47,7 @@ import SearchCriteria, {
 } from "../search-criteria/search-criteria.tsx";
 import EnhancedAutocomplete from "../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 import { EntityHint } from "../../enum/entity-hint.ts";
+import AppStatus from "../app-status/app-status.tsx";
 
 function ChannelMessages() {
   const { state: userState } = useUserSlice();
@@ -80,8 +81,6 @@ function ChannelMessages() {
   const discrubCancelled = appState.discrubCancelled();
   const task = appState.task();
   const settings = appState.settings();
-
-  const { statusText } = task || {};
 
   const [searchTouched, setSearchTouched] = useState(false);
   const [expanded, setExpanded] = useState(true);
@@ -372,7 +371,7 @@ function ChannelMessages() {
               }}
             >
               <LinearProgress sx={{ width: "100%", m: 1 }} />
-              <Typography variant="caption">{statusText}</Typography>
+              <AppStatus height={200} />
             </Box>
           </Paper>
         )}

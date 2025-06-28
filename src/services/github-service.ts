@@ -26,7 +26,6 @@ export const fetchAnnouncementData = (): Promise<Announcement> => {
 };
 
 export const fetchAnnouncementMarkdown = (): Promise<string> => {
-  console.warn(ANNOUNCEMENT_MARKDOWN_ENDPOINT);
   return fetch(ANNOUNCEMENT_MARKDOWN_ENDPOINT, {
     method: "GET",
     headers: {

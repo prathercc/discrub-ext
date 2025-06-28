@@ -4,6 +4,7 @@ import {
   getEncodedEmoji,
   getGMOMappingData,
   getSortedMessages,
+  getThreadEntityName,
   getUserMappingData,
   isCriteriaActive,
   isDm,
@@ -1423,7 +1424,7 @@ const _getSearchMessages =
     const channel = combinedChannels.find((c) => c.id === channelId);
 
     let knownMessages: Message[] = [];
-    const knownThreads: Channel[] = [];
+    let knownThreads: Channel[] = [];
     let { offset, isEndConditionMet, criteria, totalMessages } = {
       offset: startOffSet || 0,
       isEndConditionMet: false,
@@ -1453,7 +1454,7 @@ const _getSearchMessages =
           for (const t of threads) {
             const isKnownThread = knownThreads.some((k) => k.id === t.id);
             if (!isKnownThread) {
-              knownThreads.push(t);
+              knownThreads = [...knownThreads, t];
             }
           }
 
@@ -1472,9 +1473,10 @@ const _getSearchMessages =
             endOffSet,
           ));
 
-          for (const m of messages) {
-            if (_messageTypeAllowed(m.type)) knownMessages.push(m);
-          }
+          knownMessages = [
+            ...knownMessages,
+            ...messages.filter((m) => _messageTypeAllowed(m.type)),
+          ];
 
           const status = _getNextSearchStatus(
             knownThreads,
@@ -1494,7 +1496,7 @@ const _getSearchMessages =
         knownMessages = await dispatch(_resolveMessageReactions(knownMessages));
       }
     }
-    dispatch(resetStatus());
+
     return {
       messages: knownMessages,
       threads: knownThreads,
@@ -1534,7 +1536,7 @@ const _getMessages =
       channels.find((c) => channelId === c.id) ||
       dms.find((d) => channelId === d.id);
     const trackedThreads: Channel[] = [];
-    const messages: Message[] = [];
+    let messages: Message[] = [];
 
     if (channel) {
       if (isGuildForum(channel)) {
@@ -1551,9 +1553,10 @@ const _getMessages =
           }
         });
       } else {
-        (await dispatch(_getMessagesFromChannel(channelId))).forEach((m) =>
-          messages.push(m),
-        );
+        messages = [
+          ...messages,
+          ...(await dispatch(_getMessagesFromChannel(channelId))),
+        ];
       }
 
       if (!isDm(channel)) {
@@ -1569,9 +1572,12 @@ const _getMessages =
         archivedThreads.forEach((at) => trackedThreads.push(at));
 
         for (const thread of trackedThreads) {
-          (await dispatch(_getMessagesFromChannel(thread.id))).forEach((m) =>
-            messages.push(m),
-          );
+          const status = `Retrieving messages for thread - ${getThreadEntityName(thread)}`;
+          dispatch(setStatus(status));
+          messages = [
+            ...messages,
+            ...(await dispatch(_getMessagesFromChannel(thread.id))),
+          ];
         }
       }
     }
@@ -1588,7 +1594,7 @@ const _getMessagesFromChannel =
     const { token } = getState().user;
     let lastId = "";
     let reachedEnd = false;
-    const messages: Message[] = [];
+    let messages: Message[] = [];
 
     if (token) {
       while (!reachedEnd) {
@@ -1600,13 +1606,13 @@ const _getMessagesFromChannel =
         if (success && data) {
           if (data.length < 100) reachedEnd = true;
           if (data.length > 0) lastId = data[data.length - 1].id;
-          const hasValidMessages = Boolean(
-            data[0]?.content || data[0]?.attachments,
-          );
+          const hasValidMessages = data[0]?.content || data[0]?.attachments;
+
           if (hasValidMessages) {
-            data
-              .filter((m) => _messageTypeAllowed(m.type))
-              .forEach((m) => messages.push(m));
+            messages = [
+              ...messages,
+              ...data.filter((m) => _messageTypeAllowed(m.type)),
+            ];
 
             const status = `Retrieved ${messages.length} messages`;
             dispatch(setStatus(status));
@@ -1616,7 +1622,6 @@ const _getMessagesFromChannel =
         }
       }
     }
-    dispatch(resetStatus());
 
     return messages;
   };

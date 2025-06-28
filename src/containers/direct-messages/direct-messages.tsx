@@ -41,6 +41,7 @@ import SearchCriteria, {
 } from "../search-criteria/search-criteria.tsx";
 import EnhancedAutocomplete from "../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 import { ChannelType } from "../../enum/channel-type.ts";
+import AppStatus from "../app-status/app-status.tsx";
 
 function DirectMessages() {
   const { state: userState } = useUserSlice();
@@ -76,8 +77,6 @@ function DirectMessages() {
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
   const [reactionModalOpen, setReactionModalOpen] = useState(false);
-
-  const { statusText } = task || {};
 
   const columns: TableColumn<Message>[] = [
     {
@@ -348,7 +347,7 @@ function DirectMessages() {
               }}
             >
               <LinearProgress sx={{ width: "100%", m: 1 }} />
-              <Typography variant="caption">{statusText}</Typography>
+              <AppStatus height={200} />
             </Box>
           </Paper>
         )}
