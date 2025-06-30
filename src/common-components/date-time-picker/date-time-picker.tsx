@@ -1,10 +1,8 @@
 import { useState, useEffect, forwardRef } from "react";
 import { TextFieldProps } from "@mui/material/TextField";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { MobileDateTimePicker } from "@mui/x-date-pickers/MobileDateTimePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-import { IconButton } from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
+import { DateTimePicker as Picker } from "@mui/x-date-pickers/DateTimePicker";
 
 type DateTimePickerProps = TextFieldProps & {
   onDateChange: (val: Date | Maybe) => void;
@@ -24,43 +22,33 @@ const DateTimePicker = forwardRef<HTMLInputElement, DateTimePickerProps>(
 
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <MobileDateTimePicker
+        <Picker
           ref={ref}
           disabled={disabled}
+          label={label}
           value={selectedDate}
           onChange={(e) => {
             setSelectedDate(e);
-            onDateChange(e);
+            if (e && !isNaN(e.getTime())) {
+              onDateChange(e);
+            } else {
+              onDateChange(null);
+            }
           }}
           slotProps={{
-            dialog: {
-              hideBackdrop: true,
-            },
+            field: { clearable: true },
             textField: {
               size: "small",
               variant: "filled",
               fullWidth: true,
               label: label,
               ...rest,
-              InputProps: {
-                endAdornment: (
-                  <IconButton
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setSelectedDate(null);
-                      onDateChange(null);
-                    }}
-                  >
-                    <ClearIcon />
-                  </IconButton>
-                ),
-              },
             },
           }}
         />
       </LocalizationProvider>
     );
-  }
+  },
 );
 
 export default DateTimePicker;

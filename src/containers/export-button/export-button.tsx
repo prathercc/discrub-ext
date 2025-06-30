@@ -44,6 +44,7 @@ const ExportButton = ({
   const totalPages = exportState.totalPages();
   const entity = exportState.currentExportEntity();
   const name = exportState.name();
+  const exportData = exportState.exportData();
 
   const {
     setDiscrubCancelled,
@@ -271,6 +272,7 @@ const ExportButton = ({
           currentPage={currentPage}
           totalPages={totalPages}
           safeEntityName={name}
+          exportData={exportData}
         />
       )}
       <ExportModal

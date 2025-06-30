@@ -4,7 +4,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import Progress from "./progress";
+import ExportProgress from "./export-progress.tsx";
 import Channel from "../../../classes/channel";
 import Config from "../../discrub-dialog/components/config";
 import { AppSettings } from "../../../features/app/app-types";
@@ -193,7 +193,7 @@ const BulkContent = ({
     <DialogContent>
       {!isExporting && !isDm && <EnhancedTabs tabs={guildTabs} />}
       {!isExporting && isDm && <EnhancedTabs tabs={dmTabs} />}
-      {isExporting && <Progress />}
+      {isExporting && <ExportProgress />}
     </DialogContent>
   );
 };

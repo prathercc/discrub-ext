@@ -33,8 +33,8 @@ export const defaultSettings: AppSettings = {
   [DiscrubSetting.DATE_FORMAT]: DateFormat.MMDDYYYY,
   [DiscrubSetting.TIME_FORMAT]: TimeFormat._12HOUR,
 
-  [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "false",
-  [DiscrubSetting.EXPORT_ARTIST_MODE]: "false",
+  [DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS]: "true",
+  [DiscrubSetting.EXPORT_ARTIST_MODE]: "true",
   [DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER]: SortDirection.DESCENDING,
   [DiscrubSetting.EXPORT_PREVIEW_MEDIA]: "",
   [DiscrubSetting.EXPORT_DOWNLOAD_MEDIA]: "",

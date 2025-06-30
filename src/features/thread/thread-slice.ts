@@ -7,6 +7,8 @@ import {
 import { AppThunk } from "../../app/store";
 import Channel from "../../classes/channel";
 import DiscordService from "../../services/discord-service";
+import { setStatus } from "../app/app-slice.ts";
+import { getThreadEntityName } from "../../utils.ts";
 
 const initialState: ThreadState = { threads: [] };
 
@@ -30,7 +32,7 @@ export const getArchivedThreads =
     channelId,
     knownThreads,
   }: ArchivedThreadProps): AppThunk<Promise<Channel[]>> =>
-  async (_, getState) => {
+  async (dispatch, getState) => {
     const { token } = getState().user;
     const { discrubCancelled, settings } = getState().app;
 
@@ -50,6 +52,10 @@ export const getArchivedThreads =
       }
       if (privateSuccess && privateData) {
         threadArr.concat(privateData);
+      }
+
+      if (threadArr.length) {
+        dispatch(setStatus(`Retrieved ${threadArr.length} archived threads`));
       }
 
       return threadArr.filter(
@@ -77,10 +83,12 @@ export const unarchiveThread =
           locked: false,
         },
       );
-
+      const { threads } = getState().thread;
+      const foundThread = threads.find((t) => t.id === threadId);
       if (success) {
-        const { threads } = getState().thread;
         if (data) {
+          const status = `Successfully un-archived thread - ${getThreadEntityName(data)}`;
+          dispatch(setStatus(status));
           dispatch(
             setThreads(
               threads.map((thread) => {
@@ -92,6 +100,9 @@ export const unarchiveThread =
           );
         }
         return data;
+      } else {
+        const status = `Failed to un-archive thread - ${foundThread ? getThreadEntityName(foundThread) : threadId}`;
+        dispatch(setStatus(status));
       }
     }
   };

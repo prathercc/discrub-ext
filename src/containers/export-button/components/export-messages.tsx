@@ -8,6 +8,7 @@ import MessageMock from "../../message-mock/message-mock";
 import { MessageType } from "../../../enum/message-type";
 import { isNonStandardMessage, messageTypeEquals } from "../../../utils";
 import PageFooterControls from "./page-footer-controls";
+import { ExportData } from "../../../features/export/export-types.ts";
 
 type ExportMessagesProps = {
   componentRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -17,6 +18,7 @@ type ExportMessagesProps = {
   currentPage: number;
   totalPages: number;
   safeEntityName: string;
+  exportData: ExportData;
 };
 
 const ExportMessages = ({
@@ -27,6 +29,7 @@ const ExportMessages = ({
   currentPage,
   totalPages,
   safeEntityName,
+  exportData,
 }: ExportMessagesProps) => {
   const getExportPageTitle = (): string => {
     return `Page ${currentPage} of ${totalPages}`;
@@ -43,6 +46,7 @@ const ExportMessages = ({
         <MessageTitleMock
           entity={entity}
           getExportPageTitle={getExportPageTitle}
+          exportData={exportData}
         />
         <Stack
           direction="column"

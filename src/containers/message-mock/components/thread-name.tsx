@@ -7,7 +7,11 @@ const ThreadName = ({ thread }: ThreadNameProps) => {
   const theme = useTheme();
 
   return (
-    <Typography variant="caption" sx={{ color: theme.palette.text.disabled }}>
+    <Typography
+      title="Thread Name"
+      variant="caption"
+      sx={{ color: theme.palette.text.disabled }}
+    >
       {thread.name}
     </Typography>
   );

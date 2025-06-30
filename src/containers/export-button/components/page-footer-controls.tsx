@@ -2,6 +2,7 @@ import { Button, Stack } from "@mui/material";
 import WestIcon from "@mui/icons-material/West";
 import EastIcon from "@mui/icons-material/East";
 import { transparancy } from "../../../theme.ts";
+import { getOsSafeString } from "../../../utils.ts";
 
 type PageFooterControlsProps = {
   currentPage: number;
@@ -15,7 +16,7 @@ const PageFooterControls = ({
   safeEntityName,
 }: PageFooterControlsProps) => {
   const resolvePageUrl = (page: number) => {
-    return `./${safeEntityName}_page_${page}.html`;
+    return `./${getOsSafeString(safeEntityName)}_page_${page}.html`;
   };
 
   return (

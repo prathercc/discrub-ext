@@ -13,6 +13,7 @@ export type ExportState = {
   exportMaps: ExportMap;
   exportMessages: Message[];
   currentExportEntity: Guild | Channel | Maybe;
+  exportData: ExportData;
 };
 
 export type ExportMap = {
@@ -137,14 +138,12 @@ export type GetEmojiProps = {
   emojiRef: EmojiRef;
   isReply: boolean;
   exportView: boolean;
-  message: Message;
 };
 
 export type FormattedInnerHtmlProps = {
   content: string;
   isReply: boolean;
   exportView: boolean;
-  message: Message;
 };
 
 export type EmojisFromMessageProps = {
@@ -161,9 +160,7 @@ export type ProcessMessagesProps = {
 export type ExportHtmlProps = {
   exportUtils: ExportUtils;
   messages: Message[];
-  entityMainDirectory: string;
-  entityName: string;
-  currentPage: number;
+  filePath: string;
 };
 
 export type ExportJsonProps = ExportHtmlProps;
@@ -175,4 +172,8 @@ export type CompressMessagesProps = {
   entityMainDirectory: string;
   exportUtils: ExportUtils;
   threadData?: { thread: Channel; threadNo: number; threadCount: number };
+};
+
+export type ExportData = {
+  currentThread?: Channel;
 };

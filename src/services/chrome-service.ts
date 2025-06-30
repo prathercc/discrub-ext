@@ -35,9 +35,9 @@ const defaultSettings = [
 
   {
     name: DiscrubSetting.EXPORT_SEPARATE_THREAD_AND_FORUM_POSTS,
-    value: "false",
+    value: "true",
   },
-  { name: DiscrubSetting.EXPORT_ARTIST_MODE, value: "false" },
+  { name: DiscrubSetting.EXPORT_ARTIST_MODE, value: "true" },
   {
     name: DiscrubSetting.EXPORT_MESSAGE_SORT_ORDER,
     value: SortDirection.DESCENDING,
