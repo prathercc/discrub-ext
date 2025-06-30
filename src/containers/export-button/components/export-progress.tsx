@@ -1,12 +1,8 @@
 import { Stack, Typography, LinearProgress } from "@mui/material";
 import { useExportSlice } from "../../../features/export/use-export-slice";
-import { useAppSlice } from "../../../features/app/use-app-slice";
+import AppStatus from "../../app-status/app-status.tsx";
 
-const Progress = () => {
-  const { state: appState } = useAppSlice();
-  const task = appState.task();
-  const { statusText } = task || {};
-
+const ExportProgress = () => {
   const { state: exportState } = useExportSlice();
   const name = exportState.name();
 
@@ -16,13 +12,12 @@ const Progress = () => {
       justifyContent="center"
       alignItems="center"
       spacing={2}
-      sx={{ minWidth: "300px" }}
     >
       <Typography>{name}</Typography>
       <LinearProgress sx={{ width: "100%", m: 1 }} />
-      <Typography variant="caption">{statusText}</Typography>
+      <AppStatus height={300} />
     </Stack>
   );
 };
 
-export default Progress;
+export default ExportProgress;

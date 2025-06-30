@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getMessageData, resetMessageData } from "../message/message-slice";
-import { v4 as uuidv4 } from "uuid";
 import {
   entityIsAudio,
   entityIsImage,
@@ -10,7 +9,7 @@ import {
   getExportFileName,
   getMediaUrls,
   getRoleNames,
-  getSafeExportName,
+  getOsSafeString,
   isDm,
   resolveAvatarUrl,
   resolveEmojiUrl,
@@ -19,6 +18,10 @@ import {
   stringToBool,
   stringToTypedArray,
   wait,
+  getThreadEntityName,
+  filterThreadsByMessages,
+  getPercent,
+  getFsUUID,
 } from "../../utils";
 import { resetChannel, setChannel } from "../channel/channel-slice";
 import {
@@ -34,6 +37,7 @@ import {
   CompressMessagesProps,
   EmojisFromMessageProps,
   ExportAvatarMap,
+  ExportData,
   ExportEmojiMap,
   ExportHtmlProps,
   ExportJsonProps,
@@ -65,6 +69,7 @@ import hljs from "highlight.js";
 import { setSetting } from "../../services/chrome-service.ts";
 import { DiscrubSetting } from "../../enum/discrub-setting.ts";
 import { fileTypeFromBlob } from "file-type";
+import { parseISO } from "date-fns";
 
 const initialMaps: ExportMap = {
   userMap: {},
@@ -84,6 +89,7 @@ const initialState: ExportState = {
   exportMaps: initialMaps,
   exportMessages: [],
   currentExportEntity: null,
+  exportData: {},
 };
 
 export const exportSlice = createSlice({
@@ -181,6 +187,9 @@ export const exportSlice = createSlice({
     ): void => {
       state.currentExportEntity = payload;
     },
+    setExportData: (state, { payload }: { payload: ExportData }): void => {
+      state.exportData = payload;
+    },
   },
 });
 
@@ -199,6 +208,7 @@ export const {
   setExportMessages,
   setTotalPages,
   setCurrentExportEntity,
+  setExportData,
 } = exportSlice.actions;
 
 const _downloadFilesFromMessage =
@@ -210,10 +220,15 @@ const _downloadFilesFromMessage =
   }: FilesFromMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { settings } = getState().app;
-    const { exportUseArtistMode, exportDownloadMedia_2 } =
-      getState().app.settings;
+    const { threads } = getState().thread;
+    const {
+      exportUseArtistMode,
+      exportDownloadMedia_2,
+      exportSeparateThreadAndForumPosts,
+    } = getState().app.settings;
     const artistMode = stringToBool(exportUseArtistMode);
     const downloadMedia = stringToTypedArray<MediaType>(exportDownloadMedia_2);
+    const folderingThreads = stringToBool(exportSeparateThreadAndForumPosts);
     const isDlImages = downloadMedia.some((mt) => mt === MediaType.IMAGES);
     const isDlVideos = downloadMedia.some((mt) => mt === MediaType.VIDEOS);
     const isDlAudio = downloadMedia.some((mt) => mt === MediaType.AUDIO);
@@ -228,6 +243,14 @@ const _downloadFilesFromMessage =
     let attachments = message.attachments;
 
     let mediaPath = paths.media;
+    if (folderingThreads) {
+      const foundThread = threads.find(
+        (t) => message.thread?.id === t.id || message.channel_id === t.id,
+      );
+      mediaPath = foundThread
+        ? `${mediaPath.substring(0, mediaPath.lastIndexOf("/"))}/${getThreadEntityName(foundThread)}_media`
+        : mediaPath;
+    }
     if (artistMode && message.userName) {
       mediaPath = `${mediaPath}/${message.userName}`;
     }
@@ -250,6 +273,8 @@ const _downloadFilesFromMessage =
           const map = exportMaps.mediaMap;
 
           if (!map[downloadUrl]) {
+            const status = `Downloading - ${downloadUrl}`;
+            dispatch(setStatus(status));
             const { success, data } = await new DiscordService(
               settings,
             ).downloadFile(downloadUrl);
@@ -262,13 +287,16 @@ const _downloadFilesFromMessage =
                 entity,
                 fileExtension,
               )}`;
-              await exportUtils.addToZip(data, `${mediaPath}/${fileName}`);
-
-              const sliceIdx = mediaPath.indexOf("/");
+              const filePath = `${mediaPath}/${fileName}`;
+              const status = `Archiving - ${filePath}`;
+              dispatch(setStatus(status));
+              await exportUtils.addToZip(data, filePath, {
+                lastModified: parseISO(message.timestamp),
+              });
 
               const updatedMediaMap = {
                 ...map,
-                [downloadUrl]: `${mediaPath.slice(sliceIdx + 1)}/${fileName}`,
+                [downloadUrl]: `${mediaPath.slice(mediaPath.indexOf("/") + 1)}/${fileName}`,
               };
               dispatch(setExportMediaMap(updatedMediaMap));
             }
@@ -343,12 +371,16 @@ const _downloadAvatarFromMessage =
       const { remote: remoteAvatar } = resolveAvatarUrl(aL.id, aL.avatar);
 
       if (!avatarMap[idAndAvatar] && remoteAvatar) {
+        const status = `Downloading - ${remoteAvatar}`;
+        dispatch(setStatus(status));
         const { success, data } = await new DiscordService(
           settings,
         ).downloadFile(remoteAvatar);
         if (success && data) {
           const fileExt = data.type.split("/")?.[1] || "webp";
           const avatarFilePath = `avatars/${idAndAvatar}.${fileExt}`;
+          const status = `Archiving - ${avatarFilePath}`;
+          dispatch(setStatus(status));
           await exportUtils.addToZip(data, avatarFilePath);
 
           dispatch(
@@ -498,7 +530,6 @@ export const getFormattedInnerHtml =
     content,
     isReply = false,
     exportView = false,
-    message,
   }: FormattedInnerHtmlProps): AppThunk<string> =>
   (dispatch, getState) => {
     const { userMap } = getState().export.exportMaps;
@@ -511,7 +542,7 @@ export const getFormattedInnerHtml =
         rawHtml = rawHtml.replaceAll(
           emojiRef.raw,
           renderToString(
-            dispatch(_getEmoji({ emojiRef, isReply, exportView, message })),
+            dispatch(_getEmoji({ emojiRef, isReply, exportView })),
           ),
         );
       });
@@ -745,15 +776,20 @@ const _downloadEmojisFromMessage =
         if (await dispatch(isAppStopped())) break;
         const { exportMaps } = getState().export;
         if (!exportMaps.emojiMap[id]) {
+          const downloadUrl = `https://cdn.discordapp.com/emojis/${id}`;
+          const status = `Downloading - ${downloadUrl}`;
+          dispatch(setStatus(status));
           const { success, data } = await new DiscordService(
             settings,
-          ).downloadFile(`https://cdn.discordapp.com/emojis/${id}`);
+          ).downloadFile(downloadUrl);
 
           if (success && data) {
             const fileExt = data.type?.split("/")?.[1] || "gif";
-            const emojiFilePath = `emojis/${getSafeExportName(
+            const emojiFilePath = `emojis/${getOsSafeString(
               name,
             )}_${id}.${fileExt}`;
+            const status = `Archiving - ${emojiFilePath}`;
+            dispatch(setStatus(status));
             await exportUtils.addToZip(data, emojiFilePath);
 
             dispatch(
@@ -791,45 +827,41 @@ const _processMessages =
       if (await dispatch(isAppStopped())) break;
 
       await dispatch(
-        _downloadFilesFromMessage({ message, exportUtils, paths, index: i }),
+        _downloadFilesFromMessage({
+          message,
+          exportUtils,
+          paths,
+          index: i,
+        }),
       );
       await dispatch(_downloadEmojisFromMessage({ message, exportUtils }));
       await dispatch(_downloadAvatarFromMessage({ message, exportUtils }));
 
-      if (i % 10 === 0) {
-        const status = `Processing - Message ${i} of ${messages.length}`;
-        dispatch(setStatus(status));
-        await wait(0.1);
-      }
+      dispatch(
+        setStatus(
+          `Processed ${i + 1} of ${messages.length} messages (${getPercent(i + 1, messages.length)}%)`,
+        ),
+      );
     }
   };
 
 const _exportHtml = async ({
   exportUtils,
   messages,
-  entityMainDirectory,
-  entityName,
-  currentPage,
+  filePath,
 }: ExportHtmlProps) => {
   // TODO: Do we still need to reference messages in case of error?
   // HTML Exports actually are using ExportMessages component ref, NOT the messages passed to _exportHtml
   exportUtils.setExportMessages(messages); // This is purely so that we can reference the messages in the case of an error!
   const htmlBlob = await exportUtils.generateHTML();
-  await exportUtils.addToZip(
-    htmlBlob,
-    `${entityMainDirectory}/${getSafeExportName(
-      entityName,
-    )}_page_${currentPage}.html`,
-  );
+  await exportUtils.addToZip(htmlBlob, filePath);
 };
 
 const _exportJson =
   ({
     exportUtils,
     messages,
-    entityMainDirectory,
-    entityName,
-    currentPage,
+    filePath,
   }: ExportJsonProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
     const { userMap } = getState().export.exportMaps;
@@ -859,18 +891,14 @@ const _exportJson =
           type: "text/plain",
         },
       ),
-      `${entityMainDirectory}/${getSafeExportName(
-        entityName,
-      )}_page_${currentPage}.json`,
+      filePath,
     );
   };
 
 const _exportCsv = async ({
   exportUtils,
   messages,
-  entityMainDirectory,
-  entityName,
-  currentPage,
+  filePath,
 }: ExportHtmlProps) => {
   const csvKeys: string[] = [];
   const csvData: Object[] = messages.map((m) => {
@@ -887,9 +915,7 @@ const _exportCsv = async ({
     Papa.unparse(csvData, {
       columns: ["id", ...csvKeys.filter((k) => k !== "id").sort()],
     }),
-    `${entityMainDirectory}/${getSafeExportName(
-      entityName,
-    )}_page_${currentPage}.csv`,
+    filePath,
   );
 };
 
@@ -903,19 +929,14 @@ const _compressMessages =
     threadData,
   }: CompressMessagesProps): AppThunk<Promise<void>> =>
   async (dispatch, getState) => {
-    const compressionStr = threadData
-      ? ` Thread ${threadData.threadNo}/${threadData.threadCount}`
-      : "";
-    dispatch(setStatus(`Compressing${compressionStr} - Page ? of ?`));
-    await wait(1);
-
     const { exportSeparateThreadAndForumPosts, exportMessagesPerPage } =
       getState().app.settings;
     const messagesPerPage = parseInt(exportMessagesPerPage);
     const folderingThreads = stringToBool(exportSeparateThreadAndForumPosts);
 
-    const threads = getState().thread.threads?.filter((t) =>
-      messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id),
+    const threads = filterThreadsByMessages(
+      getState().thread.threads,
+      messages,
     );
 
     let adjustedMessages: Message[] = messages;
@@ -926,7 +947,6 @@ const _compressMessages =
       );
       for (let [i, t] of threads.entries()) {
         const threadNumber = i + 1;
-        const threadName = `Thread ${threadNumber}`;
         const threadMessages = messages.filter(
           (m) => m.thread?.id === t.id || m.channel_id === t.id,
         );
@@ -935,7 +955,7 @@ const _compressMessages =
             _compressMessages({
               messages: threadMessages,
               format,
-              entityName: threadName,
+              entityName: getThreadEntityName(t),
               entityMainDirectory,
               exportUtils,
               threadData: {
@@ -956,17 +976,21 @@ const _compressMessages =
           : 1;
       dispatch(setTotalPages(totalPages));
 
+      if (threadData?.thread) {
+        dispatch(setExportData({ currentThread: threadData.thread }));
+      } else {
+        const { exportData } = getState().export;
+        dispatch(setExportData({ ...exportData, currentThread: undefined }));
+      }
+
       while (getState().export.currentPage <= totalPages) {
         const currentPage = getState().export.currentPage;
+        const filePath = `${entityMainDirectory}/${getOsSafeString(entityName)}_page_${currentPage}.${format}`;
         if (await dispatch(isAppStopped())) break;
-        if (format === ExportType.MEDIA) {
-          dispatch(setStatus("Cleaning up..."));
-        } else {
-          const status = `Compressing${compressionStr} - Page ${currentPage} of ${totalPages}`;
-          dispatch(setStatus(status));
+        if (format !== ExportType.MEDIA) {
+          dispatch(setStatus(`Archiving - ${filePath}`));
         }
 
-        await wait(1);
         const startIndex =
           currentPage === 1 ? 0 : (currentPage - 1) * messagesPerPage;
         const exportMessages = adjustedMessages?.slice(
@@ -981,26 +1005,20 @@ const _compressMessages =
             _exportJson({
               exportUtils,
               messages: exportMessages,
-              entityMainDirectory,
-              entityName,
-              currentPage,
+              filePath,
             }),
           );
         } else if (format === ExportType.HTML) {
           await _exportHtml({
             exportUtils,
             messages: exportMessages,
-            entityMainDirectory,
-            entityName,
-            currentPage,
+            filePath,
           });
         } else if (format === ExportType.CSV) {
           await _exportCsv({
             exportUtils,
             messages: exportMessages,
-            entityMainDirectory,
-            entityName,
-            currentPage,
+            filePath,
           });
         }
         dispatch(setCurrentPage(currentPage + 1));
@@ -1025,8 +1043,8 @@ export const exportMessages =
     const entity = !!selectedDms.length
       ? selectedDms[0]
       : selectedChannel || selectedGuild;
-    const safeEntityName = getSafeExportName(entityName);
-    const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
+    const safeEntityName = getOsSafeString(entityName);
+    const entityMainDirectory = `${safeEntityName}_${getFsUUID()}`;
     dispatch(setIsExporting(true));
     dispatch(setName(safeEntityName));
     dispatch(setCurrentExportEntity(entity));
@@ -1088,8 +1106,8 @@ export const exportChannels =
     for (const entity of channels) {
       if (getState().app.discrubCancelled) break;
       dispatch(resetStatus());
-      const safeEntityName = getSafeExportName(entity.name || entity.id);
-      const entityMainDirectory = `${safeEntityName}_${uuidv4()}`;
+      const safeEntityName = getOsSafeString(entity.name || entity.id);
+      const entityMainDirectory = `${safeEntityName}_${getFsUUID()}`;
       dispatch(setCurrentExportEntity(entity));
       dispatch(setName(safeEntityName));
       if (!isDm(entity)) {

@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.12.10",
+    "changes": [
+      "Name exported thread and forums posts according to the relevant title, replacing the 'Thread X' naming scheme.",
+      "Enable the 'Separate Threads & Forum Posts' and 'Artist Mode' settings by default.",
+      "When the 'Separate Threads & Forum Posts' setting is enabled during an export, media belonging to threads or forum posts will now be stored in a separate and distinguished folder.",
+      "Media downloaded as part of an export will now use the message it originated from as the file's Last Modified attribute, to better ensure the files can be sorted sequentially.",
+      "HTML exports will now show a Channel description popup when the Channel name on the top-left of the page, is clicked.",
+      "Filenames with invalid characters, and filename randomization are now better handled when performing exports.",
+      "Dates can now be manually entered into the date selection field.",
+      "Exports and searches now show a progress log.",
+      "Style adjustments to the reaction pop-up on HTML exports."
+    ]
+  },
+  {
     "version": "1.12.9",
     "changes": [
       "Make reaction fetching opt-in by default, it now must be manually toggled in settings if using the extension for the first time.",

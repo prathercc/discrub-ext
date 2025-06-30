@@ -96,7 +96,9 @@ export default class ExportUtils {
     removeAfterPrint: true,
   });
 
-  addToZip = async (blob, filename) => {
+  addToZip = async (blob, filename, options) => {
+    const { lastModified } = options || {};
+
     if (!this.fileStream) {
       this.fileStream = streamSaver.createWriteStream(
         `${this.zipName || "Export"}.zip`,
@@ -106,7 +108,7 @@ export default class ExportUtils {
       await this.writer.ready;
       this.writer.write({
         name: `${filename}`,
-        lastModified: new Date(),
+        lastModified: lastModified || new Date(),
         stream: () => new Response(blob).body,
       });
       if (!this.readable.locked) {

@@ -1,21 +1,25 @@
-import { Stack, Typography, useTheme } from "@mui/material";
+import { Button, Stack, Theme, Typography, useTheme } from "@mui/material";
 import Guild from "../../../classes/guild";
 import Channel from "../../../classes/channel";
 import { isGuild } from "../../../app/guards";
 import { isDm } from "../../../utils";
 import { transparancy } from "../../../theme.ts";
+import { ExportData } from "../../../features/export/export-types.ts";
 
 type MessageTitleMockProps = {
   entity: Channel | Guild | Maybe;
   getExportPageTitle: () => string;
+  exportData: ExportData;
 };
 
 const MessageTitleMock = ({
   entity,
   getExportPageTitle,
+  exportData,
 }: MessageTitleMockProps) => {
   const theme = useTheme();
   const description = isGuild(entity) ? entity.description : entity?.topic;
+  const { currentThread } = exportData;
 
   const getName = (entity: Channel | Guild): string => {
     if (isGuild(entity) || !isDm(entity)) {
@@ -42,58 +46,39 @@ const MessageTitleMock = ({
 
   return (
     <Stack
-      sx={{
-        ...transparancy,
-        width: "100%",
-        zIndex: 5000,
-        borderBottom: "0.5px solid #202225",
-        padding: "5px",
-        position: "sticky",
-        top: 0,
-        "& h4": {
-          userSelect: "none !important",
-          cursor: "default !important",
-        },
-        "& h6": {
-          userSelect: "none !important",
-          cursor: "default !important",
-        },
-      }}
+      sx={titleMockStackSx()}
       direction="row"
       justifyContent="space-between"
       alignItems="center"
     >
-      <Stack
-        direction="row"
-        justifyContent="flex-start"
-        alignItems="center"
-        spacing={1}
-        ml="10px"
-      >
-        <Typography sx={{ color: theme.palette.text.disabled }} variant="h4">
-          {entity && !isGuild(entity) && getHash(entity)}
-        </Typography>
-        <Typography sx={{ color: theme.palette.text.primary }} variant="h6">
-          {entity && getName(entity)}
-        </Typography>
-        {description && (
-          <Typography
-            sx={{
-              maxWidth: "200px",
-              maxHeight: "40px",
-              overflowY: "auto",
-              overflowX: "hidden",
-              color: `${theme.palette.text.disabled} !important`,
-              whiteSpace: "pre-line",
-              padding: "0px 5px 0px 5px",
-            }}
-            variant="caption"
-          >
-            {description}
+      <Stack direction="column" alignItems="flex-start">
+        <Stack
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="center"
+          spacing={1}
+          ml="10px"
+          component="a"
+          href="#description"
+          sx={{
+            textDecoration: "none",
+          }}
+        >
+          <Typography sx={hashTypographySx(theme)} variant="h4">
+            {entity && !isGuild(entity) && getHash(entity)}
           </Typography>
-        )}
+          <Typography sx={nameTypographySx(theme)} variant="h6">
+            {entity && getName(entity)}
+          </Typography>
+          {!!currentThread && (
+            <Typography sx={nameTypographySx(theme)} variant="h6">
+              / {currentThread.name}
+            </Typography>
+          )}
+        </Stack>
       </Stack>
-      <Typography sx={{ color: theme.palette.text.primary }} variant="h6">
+
+      <Typography sx={primaryTypographySx(theme)} variant="h6">
         {getExportPageTitle()}
       </Typography>
       <Stack
@@ -102,21 +87,9 @@ const MessageTitleMock = ({
         alignItems="center"
         spacing={1}
         mr="10px"
-        sx={{
-          borderRadius: "5px",
-          padding: "5px",
-          userSelect: "none !important",
-          cursor: "default !important",
-          "& span": {
-            userSelect: "none !important",
-            cursor: "default !important",
-          },
-        }}
+        sx={brandStackSx()}
       >
-        <Typography
-          sx={{ color: theme.palette.text.primary }}
-          variant="caption"
-        >
+        <Typography sx={generatedWithTypographySx(theme)} variant="caption">
           Generated with <strong>Discrub</strong>
         </Typography>
         <img
@@ -126,7 +99,82 @@ const MessageTitleMock = ({
           alt="Discrub Logo"
         />
       </Stack>
+      <Stack id="description" sx={descriptionBoxSx(theme)}>
+        <Typography sx={disabledTypographySx(theme)} variant="h6">
+          Description
+        </Typography>
+        <Typography>{description || "N/A"}</Typography>
+        <Button sx={{ maxWidth: "fit-content" }} variant="contained" href="#/">
+          Close
+        </Button>
+      </Stack>
     </Stack>
   );
 };
+
+const titleMockStackSx = () => ({
+  ...transparancy,
+  width: "100%",
+  zIndex: 5000,
+  borderBottom: "0.5px solid #202225",
+  padding: "5px",
+  position: "sticky",
+  top: 0,
+  "& h4": {
+    userSelect: "none !important",
+  },
+  "& h6": {
+    userSelect: "none !important",
+  },
+});
+
+const disabledTypographySx = (theme: Theme) => ({
+  color: theme.palette.text.disabled,
+});
+
+const hashTypographySx = (theme: Theme) => ({
+  ...disabledTypographySx(theme),
+  cursor: "pointer",
+});
+
+const primaryTypographySx = (theme: Theme) => ({
+  color: theme.palette.text.primary,
+});
+
+const nameTypographySx = (theme: Theme) => ({
+  ...primaryTypographySx(theme),
+  cursor: "pointer",
+});
+
+const brandStackSx = () => ({
+  borderRadius: "5px",
+  padding: "5px",
+  userSelect: "none !important",
+  cursor: "default !important",
+  "& span": {
+    userSelect: "none !important",
+    cursor: "default !important",
+  },
+});
+
+const generatedWithTypographySx = (theme: Theme) => ({
+  color: theme.palette.text.primary,
+});
+
+const descriptionBoxSx = (theme: Theme) => ({
+  padding: "15px",
+  backgroundColor: "background.paper",
+  border: `1px solid ${theme.palette.secondary.dark}`,
+  borderRadius: "5px",
+  display: "none",
+  width: "300px",
+  color: "white",
+  "&:target": {
+    display: "flex",
+    gap: "5px",
+    position: "fixed",
+    alignItems: "center",
+    top: "60px",
+  },
+});
 export default MessageTitleMock;

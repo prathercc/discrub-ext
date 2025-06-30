@@ -1,7 +1,7 @@
 {
   "name": "discrub-ext",
   "private": true,
-  "version": "1.12.9",
+  "version": "1.12.10",
   "type": "module",
   "scripts": {
     "clean_prod_manifest": "cat <<< $(jq 'del(.use_dynamic_url, .web_accessible_resources[].use_dynamic_url)' dist/manifest.json) > dist/manifest.json",
@@ -27,8 +27,10 @@
     "date-fns-tz": "^3.2.0",
     "debounce": "^2.0.0",
     "file-type": "^21.0.0",
+    "filenamify": "^6.0.0",
     "flat": "^6.0.1",
     "highlight.js": "^11.10.0",
+    "nanoid": "^5.1.5",
     "papaparse": "^5.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -36,8 +38,7 @@
     "react-redux": "^9.0.4",
     "react-to-print": "^2.14.15",
     "react-window": "^1.8.10",
-    "streamsaver": "^2.0.6",
-    "uuid": "^9.0.1"
+    "streamsaver": "^2.0.6"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.21",

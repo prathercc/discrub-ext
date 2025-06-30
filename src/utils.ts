@@ -8,8 +8,6 @@ import Message from "./classes/message";
 import Role from "./classes/role";
 import { ChannelType } from "./enum/channel-type";
 import { EmbedType } from "./enum/embed-type";
-import { MessageRegex } from "./enum/message-regex";
-import { v4 as uuidv4 } from "uuid";
 import {
   ExportAvatarMap,
   ExportEmojiMap,
@@ -34,6 +32,8 @@ import { SortDirection } from "./enum/sort-direction.ts";
 import { START_OFFSET } from "./features/message/contants.ts";
 import { User } from "./classes/user.ts";
 import { GuildMemberObject } from "./types/guild-member-object.ts";
+import filenamify from "filenamify";
+import { nanoid } from "nanoid";
 
 /**
  *
@@ -112,17 +112,11 @@ export const colorToHex = (color: number | Maybe): string => {
 
 /**
  *
- * @param name The value to strip unsafe characters from
- * @returns OS safe version of `name`
+ * @param str The string value to remove unsafe characters from
+ * @returns A safe version of the parameter string to use as a filename.
  */
-export const getSafeExportName = (name: string) => {
-  const matchedWindowsCharacters =
-    name.match(MessageRegex.WINDOWS_INVALID_CHARACTERS) || [];
-  let retStr = name;
-  matchedWindowsCharacters.forEach((char) => {
-    retStr = retStr.replaceAll(char, "");
-  });
-  return retStr;
+export const getOsSafeString = (str: string) => {
+  return filenamify(str);
 };
 
 interface FormatUserData {
@@ -170,12 +164,12 @@ export const getExportFileName = (
   fileExtension: string,
 ) => {
   if (isRole(entity)) {
-    return `${getSafeExportName(entity.name)}_${entity.id}.${fileExtension}`;
+    return `${getOsSafeString(entity.name)}_${entity.id}.${fileExtension}`;
   } else if (isAttachment(entity)) {
-    return `${getSafeExportName(entity.filename)}.${uuidv4()}.${fileExtension}`;
+    return `${getOsSafeString(entity.filename)}.${getFsUUID()}.${fileExtension}`;
   } else {
     const name = entity.title ? `${entity.title}_` : "";
-    return `${getSafeExportName(name)}.${uuidv4()}.${fileExtension}`;
+    return `${getOsSafeString(name)}.${getFsUUID()}.${fileExtension}`;
   }
 };
 
@@ -666,3 +660,26 @@ export const filterBoth = <T>(value: T[], a1: T[], a2: T[]) => {
     (id) => !a1.some((uId) => uId === id) && !a2.some((uId) => uId === id),
   );
 };
+
+export const getThreadEntityName = (thread: Channel) => {
+  return thread.name ? getOsSafeString(thread.name) : `Thread ${thread.id}`;
+};
+
+/**
+ * Retrieve a filtered array of threads where one or more messages exist for it in the provided messages
+ * @param threads
+ * @param messages
+ */
+export const filterThreadsByMessages = (
+  threads: Channel[],
+  messages: Message[],
+) => {
+  return threads.filter((t) =>
+    messages.some((m) => m.thread?.id === t.id || m.channel_id === t.id),
+  );
+};
+
+/**
+ * Generate a 10-digit long filesystem UUID
+ */
+export const getFsUUID = () => getOsSafeString(nanoid(10));

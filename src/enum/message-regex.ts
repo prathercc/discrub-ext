@@ -11,6 +11,4 @@ export class MessageRegex {
   public static readonly CODE = /```(?<text>[^]+)(?=(```))```/g;
   public static readonly USER_MENTION = /<@(?:&|!)?(?<user_id>[0-9]+)>/g;
   public static readonly EMOJI = /<a:[^<>]+:[0-9]+>|<:[^<>]+:[0-9]+>/g;
-  public static readonly WINDOWS_INVALID_CHARACTERS =
-    /\[|<|>|:|"|\/|\\|\||\?|\*|\]/g;
 }

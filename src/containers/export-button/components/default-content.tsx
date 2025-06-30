@@ -1,5 +1,5 @@
 import { DialogContent, DialogContentText, Typography } from "@mui/material";
-import Progress from "./progress";
+import ExportProgress from "./export-progress.tsx";
 import { DiscrubSetting } from "../../../enum/discrub-setting";
 import { AppSettings } from "../../../features/app/app-types";
 import EnhancedTabs, {
@@ -52,7 +52,7 @@ const DefaultContent = ({
           <EnhancedTabs tabs={tabs} />
         </>
       )}
-      {isExporting && <Progress />}
+      {isExporting && <ExportProgress />}
     </DialogContent>
   );
 };

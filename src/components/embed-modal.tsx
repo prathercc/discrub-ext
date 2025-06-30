@@ -35,11 +35,7 @@ const EmbedModal = ({ task, open, handleClose }: EmbedModalProps) => {
         >
           {isMessage(entity) &&
             getRichEmbeds(entity).map((embed) => (
-              <WebhookEmbedMock
-                alwaysExpanded={false}
-                embed={embed}
-                message={entity}
-              />
+              <WebhookEmbedMock alwaysExpanded={false} embed={embed} />
             ))}
         </Stack>
       </DialogContent>

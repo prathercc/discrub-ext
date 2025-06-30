@@ -18,11 +18,7 @@ const WebhookEmbeds = ({ message }: WebhookEmbedsProps) => {
       spacing={1}
     >
       {getRichEmbeds(message).map((embed) => (
-        <WebhookEmbedMock
-          alwaysExpanded={true}
-          embed={embed}
-          message={message}
-        />
+        <WebhookEmbedMock alwaysExpanded={true} embed={embed} />
       ))}
     </Stack>
   );
