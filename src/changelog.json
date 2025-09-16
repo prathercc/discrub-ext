@@ -1,5 +1,11 @@
 [
   {
+    "version": "1.12.11",
+    "changes": [
+      "Emergency fix for Github Gist API calls."
+    ]
+  },
+  {
     "version": "1.12.10",
     "changes": [
       "Name exported thread and forums posts according to the relevant title, replacing the 'Thread X' naming scheme.",
