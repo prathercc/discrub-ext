@@ -7,7 +7,9 @@ export function useDonations() {
   useEffect(() => {
     const getDonationData = async () => {
       const data = await fetchDonationData();
-      setDonations(data);
+      if (data?.length) {
+        setDonations(data);
+      }
     };
     getDonationData();
   }, []);

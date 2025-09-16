@@ -31,23 +31,25 @@ function AnnouncementComponent({
   useEffect(() => {
     const getAnnouncementData = async () => {
       const data = await fetchAnnouncementData();
-      const revKeyMap: Record<BrowserEnvironment, keyof Announcement> = {
-        [BrowserEnvironment.CHROME]: "rev",
-        [BrowserEnvironment.FIREFOX]: "ff_rev",
-      };
-      const revisionChanged = !!(
-        data?.[revKeyMap[browserEnvironment]] &&
-        data[revKeyMap[browserEnvironment]] !== currentRevision
-      );
-      const versionMatches = data.pop_ver === version;
-
-      if (versionMatches && revisionChanged) {
-        const settings = await setSetting(
-          DiscrubSetting.CACHED_ANNOUNCEMENT_REV,
-          data[revKeyMap[browserEnvironment]],
+      if (data) {
+        const revKeyMap: Record<BrowserEnvironment, keyof Announcement> = {
+          [BrowserEnvironment.CHROME]: "rev",
+          [BrowserEnvironment.FIREFOX]: "ff_rev",
+        };
+        const revisionChanged = !!(
+          data?.[revKeyMap[browserEnvironment]] &&
+          data[revKeyMap[browserEnvironment]] !== currentRevision
         );
-        onChangeSettings(settings);
-        setDialogOpen(true);
+        const versionMatches = data.pop_ver === version;
+
+        if (versionMatches && revisionChanged) {
+          const settings = await setSetting(
+            DiscrubSetting.CACHED_ANNOUNCEMENT_REV,
+            data[revKeyMap[browserEnvironment]],
+          );
+          onChangeSettings(settings);
+          setDialogOpen(true);
+        }
       }
     };
     if (isInitialized) {
