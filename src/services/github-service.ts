@@ -1,4 +1,7 @@
 const GITHUB_GIST_URL = "https://api.github.com/gists";
+const GITHUB_GIST_READONLY = atob(
+  "QmVhcmVyIGdpdGh1Yl9wYXRfMTFBSUtKVFZZMHoxZkZaMUZpYmpHcl96RTZVbEo0TEl5T04yVHNKZmhoWEZtcGd5dVhmSHFobzNQeVFnWGhnQm9LWUYzVFpSR1NCMkNpYWZOYw==",
+);
 const ANNOUNCEMENT_ENDPOINT = `${GITHUB_GIST_URL}/912abef788d8f6dc25b3f4e0fa5e6371`;
 const DONATION_ENDPOINT = `${GITHUB_GIST_URL}/2aca7928b4db1ab84eac3720ac8e8559`;
 const ANNOUNCEMENT_MARKDOWN_ENDPOINT = `${GITHUB_GIST_URL}/5b230f045a910b6b6501e67c9c4d2f3f`;
@@ -13,6 +16,7 @@ export const fetchAnnouncementData = (): Promise<Announcement> => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      Authorization: GITHUB_GIST_READONLY,
     },
   })
     .then(async (resp) => {
@@ -30,6 +34,7 @@ export const fetchAnnouncementMarkdown = (): Promise<string> => {
     method: "GET",
     headers: {
       "Content-Type": "application/text",
+      Authorization: GITHUB_GIST_READONLY,
     },
   })
     .then(async (resp) => {
@@ -55,6 +60,7 @@ export const fetchDonationData = (): Promise<Donation[]> => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      Authorization: GITHUB_GIST_READONLY,
     },
   })
     .then(async (resp) => {
