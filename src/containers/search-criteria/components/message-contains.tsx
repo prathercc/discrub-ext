@@ -1,57 +1,39 @@
-import { useRef, useEffect } from "react";
-import { IconButton, TextField } from "@mui/material";
 import Tooltip from "../../../common-components/tooltip/tooltip";
-import CloseIcon from "@mui/icons-material/Close";
-import { useMessageSlice } from "../../../features/message/use-message-slice";
+import {useMessageSlice} from "../../../features/message/use-message-slice";
+import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 
 type MessageContainsProps = {
   disabled: boolean;
 };
 
-function MessageContains({ disabled }: MessageContainsProps) {
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | Maybe>(null);
-
-  const { state: messageState, setSearchCriteria } = useMessageSlice();
+function MessageContains({disabled}: MessageContainsProps) {
+  const {state: messageState, setSearchCriteria} = useMessageSlice();
   const searchCriteria = messageState.searchCriteria();
-  const { searchMessageContent } = searchCriteria;
-
-  useEffect(() => {
-    if (!searchMessageContent && inputRef.current) {
-      inputRef.current.value = "";
-    }
-  }, [searchMessageContent]);
+  const {searchMessageContent} = searchCriteria;
 
   return (
     <Tooltip
       title="Message Content"
-      description="Messages containing the specified text."
+      description="Messages containing the specified text. You can add multiple search terms."
       placement="left"
     >
-      <TextField
-        fullWidth
-        inputRef={inputRef}
-        InputProps={{
-          endAdornment: (
-            <IconButton
-              onClick={() => setSearchCriteria({ searchMessageContent: null })}
-              disabled={disabled}
-              color="secondary"
-            >
-              <CloseIcon />
-            </IconButton>
-          ),
-        }}
+      <EnhancedAutocomplete
         disabled={disabled}
-        size="small"
         label="Message Content"
-        variant="filled"
+        options={[]}
+        multiple
+        freeSolo
+        tags
         value={searchMessageContent}
-        onChange={(e) =>
-          setSearchCriteria({ searchMessageContent: e.target.value })
-        }
+        onChange={(v) => {
+          if (Array.isArray(v)) {
+            setSearchCriteria({searchMessageContent: v});
+          }
+        }}
       />
     </Tooltip>
   );
 }
 
 export default MessageContains;
+

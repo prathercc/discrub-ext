@@ -99,7 +99,7 @@ const initialState: MessageState = {
   searchCriteria: {
     searchBeforeDate: null,
     searchAfterDate: null,
-    searchMessageContent: null,
+    searchMessageContent: [],
     selectedHasTypes: [],
     userIds: [],
     mentionIds: [],
@@ -1089,9 +1089,56 @@ export const retrieveMessages =
 
     if (token) {
       if (isCriteriaActive(searchCriteria)) {
-        payload = await dispatch(
-          _getSearchMessages(channelId, guildId, searchCriteria, options),
-        );
+        const { searchMessageContent } = searchCriteria;
+
+        // If multiple content terms, cycle through each one
+        if (searchMessageContent.length > 1) {
+          let allMessages: Message[] = [];
+          let allThreads: Channel[] = [];
+
+          for (let i = 0; i < searchMessageContent.length; i++) {
+            if (await dispatch(isAppStopped())) break;
+
+            const term = searchMessageContent[i];
+
+            // Create criteria with only this single content term
+            const singleTermCriteria: SearchCriteria = {
+              ...searchCriteria,
+              searchMessageContent: [term],
+            };
+
+            const termPayload = await dispatch(
+              _getSearchMessages(channelId, guildId, singleTermCriteria, options),
+            );
+
+            // Merge messages, avoiding duplicates by ID
+            for (const msg of termPayload.messages) {
+              if (!allMessages.some((m) => m.id === msg.id)) {
+                allMessages.push(msg);
+              }
+            }
+
+            // Merge threads, avoiding duplicates by ID
+            for (const thread of termPayload.threads) {
+              if (!allThreads.some((t) => t.id === thread.id)) {
+                allThreads.push(thread);
+              }
+            }
+          }
+
+          payload = {
+            messages: allMessages,
+            threads: allThreads,
+            totalMessages: allMessages.length,
+            offset: 0,
+            searchCriteria: searchCriteria,
+          };
+        } else {
+          // Single term or no content terms - use normal search
+          payload = await dispatch(
+            _getSearchMessages(channelId, guildId, searchCriteria, options),
+          );
+        }
       } else if (channelId) {
         payload = await dispatch(_getMessages(channelId));
       }

@@ -375,7 +375,7 @@ class DiscordService {
       max_id: searchBeforeDate
         ? this.generateSnowflake(searchBeforeDate)
         : "null",
-      content: searchMessageContent || "null",
+      content: searchMessageContent?.[0] || "null",
       channel_id: isDmSearch ? "null" : channelId || "null",
       include_nsfw: "true",
       pinned: isPinned,

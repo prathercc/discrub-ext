@@ -77,7 +77,7 @@ export type MessageSearchOptions = {
 export type SearchCriteria = {
   searchBeforeDate: Date | Maybe;
   searchAfterDate: Date | Maybe;
-  searchMessageContent: string | Maybe;
+  searchMessageContent: string[];
   selectedHasTypes: HasType[];
   userIds: string[];
   mentionIds: string[];
