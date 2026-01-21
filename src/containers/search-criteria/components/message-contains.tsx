@@ -1,3 +1,4 @@
+import {useState} from "react";
 import Tooltip from "../../../common-components/tooltip/tooltip";
 import {useMessageSlice} from "../../../features/message/use-message-slice";
 import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
@@ -10,6 +11,15 @@ function MessageContains({disabled}: MessageContainsProps) {
   const {state: messageState, setSearchCriteria} = useMessageSlice();
   const searchCriteria = messageState.searchCriteria();
   const {searchMessageContent} = searchCriteria;
+  const [inputValue, setInputValue] = useState("");
+
+  const addPendingInput = () => {
+    const trimmed = inputValue.trim();
+    if (trimmed && !searchMessageContent.includes(trimmed)) {
+      setSearchCriteria({searchMessageContent: [...searchMessageContent, trimmed]});
+    }
+    setInputValue("");
+  };
 
   return (
     <Tooltip
@@ -25,11 +35,19 @@ function MessageContains({disabled}: MessageContainsProps) {
         freeSolo
         tags
         value={searchMessageContent}
+        inputValue={inputValue}
+        onInputChange={(v) => {
+          if (typeof v === "string") {
+            setInputValue(v);
+          }
+        }}
         onChange={(v) => {
           if (Array.isArray(v)) {
             setSearchCriteria({searchMessageContent: v});
+            setInputValue("");
           }
         }}
+        onBlur={addPendingInput}
       />
     </Tooltip>
   );

@@ -18,6 +18,8 @@ type EnhancedAutocompleteProps = {
   value?: string[];
   onChange?: (value: string[] | string | null) => void;
   onInputChange?: (value: string[] | string) => void;
+  onBlur?: () => void;
+  inputValue?: string;
   getOptionLabel?: (value: string) => string;
   copyValue?: string;
   copyName?: string;
@@ -43,6 +45,7 @@ const EnhancedAutocomplete = forwardRef<
     value,
     onChange,
     onInputChange,
+    inputValue,
     getOptionLabel,
     label,
     copyValue,
@@ -108,6 +111,7 @@ const EnhancedAutocomplete = forwardRef<
       onInputChange={(_, v) => {
         onInputChange?.(v);
       }}
+      inputValue={inputValue}
       value={value}
       renderOption={(props, option, { selected }) => {
         const { ...optionProps } = props;
