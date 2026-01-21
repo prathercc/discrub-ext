@@ -118,6 +118,16 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
         "The rate at which User data will be refreshed (Display Name, Server Nickname & Roles).",
     },
     {
+      name: DiscrubSetting.AUTO_DELAY_ENABLED,
+      label: "Automatic Delay Mode",
+      options: [
+        { value: "true", name: "Automatic" },
+        { value: "false", name: "Manual" },
+      ],
+      description:
+        "When set to Automatic, delays will dynamically adjust based on rate limits. When Manual, use the configured delay values below.",
+    },
+    {
       name: DiscrubSetting.DELAY_MODIFIER,
       label: "Delay Spread Seconds",
       description:

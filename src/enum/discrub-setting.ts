@@ -9,6 +9,7 @@ export enum DiscrubSetting {
   SEARCH_DELAY = "searchDelay2",
   DELETE_DELAY = "deleteDelay2",
   DELAY_MODIFIER = "delayModifier2",
+  AUTO_DELAY_ENABLED = "autoDelayEnabled",
   DATE_FORMAT = "dateFormat",
   TIME_FORMAT = "timeFormat",
 

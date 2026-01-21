@@ -30,6 +30,7 @@ export const defaultSettings: AppSettings = {
   [DiscrubSetting.SEARCH_DELAY]: Delay.ONE,
   [DiscrubSetting.DELETE_DELAY]: Delay.TWO,
   [DiscrubSetting.DELAY_MODIFIER]: DelayModifier.ZERO_POINT_FIVE,
+  [DiscrubSetting.AUTO_DELAY_ENABLED]: "true",
   [DiscrubSetting.DATE_FORMAT]: DateFormat.MMDDYYYY,
   [DiscrubSetting.TIME_FORMAT]: TimeFormat._12HOUR,
 

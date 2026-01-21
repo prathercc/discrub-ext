@@ -15,7 +15,15 @@ import { DefaultReactionObject } from "../types/default-reaction-object";
 import { ForumTagObject } from "../types/forum-tag-object";
 import { GuildMemberObject } from "../types/guild-member-object";
 import { OverwriteObject } from "../types/overwrite-object";
-import { wait } from "../utils";
+import { wait, stringToBool } from "../utils";
+import {
+  getSearchDelayOffset,
+  getDeleteDelayOffset,
+  onSearchRateLimited,
+  onDeleteRateLimited,
+  onSearchSuccess,
+  onDeleteSuccess,
+} from "./adaptive-delay-manager";
 
 type GuildChannelModify = {
   name?: string;
@@ -70,6 +78,7 @@ class DiscordService {
   searchDelaySecs = 0;
   deleteDelaySecs = 0;
   delayModifierSecs = 0;
+  autoDelayEnabled = true;
   DISCORD_API_URL = "https://discord.com/api/v10";
   DISCORD_USERS_ENDPOINT = `${this.DISCORD_API_URL}/users`;
   DISCORD_GUILDS_ENDPOINT = `${this.DISCORD_API_URL}/guilds`;
@@ -82,6 +91,7 @@ class DiscordService {
       this.searchDelaySecs = Number(settings.searchDelay2);
       this.deleteDelaySecs = Number(settings.deleteDelay2);
       this.delayModifierSecs = Number(settings.delayModifier2);
+      this.autoDelayEnabled = stringToBool(settings.autoDelayEnabled);
     }
   }
 
@@ -94,14 +104,23 @@ class DiscordService {
   withSearchDelay = async <T = void>(
     func: () => Promise<DiscordApiResponse<T>>,
   ) => {
-    const isDelaySearch = this.searchDelaySecs > 0;
-    if (isDelaySearch) {
-      const min = Math.max(this.searchDelaySecs - this.delayModifierSecs, 0);
-      const max = this.searchDelaySecs + this.delayModifierSecs;
-      const delay = this.calculateRandomNumber(max, min);
-      console.warn(`Applying Search Delay: ${delay} seconds`);
-      await wait(delay);
+    const isDelaySearch = this.searchDelaySecs > 0 || this.autoDelayEnabled;
+    if (!isDelaySearch) {
+      return func();
     }
+
+    // Calculate base delay with adaptive offset
+    const baseDelay = this.autoDelayEnabled
+      ? this.searchDelaySecs + getSearchDelayOffset()
+      : this.searchDelaySecs;
+
+    // Apply spread/modifier
+    const min = Math.max(baseDelay - this.delayModifierSecs, 0);
+    const max = baseDelay + this.delayModifierSecs;
+    const delay = this.calculateRandomNumber(max, min);
+
+    console.warn(`Applying Search Delay: ${delay.toFixed(2)} seconds${this.autoDelayEnabled ? ` (offset: +${getSearchDelayOffset().toFixed(2)}s)` : ""}`);
+    await wait(delay);
 
     return func();
   };
@@ -109,14 +128,23 @@ class DiscordService {
   withDeleteDelay = async <T = void>(
     func: () => Promise<DiscordApiResponse<T>>,
   ) => {
-    const isDelayDelete = this.deleteDelaySecs > 0;
-    if (isDelayDelete) {
-      const min = Math.max(this.deleteDelaySecs - this.delayModifierSecs, 0);
-      const max = this.deleteDelaySecs + this.delayModifierSecs;
-      const delay = this.calculateRandomNumber(max, min);
-      console.warn(`Applying Delete/Edit Delay: ${delay} seconds`);
-      await wait(delay);
+    const isDelayDelete = this.deleteDelaySecs > 0 || this.autoDelayEnabled;
+    if (!isDelayDelete) {
+      return func();
     }
+
+    // Calculate base delay with adaptive offset
+    const baseDelay = this.autoDelayEnabled
+      ? this.deleteDelaySecs + getDeleteDelayOffset()
+      : this.deleteDelaySecs;
+
+    // Apply spread/modifier
+    const min = Math.max(baseDelay - this.delayModifierSecs, 0);
+    const max = baseDelay + this.delayModifierSecs;
+    const delay = this.calculateRandomNumber(max, min);
+
+    console.warn(`Applying Delete/Edit Delay: ${delay.toFixed(2)} seconds${this.autoDelayEnabled ? ` (offset: +${getDeleteDelayOffset().toFixed(2)}s)` : ""}`);
+    await wait(delay);
 
     return func();
   };
@@ -124,6 +152,7 @@ class DiscordService {
   withRetry = async <T = void>(
     promise: () => Promise<Response>,
     isBlob: boolean = false,
+    delayType: "search" | "delete" = "search",
   ): Promise<DiscordApiResponse<T>> => {
     let apiResponse: DiscordApiResponse<T> = { success: false };
     try {
@@ -144,7 +173,23 @@ class DiscordService {
             // Successful request does not have data
             apiResponse = { success: true };
           }
+          // Signal success to adaptive delay manager
+          if (this.autoDelayEnabled) {
+            if (delayType === "search") {
+              onSearchSuccess();
+            } else {
+              onDeleteSuccess();
+            }
+          }
         } else if (status === 429) {
+          // Signal rate limit to adaptive delay manager
+          if (this.autoDelayEnabled) {
+            if (delayType === "search") {
+              onSearchRateLimited(this.searchDelaySecs);
+            } else {
+              onDeleteRateLimited(this.deleteDelaySecs);
+            }
+          }
           // Request must be re-attempted after x seconds
           const json = await response.json();
           await wait(json.retry_after);
@@ -289,19 +334,22 @@ class DiscordService {
     channelId: string,
   ) =>
     this.withDeleteDelay(() =>
-      this.withRetry<Message>(() =>
-        fetch(
-          `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: authorization,
-              "user-agent": this.userAgent,
+      this.withRetry<Message>(
+        () =>
+          fetch(
+            `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                authorization: authorization,
+                "user-agent": this.userAgent,
+              },
+              body: JSON.stringify({ ...updateProps }),
             },
-            body: JSON.stringify({ ...updateProps }),
-          },
-        ),
+          ),
+        false,
+        "delete",
       ),
     );
 
@@ -311,18 +359,21 @@ class DiscordService {
     channelId: string,
   ) =>
     this.withDeleteDelay(() =>
-      this.withRetry(() =>
-        fetch(
-          `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: authorization,
-              "user-agent": this.userAgent,
+      this.withRetry(
+        () =>
+          fetch(
+            `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                authorization: authorization,
+                "user-agent": this.userAgent,
+              },
             },
-          },
-        ),
+          ),
+        false,
+        "delete",
       ),
     );
 
@@ -385,13 +436,13 @@ class DiscordService {
       urlSearchParams.delete("channel_id");
     }
 
-    userIds.forEach((userId: string) => {
+    [...new Set(userIds)].forEach((userId: string) => {
       urlSearchParams.append("author_id", userId);
     });
-    channelIds.forEach((channelId: string) => {
+    [...new Set(channelIds)].forEach((channelId: string) => {
       urlSearchParams.append("channel_id", channelId);
     });
-    mentionIds.forEach((userId: string) => {
+    [...new Set(mentionIds)].forEach((userId: string) => {
       urlSearchParams.append("mentions", userId);
     });
     selectedHasTypes.forEach((type: string) => {
@@ -587,18 +638,21 @@ class DiscordService {
     userId: string,
   ) =>
     this.withDeleteDelay(() =>
-      this.withRetry(() =>
-        fetch(
-          `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}/${userId}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: authorization,
-              "user-agent": this.userAgent,
+      this.withRetry(
+        () =>
+          fetch(
+            `${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/messages/${messageId}/reactions/${emoji}/${userId}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                authorization: authorization,
+                "user-agent": this.userAgent,
+              },
             },
-          },
-        ),
+          ),
+        false,
+        "delete",
       ),
     );
 }

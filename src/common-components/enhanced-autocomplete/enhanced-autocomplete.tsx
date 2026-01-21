@@ -45,6 +45,7 @@ const EnhancedAutocomplete = forwardRef<
     value,
     onChange,
     onInputChange,
+    onBlur,
     inputValue,
     getOptionLabel,
     label,
@@ -105,6 +106,7 @@ const EnhancedAutocomplete = forwardRef<
       freeSolo={freeSolo}
       fullWidth={fullWidth}
       disableCloseOnSelect={multiple}
+      onBlur={onBlur}
       onChange={(_, v) => {
         onChange?.(v);
       }}

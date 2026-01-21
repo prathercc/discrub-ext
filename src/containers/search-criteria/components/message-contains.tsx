@@ -1,22 +1,24 @@
-import {useState} from "react";
+import { useState } from "react";
 import Tooltip from "../../../common-components/tooltip/tooltip";
-import {useMessageSlice} from "../../../features/message/use-message-slice";
+import { useMessageSlice } from "../../../features/message/use-message-slice";
 import EnhancedAutocomplete from "../../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 
 type MessageContainsProps = {
   disabled: boolean;
 };
 
-function MessageContains({disabled}: MessageContainsProps) {
-  const {state: messageState, setSearchCriteria} = useMessageSlice();
+function MessageContains({ disabled }: MessageContainsProps) {
+  const { state: messageState, setSearchCriteria } = useMessageSlice();
   const searchCriteria = messageState.searchCriteria();
-  const {searchMessageContent} = searchCriteria;
+  const { searchMessageContent } = searchCriteria;
   const [inputValue, setInputValue] = useState("");
 
   const addPendingInput = () => {
     const trimmed = inputValue.trim();
     if (trimmed && !searchMessageContent.includes(trimmed)) {
-      setSearchCriteria({searchMessageContent: [...searchMessageContent, trimmed]});
+      setSearchCriteria({
+        searchMessageContent: [...searchMessageContent, trimmed],
+      });
     }
     setInputValue("");
   };
@@ -43,7 +45,7 @@ function MessageContains({disabled}: MessageContainsProps) {
         }}
         onChange={(v) => {
           if (Array.isArray(v)) {
-            setSearchCriteria({searchMessageContent: v});
+            setSearchCriteria({ searchMessageContent: v });
             setInputValue("");
           }
         }}

@@ -121,6 +121,7 @@ const PurgeModal = ({
       <Config
         isDm={isDm}
         visibleSettings={[
+          DiscrubSetting.AUTO_DELAY_ENABLED,
           DiscrubSetting.DELAY_MODIFIER,
           DiscrubSetting.SEARCH_DELAY,
           DiscrubSetting.DELETE_DELAY,

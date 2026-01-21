@@ -43,6 +43,7 @@ const defaultSettings = [
     name: DiscrubSetting.DELAY_MODIFIER,
     value: DelayModifier.ZERO_POINT_FIVE,
   },
+  { name: DiscrubSetting.AUTO_DELAY_ENABLED, value: "true" },
   { name: DiscrubSetting.DATE_FORMAT, value: DateFormat.MMDDYYYY },
   { name: DiscrubSetting.TIME_FORMAT, value: TimeFormat._12HOUR },
 
@@ -110,6 +111,8 @@ export const getSettings = async (): Promise<AppSettings> => {
     [DiscrubSetting.DELETE_DELAY]: chromeSettings[DiscrubSetting.DELETE_DELAY],
     [DiscrubSetting.DELAY_MODIFIER]:
       chromeSettings[DiscrubSetting.DELAY_MODIFIER],
+    [DiscrubSetting.AUTO_DELAY_ENABLED]:
+      chromeSettings[DiscrubSetting.AUTO_DELAY_ENABLED],
     [DiscrubSetting.DATE_FORMAT]: chromeSettings[DiscrubSetting.DATE_FORMAT],
     [DiscrubSetting.TIME_FORMAT]: chromeSettings[DiscrubSetting.TIME_FORMAT],
 

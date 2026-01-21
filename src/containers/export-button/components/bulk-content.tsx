@@ -168,6 +168,7 @@ const BulkContent = ({
     getComponent: () =>
       getExportSettings(
         [
+          DiscrubSetting.AUTO_DELAY_ENABLED,
           DiscrubSetting.DELAY_MODIFIER,
           DiscrubSetting.SEARCH_DELAY,
           DiscrubSetting.DATE_FORMAT,
