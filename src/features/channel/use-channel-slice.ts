@@ -53,8 +53,8 @@ const useChannelSlice = () => {
     dispatch(getChannelsAction(guildId));
   };
 
-  const changeChannel = (channelId: Snowflake | null): void => {
-    dispatch(changeChannelAction(channelId));
+  const changeChannel = (channelId: Snowflake | null) => {
+    return dispatch(changeChannelAction(channelId));
   };
 
   const loadChannel = (channelId: Snowflake): void => {

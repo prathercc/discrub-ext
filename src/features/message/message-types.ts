@@ -69,6 +69,7 @@ export type SearchResultData = {
 export type MessageSearchOptions = {
   excludeReactions?: boolean;
   excludeUserLookups?: boolean;
+  includeRelatedThreads?: boolean;
   startOffSet?: number;
   endOffSet?: number;
   searchCriteriaOverrides?: Partial<SearchCriteria>;

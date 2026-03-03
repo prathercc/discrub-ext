@@ -1093,7 +1093,7 @@ export const retrieveMessages =
           _getSearchMessages(channelId, guildId, searchCriteria, options),
         );
       } else if (channelId) {
-        payload = await dispatch(_getMessages(channelId));
+        payload = await dispatch(_getMessages(channelId, options));
       }
 
       if (!getState().app.discrubCancelled) {
@@ -1527,7 +1527,10 @@ const _messageTypeAllowed = (type: number) => {
 };
 
 const _getMessages =
-  (channelId: Snowflake): AppThunk<Promise<MessageData>> =>
+  (
+    channelId: Snowflake,
+    { includeRelatedThreads = true }: Partial<MessageSearchOptions> = {},
+  ): AppThunk<Promise<MessageData>> =>
   async (dispatch, getState) => {
     const { channels } = getState().channel;
     const { dms } = getState().dm;
@@ -1539,7 +1542,7 @@ const _getMessages =
     let messages: Message[] = [];
 
     if (channel) {
-      if (isGuildForum(channel)) {
+      if (isGuildForum(channel) && includeRelatedThreads) {
         const { threads } = await dispatch(
           _getSearchMessages(
             channelId,
@@ -1559,7 +1562,7 @@ const _getMessages =
         ];
       }
 
-      if (!isDm(channel)) {
+      if (!isDm(channel) && includeRelatedThreads) {
         const threadsFromMessages = getThreadsFromMessages({
           messages,
           knownThreads: trackedThreads,

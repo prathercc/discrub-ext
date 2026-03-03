@@ -70,7 +70,7 @@ const useGuildSlice = () => {
   };
 
   const changeGuild = (guildId: Snowflake | Maybe) => {
-    dispatch(changeGuildAction(guildId));
+    return dispatch(changeGuildAction(guildId));
   };
 
   const getPreFilterUsers = (guildId: Snowflake) => {

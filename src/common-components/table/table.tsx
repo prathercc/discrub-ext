@@ -49,7 +49,7 @@ export default function Table<T>({
   stickyControl = false,
 }: TableProps<T>) {
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [internalSelections, setInternalSelections] =
     useState<string[]>(selectedRows);
   const [order, setOrder] = useState<SortDirection>(orderProps.order);
@@ -176,6 +176,7 @@ export default function Table<T>({
             userSelect: "none",
             ...paginationStyle,
           }}
+          labelRowsPerPage="Messages per page:"
           rowsPerPageOptions={[5, 10, 25, 50, 100, 1000, 10000]}
           component="div"
           count={rows.length}

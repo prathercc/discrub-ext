@@ -1,4 +1,4 @@
-/*global chrome*/
+/*global chrome browser*/
 
 import { DiscrubSetting } from "../enum/discrub-setting";
 import { ResolutionType } from "../enum/resolution-type";
@@ -11,22 +11,56 @@ import { DateFormat } from "../enum/date-format.ts";
 import { TimeFormat } from "../enum/time-format.ts";
 import { BrowserEnvironment } from "../enum/browser-environment.ts";
 
-type ChromeCallback = (param: string) => Promise<void> | void | Maybe;
+type ChromeCallback<T = unknown> = (param: T) => Promise<void> | void | Maybe;
 
-export const sendChromeMessage = (msg: string, callback?: ChromeCallback) => {
-  chrome &&
-    chrome.tabs &&
-    chrome.tabs.query(
-      { active: true, currentWindow: true },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      function (tabs: any) {
-        if (callback) {
-          chrome.tabs.sendMessage(tabs[0].id, { message: msg }, callback);
-        } else {
-          chrome.tabs.sendMessage(tabs[0].id, { message: msg });
-        }
-      },
-    );
+export const sendChromeMessage = <T = unknown>(
+  msg: string,
+  callback?: ChromeCallback<T>,
+) => {
+  const ext: any = typeof browser !== "undefined" ? browser : chrome;
+  if (!(ext && ext.runtime && ext.runtime.sendMessage)) {
+    callback?.(null as T);
+    return;
+  }
+
+  if (callback) {
+    try {
+      const result = ext.runtime.sendMessage({ message: msg });
+      if (result && typeof result.then === "function") {
+        result
+          .then((response: T) => callback(response))
+          .catch(() => callback(null as T));
+        return;
+      }
+    } catch (_err) {
+      // Fall back to callback-style API below.
+    }
+
+    try {
+      ext.runtime.sendMessage({ message: msg }, callback);
+    } catch (_err) {
+      callback(null as T);
+    }
+  } else {
+    try {
+      ext.runtime.sendMessage({ message: msg });
+    } catch (_err) {
+      // Ignore fire-and-forget errors.
+    }
+  }
+};
+
+export type CurrentDiscordView = {
+  guildId: string | null;
+  channelId: string | null;
+};
+
+export const getCurrentDiscordView = () => {
+  return new Promise<CurrentDiscordView | null>((resolve) => {
+    sendChromeMessage<CurrentDiscordView | null>("GET_CURRENT_VIEW", (view) => {
+      resolve(view || null);
+    });
+  });
 };
 
 const defaultSettings = [

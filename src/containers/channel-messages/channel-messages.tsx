@@ -48,6 +48,7 @@ import SearchCriteria, {
 import EnhancedAutocomplete from "../../common-components/enhanced-autocomplete/enhanced-autocomplete.tsx";
 import { EntityHint } from "../../enum/entity-hint.ts";
 import AppStatus from "../app-status/app-status.tsx";
+import { getCurrentDiscordView } from "../../services/chrome-service.ts";
 
 function ChannelMessages() {
   const { state: userState } = useUserSlice();
@@ -87,6 +88,7 @@ function ChannelMessages() {
   const [attachmentModalOpen, setAttachmentModalOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
   const [reactionModalOpen, setReactionModalOpen] = useState(false);
+  const [currentViewLoading, setCurrentViewLoading] = useState(false);
 
   const columns: TableColumn<Message>[] = [
     {
@@ -132,9 +134,42 @@ function ChannelMessages() {
   };
 
   const fetchChannelData = () => {
-    getMessageData(selectedGuild?.id || null, selectedChannel?.id || null);
+    getMessageData(selectedGuild?.id || null, selectedChannel?.id || null, {
+      includeRelatedThreads: false,
+    });
     setSearchTouched(true);
     setExpanded(false);
+  };
+
+  const fetchCurrentViewData = async () => {
+    setCurrentViewLoading(true);
+    try {
+      const currentView = await getCurrentDiscordView();
+      const guildId = currentView?.guildId || null;
+      const channelId = currentView?.channelId || null;
+
+      // "Channel Messages" supports guild contexts only.
+      if (!guildId || !channelId) {
+        return;
+      }
+
+      if (selectedGuild?.id !== guildId) {
+        await changeGuild(guildId);
+      }
+
+      if (selectedChannel?.id !== channelId) {
+        await changeChannel(channelId);
+      }
+
+      await getMessageData(guildId, channelId, {
+        includeRelatedThreads: false,
+      });
+
+      setSearchTouched(true);
+      setExpanded(false);
+    } finally {
+      setCurrentViewLoading(false);
+    }
   };
 
   const handleGuildChange = (id: Snowflake | null) => {
@@ -156,6 +191,8 @@ function ChannelMessages() {
     messagesLoading ||
     (!isCriteriaActive(searchCriteria) && !selectedChannel?.id) ||
     discrubCancelled;
+  const currentViewBtnDisabled =
+    messagesLoading || discrubCancelled || currentViewLoading;
   const purgeDisabled = Boolean(
     !selectedGuild?.id ||
       messagesLoading ||
@@ -310,6 +347,17 @@ function ChannelMessages() {
                 <ExportButton bulk disabled={exportDisabled} />
                 <PurgeButton disabled={purgeDisabled} />
                 <PauseButton disabled={pauseCancelDisabled} />
+                <Tooltip title="Read the active Discord tab URL and fetch only that server/channel/thread">
+                  <span>
+                    <Button
+                      disabled={currentViewBtnDisabled}
+                      onClick={fetchCurrentViewData}
+                      variant="outlined"
+                    >
+                      {currentViewLoading ? "Loading..." : "Current View"}
+                    </Button>
+                  </span>
+                </Tooltip>
                 <Button
                   disabled={searchBtnDisabled}
                   onClick={fetchChannelData}

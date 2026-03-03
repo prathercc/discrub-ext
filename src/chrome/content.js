@@ -1,6 +1,13 @@
-/*global chrome*/
-if (!chrome.runtime.onMessage.hasListeners())
-  chrome.runtime.onMessage.addListener(function (request, sender, callback) {
+/*global chrome browser*/
+const ext = typeof browser !== "undefined" ? browser : chrome;
+const hasListeners = ext?.runtime?.onMessage?.hasListeners;
+const hasMessageListener =
+  typeof hasListeners === "function"
+    ? hasListeners.call(ext.runtime.onMessage)
+    : false;
+
+if (ext?.runtime?.onMessage && !hasMessageListener)
+  ext.runtime.onMessage.addListener(function (request, sender, callback) {
     const { message } = request;
     switch (message) {
       case "INJECT_BUTTON":
@@ -15,7 +22,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           element.style.justifyContent = "center";
           const iframe = document.createElement("iframe");
           iframe.id = "injected_iframe_button";
-          iframe.src = chrome.runtime.getURL("button_injection.html");
+          iframe.src = ext.runtime.getURL("button_injection.html");
           iframe.scrolling = "no";
           iframe.width = 30;
           iframe.height = 30;
@@ -34,7 +41,7 @@ if (!chrome.runtime.onMessage.hasListeners())
           modal.style.overflow = "auto";
           const iframe = document.createElement("iframe");
           iframe.id = "injected_dialog_iframe";
-          iframe.src = chrome.runtime.getURL("index.html");
+          iframe.src = ext.runtime.getURL("index.html");
           iframe.height = "675px";
           iframe.width = "1250px";
           // iframe.style.border = "1px dotted gray";
@@ -57,6 +64,21 @@ if (!chrome.runtime.onMessage.hasListeners())
         ).contentWindow.localStorage;
         if (storage.token) callback(JSON.parse(storage.token));
         else callback(null);
+        return true;
+      case "GET_CURRENT_VIEW":
+        // Example path formats:
+        // /channels/@me/<channel-id>
+        // /channels/<guild-id>/<channel-or-thread-id>
+        // eslint-disable-next-line no-case-declarations
+        const match = window.location.pathname.match(
+          /^\/channels\/([^/]+)\/([^/?#]+)/
+        );
+        if (match) {
+          const guildId = match[1] === "@me" ? null : match[1];
+          callback({ guildId, channelId: match[2] });
+        } else {
+          callback({ guildId: null, channelId: null });
+        }
         return true;
       default:
         break;
