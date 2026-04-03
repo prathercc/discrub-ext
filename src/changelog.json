@@ -2,7 +2,8 @@
   {
     "version": "1.12.11",
     "changes": [
-      "Emergency fix for Github Gist API calls."
+      "Emergency fix for Github Gist API calls.",
+      "Add a configurable sort order setting for Purge and message deletion, allowing messages to be deleted oldest-first or newest-first."
     ]
   },
   {
