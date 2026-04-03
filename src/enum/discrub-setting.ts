@@ -22,6 +22,7 @@ export enum DiscrubSetting {
 
   PURGE_RETAIN_ATTACHED_MEDIA = "purgeRetainAttachedMedia",
   PURGE_REACTION_REMOVAL_FROM = "purgeReactionRemovalFrom",
+  PURGE_DELETE_SORT_ORDER = "purgeDeleteSortOrder",
 
   APP_SHOW_KOFI_FEED = "appShowKoFiFeed",
   APP_USER_DATA_REFRESH_RATE = "appUserDataRefreshRate",

@@ -124,6 +124,7 @@ const PurgeModal = ({
           DiscrubSetting.DELAY_MODIFIER,
           DiscrubSetting.SEARCH_DELAY,
           DiscrubSetting.DELETE_DELAY,
+          DiscrubSetting.PURGE_DELETE_SORT_ORDER,
           DiscrubSetting.PURGE_REACTION_REMOVAL_FROM,
           DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
         ]}

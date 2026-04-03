@@ -43,6 +43,7 @@ export const defaultSettings: AppSettings = {
 
   [DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA]: "false",
   [DiscrubSetting.PURGE_REACTION_REMOVAL_FROM]: "",
+  [DiscrubSetting.PURGE_DELETE_SORT_ORDER]: SortDirection.DESCENDING,
 
   [DiscrubSetting.APP_SHOW_KOFI_FEED]: "true",
   [DiscrubSetting.APP_USER_DATA_REFRESH_RATE]: UserDataRefreshRate.DAILY,

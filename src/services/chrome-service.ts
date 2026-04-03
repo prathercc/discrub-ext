@@ -14,6 +14,7 @@ import { BrowserEnvironment } from "../enum/browser-environment.ts";
 type ChromeCallback = (param: string) => Promise<void> | void | Maybe;
 
 export const sendChromeMessage = (msg: string, callback?: ChromeCallback) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   chrome &&
     chrome.tabs &&
     chrome.tabs.query(
@@ -65,6 +66,10 @@ const defaultSettings = [
 
   { name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA, value: "false" },
   { name: DiscrubSetting.PURGE_REACTION_REMOVAL_FROM, value: "" },
+  {
+    name: DiscrubSetting.PURGE_DELETE_SORT_ORDER,
+    value: SortDirection.DESCENDING,
+  },
 
   { name: DiscrubSetting.APP_SHOW_KOFI_FEED, value: "true" },
   {
@@ -132,6 +137,8 @@ export const getSettings = async (): Promise<AppSettings> => {
       chromeSettings[DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA],
     [DiscrubSetting.PURGE_REACTION_REMOVAL_FROM]:
       chromeSettings[DiscrubSetting.PURGE_REACTION_REMOVAL_FROM],
+    [DiscrubSetting.PURGE_DELETE_SORT_ORDER]:
+      chromeSettings[DiscrubSetting.PURGE_DELETE_SORT_ORDER],
 
     [DiscrubSetting.APP_SHOW_KOFI_FEED]:
       chromeSettings[DiscrubSetting.APP_SHOW_KOFI_FEED],

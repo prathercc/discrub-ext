@@ -15,9 +15,11 @@ import {
 } from "../app/app-slice";
 import { PurgeState, PurgeStatus } from "./purge-types";
 import { AppThunk } from "../../app/store";
+import { SortDirection } from "../../enum/sort-direction.ts";
 import Channel from "../../classes/channel";
 import Message from "../../classes/message";
 import {
+  getSortedMessages,
   isRemovableMessage,
   isSearchComplete,
   stringToBool,
@@ -123,7 +125,7 @@ export const purge =
         if (payload.offset === START_OFFSET && isResetPurge) break;
         //
 
-        await dispatch(
+        skipThreadIds = await dispatch(
           _purgeMessages(
             payload.messages,
             payload.threads,
@@ -147,10 +149,12 @@ export const _purgeMessages =
     skipThreadIds: string[],
     skipMessageIds: string[],
     { totalMessages }: Partial<SearchResultData> = {},
-  ): AppThunk<Promise<void>> =>
+  ): AppThunk<Promise<string[]>> =>
   async (dispatch, getState) => {
-    const filteredMessages = messages.filter(
-      (m) => !skipMessageIds.some((id) => id === m.id),
+    const { purgeDeleteSortOrder } = getState().app.settings;
+    const filteredMessages = getSortedMessages(
+      messages.filter((m) => !skipMessageIds.some((id) => id === m.id)),
+      purgeDeleteSortOrder as SortDirection,
     );
     for (const [index, message] of filteredMessages.entries()) {
       if (await dispatch(isAppStopped())) break;
@@ -159,7 +163,7 @@ export const _purgeMessages =
         liftThreadRestrictions(message.channel_id, skipThreadIds, threads),
       );
 
-      let modifyEntity = Object.assign(new Message({ ...message }), {
+      const modifyEntity = Object.assign(new Message({ ...message }), {
         _index: index + 1,
         _total: Number(totalMessages) - index,
         _status: PurgeStatus.IN_PROGRESS,
@@ -194,6 +198,7 @@ export const _purgeMessages =
       }
       dispatch(setModifyEntity(modifyEntity));
     }
+    return skipThreadIds;
   };
 
 /**
@@ -231,10 +236,10 @@ export const _removeMessageReactions =
 
     // Result of reaction removal for the provided message
     let status = PurgeStatus.NO_REACTIONS_FOUND;
-    if (!!total) {
+    if (total) {
       if (succeeded === total) {
         status = PurgeStatus.REACTIONS_REMOVED;
-      } else if (!!succeeded && succeeded < total) {
+      } else if (succeeded && succeeded < total) {
         status = PurgeStatus.REACTIONS_PARTIALLY_REMOVED;
       } else if (!succeeded) {
         status = PurgeStatus.MISSING_PERMISSION;
@@ -258,7 +263,7 @@ export const _retainAttachmentMessage =
   async (dispatch, _getState) => {
     if (message.content.length) {
       const { success } = await dispatch(
-        updateRawMessage(Object.assign(message, { content: "" })),
+        updateRawMessage(Object.assign(new Message({ ...message }), { content: "" })),
       );
       modifyEntity._status = success
         ? PurgeStatus.ATTACHMENTS_KEPT

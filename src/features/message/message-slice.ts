@@ -854,7 +854,10 @@ export const deleteMessages =
     }
     // -------------------------------
 
-    for (const [count, currentRow] of messages.entries()) {
+    const { purgeDeleteSortOrder } = getState().app.settings;
+    const sortedMessages = getSortedMessages(messages, purgeDeleteSortOrder as SortDirection);
+
+    for (const [count, currentRow] of sortedMessages.entries()) {
       if (await dispatch(isAppStopped())) break;
 
       noPermissionThreadIds = await dispatch(
@@ -1441,7 +1444,8 @@ const _getSearchMessages =
         ).fetchSearchMessageData(token, offset, channelId, guildId, criteria);
 
         if (success && data) {
-          let { total_results, messages = [], threads = [] } = data;
+          const { total_results, threads = [] } = data;
+          let { messages = [] } = data;
           const isResultsFound = !!total_results || messages.length > 0;
 
           // Ensure totalMessages is up-to-date so that _getSearchData can assign the correct offset

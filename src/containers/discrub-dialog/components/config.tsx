@@ -302,6 +302,20 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
       freeSolo: true,
     },
     {
+      name: DiscrubSetting.PURGE_DELETE_SORT_ORDER,
+      label: "Delete Sort Order",
+      options: [
+        { value: SortDirection.DESCENDING, name: "Newest First" },
+        { value: SortDirection.ASCENDING, name: "Oldest First" },
+      ],
+      description: `Messages will be deleted ${
+        getValue(DiscrubSetting.PURGE_DELETE_SORT_ORDER) ===
+        SortDirection.ASCENDING
+          ? "oldest"
+          : "newest"
+      } first.`,
+    },
+    {
       name: DiscrubSetting.PURGE_RETAIN_ATTACHED_MEDIA,
       label: "Keep Attachments",
       disabled: !!settings.purgeReactionRemovalFrom.length,
@@ -341,6 +355,7 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
           const Icon = control.icon?.();
           return (
             <Tooltip
+              key={control.name}
               placement="left"
               title={control.label}
               description={control.description}
@@ -358,7 +373,7 @@ function Config({ visibleSettings = [], containerProps, isDm }: ConfigProps) {
                     InputProps={{ endAdornment: Icon }}
                   />
                 )}
-                {control.options?.length && (
+                {!!control.options?.length && (
                   <EnhancedAutocomplete
                     groupBy={
                       control.categorized
