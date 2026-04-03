@@ -4,7 +4,7 @@
   "version": "1.12.11",
   "type": "module",
   "scripts": {
-    "clean_prod_manifest": "cat <<< $(jq 'del(.use_dynamic_url, .web_accessible_resources[].use_dynamic_url)' dist/manifest.json) > dist/manifest.json",
+    "clean_prod_manifest": "node ./scripts/clean-prod-manifest.mjs",
     "dev": "vite",
     "build": "tsc && vite build && npm run clean_prod_manifest",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
