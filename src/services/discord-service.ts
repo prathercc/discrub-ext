@@ -66,6 +66,38 @@ type SearchMessageResult = {
   total_results: number;
 };
 
+type ChannelInvite = {
+  code?: string;
+};
+
+type GuildVanityInvite = {
+  code?: string | null;
+};
+
+type GuildAssetEmoji = {
+  id: Snowflake | Maybe;
+  name: string | Maybe;
+  animated?: boolean;
+};
+
+type GuildAssetSticker = {
+  id: Snowflake;
+  name: string;
+  format_type?: number;
+};
+
+type GuildAssetData = {
+  id: Snowflake;
+  name: string;
+  vanity_url_code?: string | null;
+  emojis?: GuildAssetEmoji[];
+  stickers?: GuildAssetSticker[];
+};
+
+type GuildWidgetData = {
+  instant_invite?: string | null;
+};
+
 class DiscordService {
   searchDelaySecs = 0;
   deleteDelaySecs = 0;
@@ -139,10 +171,10 @@ class DiscordService {
             const data: T = isBlob
               ? await response.blob()
               : await response.json();
-            apiResponse = { success: true, data: data };
+            apiResponse = { success: true, data: data, status };
           } else {
             // Successful request does not have data
-            apiResponse = { success: true };
+            apiResponse = { success: true, status };
           }
         } else if (status === 429) {
           // Request must be re-attempted after x seconds
@@ -151,12 +183,14 @@ class DiscordService {
         } else {
           // Request failed for unknown reason
           requestComplete = true;
+          apiResponse = { success: false, status };
           console.error("Request could not be completed", response);
         }
       }
       return apiResponse;
     } catch (e) {
       console.error("Request threw an exception", e);
+      apiResponse = { success: false, status: 0, error: e };
       return apiResponse;
     }
   };
@@ -225,6 +259,20 @@ class DiscordService {
       }),
     );
 
+  fetchGuildAssetData = (authorization: string, guildId: string) =>
+    this.withSearchDelay(() =>
+      this.withRetry<GuildAssetData>(() =>
+        fetch(`${this.DISCORD_GUILDS_ENDPOINT}/${guildId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authorization,
+            "user-agent": this.userAgent,
+          },
+        }),
+      ),
+    );
+
   fetchRoles = (guildId: string, authorization: string) =>
     this.withRetry<Role[]>(() =>
       fetch(`${this.DISCORD_GUILDS_ENDPOINT}/${guildId}/roles`, {
@@ -253,6 +301,68 @@ class DiscordService {
     this.withSearchDelay(() =>
       this.withRetry<Channel>(() =>
         fetch(`${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authorization,
+            "user-agent": this.userAgent,
+          },
+        }),
+      ),
+    );
+
+  fetchChannelInvites = (authorization: string, channelId: string) =>
+    this.withSearchDelay(() =>
+      this.withRetry<ChannelInvite[]>(() =>
+        fetch(`${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/invites`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authorization,
+            "user-agent": this.userAgent,
+          },
+        }),
+      ),
+    );
+
+  createChannelInvite = (authorization: string, channelId: string) =>
+    this.withSearchDelay(() =>
+      this.withRetry<ChannelInvite>(() =>
+        fetch(`${this.DISCORD_CHANNELS_ENDPOINT}/${channelId}/invites`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authorization,
+            "user-agent": this.userAgent,
+          },
+          body: JSON.stringify({
+            max_age: 0,
+            max_uses: 0,
+            temporary: false,
+            unique: false,
+          }),
+        }),
+      ),
+    );
+
+  fetchGuildVanityInvite = (authorization: string, guildId: string) =>
+    this.withSearchDelay(() =>
+      this.withRetry<GuildVanityInvite>(() =>
+        fetch(`${this.DISCORD_GUILDS_ENDPOINT}/${guildId}/vanity-url`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: authorization,
+            "user-agent": this.userAgent,
+          },
+        }),
+      ),
+    );
+
+  fetchGuildWidget = (authorization: string, guildId: string) =>
+    this.withSearchDelay(() =>
+      this.withRetry<GuildWidgetData>(() =>
+        fetch(`${this.DISCORD_GUILDS_ENDPOINT}/${guildId}/widget.json`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

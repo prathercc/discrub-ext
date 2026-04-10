@@ -17,9 +17,14 @@ import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import RedditIcon from "@mui/icons-material/Reddit";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
+import LinkIcon from "@mui/icons-material/Link";
+import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
+import ForumIcon from "@mui/icons-material/Forum";
 import { useExportSlice } from "../../../features/export/use-export-slice";
 import { useAppSlice } from "../../../features/app/use-app-slice";
 import { useMessageSlice } from "../../../features/message/use-message-slice";
+import InviteExportButton from "../../invite-export-button/invite-export-button.tsx";
+import EmojiExportButton from "../../emoji-export-button/emoji-export-button.tsx";
 
 const MenuBar = ({
   menuIndex,
@@ -43,6 +48,12 @@ const MenuBar = ({
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | Maybe>(null);
   const menuOpen = !!anchorEl;
+  const [inviteOpenSignal, setInviteOpenSignal] = useState<number | undefined>(
+    undefined,
+  );
+  const [emojiOpenSignal, setEmojiOpenSignal] = useState<number | undefined>(
+    undefined,
+  );
 
   const menuItems = [
     { name: "Channel Messages", icon: <ChatIcon /> },
@@ -130,6 +141,40 @@ const MenuBar = ({
         <Divider />
         <MenuItem
           onClick={() => {
+            setInviteOpenSignal((prevState) => (prevState ?? 0) + 1);
+            setAnchorEl(null);
+          }}
+        >
+          <ListItemIcon>
+            <LinkIcon />
+          </ListItemIcon>
+          <ListItemText>Export Invites</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setEmojiOpenSignal((prevState) => (prevState ?? 0) + 1);
+            setAnchorEl(null);
+          }}
+        >
+          <ListItemIcon>
+            <EmojiEmotionsIcon />
+          </ListItemIcon>
+          <ListItemText>Export Emojis</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem
+          onClick={() => {
+            window.open("https://discord.gg/magikownia", "_blank");
+            setAnchorEl(null);
+          }}
+        >
+          <ListItemIcon>
+            <ForumIcon />
+          </ListItemIcon>
+          <ListItemText>Magikownia Discord</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
             window.open("https://www.reddit.com/r/discrub/", "_blank");
             setAnchorEl(null);
           }}
@@ -140,6 +185,8 @@ const MenuBar = ({
           <ListItemText>Reddit</ListItemText>
         </MenuItem>
       </Menu>
+      <InviteExportButton showTrigger={false} openSignal={inviteOpenSignal} />
+      <EmojiExportButton showTrigger={false} openSignal={emojiOpenSignal} />
     </Box>
   );
 };

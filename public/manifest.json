@@ -4,7 +4,8 @@
   "version": "1.12.11",
   "description": "A data manipulation and export tool for Discord.",
   "manifest_version": 3,
-  "permissions": ["storage"],
+  "permissions": ["storage", "downloads"],
+  "host_permissions": ["https://cdn.discordapp.com/*"],
   "background": {
     "service_worker": "public/resources/js/background.js",
     "type": "module"
