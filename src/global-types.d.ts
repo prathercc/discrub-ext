@@ -6,3 +6,7 @@ type DiscordApiResponse<T = void> = {
   status?: number;
   error?: unknown;
 };
+
+declare module "streamsaver";
+declare module "@transcend-io/conflux";
+declare module "gifenc";

@@ -29,6 +29,7 @@
     "file-type": "^21.0.0",
     "filenamify": "^6.0.0",
     "flat": "^6.0.1",
+    "gifenc": "^1.0.3",
     "highlight.js": "^11.10.0",
     "nanoid": "^5.1.5",
     "papaparse": "^5.4.1",

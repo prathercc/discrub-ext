@@ -201,7 +201,16 @@ const InviteExportButton = ({
 
     return (
       <ListItem style={style} key={row.id} dense divider>
-        <Typography variant="body2" sx={{ color, fontFamily: "monospace" }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color,
+            fontFamily: "monospace",
+            fontSize: "0.73rem",
+            lineHeight: 1.25,
+            wordBreak: "break-word",
+          }}
+        >
           {row.text}
         </Typography>
       </ListItem>
@@ -476,7 +485,16 @@ const InviteExportButton = ({
 
       <Dialog
         hideBackdrop
-        PaperProps={{ sx: { minWidth: "600px", minHeight: "500px" } }}
+        PaperProps={{
+          sx: {
+            minWidth: "600px",
+            width: "600px",
+            minHeight: "550px",
+            height: "550px",
+            maxHeight: "550px",
+            overflow: "hidden",
+          },
+        }}
         open={dialogOpen}
       >
         <EnhancedDialogTitle title="Export Invites" onClose={handleClose} />
@@ -533,12 +551,14 @@ const InviteExportButton = ({
               maxWidth: 560,
               height: 320,
               backgroundColor: "background.paper",
+              borderRadius: 1,
+              overflow: "hidden",
             }}
           >
             <FixedSizeList
               height={320}
-              width={560}
-              itemSize={36}
+              width="100%"
+              itemSize={32}
               itemCount={logs.length}
             >
               {getLogRow}

@@ -13,6 +13,8 @@ Settings are used by the extension to customize your experience, and they can be
 
 **Note:** The values entered for these settings will persist for each session, so you **will not** need to re-enter these each time you use Discrub.
 
+Fork note: the dedicated **Export Invites** and **Export Emojis** dialogs introduced in this fork also have their own local controls. Those are not part of the persistent global Settings page documented below. See [export_invites.md](./export_invites.md) and [export_emojis.md](./export_emojis.md).
+
 Below is an overview of each possible setting and what behavior it defines:
 
  - **Fetch Reaction Data** - Determine if the extension should attempt to lookup Reaction data for any messages that are found during searches.
