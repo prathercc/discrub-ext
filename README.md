@@ -1,5 +1,16 @@
 
-# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/master/public/resources/media/discrub.png"> Discrub
+# <img width="45px" src="https://github.com/prathercc/discrub-ext/raw/development/public/resources/media/discrub.png"> Discrub
+
+> ⚠️ **Legacy — No Longer Actively Maintained**
+>
+> This is **Discrub Classic**, the original Chrome/Firefox extension. The current
+> version of Discrub uses a new codebase and is delivered from the same Chrome
+> Web Store and Firefox Add-ons listings (auto-updated). This repository remains
+> here for historical reference and for users who prefer the Classic interface;
+> it is no longer receiving updates.
+>
+> The code is now MIT-licensed (see [LICENSE](./LICENSE)). The "Discrub" name and
+> logo remain trademarks of prathercc — forks must rename their distribution.
 
 **Discrub** is a Google Chrome extension that is used to Edit/Delete, Sort/Filter, and Export (HTML, CSV, and JSON supported) Discord messages.
 
@@ -55,3 +66,11 @@
 ## Contributing
 
 Feel free to create an [Issue](https://github.com/prathercc/discrub-ext/issues) if you have any ideas for improvement or notice any bugs that need to addressed.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+"Discrub" and the Discrub logo are trademarks of prathercc. If you fork or
+modify this code, you must rename your distribution; you may not use the
+"Discrub" name or branding for redistributed versions.
